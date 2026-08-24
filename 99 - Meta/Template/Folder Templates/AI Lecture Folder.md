@@ -1,10 +1,13 @@
 ---
+status: permanent
+type: lecture
+area: meta
+related: []
+source: original
 title: "AI Lecture Folder"
-date: 2026-01-31
+date: '2026-01-31'
 updated: 2026-01-31T16:19
 tags: []
-status: permanent
-macro_area: meta
 ---
 [[Home MOC|Home]] / [[Template]] / [[AI Lecture Folder]]
 

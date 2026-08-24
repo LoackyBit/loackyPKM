@@ -1,0 +1,2627 @@
+{
+  "completed": {
+    "GEMINI.md": {
+      "summary": "Questo documento costituisce la memoria di sistema e il system prompt permanente per l'assistente AI Gemini (Assistente di Sistema Principale) operante all'interno di questo Vault Obsidian (Ken vau...",
+      "timestamp": "2026-08-24T22:33:26.807188"
+    },
+    "AGENTS.md": {
+      "summary": "AI Second Brain — Obsidian PKM & Digital Garden",
+      "timestamp": "2026-08-24T22:33:26.863361"
+    },
+    "01 - Map of Content/Arte MOC.md": {
+      "summary": "Indice e mappa concettuale per Arte MOC.",
+      "timestamp": "2026-08-24T22:33:26.865607"
+    },
+    "01 - Map of Content/Italiano MOC.md": {
+      "summary": "Indice e mappa concettuale per Italiano MOC.",
+      "timestamp": "2026-08-24T22:33:26.869792"
+    },
+    "01 - Map of Content/Personal Growth & Health MOC.md": {
+      "summary": "Indice e mappa concettuale per Personal Growth & Health MOC.",
+      "timestamp": "2026-08-24T22:33:26.871983"
+    },
+    "01 - Map of Content/Blog MOC.md": {
+      "summary": "Indice e mappa concettuale per Blog MOC.",
+      "timestamp": "2026-08-24T22:33:26.873874"
+    },
+    "01 - Map of Content/Prompts MOC.md": {
+      "summary": "Indice e mappa concettuale per Prompts MOC.",
+      "timestamp": "2026-08-24T22:33:26.875884"
+    },
+    "01 - Map of Content/Youtube MOC.md": {
+      "summary": "Indice e mappa concettuale per Youtube MOC.",
+      "timestamp": "2026-08-24T22:33:26.877945"
+    },
+    "01 - Map of Content/Corsi MOC.md": {
+      "summary": "Indice e mappa concettuale per Corsi MOC.",
+      "timestamp": "2026-08-24T22:33:26.879911"
+    },
+    "01 - Map of Content/Chimica MOC.md": {
+      "summary": "Indice e mappa concettuale per Chimica MOC.",
+      "timestamp": "2026-08-24T22:33:26.881746"
+    },
+    "01 - Map of Content/School MOC.md": {
+      "summary": "Indice e mappa concettuale per School MOC.",
+      "timestamp": "2026-08-24T22:33:26.883951"
+    },
+    "01 - Map of Content/Latino MOC.md": {
+      "summary": "Indice e mappa concettuale per Latino MOC.",
+      "timestamp": "2026-08-24T22:33:26.886004"
+    },
+    "01 - Map of Content/Projects MOC.md": {
+      "summary": "Indice e mappa concettuale per Projects MOC.",
+      "timestamp": "2026-08-24T22:33:26.888023"
+    },
+    "01 - Map of Content/Telos.md": {
+      "summary": "Indice e mappa concettuale per Telos.",
+      "timestamp": "2026-08-24T22:33:26.889957"
+    },
+    "01 - Map of Content/Home MOC.md": {
+      "summary": "Indice e mappa concettuale per Home MOC.",
+      "timestamp": "2026-08-24T22:33:26.892021"
+    },
+    "01 - Map of Content/Inglese MOC.md": {
+      "summary": "Indice e mappa concettuale per Inglese MOC.",
+      "timestamp": "2026-08-24T22:33:26.893818"
+    },
+    "01 - Map of Content/Finance MOC.md": {
+      "summary": "Indice e mappa concettuale per Finance MOC.",
+      "timestamp": "2026-08-24T22:33:26.896036"
+    },
+    "01 - Map of Content/University MOC.md": {
+      "summary": "Indice e mappa concettuale per University MOC.",
+      "timestamp": "2026-08-24T22:33:26.898110"
+    },
+    "01 - Map of Content/Tech & AI MOC.md": {
+      "summary": "Indice e mappa concettuale per Tech & AI MOC.",
+      "timestamp": "2026-08-24T22:33:26.900528"
+    },
+    "01 - Map of Content/Scienze MOC.md": {
+      "summary": "Indice e mappa concettuale per Scienze MOC.",
+      "timestamp": "2026-08-24T22:33:26.902776"
+    },
+    "01 - Map of Content/Filosofia MOC.md": {
+      "summary": "Indice e mappa concettuale per Filosofia MOC.",
+      "timestamp": "2026-08-24T22:33:26.904653"
+    },
+    "01 - Map of Content/Education & Learning MOC.md": {
+      "summary": "Indice e mappa concettuale per Education & Learning MOC.",
+      "timestamp": "2026-08-24T22:33:26.906820"
+    },
+    "01 - Map of Content/Storia MOC.md": {
+      "summary": "Indice e mappa concettuale per Storia MOC.",
+      "timestamp": "2026-08-24T22:33:26.908674"
+    },
+    "04 - Calendar/DailyNote - 2025021.md": {
+      "summary": "Diario giornaliero e tracciamento delle attività del del giorno.",
+      "timestamp": "2026-08-24T22:33:26.912498"
+    },
+    "04 - Calendar/DailyNote - 20250704.md": {
+      "summary": "Diario giornaliero e tracciamento delle attività del 20250704.",
+      "timestamp": "2026-08-24T22:33:26.914506"
+    },
+    "04 - Calendar/DailyNote - 20260103.md": {
+      "summary": "Diario giornaliero e tracciamento delle attività del 20260103.",
+      "timestamp": "2026-08-24T22:33:26.916528"
+    },
+    "04 - Calendar/DailyNote - 20250131.md": {
+      "summary": "Diario giornaliero e tracciamento delle attività del 20250131.",
+      "timestamp": "2026-08-24T22:33:26.918478"
+    },
+    "04 - Calendar/DailyNote - 20250123.md": {
+      "summary": "Diario giornaliero e tracciamento delle attività del 20250123.",
+      "timestamp": "2026-08-24T22:33:26.920518"
+    },
+    "04 - Calendar/DailyNote - 2025028.md": {
+      "summary": "Diario giornaliero e tracciamento delle attività del del giorno.",
+      "timestamp": "2026-08-24T22:33:26.922480"
+    },
+    "04 - Calendar/DailyNote - 20260104.md": {
+      "summary": "Diario giornaliero e tracciamento delle attività del 20260104.",
+      "timestamp": "2026-08-24T22:33:26.924822"
+    },
+    "04 - Calendar/DailyNote - 20250530.md": {
+      "summary": "Diario giornaliero e tracciamento delle attività del 20250530.",
+      "timestamp": "2026-08-24T22:33:26.926865"
+    },
+    "99 - Meta/Style Guide.md": {
+      "summary": "<mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bparola</b</font</mark — parole chiave ASSOLUTE, concetti-cardine, tesi critiche fondamentali",
+      "timestamp": "2026-08-24T22:33:26.978791"
+    },
+    "99 - Meta/Guide/Ingest Automation Refactoring Design.md": {
+      "summary": "Questo documento definisce il design dell'architettura e dei flussi di lavoro per il rifacimento dell'automazione di ingestione del Second Brain. L'obiettivo principale è separare le responsabilità...",
+      "timestamp": "2026-08-24T22:33:27.028443"
+    },
+    "99 - Meta/Guide/MOC'S.md": {
+      "summary": "Quando inizi a usare Obsidian, organizzare è facile. Devi solo creare qualche appunto e lasciare che il tuo sé futuro si occupi dei tuoi problemi. Proprio come nella vita reale!",
+      "timestamp": "2026-08-24T22:33:27.082403"
+    },
+    "99 - Meta/Guide/Obsidian Graph View.md": {
+      "summary": "The graph view in [Obsidian (software)](https://en.wikipedia.org/wiki/Obsidian(software)) is more than just a visual representation of notes and can be used in various ways [(00:00:09)](https://www...",
+      "timestamp": "2026-08-24T22:33:27.131336"
+    },
+    "99 - Meta/School/Style Guide.md": {
+      "summary": "<mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bparola</b</font</mark — parole chiave ASSOLUTE, concetti-cardine, tesi critiche fondamentali",
+      "timestamp": "2026-08-24T22:33:27.180221"
+    },
+    "99 - Meta/School/List.md": {
+      "summary": "CVV STUDY CONTEXT EXPORT",
+      "timestamp": "2026-08-24T22:33:27.243510"
+    },
+    "05 - Blog/BlogPost - 20260303it.md": {
+      "summary": "Oggi ho riflettuto su come la descrizione dell'atomismo fatta da Karl Marx trovi un'eco sorprendente e amara nella realtà dello Stato italiano contemporaneo. Marx, nelle sue critiche allo Stato mod...",
+      "timestamp": "2026-08-24T22:33:27.307852"
+    },
+    "05 - Blog/Avanguardie Artistiche.md": {
+      "summary": "Le caratteristiche principali sono la deformazione e l’alterazione dei colori e entrambe sono dovute al sentimento e allo stato d’animo dei poeti.",
+      "timestamp": "2026-08-24T22:33:27.361666"
+    },
+    "05 - Blog/Problema P Vs NP.md": {
+      "summary": "Il problema P vs NP è probabilmente il più grande quesito irrisolto dell'Informatica Teorica (e uno dei problemi del millennio da 1 milione di dollari del Clay Mathematics Institute).",
+      "timestamp": "2026-08-24T22:33:27.413195"
+    },
+    "05 - Blog/Unfuck Your Brain.md": {
+      "summary": "Molto spesso mi ritrovo con ottimi propositi per l'anno nuovo o per un nuovo progetto, mi siedo alla scrivania e, dopo ore, mi rendo conto di aver solo consumato contenuti senza produrre nulla. Il ...",
+      "timestamp": "2026-08-24T22:33:27.466676"
+    },
+    "05 - Blog/Avanguardie e Tematiche Storiche 2.md": {
+      "summary": "colonie in africa → retrogradi, primitivi",
+      "timestamp": "2026-08-24T22:33:27.516796"
+    },
+    "05 - Blog/Crono S.md": {
+      "summary": "libro come cura allo scrolling",
+      "timestamp": "2026-08-24T22:33:27.566448"
+    },
+    "05 - Blog/Workflow Perplexity NotebookLM.md": {
+      "summary": "Perplexity non supporta l'allegato diretto di interi notebook come fonte di contesto.",
+      "timestamp": "2026-08-24T22:33:27.622480"
+    },
+    "05 - Blog/Index.md": {
+      "summary": "Questa è la homepage del blog",
+      "timestamp": "2026-08-24T22:33:27.676272"
+    },
+    "05 - Blog/Bitcoin Protocol.md": {
+      "summary": "Immaginiamo di voler creare la nostra moneta digitale da zero. Come faremmo a farla funzionare senza affidarci a una banca? Ecco quindi una spiegazione del Bitcoin Protocol|protocollo Bitcoin.",
+      "timestamp": "2026-08-24T22:33:27.730418"
+    },
+    "05 - Blog/Avanguardie e Tematiche Storiche Old.md": {
+      "summary": "1. L’arte deve / non deve fare propaganda o essere legata alla politica.",
+      "timestamp": "2026-08-24T22:33:27.783488"
+    },
+    "05 - Blog/Blog su Quartz.md": {
+      "summary": "Oggi ho rifatto quasi tutto il setup del blog, passando da una logica Astro a una pipeline Quartz molto piu automatizzata e orientata a Obsidian.",
+      "timestamp": "2026-08-24T22:33:27.833914"
+    },
+    "05 - Blog/Corsi/Pilota AIRO/5 Gestione della Conoscenza.md": {
+      "summary": "Nel dominio della robotica avanzata, il passaggio dalla reattività procedurale alla persistenza cognitiva segna la transizione tra un semplice automa e un agente intelligente. La gestione della con...",
+      "timestamp": "2026-08-24T22:33:27.887854"
+    },
+    "05 - Blog/Corsi/Pilota AIRO/4 Interazione Umana e Messaggi.md": {
+      "summary": "Il passaggio dalla navigazione autonoma all'interazione sociale rappresenta un salto di paradigma nell'architettura di SMARRtino. Non operiamo più in un ambiente di soli ostacoli fisici, ma in un e...",
+      "timestamp": "2026-08-24T22:33:27.936966"
+    },
+    "05 - Blog/Corsi/Pilota AIRO/2 Ambiente e Modelli Visuali.md": {
+      "summary": "Nel primo modulo abbiamo affrontato la cinematica di base e la navigazione reattiva. Tuttavia, per un robot sociale come SMARRtino, muoversi nello spazio è solo una precondizione: la vera sfida ris...",
+      "timestamp": "2026-08-24T22:33:27.991592"
+    },
+    "05 - Blog/Corsi/Pilota AIRO/1 Introduzione e Linguaggio Naturale.md": {
+      "summary": "Analisi Strategica: Il corso \"Laboratorio di Programmazione di Robot Sociali e Intelligenza Artificiale\" si pone come un ponte metodologico tra la programmazione deterministica tradizionale e la nu...",
+      "timestamp": "2026-08-24T22:33:28.042347"
+    },
+    "05 - Blog/Corsi/Pilota AIRO/3 Ambienti Dinamici e Domotica.md": {
+      "summary": "In un'architettura di simulazione avanzata basata su Gazebo, un \"ambiente dinamico\" non si limita alla presenza di entità in movimento regolate dal motore fisico, ma si definisce propriamente come ...",
+      "timestamp": "2026-08-24T22:33:28.095369"
+    },
+    "05 - Blog/Corsi/CS50’s Artificial Intelligence with Python/1 - Search.md": {
+      "summary": "Artificial Intelligence (AI) covers a range of techniques that appear as sentient behavior by the computer. For example, AI is used to recognize faces in photographs on your social media, beat the ...",
+      "timestamp": "2026-08-24T22:33:28.149663"
+    },
+    "05 - Blog/Corsi/CS50's Python/0 Functions, Variables.md": {
+      "summary": "VS Code is a text editor. In addition to editing text, you can visually browse files and run text-based commands at a terminal.",
+      "timestamp": "2026-08-24T22:33:28.202770"
+    },
+    "05 - Blog/Corsi/CS50's Python/3 Exceptions.md": {
+      "summary": "Exceptions are things that go wrong within our coding.",
+      "timestamp": "2026-08-24T22:33:28.257093"
+    },
+    "05 - Blog/Corsi/CS50's Python/7 Regular Expressions.md": {
+      "summary": "Regular expressions or “regexes” will enable us to examine patterns within our code. For example, we might want to validate that an email address is formatted correctly. Regular expressions will en...",
+      "timestamp": "2026-08-24T22:33:28.311102"
+    },
+    "05 - Blog/Corsi/CS50's Python/8 Object-Oriented Programming.md": {
+      "summary": "There are different paradigms of programming. As you learn other languages, you will start recognizing patterns like these.",
+      "timestamp": "2026-08-24T22:33:28.365112"
+    },
+    "05 - Blog/Corsi/CS50's Python/1 Conditionals.md": {
+      "summary": "Conditionals allow you, the programmer, to allow your program to make decisions: As if your program has the choice between taking the left-hand road or the right-hand road based upon certain condit...",
+      "timestamp": "2026-08-24T22:33:28.416684"
+    },
+    "05 - Blog/Corsi/CS50's Python/6 File I-o.md": {
+      "summary": "Up until now, everything we’ve programmed has stored information in memory. That is, once the program is ended, all information gathered from the user or generated by the program is lost.",
+      "timestamp": "2026-08-24T22:33:28.472472"
+    },
+    "05 - Blog/Corsi/CS50's Python/5 Unit Tests.md": {
+      "summary": "Up until now, you have been likely testing your own code using print statements.",
+      "timestamp": "2026-08-24T22:33:28.525211"
+    },
+    "05 - Blog/Corsi/CS50's Python/4 Libraries.md": {
+      "summary": "Generally, libraries are bits of code written by you or others that you can use in your program.",
+      "timestamp": "2026-08-24T22:33:28.577398"
+    },
+    "05 - Blog/Corsi/CS50's Python/2 Loops.md": {
+      "summary": "Essentially, loops are a way to do something over and over again.",
+      "timestamp": "2026-08-24T22:33:28.630021"
+    },
+    "05 - Blog/Today I Learned/TIL l'Inganno Dell'Applauso Quintiliano.md": {
+      "summary": "Leggendo gli appunti sull'Institutio Oratoria di Quintiliano, mi sono reso conto di quanto i suoi precetti educativi siano in realtà manuali di sopravvivenza per la comunicazione moderna. I suoi co...",
+      "timestamp": "2026-08-24T22:33:28.683857"
+    },
+    "05 - Blog/Archivio/BlogPost - 20250825it.md": {
+      "summary": "Negli ultimi giorni ho deciso di immergermi nello studio di Vim, un editor di testo potente ma notoriamente ostico, per migliorare le mie competenze di programmazione. Sto seguendo il corso [CS50's...",
+      "timestamp": "2026-08-24T22:33:28.737021"
+    },
+    "05 - Blog/Archivio/BlogPost - 20250613en.md": {
+      "summary": "Hello everyone! In this post, I’ll share how I built my blog using Obsidian, Hugo, GitHub, and Hostinger, following a tutorial by NetworkChuck and customizing it with the Stack theme ([https://stac...",
+      "timestamp": "2026-08-24T22:33:28.794055"
+    },
+    "05 - Blog/Archivio/BlogPost - 20250910it.md": {
+      "summary": "Qualche giorno fa ho deciso di prepararmi all'inizio della scuola ripassando la fisica del quarto anno. Conoscendo il mitico Alessandro De Concini, sono partito da uno dei suoi video, e da lì è ini...",
+      "timestamp": "2026-08-24T22:33:28.847590"
+    },
+    "05 - Blog/Archivio/BlogPost - 20250703it.md": {
+      "summary": "TradingView offre uno degli ambienti migliori per lo sviluppo e il test di strategie tramite Pine Script, ma ha dei limiti importanti:",
+      "timestamp": "2026-08-24T22:33:28.898429"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Come e Perché Parlare Bene.md": {
+      "summary": "Video URL: https://youtu.be/9qKD1j1BLg",
+      "timestamp": "2026-08-24T22:33:28.953430"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Pseudo Problemi e la Tecnica dei 5 Perche.md": {
+      "summary": "Video URL: https://youtu.be/isAcbfMsHZs",
+      "timestamp": "2026-08-24T22:33:29.004154"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/5 Libri per Svegliarti.md": {
+      "summary": "Video URL: https://youtu.be/FCzZZTBrSpA",
+      "timestamp": "2026-08-24T22:33:29.057675"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/David Goggins - Analisi.md": {
+      "summary": "La motivazione, l'ispirazione, la carica, l'energia, la potenza, la resistenza, la disciplina e l'autocontrollo sono tutte espressioni che si trovano al centro del mondo del self-help e dell'autoai...",
+      "timestamp": "2026-08-24T22:33:29.110211"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Contrastare la Brevita.md": {
+      "summary": "Vivere in un’epoca dominata dalla brevità è una sfida che permea ogni aspetto della nostra quotidianità. La tendenza a cercare esperienze rapide, gratificazioni immediate e contenuti sintetici semb...",
+      "timestamp": "2026-08-24T22:33:29.160185"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Come Organizzare le Giornate.md": {
+      "summary": "Video URL: https://youtu.be/zMxxEDaO0QM",
+      "timestamp": "2026-08-24T22:33:29.217871"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Cancel Culture.md": {
+      "summary": "La Cancel Culture è un fenomeno in cui individui o entità vengono pubblicamente criticati e boicottati per comportamenti o dichiarazioni ritenuti problematici. Attraverso piattaforme come X, le per...",
+      "timestamp": "2026-08-24T22:33:29.267863"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Skincare.md": {
+      "summary": "Spesso si commette l'errore di attribuire una pelle perfetta ed estremamente luminosa esclusivamente alla fortuna genetica. La realtà, tuttavia, è ben diversa: ottenere quella luminosità pulita, id...",
+      "timestamp": "2026-08-24T22:33:29.318252"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Guida Al Dopamine Detox.md": {
+      "summary": "Il detox dopaminico non è una sfida temporanea o una soluzione rapida per migliorare la produttività o il benessere mentale. È un processo strutturato e intenzionale per riprendere il controllo del...",
+      "timestamp": "2026-08-24T22:33:29.371017"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Il File Telos.md": {
+      "summary": "Video URL: https://youtu.be/3BXE0e3QZ4U",
+      "timestamp": "2026-08-24T22:33:29.421369"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Perche Si Usa il Tessuto Verde per i Giochi da Tavolo Es Biliardo.md": {
+      "summary": "Il tessuto verde nei giochi da tavolo come il biliardo è usato per tradizione e funzionalità. Storicamente, il verde richiama il prato su cui si giocavano giochi simili all'aperto, come il croquet....",
+      "timestamp": "2026-08-24T22:33:29.475446"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Sindrome del Papavero Alto.md": {
+      "summary": "La <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bsindrome del papavero alto</b</font</mark (nota internazionalmente come <mark style=\"background:rgba(181, 113, 255, 0.36)\"...",
+      "timestamp": "2026-08-24T22:33:29.526575"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Learning to Learn ITA.md": {
+      "summary": "Imparare ad imparare è forse la competenza più trasformativa che si possa acquisire nel mondo moderno. Non si tratta semplicemente di memorizzare informazioni per un esame o di acquisire una nuova ...",
+      "timestamp": "2026-08-24T22:33:29.576881"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Echo Chamber.md": {
+      "summary": "Un'echo chamber è un fenomeno sociale, spesso legato ai media o ai social network, in cui una persona finisce per essere esposta solo a idee, opinioni o informazioni che confermano quello che già p...",
+      "timestamp": "2026-08-24T22:33:29.631424"
+    },
+    "02 - Atlas/Personal Growth & Health/Mentality/Learning to Learn ENG.md": {
+      "summary": "learning styles & learning preferences",
+      "timestamp": "2026-08-24T22:33:29.687618"
+    },
+    "02 - Atlas/Personal Growth & Health/Palestra/Come Impostare Una Corretta Progressione Dei Carichi.md": {
+      "summary": "La progressione dei carichi (sovraccarico progressivo) è il pilastro fondamentale di qualsiasi programmazione di allenamento finalizzata all'ipertrofia e all'aumento della forza. Senza un increment...",
+      "timestamp": "2026-08-24T22:33:29.738755"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Filosofia/Positivismo.md": {
+      "summary": "Il <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bpositivismo</b</font</mark non deve essere inteso semplicemente come una teoria filosofica isolata o un insieme di dottrin...",
+      "timestamp": "2026-08-24T22:33:29.794703"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Filosofia/Confronto Filosofia Contemporanea.md": {
+      "summary": "L'orizzonte filosofico tra la fine dell'Ottocento e il Novecento è segnato da un sisma profondo: il crollo delle certezze metafisiche, razionali e scientifiche che avevano illuso l'Occidente di pos...",
+      "timestamp": "2026-08-24T22:33:29.847552"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Filosofia/Sigmund Freud.md": {
+      "summary": "Sigmund Freud non è stato semplicemente un medico o uno psichiatra di fine Ottocento, ma il fondatore di una disciplina — la psicoanalisi — che ha agito come una delle più profonde e destabilizzant...",
+      "timestamp": "2026-08-24T22:33:29.904908"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Filosofia/Karl Marx.md": {
+      "summary": "Karl Marx non è stato solo un filosofo, ma un intellettuale totale che ha cercato di fondere teoria ed economia in una <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bprassi...",
+      "timestamp": "2026-08-24T22:33:29.962203"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Filosofia/Hans Jonas.md": {
+      "summary": "concentrarsi sulla paura, ecologia (+ prometeo scatenato), relazione con la guerra fredda,",
+      "timestamp": "2026-08-24T22:33:30.027707"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Filosofia/Friedrich Nietzsche.md": {
+      "summary": "Friedrich Nietzsche non è stato solo un filosofo, ma un vero e proprio terremoto intellettuale che ha scosso le fondamenta della civiltà occidentale. Egli stesso si definiva “dinamite”, consapevole...",
+      "timestamp": "2026-08-24T22:33:30.105466"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Arte/Avanguardie Artistiche Contestualizzate.md": {
+      "summary": "Approcciare l'immagine artistica nel contesto accademico richiede un radicale mutamento di prospettiva: l'opera non deve essere intesa come una mera <mark style=\"background:rgba(181, 113, 255, 0.36...",
+      "timestamp": "2026-08-24T22:33:30.169431"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/Chimica Organica R.md": {
+      "summary": "Chimica Organica: Studio dei composti del carbonio, originato con la sintesi dell'urea di Wöhler che ha superato la teoria vitalistica.",
+      "timestamp": "2026-08-24T22:33:30.235298"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/Storia della Terra.md": {
+      "summary": "La storia della Terra non è semplicemente una cronologia di date lontanissime, ma un racconto dinamico di <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<btrasformazioni geol...",
+      "timestamp": "2026-08-24T22:33:30.297745"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/Genetica e Biotecnologie.md": {
+      "summary": "Per comprendere l'intera complessa rete delle biotecnologie, è necessario partire dai fondamenti strutturali della molecola che custodisce la vita. Il DNA è strutturato in un doppio filamento antip...",
+      "timestamp": "2026-08-24T22:33:30.351788"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/Genetica e Biotecnologie R.md": {
+      "summary": "Termodinamica della Replicazione: L'energia necessaria per i legami fosfodiestere è fornita dalla rottura dei gruppi fosfato dei nucleotidi trifosfato (dNTP), principio sfruttato in laboratorio nel...",
+      "timestamp": "2026-08-24T22:33:30.409001"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/Biomolecole.md": {
+      "summary": "Le <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bbiomolecole</b</font</mark rappresentano l'essenza stessa della materia vivente. Si tratta di composti organici polifunzio...",
+      "timestamp": "2026-08-24T22:33:30.468882"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/Biotecnologie.md": {
+      "summary": "Le biotecnologie rappresentano il punto di incontro definitivo tra la biologia molecolare e l'ingegneria, trasformando la nostra capacità di comprendere e manipolare la vita da un livello puramente...",
+      "timestamp": "2026-08-24T22:33:30.530775"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/Chimica Organica.md": {
+      "summary": "Storicamente, lo studio delle molecole chimiche era nettamente diviso: da un lato i composti inorganici, dall'altro i composti organici (come le proteine, i carboidrati, i grassi o il DNA), che ven...",
+      "timestamp": "2026-08-24T22:33:30.591552"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/DNA e Genetica R.md": {
+      "summary": "Struttura del DNA: Polimero a doppia elica antiparallela di nucleotidi (deossiribosio, fosfato, basi azotate). La stabilità è data dall'assenza dell'ossigeno in C2', dai legami a idrogeno tra basi ...",
+      "timestamp": "2026-08-24T22:33:30.653393"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/Biotecnologie R.md": {
+      "summary": "Biotecnologie Moderne: Utilizzo della tecnologia del DNA ricombinante per manipolare attivamente il genotipo degli organismi e creare OGM.",
+      "timestamp": "2026-08-24T22:33:30.714623"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/DNA e Genetica.md": {
+      "summary": "La comprensione della <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bgenetica molecolare</b</font</mark rappresenta il punto di svolta della biologia moderna, trasformando ...",
+      "timestamp": "2026-08-24T22:33:30.774931"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/Storia della Terra R.md": {
+      "summary": "Origine e Formazione: La Terra si è formata circa 4,6 miliardi di anni fa per accrezione. Nell'Adeano, l'immenso calore ha portato al processo di differenziazione creando nucleo, mantello e crosta.",
+      "timestamp": "2026-08-24T22:33:30.828572"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Scienze/Biomolecole R.md": {
+      "summary": "Biomolecole: Composti organici basati sul carbonio, fondamentali per la struttura e il metabolismo cellulare.",
+      "timestamp": "2026-08-24T22:33:30.889499"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Giacomo Leopardi.md": {
+      "summary": "La figura di Giacomo Leopardi non si può limitare alla categoria del \"poeta triste\", uno stereotipo che banalizza la grandezza e la complessità del suo pensiero. Leopardi è stato prima di tutto uno...",
+      "timestamp": "2026-08-24T22:33:30.959126"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Eugenio Montale.md": {
+      "summary": "Eugenio Montale nasce a <mark style=\"background:rgba(181, 113, 255, 0.36)\"<font color=\"#9a54c1\"<bGenova</b</font</mark nel 1896, trascorrendo la giovinezza tra la città e le Cinque Terre (Monteross...",
+      "timestamp": "2026-08-24T22:33:31.016741"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Gabriele d'Annunzio R.md": {
+      "summary": "Estetismo e Dandysmo: Concezione della propria vita come un'opera d'arte, subordinata al culto assoluto della bellezza e in contrasto con la morale borghese.",
+      "timestamp": "2026-08-24T22:33:31.078739"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Eta Post-Unitaria R.md": {
+      "summary": "Delusione Post-Risorgimentale: Scontro tra gli ideali unitari e la rigida \"piemontesizzazione\". L'Italia unita si rivela frammentata socialmente, linguisticamente ed economicamente.",
+      "timestamp": "2026-08-24T22:33:31.136137"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Romanticismo Italiano.md": {
+      "summary": "Il <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bRomanticismo italiano</b</font</mark non nasce come una rivoluzione filosofica astratta o un ripiegamento onirico, ma come...",
+      "timestamp": "2026-08-24T22:33:31.191125"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Eugenio Montale R.md": {
+      "summary": "Gnoseologia negativa: Impossibilità di conoscere l'essenza della realtà se non \"per via negativa\" (ciò che non siamo, ciò che non vogliamo).",
+      "timestamp": "2026-08-24T22:33:31.242907"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Italo Svevo.md": {
+      "summary": "La figura di <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bItalo Svevo</b</font</mark rappresenta una clamorosa anomalia nel panorama letterario italiano tra la fine dell'...",
+      "timestamp": "2026-08-24T22:33:31.298796"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Decadentismo.md": {
+      "summary": "Il <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bDecadentismo</b</font</mark non è solo una corrente letteraria, ma una vera e propria categoria spirituale e culturale che...",
+      "timestamp": "2026-08-24T22:33:31.357143"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Eta Post-Unitaria.md": {
+      "summary": "L'epoca post-unitaria, che si estende convenzionalmente dall'Unità d'Italia (1861) fino alla fine del secolo (1900), rappresenta una fase di trasformazioni strutturali, sociali e culturali senza pr...",
+      "timestamp": "2026-08-24T22:33:31.413833"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Crepuscolarismo e Guido Gozzano R.md": {
+      "summary": "Crisi e Disorientamento: Sensibilità poetica nata dal rifiuto dei miti della nazione e dal senso di futilità in una società borghese orientata al profitto.",
+      "timestamp": "2026-08-24T22:33:31.468590"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Ermetismo e Salvatore Quasimodo R.md": {
+      "summary": "Letteratura come Vita: L'arte non è svago ma dimensione totale e assoluta dell'essere (come teorizzato da Carlo Bo); rifiuto della propaganda e di ogni compromesso.",
+      "timestamp": "2026-08-24T22:33:31.523134"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Giovanni Pascoli R.md": {
+      "summary": "Trauma Biografico: L'assassinio del padre segna profondamente l'autore, portandolo a percepire la realtà esterna come oscura e minacciosa.",
+      "timestamp": "2026-08-24T22:33:31.579249"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Paradiso R.md": {
+      "summary": "Architettura Tolemaica ed Empireo: I primi nove cieli rotanti e materiali sono inglobati nel decimo cielo immateriale e immobile (Empireo, dimora di Dio), dominato dalla sconfinata \"candida rosa\".",
+      "timestamp": "2026-08-24T22:33:31.632116"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Italo Svevo R.md": {
+      "summary": "Autofiction: La scrittura concepita come un'autoanalisi ininterrotta, in cui l'autore modella o deforma tratti autobiografici e ansie nevrotiche nei suoi protagonisti.",
+      "timestamp": "2026-08-24T22:33:31.688183"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Giuseppe Ungaretti.md": {
+      "summary": "Giuseppe Ungaretti nasce nel 1888 ad <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bAlessandria d'Egitto</b</font</mark, in un contesto che segnerà per sempre la sua percez...",
+      "timestamp": "2026-08-24T22:33:31.741358"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Luigi Pirandello.md": {
+      "summary": "La letteratura e il pensiero di Luigi Pirandello si radicano profondamente in quello che viene definito il <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bTrauma della moder...",
+      "timestamp": "2026-08-24T22:33:31.793057"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Letteratura Italiana Esame R.md": {
+      "summary": "Romanticismo Italiano: Si distingue dall'irrazionalismo del Nord Europa per una forte impronta pragmatica, civile e moderata, finalizzata a educare la borghesia (\"Popolo\") e formare una coscienza p...",
+      "timestamp": "2026-08-24T22:33:31.843207"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Giovanni Verga.md": {
+      "summary": "Giovanni Verga rappresenta il punto di rottura definitivo della narrativa italiana dell'Ottocento. Non è solo l'iniziatore del <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"...",
+      "timestamp": "2026-08-24T22:33:31.898071"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Giovanni Verga R.md": {
+      "summary": "Verismo: Indagine fredda e \"scientifica\" della realtà socio-economica (in contrasto con le idealizzazioni romantiche), spinta da una concezione ferina della lotta per la sopravvivenza.",
+      "timestamp": "2026-08-24T22:33:31.949562"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Crepuscolarismo e Guido Gozzano.md": {
+      "summary": "Il <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bCrepuscolarismo</b</font</mark non è una scuola letteraria organizzata attorno a un manifesto programmatico, come avverrà ...",
+      "timestamp": "2026-08-24T22:33:32.002925"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Umberto Saba.md": {
+      "summary": "Umberto Saba (nato Umberto Poli a Trieste nel 1883) è uno degli autori più singolari e originali del panorama letterario italiano del Novecento. La sua esistenza e la sua formazione intellettuale s...",
+      "timestamp": "2026-08-24T22:33:32.057888"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Giacomo Leopardi R.md": {
+      "summary": "Studio matto e disperatissimo: Immersione totale nell'erudizione giovanile (1808-1815) che gli dona una cultura prodigiosa ma compromette irreparabilmente la sua salute.",
+      "timestamp": "2026-08-24T22:33:32.112058"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Alessandro Manzoni R.md": {
+      "summary": "Illuminismo e Giansenismo: Sintesi tra razionalità appresa a Parigi e il severo rigore morale giansenista acquisito dopo la conversione.",
+      "timestamp": "2026-08-24T22:33:32.169356"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Letteratura Italiana Esame.md": {
+      "summary": "Questa nota costituisce il resoconto organico e profondo del programma di Lingua e Letteratura Italiana svolto per l'Esame di Stato 2025/2026. Non si limita a riassumere i contenuti, ma integra le ...",
+      "timestamp": "2026-08-24T22:33:32.220529"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Giovanni Pascoli.md": {
+      "summary": "Per decisione dei genitori viene mandato in collegio (primo motivo di turbamento). Il <mark style=\"background:rgba(181, 113, 255, 0.36)\"<font color=\"#9a54c1\"<bpadre</b</font</mark viene <mark style...",
+      "timestamp": "2026-08-24T22:33:32.274354"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Ermetismo e Salvatore Quasimodo.md": {
+      "summary": "L'Ermetismo non rappresenta solo un <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bmovimento letterario</b</font</mark, ma una vera e propria <mark style=\"background:rgba(2...",
+      "timestamp": "2026-08-24T22:33:32.325217"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Giuseppe Ungaretti R.md": {
+      "summary": "Sradicamento e Nomadismo: Cresciuto ad Alessandria d'Egitto e formatosi a Parigi, Ungaretti si percepisce come un nomade alla ricerca d'identità.",
+      "timestamp": "2026-08-24T22:33:32.380848"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Gabriele d'Annunzio.md": {
+      "summary": "Già dall’infanzia dotato di brillante intelligenza, si avvicina alla poetica leggendo le Odi Barbare di <mark style=\"background:rgba(181, 113, 255, 0.36)\"<font color=\"#9a54c1\"<bCarducci</b</font</m...",
+      "timestamp": "2026-08-24T22:33:32.432528"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Romanticismo Italiano R.md": {
+      "summary": "Natura Civile e Pragmatica: Il Romanticismo italiano (differenziandosi dalla declinazione nordeuropea tesa al macabro, al titanismo e alla frattura col mondo) si erge come movimento radicato, utile...",
+      "timestamp": "2026-08-24T22:33:32.483728"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Umberto Saba R.md": {
+      "summary": "Scissione Originaria e Trauma Famigliare: La fisionomia psicanalitica sabiana scaturisce dall'urto irrisolto tra l'eredità genetica paterna (un'identità allegra, spensierata e inaffidabile) e la fe...",
+      "timestamp": "2026-08-24T22:33:32.537312"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Luigi Pirandello R.md": {
+      "summary": "Trauma della Modernità: Il declino delle vecchie certezze ottocentesche trasforma l'individuo smarrito in un mero ingranaggio insignificante, annientato dall'industrializzazione e dalla società di ...",
+      "timestamp": "2026-08-24T22:33:32.588276"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Decadentismo R.md": {
+      "summary": "Crisi del Positivismo: Sfiducia nella scienza e nella razionalità a favore dell'esplorazione dell'irrazionale, dell'inconscio e della malattia.",
+      "timestamp": "2026-08-24T22:33:32.639043"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Paradiso.md": {
+      "summary": "Il Paradiso rappresenta il culmine assoluto del viaggio dantesco: il passaggio dalla dimensione fisica, legata al tempo e allo spazio di Inferno e Purgatorio, a una dimensione puramente spirituale ...",
+      "timestamp": "2026-08-24T22:33:32.694134"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Futurismo.md": {
+      "summary": "Tra la fine dell'Ottocento e l'inizio del Novecento, il panorama culturale internazionale è animato da una profonda crisi e da una fortissima spinta innovatrice che porta alla nascita delle <mark s...",
+      "timestamp": "2026-08-24T22:33:32.745382"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Alessandro Manzoni.md": {
+      "summary": "La biografia di <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bAlessandro Manzoni</b</font</mark (1785-1873) rappresenta un ponte fondamentale tra l'illuminismo settecentes...",
+      "timestamp": "2026-08-24T22:33:32.797325"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Scapigliatura.md": {
+      "summary": "La <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bScapigliatura</b</font</mark è un fenomeno artistico e letterario che si sviluppa in Italia, con epicentro a Milano, a cav...",
+      "timestamp": "2026-08-24T22:33:32.848265"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/L'Eta Post-Unitaria General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:32.901175"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Riassunto Testi.md": {
+      "summary": "Questo documento raccoglie un brevissimo riassunto di ciascun testo letterario presente nella cartella testi|testi. I testi sono organizzati secondo la convenzione di studio letteraria (in ordine c...",
+      "timestamp": "2026-08-24T22:33:32.952916"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Naturalismo e Verismo General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:33.003591"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Decadentismo General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:33.054521"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Futurismo e Avanguardie/Futurismo e Avanguardie General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:33.106731"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Futurismo e Avanguardie/T3, Battaglia Sotto Vetro-vento.md": {
+      "summary": "Futurismo e Avanguardie General #italiano",
+      "timestamp": "2026-08-24T22:33:33.160655"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Futurismo e Avanguardie/T1, Manifesto di Fondazione del Futurismo.md": {
+      "summary": "Futurismo e Avanguardie General #italiano",
+      "timestamp": "2026-08-24T22:33:33.214498"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Futurismo e Avanguardie/T2, Manifesto Tecnico della Letteratura Futurista.md": {
+      "summary": "Futurismo e Avanguardie General #italiano",
+      "timestamp": "2026-08-24T22:33:33.268368"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Romanticismo/Romanticismo General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:33.328325"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Romanticismo/T , Sulla Maniera e l'Utilita Delle Traduzioni.md": {
+      "summary": "Scuola/Italiano/Romanticismo/Romanticismo General|Romanticismo General #italiano",
+      "timestamp": "2026-08-24T22:33:33.393526"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Romanticismo/T11, Sul Discorso di Madame De Stael.md": {
+      "summary": "Romantici Italiani e Riviste General #italiano",
+      "timestamp": "2026-08-24T22:33:33.455581"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Romanticismo/Romantici Italiani e Riviste General.md": {
+      "summary": "Scuola/Italiano/Romanticismo/Romanticismo General|Romanticismo General #italiano",
+      "timestamp": "2026-08-24T22:33:33.513468"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Romanticismo/T5, il Trovatore.md": {
+      "summary": "Romantici Italiani e Riviste General #italiano",
+      "timestamp": "2026-08-24T22:33:33.580836"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Saggistica General.md": {
+      "summary": "Manzoni General #italiano",
+      "timestamp": "2026-08-24T22:33:33.640762"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Manzoni General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:33.694732"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Tragedie General.md": {
+      "summary": "Manzoni General #italiano",
+      "timestamp": "2026-08-24T22:33:33.746743"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Pensiero di Manzoni.md": {
+      "summary": "Manzoni General #italiano",
+      "timestamp": "2026-08-24T22:33:33.801134"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Promessi Sposi/T , il Sugo della Storia.md": {
+      "summary": "Promessi Sposi General   #italiano",
+      "timestamp": "2026-08-24T22:33:33.854088"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Promessi Sposi/T7, Don Abbondio e i Bravi.md": {
+      "summary": "Promessi Sposi General #italiano",
+      "timestamp": "2026-08-24T22:33:33.910989"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Promessi Sposi/T , la Monaca di Monza.md": {
+      "summary": "Promessi Sposi General #italiano",
+      "timestamp": "2026-08-24T22:33:33.965767"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Promessi Sposi/Promessi Sposi General.md": {
+      "summary": "Manzoni General #italiano",
+      "timestamp": "2026-08-24T22:33:34.017483"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Poesia/Poesia General.md": {
+      "summary": "Manzoni General #italiano",
+      "timestamp": "2026-08-24T22:33:34.070733"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Poesia/Inni Sacri/T2, la Pentecoste.md": {
+      "summary": "La Pentecoste appartiene al genere letterario dell'inno sacro (componimento poetico di argomento religioso destinato al canto collettivo dei fedeli). Manzoni sceglie questa forma perché desidera cr...",
+      "timestamp": "2026-08-24T22:33:34.124905"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Poesia/Inni Sacri/Inni Sacri General.md": {
+      "summary": "Scuola/Italiano/Manzoni/Poesia/Poesia General|Poesia General   #italiano",
+      "timestamp": "2026-08-24T22:33:34.178734"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Poesia/Odi Civili/T , Marzo 1821.md": {
+      "summary": "Odi Civili General #italiano",
+      "timestamp": "2026-08-24T22:33:34.228997"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Poesia/Odi Civili/Odi Civili General.md": {
+      "summary": "Scuola/Italiano/Manzoni/Poesia/Poesia General|Poesia General  #italiano",
+      "timestamp": "2026-08-24T22:33:34.281066"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Poesia/Odi Civili/T3, il Cinque Maggio.md": {
+      "summary": "Odi Civili General #italiano",
+      "timestamp": "2026-08-24T22:33:34.331123"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Manzoni/Poesia/Poesie Giovanili/Poesie Giovanili General.md": {
+      "summary": "Scuola/Italiano/Manzoni/Poesia/Poesia General|Poesia General #italiano",
+      "timestamp": "2026-08-24T22:33:34.383925"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Pensiero di Pirandello.md": {
+      "summary": "Pirandello General #italiano",
+      "timestamp": "2026-08-24T22:33:34.434916"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Uno, Nessuno, Centomila General.md": {
+      "summary": "Pirandello General #italiano",
+      "timestamp": "2026-08-24T22:33:34.495800"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Teatro General.md": {
+      "summary": "Pirandello General #italiano",
+      "timestamp": "2026-08-24T22:33:34.546296"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Pirandello General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:34.596502"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/L'Umorismo General.md": {
+      "summary": "Pensiero di Pirandello #italiano",
+      "timestamp": "2026-08-24T22:33:34.648165"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Il fu Mattia Pascal/Il Fu Mattia Pascal General.md": {
+      "summary": "Pirandello General #italiano",
+      "timestamp": "2026-08-24T22:33:34.700690"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Il fu Mattia Pascal/T8, la Lanterninosofia.md": {
+      "summary": "Il Fu Mattia Pascal General #italiano",
+      "timestamp": "2026-08-24T22:33:34.751708"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Il fu Mattia Pascal/T7, Uno Strappo Nel Cielo di Carta del Teatrino.md": {
+      "summary": "Il Fu Mattia Pascal General #italiano",
+      "timestamp": "2026-08-24T22:33:34.803927"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Novelle/T , la Patente.md": {
+      "summary": "Novelle General #italiano",
+      "timestamp": "2026-08-24T22:33:34.858226"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Novelle/T3, il Treno Ha Fischiato.md": {
+      "summary": "Novelle General #italiano",
+      "timestamp": "2026-08-24T22:33:34.913200"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Novelle/Novelle General.md": {
+      "summary": "Pirandello General #italiano",
+      "timestamp": "2026-08-24T22:33:34.964720"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Quaderni di Serafino Gubbio Operatore/Quaderni di Serafino Gubbio Operatore General.md": {
+      "summary": "Pirandello General #italiano",
+      "timestamp": "2026-08-24T22:33:35.018568"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pirandello/Quaderni di Serafino Gubbio Operatore/T9, Serafino Si Presenta.md": {
+      "summary": "Quaderni di Serafino Gubbio Operatore General #italiano",
+      "timestamp": "2026-08-24T22:33:35.069438"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Pascoli General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:35.119324"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Pensiero di Pascoli.md": {
+      "summary": "Pascoli General #italiano",
+      "timestamp": "2026-08-24T22:33:35.175321"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Poemi Conviviali General.md": {
+      "summary": "Pascoli General #italiano",
+      "timestamp": "2026-08-24T22:33:35.226541"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Myricae/Myricae General.md": {
+      "summary": "Pascoli General #italiano",
+      "timestamp": "2026-08-24T22:33:35.277635"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Myricae/T4, X Agosto.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:35.327949"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Myricae/T8, Novembre.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:35.378765"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Myricae/T3, Lavandare.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:35.429530"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Myricae/T2, Arano.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:35.479605"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Myricae/T7, l'Assiuolo.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:35.529913"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Myricae/T , il Tuono.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:35.581159"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Myricae/T6, il Lampo.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:35.632657"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Fanciullino/T1, la Voce del Bimbo Interiore.md": {
+      "summary": "Fanciullino General #italiano",
+      "timestamp": "2026-08-24T22:33:35.683830"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Fanciullino/Fanciullino General.md": {
+      "summary": "Pensiero di Pascoli #italiano",
+      "timestamp": "2026-08-24T22:33:35.735215"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Canti di Castelvecchio/T10, Nebbia.md": {
+      "summary": "Canti di Castelvecchio General #italiano",
+      "timestamp": "2026-08-24T22:33:35.785578"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Canti di Castelvecchio/T11, Gelsomino Notturno.md": {
+      "summary": "Canti di Castelvecchio General #italiano",
+      "timestamp": "2026-08-24T22:33:35.836249"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Canti di Castelvecchio/Canti di Castelvecchio General.md": {
+      "summary": "Pascoli General #italiano",
+      "timestamp": "2026-08-24T22:33:35.888582"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Poemetti/T12, Digitale Purpurea.md": {
+      "summary": "Poemetti General #italiano",
+      "timestamp": "2026-08-24T22:33:35.940237"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Poemetti/T , Italy.md": {
+      "summary": "Poemetti General #italiano",
+      "timestamp": "2026-08-24T22:33:35.993818"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Pascoli/Poemetti/Poemetti General.md": {
+      "summary": "Pascoli General #italiano",
+      "timestamp": "2026-08-24T22:33:36.045876"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T11, l'Incontro Col Canonico Lupi.md": {
+      "summary": "Mastro Don Gesualdo General #italiano",
+      "timestamp": "2026-08-24T22:33:36.103067"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T8, Veglia.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:36.153585"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T13, la Ginestra.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:36.204701"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T10, Nebbia.md": {
+      "summary": "Canti di Castelvecchio General #italiano",
+      "timestamp": "2026-08-24T22:33:36.254871"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T1, in Memoria.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:36.305372"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T4, Spesso il Male di Vivere Ho Incontrato.md": {
+      "summary": "Ossi di Seppia General #italiano",
+      "timestamp": "2026-08-24T22:33:36.353562"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T16, Ho Sceso Dandoti il Braccio Almeno Un Milione di Scale.md": {
+      "summary": "L'Ultimo Montale #italiano",
+      "timestamp": "2026-08-24T22:33:36.403317"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T , il Sugo della Storia.md": {
+      "summary": "Promessi Sposi General   #italiano",
+      "timestamp": "2026-08-24T22:33:36.453288"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T6, il Porto Sepolto.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:36.503047"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T9, Fratelli.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:36.552644"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T10, Non Recidere Forbice.md": {
+      "summary": "Le Occasioni General #italiano",
+      "timestamp": "2026-08-24T22:33:36.601595"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T1, Oboe Sommerso.md": {
+      "summary": "Ermetismo e Quasimodo General #italiano",
+      "timestamp": "2026-08-24T22:33:36.653593"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T7, a Silvia.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:36.720101"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T3, la Sofferenza di Tutte le Cose.md": {
+      "summary": "Zibaldone General #italiano",
+      "timestamp": "2026-08-24T22:33:36.773409"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T8, la Sera Fiesolana.md": {
+      "summary": "Scuola/Italiano/D'Annunzio/Poesia/Poesia General|Poesia General #italiano",
+      "timestamp": "2026-08-24T22:33:36.830761"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T , Marzo 1821.md": {
+      "summary": "Odi Civili General #italiano",
+      "timestamp": "2026-08-24T22:33:36.882666"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T8, la Morte del Padre.md": {
+      "summary": "La Coscienza di Zeno General #italiano",
+      "timestamp": "2026-08-24T22:33:36.936742"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T7, Secondo Congedo.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:36.993903"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T8, la Lanterninosofia.md": {
+      "summary": "Il Fu Mattia Pascal General #italiano",
+      "timestamp": "2026-08-24T22:33:37.045126"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T2, Non Chiederci la Parola.md": {
+      "summary": "Ossi di Seppia General #italiano",
+      "timestamp": "2026-08-24T22:33:37.098655"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T10, il Sabato del Villaggio.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:37.155156"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T1, la Lettera a Salvatore Farina.md": {
+      "summary": "Vita Dei Campi General #italiano",
+      "timestamp": "2026-08-24T22:33:37.210273"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T6, Mio Padre e Stato per Me l'Assassino.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:37.267049"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T4, l'Infinito.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:37.318682"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T3, a Mia Moglie.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:37.372332"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T1, i Limoni.md": {
+      "summary": "Ossi di Seppia General #italiano",
+      "timestamp": "2026-08-24T22:33:37.432498"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T , Sulla Maniera e l'Utilita Delle Traduzioni.md": {
+      "summary": "Scuola/Italiano/Romanticismo/Romanticismo General|Romanticismo General #italiano",
+      "timestamp": "2026-08-24T22:33:37.485357"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T7, Uno Strappo Nel Cielo di Carta del Teatrino.md": {
+      "summary": "Il Fu Mattia Pascal General #italiano",
+      "timestamp": "2026-08-24T22:33:37.536550"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T11, Gelsomino Notturno.md": {
+      "summary": "Canti di Castelvecchio General #italiano",
+      "timestamp": "2026-08-24T22:33:37.590368"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T11, Sul Discorso di Madame De Stael.md": {
+      "summary": "Romantici Italiani e Riviste General #italiano",
+      "timestamp": "2026-08-24T22:33:37.646987"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T3, Meriggiare Pallido e Assorto.md": {
+      "summary": "Ossi di Seppia General #italiano",
+      "timestamp": "2026-08-24T22:33:37.701195"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T7, Don Abbondio e i Bravi.md": {
+      "summary": "Promessi Sposi General #italiano",
+      "timestamp": "2026-08-24T22:33:37.754119"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T1, la Sacra Maria e la Profana Elena.md": {
+      "summary": "Il Piacere General #italiano",
+      "timestamp": "2026-08-24T22:33:37.810556"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T12, Scrivo Nell'Oscurita.md": {
+      "summary": "Gli Scritti Autobiografici General #italiano",
+      "timestamp": "2026-08-24T22:33:37.862584"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T4, X Agosto.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:37.918554"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T3, Battaglia Sotto Vetro-vento.md": {
+      "summary": "Futurismo e Avanguardie General #italiano",
+      "timestamp": "2026-08-24T22:33:37.970128"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T19, Cantico del Gallo Silvestre.md": {
+      "summary": "Le Operette Morali General #italiano",
+      "timestamp": "2026-08-24T22:33:38.023980"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T2, Fantasticheria.md": {
+      "summary": "Vita Dei Campi General #italiano",
+      "timestamp": "2026-08-24T22:33:38.079742"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T4, il Ritratto del Superuomo.md": {
+      "summary": "Il Superuomo General #italiano",
+      "timestamp": "2026-08-24T22:33:38.133399"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T8, Amai.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:38.186633"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T13, la Primavera Hitleriana.md": {
+      "summary": "La Bufera e Altro General #italiano",
+      "timestamp": "2026-08-24T22:33:38.242138"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T1, Manifesto di Fondazione del Futurismo.md": {
+      "summary": "Futurismo e Avanguardie General #italiano",
+      "timestamp": "2026-08-24T22:33:38.297930"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T , la Patente.md": {
+      "summary": "Novelle General #italiano",
+      "timestamp": "2026-08-24T22:33:38.348652"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T2, Alle Fronde Dei Salici.md": {
+      "summary": "Ermetismo e Quasimodo General #italiano",
+      "timestamp": "2026-08-24T22:33:38.402123"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T17, Dialogo della Natura e di Un Islandese.md": {
+      "summary": "Le Operette Morali General #italiano",
+      "timestamp": "2026-08-24T22:33:38.457045"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T2, la Pentecoste.md": {
+      "summary": "La Pentecoste appartiene al genere letterario dell'inno sacro (componimento poetico di argomento religioso destinato al canto collettivo dei fedeli). Manzoni sceglie questa forma perché desidera cr...",
+      "timestamp": "2026-08-24T22:33:38.511182"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T9, la Pioggia Nel Pineto.md": {
+      "summary": "Scuola/Italiano/D'Annunzio/Poesia/Poesia General|Poesia General #italiano",
+      "timestamp": "2026-08-24T22:33:38.567027"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T7, l'Ultima Sigaretta.md": {
+      "summary": "La Coscienza di Zeno General #italiano",
+      "timestamp": "2026-08-24T22:33:38.616469"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T2, Preludio di Emilio Praga.md": {
+      "summary": "La Scapigliatura General #italiano",
+      "timestamp": "2026-08-24T22:33:38.673038"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T , la Monaca di Monza.md": {
+      "summary": "Promessi Sposi General #italiano",
+      "timestamp": "2026-08-24T22:33:38.725968"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T1, la Vaghezza Degli Antichi e la Ragione Dei Moderni.md": {
+      "summary": "Zibaldone General #italiano",
+      "timestamp": "2026-08-24T22:33:38.782594"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T8, Novembre.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:38.836875"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T12, Digitale Purpurea.md": {
+      "summary": "Poemetti General #italiano",
+      "timestamp": "2026-08-24T22:33:38.890608"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T3, Lavandare.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:38.941776"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T10, Sono Una Creatura.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:38.998658"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T4, la Lupa.md": {
+      "summary": "Vita Dei Campi General #italiano",
+      "timestamp": "2026-08-24T22:33:39.049392"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T3, il Treno Ha Fischiato.md": {
+      "summary": "Novelle General #italiano",
+      "timestamp": "2026-08-24T22:33:39.104371"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T2, Arano.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:39.159643"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T11, a Se Stesso.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:39.211210"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T9, Una Strana Proposta di Matrimonio.md": {
+      "summary": "La Coscienza di Zeno General #italiano",
+      "timestamp": "2026-08-24T22:33:39.267302"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T5, Trieste.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:39.319970"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T1, la Voce del Bimbo Interiore.md": {
+      "summary": "Fanciullino General #italiano",
+      "timestamp": "2026-08-24T22:33:39.376823"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T9, la Quiete Dopo la Tempesta.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:39.430380"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T9, il Ramarro, Se Scocca.md": {
+      "summary": "Le Occasioni General #italiano",
+      "timestamp": "2026-08-24T22:33:39.481126"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T6, Prefazione.md": {
+      "summary": "La Coscienza di Zeno General #italiano",
+      "timestamp": "2026-08-24T22:33:39.537343"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T13, Lago Luna Alba Notte.md": {
+      "summary": "Il Sentimento del Tempo General #italiano",
+      "timestamp": "2026-08-24T22:33:39.588830"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T , Italy.md": {
+      "summary": "Poemetti General #italiano",
+      "timestamp": "2026-08-24T22:33:39.644171"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T7, l'Assiuolo.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:39.698758"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T4, la Capra.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:39.750542"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T , il Tuono.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:39.804836"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T3, Consolazione.md": {
+      "summary": "Scuola/Italiano/D'Annunzio/Poesia/Poesia General|Poesia General #italiano",
+      "timestamp": "2026-08-24T22:33:39.860951"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T8, Canto Notturno di Un Pastore Errante Dell'Asia.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:39.912040"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T6, il Lampo.md": {
+      "summary": "Myricae General #italiano",
+      "timestamp": "2026-08-24T22:33:39.964467"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T5, il Trovatore.md": {
+      "summary": "Romantici Italiani e Riviste General #italiano",
+      "timestamp": "2026-08-24T22:33:40.018884"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T11, i Fiumi.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:40.074657"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T6, la Signorina Felicita Ovvero la Felicita.md": {
+      "summary": "Crepuscolari e Gozzano General #italiano",
+      "timestamp": "2026-08-24T22:33:40.126082"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T3, Rosso Malpelo.md": {
+      "summary": "Vita Dei Campi General #italiano",
+      "timestamp": "2026-08-24T22:33:40.180261"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T10, 3 Maggio 1915.md": {
+      "summary": "La Coscienza di Zeno General #italiano",
+      "timestamp": "2026-08-24T22:33:40.235454"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T2, Glauco.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:40.291137"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T2, l'Irrealizzabilita del Piacere.md": {
+      "summary": "Zibaldone General #italiano",
+      "timestamp": "2026-08-24T22:33:40.341668"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T12, la Morte di Don Gesualdo.md": {
+      "summary": "Mastro Don Gesualdo General #italiano",
+      "timestamp": "2026-08-24T22:33:40.394879"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T , Liberta.md": {
+      "summary": "Novelle Rusticane General #italiano",
+      "timestamp": "2026-08-24T22:33:40.446385"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T3, il Cinque Maggio.md": {
+      "summary": "Odi Civili General #italiano",
+      "timestamp": "2026-08-24T22:33:40.498052"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T5, l'Ultimo Canto di Saffo.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:40.549941"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T11, la Casa Dei Doganieri.md": {
+      "summary": "Le Occasioni General #italiano",
+      "timestamp": "2026-08-24T22:33:40.605921"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T10, la Roba.md": {
+      "summary": "Novelle Rusticane General #italiano",
+      "timestamp": "2026-08-24T22:33:40.662622"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T2, Manifesto Tecnico della Letteratura Futurista.md": {
+      "summary": "Futurismo e Avanguardie General #italiano",
+      "timestamp": "2026-08-24T22:33:40.712710"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T6, il Passero Solitario.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:40.768969"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/testi/T9, Serafino Si Presenta.md": {
+      "summary": "Quaderni di Serafino Gubbio Operatore General #italiano",
+      "timestamp": "2026-08-24T22:33:40.823106"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Opere Prima del Verismo General.md": {
+      "summary": "Verga General #italiano",
+      "timestamp": "2026-08-24T22:33:40.878392"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Verga General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:40.933566"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Pensiero di Verga.md": {
+      "summary": "Verga General #italiano",
+      "timestamp": "2026-08-24T22:33:40.987320"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Le Ultime Raccolte/Le Ultime Raccolte General.md": {
+      "summary": "Verga General #italiano",
+      "timestamp": "2026-08-24T22:33:41.038689"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Vita dei campi/Vita Dei Campi General.md": {
+      "summary": "Verga General #italiano",
+      "timestamp": "2026-08-24T22:33:41.093671"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Vita dei campi/T1, la Lettera a Salvatore Farina.md": {
+      "summary": "Vita Dei Campi General #italiano",
+      "timestamp": "2026-08-24T22:33:41.144563"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Vita dei campi/T2, Fantasticheria.md": {
+      "summary": "Vita Dei Campi General #italiano",
+      "timestamp": "2026-08-24T22:33:41.199711"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Vita dei campi/T4, la Lupa.md": {
+      "summary": "Vita Dei Campi General #italiano",
+      "timestamp": "2026-08-24T22:33:41.250986"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Vita dei campi/T3, Rosso Malpelo.md": {
+      "summary": "Vita Dei Campi General #italiano",
+      "timestamp": "2026-08-24T22:33:41.303079"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/I Malavoglia/I Malavoglia General.md": {
+      "summary": "Verga General #italiano",
+      "timestamp": "2026-08-24T22:33:41.355677"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Mastro don Gesualdo/T11, l'Incontro Col Canonico Lupi.md": {
+      "summary": "Mastro Don Gesualdo General #italiano",
+      "timestamp": "2026-08-24T22:33:41.409817"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Mastro don Gesualdo/Mastro Don Gesualdo General.md": {
+      "summary": "Verga General #italiano",
+      "timestamp": "2026-08-24T22:33:41.465006"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Mastro don Gesualdo/T12, la Morte di Don Gesualdo.md": {
+      "summary": "Mastro Don Gesualdo General #italiano",
+      "timestamp": "2026-08-24T22:33:41.520326"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Novelle Rusticane/Novelle Rusticane General.md": {
+      "summary": "Verga General #italiano",
+      "timestamp": "2026-08-24T22:33:41.571595"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Novelle Rusticane/T , Liberta.md": {
+      "summary": "Novelle Rusticane General #italiano",
+      "timestamp": "2026-08-24T22:33:41.624578"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Verga/Novelle Rusticane/T10, la Roba.md": {
+      "summary": "Novelle Rusticane General #italiano",
+      "timestamp": "2026-08-24T22:33:41.679716"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Crepuscolari e Gozzano/Crepuscolari e Gozzano General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:41.732392"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Crepuscolari e Gozzano/T6, la Signorina Felicita Ovvero la Felicita.md": {
+      "summary": "Crepuscolari e Gozzano General #italiano",
+      "timestamp": "2026-08-24T22:33:41.787681"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Pensiero di Leopardi.md": {
+      "summary": "Leopardi General #italiano",
+      "timestamp": "2026-08-24T22:33:41.840215"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Leopardi General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:41.895453"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Le Prime Opere e le Lettere.md": {
+      "summary": "Leopardi General #italiano",
+      "timestamp": "2026-08-24T22:33:41.952306"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Zibaldone/T3, la Sofferenza di Tutte le Cose.md": {
+      "summary": "Zibaldone General #italiano",
+      "timestamp": "2026-08-24T22:33:42.006734"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Zibaldone/T1, la Vaghezza Degli Antichi e la Ragione Dei Moderni.md": {
+      "summary": "Zibaldone General #italiano",
+      "timestamp": "2026-08-24T22:33:42.060598"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Zibaldone/Zibaldone General.md": {
+      "summary": "Leopardi General #italiano",
+      "timestamp": "2026-08-24T22:33:42.115835"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Zibaldone/T2, l'Irrealizzabilita del Piacere.md": {
+      "summary": "Zibaldone General #italiano",
+      "timestamp": "2026-08-24T22:33:42.166358"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Le Operette Morali/Le Operette Morali General.md": {
+      "summary": "Leopardi General #italiano",
+      "timestamp": "2026-08-24T22:33:42.222387"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Le Operette Morali/T19, Cantico del Gallo Silvestre.md": {
+      "summary": "Le Operette Morali General #italiano",
+      "timestamp": "2026-08-24T22:33:42.274789"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Le Operette Morali/T17, Dialogo della Natura e di Un Islandese.md": {
+      "summary": "Le Operette Morali General #italiano",
+      "timestamp": "2026-08-24T22:33:42.325204"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Canti/T13, la Ginestra.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:42.377936"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Canti/Canti General.md": {
+      "summary": "Leopardi General #italiano",
+      "timestamp": "2026-08-24T22:33:42.432143"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Canti/T7, a Silvia.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:42.485423"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Canti/T10, il Sabato del Villaggio.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:42.539319"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Canti/T4, l'Infinito.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:42.595729"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Canti/T11, a Se Stesso.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:42.645918"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Canti/T9, la Quiete Dopo la Tempesta.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:42.701860"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Canti/T8, Canto Notturno di Un Pastore Errante Dell'Asia.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:42.754197"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Canti/T5, l'Ultimo Canto di Saffo.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:42.809393"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Leopardi/Canti/T6, il Passero Solitario.md": {
+      "summary": "Canti General #italiano",
+      "timestamp": "2026-08-24T22:33:42.860147"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ermetismo e Quasimodo/Ermetismo e Quasimodo General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:42.915296"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ermetismo e Quasimodo/T1, Oboe Sommerso.md": {
+      "summary": "Ermetismo e Quasimodo General #italiano",
+      "timestamp": "2026-08-24T22:33:42.967358"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ermetismo e Quasimodo/T2, Alle Fronde Dei Salici.md": {
+      "summary": "Ermetismo e Quasimodo General #italiano",
+      "timestamp": "2026-08-24T22:33:43.024564"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Svevo/Svevo General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:43.080913"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Svevo/Pensiero di Svevo.md": {
+      "summary": "Svevo General #italiano",
+      "timestamp": "2026-08-24T22:33:43.132243"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Svevo/Una Vita General.md": {
+      "summary": "Svevo General #italiano",
+      "timestamp": "2026-08-24T22:33:43.186781"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Svevo/Senilita General.md": {
+      "summary": "Svevo General #italiano",
+      "timestamp": "2026-08-24T22:33:43.240007"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Svevo/La coscienza di Zeno/T8, la Morte del Padre.md": {
+      "summary": "La Coscienza di Zeno General #italiano",
+      "timestamp": "2026-08-24T22:33:43.296063"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Svevo/La coscienza di Zeno/La Coscienza di Zeno General.md": {
+      "summary": "Svevo General #italiano",
+      "timestamp": "2026-08-24T22:33:43.349829"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Svevo/La coscienza di Zeno/T7, l'Ultima Sigaretta.md": {
+      "summary": "La Coscienza di Zeno General #italiano",
+      "timestamp": "2026-08-24T22:33:43.399480"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Svevo/La coscienza di Zeno/T9, Una Strana Proposta di Matrimonio.md": {
+      "summary": "La Coscienza di Zeno General #italiano",
+      "timestamp": "2026-08-24T22:33:43.450504"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Svevo/La coscienza di Zeno/T6, Prefazione.md": {
+      "summary": "La Coscienza di Zeno General #italiano",
+      "timestamp": "2026-08-24T22:33:43.508556"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Svevo/La coscienza di Zeno/T10, 3 Maggio 1915.md": {
+      "summary": "La Coscienza di Zeno General #italiano",
+      "timestamp": "2026-08-24T22:33:43.559815"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/La Scapigliatura/T2, Preludio di Emilio Praga.md": {
+      "summary": "La Scapigliatura General #italiano",
+      "timestamp": "2026-08-24T22:33:43.610855"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/La Scapigliatura/La Scapigliatura General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:43.666069"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/Il Dolore General.md": {
+      "summary": "Ungaretti General #italiano",
+      "timestamp": "2026-08-24T22:33:43.718879"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/Ungaretti General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:43.775266"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/Pensiero di Ungaretti.md": {
+      "summary": "Ungaretti General #italiano",
+      "timestamp": "2026-08-24T22:33:43.829443"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/L'Allegria/T8, Veglia.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:43.880574"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/L'Allegria/T1, in Memoria.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:43.932861"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/L'Allegria/T6, il Porto Sepolto.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:43.986971"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/L'Allegria/T9, Fratelli.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:44.043050"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/L'Allegria/L'Allegria General.md": {
+      "summary": "Ungaretti General #italiano",
+      "timestamp": "2026-08-24T22:33:44.099786"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/L'Allegria/T10, Sono Una Creatura.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:44.153282"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/L'Allegria/T11, i Fiumi.md": {
+      "summary": "L'Allegria General #italiano",
+      "timestamp": "2026-08-24T22:33:44.205107"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/Il Sentimento del Tempo/T13, Lago Luna Alba Notte.md": {
+      "summary": "Il Sentimento del Tempo General #italiano",
+      "timestamp": "2026-08-24T22:33:44.257892"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Ungaretti/Il Sentimento del Tempo/Il Sentimento del Tempo General.md": {
+      "summary": "Ungaretti General #italiano",
+      "timestamp": "2026-08-24T22:33:44.316514"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Pensiero di d'Annunzio.md": {
+      "summary": "D'Annunzio General #italiano",
+      "timestamp": "2026-08-24T22:33:44.372488"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/D'Annunzio General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:44.436861"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Teatro, Società di Massa e altri Romanzi/Teatro, Societa di Massa e Altri Romanzi.md": {
+      "summary": "D'Annunzio General #italiano",
+      "timestamp": "2026-08-24T22:33:44.497779"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Poesia/T8, la Sera Fiesolana.md": {
+      "summary": "Scuola/Italiano/D'Annunzio/Poesia/Poesia General|Poesia General #italiano",
+      "timestamp": "2026-08-24T22:33:44.556570"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Poesia/T9, la Pioggia Nel Pineto.md": {
+      "summary": "Scuola/Italiano/D'Annunzio/Poesia/Poesia General|Poesia General #italiano",
+      "timestamp": "2026-08-24T22:33:44.612340"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Poesia/T3, Consolazione.md": {
+      "summary": "Scuola/Italiano/D'Annunzio/Poesia/Poesia General|Poesia General #italiano",
+      "timestamp": "2026-08-24T22:33:44.665776"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Poesia/Poesia General.md": {
+      "summary": "D'Annunzio General #italiano",
+      "timestamp": "2026-08-24T22:33:44.729409"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Gli Scritti Autobiografici/T12, Scrivo Nell'Oscurita.md": {
+      "summary": "Gli Scritti Autobiografici General #italiano",
+      "timestamp": "2026-08-24T22:33:44.787085"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Gli Scritti Autobiografici/Gli Scritti Autobiografici General.md": {
+      "summary": "D'Annunzio General #italiano",
+      "timestamp": "2026-08-24T22:33:44.842307"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Il Superuomo/T4, il Ritratto del Superuomo.md": {
+      "summary": "Il Superuomo General #italiano",
+      "timestamp": "2026-08-24T22:33:44.895558"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Il Superuomo/Il Superuomo General.md": {
+      "summary": "Pensiero di d'Annunzio #italiano",
+      "timestamp": "2026-08-24T22:33:44.948687"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Il Piacere/T1, la Sacra Maria e la Profana Elena.md": {
+      "summary": "Il Piacere General #italiano",
+      "timestamp": "2026-08-24T22:33:45.004145"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/D'Annunzio/Il Piacere/Il Piacere General.md": {
+      "summary": "D'Annunzio General #italiano",
+      "timestamp": "2026-08-24T22:33:45.059949"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/Montale General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:45.111962"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/Pensiero di Montale.md": {
+      "summary": "Montale General #italiano",
+      "timestamp": "2026-08-24T22:33:45.168106"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/La Bufera e altro/T13, la Primavera Hitleriana.md": {
+      "summary": "La Bufera e Altro General #italiano",
+      "timestamp": "2026-08-24T22:33:45.223403"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/La Bufera e altro/La Bufera e Altro General.md": {
+      "summary": "Montale General #italiano",
+      "timestamp": "2026-08-24T22:33:45.275030"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/Ossi di Seppia/T4, Spesso il Male di Vivere Ho Incontrato.md": {
+      "summary": "Ossi di Seppia General #italiano",
+      "timestamp": "2026-08-24T22:33:45.332886"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/Ossi di Seppia/T2, Non Chiederci la Parola.md": {
+      "summary": "Ossi di Seppia General #italiano",
+      "timestamp": "2026-08-24T22:33:45.389178"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/Ossi di Seppia/T1, i Limoni.md": {
+      "summary": "Ossi di Seppia General #italiano",
+      "timestamp": "2026-08-24T22:33:45.446578"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/Ossi di Seppia/T3, Meriggiare Pallido e Assorto.md": {
+      "summary": "Ossi di Seppia General #italiano",
+      "timestamp": "2026-08-24T22:33:45.501025"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/Ossi di Seppia/Ossi di Seppia General.md": {
+      "summary": "Montale General #italiano",
+      "timestamp": "2026-08-24T22:33:45.556973"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/L'ultimo Montale/T16, Ho Sceso Dandoti il Braccio Almeno Un Milione di Scale.md": {
+      "summary": "L'Ultimo Montale #italiano",
+      "timestamp": "2026-08-24T22:33:45.609599"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/L'ultimo Montale/L'Ultimo Montale.md": {
+      "summary": "Montale General #italiano",
+      "timestamp": "2026-08-24T22:33:45.665945"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/Le Occasioni/T10, Non Recidere Forbice.md": {
+      "summary": "Le Occasioni General #italiano",
+      "timestamp": "2026-08-24T22:33:45.721396"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/Le Occasioni/T9, il Ramarro, Se Scocca.md": {
+      "summary": "Le Occasioni General #italiano",
+      "timestamp": "2026-08-24T22:33:45.774238"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/Le Occasioni/Le Occasioni General.md": {
+      "summary": "Montale General #italiano",
+      "timestamp": "2026-08-24T22:33:45.847893"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Montale/Le Occasioni/T11, la Casa Dei Doganieri.md": {
+      "summary": "Le Occasioni General #italiano",
+      "timestamp": "2026-08-24T22:33:45.906830"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Saba/Pensiero di Saba.md": {
+      "summary": "Saba General #italiano",
+      "timestamp": "2026-08-24T22:33:45.961641"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Saba/Saba General.md": {
+      "summary": "Italiano MOC #italiano",
+      "timestamp": "2026-08-24T22:33:46.045544"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Saba/Canzoniere/T7, Secondo Congedo.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:46.105563"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Saba/Canzoniere/T6, Mio Padre e Stato per Me l'Assassino.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:46.222032"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Saba/Canzoniere/T3, a Mia Moglie.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:46.316659"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Saba/Canzoniere/Canzoniere General.md": {
+      "summary": "Saba General #italiano",
+      "timestamp": "2026-08-24T22:33:46.408932"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Saba/Canzoniere/T8, Amai.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:46.480425"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Saba/Canzoniere/T5, Trieste.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:46.547933"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Saba/Canzoniere/T4, la Capra.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:46.613609"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Italiano/Andrea/Saba/Canzoniere/T2, Glauco.md": {
+      "summary": "Canzoniere General #italiano",
+      "timestamp": "2026-08-24T22:33:46.671620"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Matematica/Calcolo Differenziale.md": {
+      "summary": "La derivata rappresenta uno dei concetti più rivoluzionari dell'intera storia della matematica, il ponte che ha permesso all'umanità di passare da una visione statica a una visione puramente dinami...",
+      "timestamp": "2026-08-24T22:33:46.740597"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Matematica/Educazione Civica.md": {
+      "summary": "L’<mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bIntelligenza Artificiale</b</font</mark non è più una visione fantascientifica, ma una realtà tecnologica che permea la nos...",
+      "timestamp": "2026-08-24T22:33:46.800147"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Matematica/Geometria Analitica Nello Spazio.md": {
+      "summary": "Il passaggio dalla geometria piana a quella tridimensionale richiede una profonda ristrutturazione mentale. La geometria analitica bidimensionale ci ha abituati a pensare in termini di due coordina...",
+      "timestamp": "2026-08-24T22:33:46.865633"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Matematica/Calcolo Combinatorio e Probabilita.md": {
+      "summary": "La concezione classica della matematica nell'immaginario collettivo è spesso indissolubilmente legata all'idea del \"continuo\": linee ininterrotte, curve morbide, spazi in cui tra due punti è sempre...",
+      "timestamp": "2026-08-24T22:33:46.942553"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Matematica/Calcolo Integrale.md": {
+      "summary": "Il <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bcalcolo integrale</b</font</mark rappresenta una delle conquiste intellettuali più vertiginose e affascinanti dell'intera ...",
+      "timestamp": "2026-08-24T22:33:47.000925"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Matematica/Funzioni e Limiti.md": {
+      "summary": "L'intero edificio dell'Analisi Matematica, la branca che ci permette di studiare il movimento, il cambiamento e l'infinito, si basa su un'entità apparentemente innocua ma dal potere straordinario: ...",
+      "timestamp": "2026-08-24T22:33:47.062442"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Evoluzione Dell'Italia Nel Xx Secolo.md": {
+      "summary": "L'evoluzione dell'Italia nel corso del Novecento non deve essere studiata come una sterile cronologia di governi, guerre e trattati, ma rappresenta una profonda e spesso violenta trasformazione del...",
+      "timestamp": "2026-08-24T22:33:47.122047"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Evoluzione Dell'Italia Nel Xx Secolo R.md": {
+      "summary": "Triade Hegeliana (Tesi, Antitesi, Sintesi): Chiave di lettura per interpretare il rapporto tra Stato e società civile italiana (Stato Liberale, Fascismo, Repubblica).",
+      "timestamp": "2026-08-24T22:33:47.176630"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Interrogazione Storia: Focus e Analisi Critica.md": {
+      "summary": "L'analisi che segue è organizzata in base alle simulazioni di interrogazione presenti nel materiale di studio. Ogni sezione riflette il nucleo tematico e gli esempi specifici sottolineati dalla pro...",
+      "timestamp": "2026-08-24T22:33:47.237389"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Seconda Guerra Mondiale R.md": {
+      "summary": "Guerra Totale e Ideologica: Scompare del tutto la distinzione tra fronte militare e civile (che costituisce il 50% delle vittime). Diventa un conflitto di annientamento biologico, in cui la raziona...",
+      "timestamp": "2026-08-24T22:33:47.288856"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Storia del Novecento.md": {
+      "summary": "Il Novecento non è, e non può essere studiato come, una sterile sequenza lineare di date, trattati o un semplice catalogo di eventi scollegati tra loro. Al contrario, esso rappresenta un gigantesco...",
+      "timestamp": "2026-08-24T22:33:47.349931"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Seconda Guerra Mondiale.md": {
+      "summary": "La Seconda Guerra Mondiale (1939-1945) non è solo il conflitto più vasto e cruento della storia umana, ma rappresenta la crisi definitiva del sistema eurocentrico e il passaggio a una modernità dom...",
+      "timestamp": "2026-08-24T22:33:47.402220"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Belle Epoque.md": {
+      "summary": "L'epoca che oggi chiamiamo <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bBelle Époque</b</font</mark (estesa convenzionalmente tra la fine della <mark style=\"background:rg...",
+      "timestamp": "2026-08-24T22:33:47.459065"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Italia Repubblicana R.md": {
+      "summary": "Dramma del Dopoguerra: Italia in macerie, forti tensioni interne, mancata \"Norimberga italiana\" ed epurazione incompleta dei fascisti (es. OVRA).",
+      "timestamp": "2026-08-24T22:33:47.512642"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Imperialismo.md": {
+      "summary": "Tra il 1870 e il 1914, il mondo si trasformò in un'immensa scacchiera su cui le grandi potenze industriali mossero le loro pedine in una febbrile corsa alla conquista globale: questa è l'età dell'<...",
+      "timestamp": "2026-08-24T22:33:47.567965"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Italia Repubblicana.md": {
+      "summary": "L'Italia del dopoguerra non è semplicemente un paese che ha perso una guerra; è un laboratorio a cielo aperto dove si scontrano le macerie del fascismo e le speranze di una democrazia ancora tutta ...",
+      "timestamp": "2026-08-24T22:33:47.620030"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Guerra Fredda.md": {
+      "summary": "La <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bGuerra Fredda</b</font</mark non è stata un semplice conflitto tra nazioni, ma uno <mark style=\"background:rgba(255, 193, ...",
+      "timestamp": "2026-08-24T22:33:47.674442"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Crisi del 1929.md": {
+      "summary": "La <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bcrisi del 1929</b</font</mark non è stata semplicemente un crollo finanziario, ma il momento in cui l'intero sistema liber...",
+      "timestamp": "2026-08-24T22:33:47.729394"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Inizio Novecento R.md": {
+      "summary": "Seconda Rivoluzione Industriale: Salto tecnologico basato su elettricità, petrolio e chimica; nascita del capitalismo finanziario (Trust, Holding, Borsa).",
+      "timestamp": "2026-08-24T22:33:47.780576"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Crisi del 1929 R.md": {
+      "summary": "Crisi del 1929: Spartiacque epocale tra il liberismo classico (laissez-faire) e l'interventismo statale nell'economia.",
+      "timestamp": "2026-08-24T22:33:47.833127"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Storia Esame di Stato.md": {
+      "summary": "Il passaggio al nuovo secolo è segnato da un'ondata di innovazioni dirompenti. Diversamente dalla fase precedente, guidata dal carbone e dalle piccole imprese, la <mark style=\"background:rgba(255, ...",
+      "timestamp": "2026-08-24T22:33:47.888473"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Prima Guerra Mondiale.md": {
+      "summary": "All'inizio del ventesimo secolo, l'Europa è un continente attraversato da tensioni sotterranee, pronto ad esplodere. Decenni di spietato colonialismo, una logorante corsa agli armamenti e l'esasper...",
+      "timestamp": "2026-08-24T22:33:47.946162"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Nazismo R.md": {
+      "summary": "Repubblica di Weimar e Crisi del 1929: Il fallimento dell'esperimento democratico e il crollo economico creano il terreno ideale per l'ascesa nazista, in un clima di disoccupazione di massa.",
+      "timestamp": "2026-08-24T22:33:48.002628"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Prima Guerra Mondiale R.md": {
+      "summary": "Guerra di Trincea e Nuove Armi: Fallita la \"guerra lampo\" del Piano Schlieffen, il fronte si stabilizza in un massacro di logoramento esacerbato dall'uso di mitragliatrici, gas tossici, carri armat...",
+      "timestamp": "2026-08-24T22:33:48.056012"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Storia del Novecento R.md": {
+      "summary": "La Nuova Guerra dei Trent'anni (1914-1945): Il Novecento visto come un ecosistema magmatico e traumatico, guidato dall'inadeguatezza dell'assetto ottocentesco di fronte all'irruzione delle masse e ...",
+      "timestamp": "2026-08-24T22:33:48.111976"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Guerra Fredda R.md": {
+      "summary": "Scontro Sistemico: Contrapposizione ontologica tra Democrazia Liberale/Capitalismo (USA) e Socialismo di Stato/Comunismo (URSS).",
+      "timestamp": "2026-08-24T22:33:48.165397"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Primo Dopoguerra in Europa e in Italia.md": {
+      "summary": "Il primo dopoguerra rappresenta uno dei periodi di transizione più turbolenti e complessi della storia contemporanea, un'epoca in cui le ferite del primo conflitto mondiale si trasformano rapidamen...",
+      "timestamp": "2026-08-24T22:33:48.219083"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Nuove Potenze.md": {
+      "summary": "La fase compresa tra la fine dell'Ottocento e l'inizio del Novecento rappresenta uno snodo cruciale per la storia globale. In questo periodo, il tradizionale assetto geopolitico eurocentrico, stabi...",
+      "timestamp": "2026-08-24T22:33:48.271456"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Primo Dopoguerra in Europa e in Italia R.md": {
+      "summary": "Massificazione della Politica e Cambiamento Sociale: Il trauma bellico innesca l'irruzione delle masse, l'emancipazione delle donne nel mondo del lavoro, e crea la figura problematica del \"reduce\",...",
+      "timestamp": "2026-08-24T22:33:48.324951"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Nazismo.md": {
+      "summary": "Il <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bNazismo</b</font</mark non può essere compreso se non lo si inquadra nel fallimento drammatico della <mark style=\"backgrou...",
+      "timestamp": "2026-08-24T22:33:48.378870"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Interrogazione Storia: Focus e Analisi Critica R.md": {
+      "summary": "Lettura Hegeliana dello Stato: Evoluzione del rapporto tra istituzioni e cittadini (Tesi Liberale, Antitesi Fascista, Sintesi Repubblicana).",
+      "timestamp": "2026-08-24T22:33:48.431450"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Inizio Novecento.md": {
+      "summary": "L'alba del XX secolo non si configura come un semplice passaggio di calendario, ma come una metamorfosi profonda e irreversibile dell'assetto mondiale, fondata sulle macerie del vecchio equilibrio ...",
+      "timestamp": "2026-08-24T22:33:48.487932"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26 (esame)/Storia/Italia Durante la Sinistra Storica.md": {
+      "summary": "Il passaggio dalla Destra alla Sinistra Storica segna una fase fondamentale e travagliata per il neonato Regno d'Italia, definita dalle fonti storiche come l'\"infanzia difficile della democrazia it...",
+      "timestamp": "2026-08-24T22:33:48.545276"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Filosofia/Filosofia - Cosa Studiare.md": {
+      "summary": "antinomie, sapere solo cosa sono",
+      "timestamp": "2026-08-24T22:33:48.595611"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Filosofia/Critica della Ragion Pura.md": {
+      "summary": "Nella filosofia di Immanuel Kant, le categorie e la tavola dei giudizi sono concetti fondamentali della Critica della ragion pura (1781). Le categorie sono forme a priori dell’intelletto che strutt...",
+      "timestamp": "2026-08-24T22:33:48.648196"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Filosofia/Critica della Ragion Pratica.md": {
+      "summary": "Per rispondere alla tua richiesta di parlare della Critica della ragion pratica di Kant sulla base del testo della Critica della ragion pura, procederò integrando i concetti fondamentali della Crit...",
+      "timestamp": "2026-08-24T22:33:48.703749"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Latino/Amores 1,9 - Ogni Amante e Un Soldato.md": {
+      "summary": "Amores 1,9 di Ovidio, noto per il verso iniziale ==Militat omnis amans== (“Ogni amante è un soldato”), è un’elegia che sviluppa l’analogia tra l’amore e la guerra, un topos della poesia elegiaca ro...",
+      "timestamp": "2026-08-24T22:33:48.758442"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Latino/Atteone.md": {
+      "summary": "Immagina di vagare in un bosco lussureggiante, il sole che filtra tra le fronde, il suono di un ruscello in lontananza. Poi, per un istante di curiosità o per un capriccio del destino, ti imbatti i...",
+      "timestamp": "2026-08-24T22:33:48.809205"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Latino/Tito Livio.md": {
+      "summary": "Nato nel 59 a.C. a Padova, in un ambiente caratterizzato da valori conservatori e da una ricca tradizione familiare, Tito Livio crebbe in una realtà lontana dal fermento politico di Roma, ma profon...",
+      "timestamp": "2026-08-24T22:33:48.862003"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Latino/Metamorfosi - Ovidio.md": {
+      "summary": "Le Metamorfosi di Ovidio, opera epica in 15 libri scritta in esametri, è una raccolta di miti greci e romani incentrati sul tema della trasformazione. Le sue caratteristiche principali sono:",
+      "timestamp": "2026-08-24T22:33:48.915748"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Latino/Ab Urbe Condita - Prefazione.md": {
+      "summary": "Appunti concettuali e sintesi di studio per Ab Urbe Condita - Prefazione.",
+      "timestamp": "2026-08-24T22:33:48.970188"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Latino/Ars Amatoria 2 - Consigli per Conquistare Una Donna.md": {
+      "summary": "1. Introduzione all’Ars Amatoria",
+      "timestamp": "2026-08-24T22:33:49.024574"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Latino/Amores 1,1 - Una Musa di Undici Piedi.md": {
+      "summary": "Amores 1,1 di Ovidio, il primo poema della raccolta Amores, è un’introduzione giocosa e ironica in cui il poeta descrive la sua trasformazione da aspirante poeta epico a poeta d’amore, per volere d...",
+      "timestamp": "2026-08-24T22:33:49.075296"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Latino/Apollo e Dafne.md": {
+      "summary": "Immagina un dio, splendente di gloria e potenza, reso vulnerabile da una freccia d’amore, che insegue una ninfa sfuggente attraverso foreste e fiumi, solo per vederla trasformarsi in un albero sott...",
+      "timestamp": "2026-08-24T22:33:49.127072"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Latino/Heroides 1 - il Dramma di Penelope.md": {
+      "summary": "1. Introduzione alle Heroides",
+      "timestamp": "2026-08-24T22:33:49.182742"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Latino/Ovidio - il Poeta Dell'Amore e Dell'Esilio.md": {
+      "summary": "Immagina di vivere in un’epoca in cui Roma è il centro del mondo, un luogo dove l’arte, la politica e la passione si intrecciano in un vortice di creatività e ambizione. In questo scenario emerge P...",
+      "timestamp": "2026-08-24T22:33:49.236096"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Fisica/I Satelliti - Sicral.md": {
+      "summary": "1. Segmento spaziale: comprende tutti i componenti situati nello spazio, come satelliti, stazioni spaziali e sonde.",
+      "timestamp": "2026-08-24T22:33:49.287546"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Fisica/Cos'e Un Alternatore.md": {
+      "summary": "Un alternatore è un dispositivo elettromeccanico che converte l'energia meccanica in energia elettrica sotto forma di corrente alternata (AC). È ampiamente utilizzato in vari ambiti, ma il suo impi...",
+      "timestamp": "2026-08-24T22:33:49.343502"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Inglese/Coleridge - Rime of the Ancient Mariner Analisi.md": {
+      "summary": "S.T. Coleridge è stato un poeta inglese romantico, nato nel 1772 e morto nel 1834, conosciuto per la sua personalità tormentata e per essere stato amico e collaboratore di [William Wordsworth](http...",
+      "timestamp": "2026-08-24T22:33:49.396956"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Italiano/Purgatorio - Canto Xiii.md": {
+      "summary": "Immagina di trovarti su una cornice rocciosa, sferzata da un vento incessante, dove le anime gridano l’una contro l’altra, ma non per odio: per invida, un desiderio bruciante di ciò che non hanno. ...",
+      "timestamp": "2026-08-24T22:33:49.453831"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Italiano/Purgatorio - Canto Xxiv.md": {
+      "summary": "Immaginate di camminare su una montagna sacra, con il peso dei vostri errori che si alleggerisce a ogni passo, mentre il profumo di un giardino celestiale vi guida verso l’alto. Questo è il cuore d...",
+      "timestamp": "2026-08-24T22:33:49.509145"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Italiano/Purgatorio - Canto Xi.md": {
+      "summary": "Immaginate di trovarvi su una cornice rocciosa sospesa tra cielo e terra, dove il vento sussurra storie di redenzione e il peso del peccato si scontra con la leggerezza della speranza. Siamo nel Ca...",
+      "timestamp": "2026-08-24T22:33:49.561850"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Italiano/Purgatorio - Canto Xix.md": {
+      "summary": "Immagina di trovarti su una montagna sacra, sospesa tra il peccato e la redenzione, dove ogni passo ti avvicina alla purificazione dell’anima. È qui, nel Canto XIX del Purgatorio di Dante Alighieri...",
+      "timestamp": "2026-08-24T22:33:49.616977"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Italiano/Sc Ugo Foscolo.md": {
+      "summary": "Immagina un giovane poeta, nato su un’isola greca, che cresce tra il fragore delle rivoluzioni e il ==sogno== di un’==Italia unita==. Ugo Foscolo (1778-1827) è stato questo e molto di più: un intel...",
+      "timestamp": "2026-08-24T22:33:49.672153"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Italiano/Purgatorio - Canto VI.md": {
+      "summary": "Immagina di trovarti su una montagna avvolta da una luce soffusa, dove le anime, liberate dal peso del peccato, si avvicinano a te con un calore quasi umano, desiderose di raccontare le loro storie...",
+      "timestamp": "2026-08-24T22:33:49.728011"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Italiano/Purgatorio - Canto Xviii.md": {
+      "summary": "Immaginate di trovarvi su una montagna sacra, sotto un cielo stellato, mentre il crepuscolo avvolge ogni cosa in un silenzio mistico. È qui, nel Capitolo XVIII del Purgatorio, che Dante, accompagna...",
+      "timestamp": "2026-08-24T22:33:49.779351"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Italiano/Purgatorio - Canto VIII.md": {
+      "summary": "VImmaginate di trovarvi su una montagna sacra, il sole che tramonta tinge il cielo di sfumature dorate, e l’aria è carica di un silenzio che sembra parlare di redenzione. È qui, nel Canto VIII del ...",
+      "timestamp": "2026-08-24T22:33:49.831826"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Italiano/Sc il Senso della Perdita del Passato Canto Xxiv, Purgatorio, Dante.md": {
+      "summary": "La principale questione riguarda il tema già toccato nel canto precedente da Dante e da Forese e qui affrontato con parole scorate ai vv. 76-90: il peggioramento della vita sul nostro pianeta. In p...",
+      "timestamp": "2026-08-24T22:33:49.887907"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Italiano/Purgatorio - Canto Xvi.md": {
+      "summary": "Immaginate di vagare in una ==nebbia== così densa da non riuscire a vedere oltre il vostro naso, un’oscurità che non solo offusca la vista, ma sembra pesare sull’anima. È esattamente qui, nel ==ter...",
+      "timestamp": "2026-08-24T22:33:49.948539"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Matematica/Probabilita Matematica.md": {
+      "summary": "La probabilità nasce dalla discussione tra ==Pascal== e ==Meré== sull’analisi del gioco dei dadi: si voleva dare una visione matematica del gioco. Inizialmente Pascal spedisce una lettera a ==Ferma...",
+      "timestamp": "2026-08-24T22:33:50.000206"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Matematica/Automa a Stati Finiti.md": {
+      "summary": "Un automa a stati finiti è un modello teorico usato in informatica per descrivere sistemi che possono trovarsi in un numero limitato di situazioni (chiamate \"stati\") e che cambiano da una situazion...",
+      "timestamp": "2026-08-24T22:33:50.051033"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Matematica/Teoria Dei Giochi Matematica.md": {
+      "summary": "La Teoria dei Giochi è una disciplina matematica che studia le decisioni strategiche in situazioni in cui il risultato di un'azione dipende non solo dalla propria scelta, ma anche da quelle degli a...",
+      "timestamp": "2026-08-24T22:33:50.101439"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Storia/Sc l'Unita d'Italia.md": {
+      "summary": "Immagina un paese frammentato, diviso in tanti piccoli stati, ognuno con le sue leggi, monete e governanti, spesso sotto il controllo di potenze straniere. Questo era l’Italia all’inizio del XIX se...",
+      "timestamp": "2026-08-24T22:33:50.154912"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2024-25/Storia/Sc Come Studiare i Nuovi Capitoli di Storia.md": {
+      "summary": "1. congresso di Vienna e moti del 20, 30 e 48 (perché ci sono state le grandi rivoluzioni)",
+      "timestamp": "2026-08-24T22:33:50.207545"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Art Nouveau.md": {
+      "summary": "Contesto Storico (Fine '800 - Inizio '900): Il periodo è segnato da una fede ottimistica nel progresso scientifico e tecnologico, ma anche da una crisi interiore (Decadentismo): la meccanizzazione ...",
+      "timestamp": "2026-08-24T22:33:50.256918"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Filosofia/Sc la Pace per Kant.md": {
+      "summary": "Qual è la pace per Kant?",
+      "timestamp": "2026-08-24T22:33:50.306062"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Filosofia/Sc Feuerbach.md": {
+      "summary": "da Hegel → destra hegeliana & sinistra hegeliana",
+      "timestamp": "2026-08-24T22:33:50.355499"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Filosofia/Sc Schopenauer.md": {
+      "summary": "gia da piccolo viaggia per tutta Europa",
+      "timestamp": "2026-08-24T22:33:50.406120"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Filosofia/Sc Fichte.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:50.455739"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Filosofia/Sc Hegel.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:50.507314"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Filosofia/Un Robot Si Aggira per l'Europa - la Nuova Dialettica Servo-padrone.md": {
+      "summary": "Delle migliaia di concetti introdotti da Hegel nella sua Fenomenologia dello Spirito, la dialettica servo-padrone (Herrschaft und Knechtschaft) è tra quelle che ha avuto maggior successo tra i pens...",
+      "timestamp": "2026-08-24T22:33:50.557014"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Filosofia/Sc Schelling.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:50.606650"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Filosofia/Idealismo.md": {
+      "summary": "L'idealismo è una corrente filosofica che considera il pensiero o lo spirito come principio fondamentale e unico della realtà, negando l'esistenza autonoma e indipendente della realtà materiale. In...",
+      "timestamp": "2026-08-24T22:33:50.656285"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Filosofia/Sc Kierkegaard.md": {
+      "summary": "anti-hegeliano per eccellenza",
+      "timestamp": "2026-08-24T22:33:50.704967"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Filosofia/Sc Hans Jonas.md": {
+      "summary": "riprende la morale di kant",
+      "timestamp": "2026-08-24T22:33:50.753404"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/AI Sc Epica Dell'Eta Flavia.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:50.804885"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Sc Poesia Lasciva, Ma Vita Onesta.md": {
+      "summary": "Contigeris nostros, Caesar, si forte libellos,",
+      "timestamp": "2026-08-24T22:33:50.852990"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/AI Sc Seneca, Lucano & Petronio.md": {
+      "summary": "La letteratura del I secolo d.C., in particolare durante l'età neroniana, si configura come un laboratorio di profonda sperimentazione formale e di intensa riflessione sui temi del potere, della mo...",
+      "timestamp": "2026-08-24T22:33:50.904801"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Sc Dinastia Giulio Claudia.md": {
+      "summary": "Cosa sono i delatori?",
+      "timestamp": "2026-08-24T22:33:50.955303"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Sc Apuleio.md": {
+      "summary": "filosofia → curiosità per la natura e tensione verso l’occulto e i riti misterici di Iside",
+      "timestamp": "2026-08-24T22:33:51.007544"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Appunti Presentazione Latino.md": {
+      "summary": "famiglia di rango equestre",
+      "timestamp": "2026-08-24T22:33:51.059615"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/AI Sc Petronio.md": {
+      "summary": "Il Satyricon è un capolavoro frammentario e complesso della letteratura latina, attribuito con alta probabilità a Petronio Arbitro, l'influente elegantiae arbiter della corte di Nerone. L'opera si ...",
+      "timestamp": "2026-08-24T22:33:51.111457"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/AI Sc Satira - Persio e Giovenale.md": {
+      "summary": "linguaggio realista & espressista",
+      "timestamp": "2026-08-24T22:33:51.162224"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Analisi - Quintiliano, Tacito, Svetonio e Apuleio.md": {
+      "summary": "Caratteristiche principali: Lo stile di Tacito è celebre per essere asciutto, condensato, sintetico e allusivo. Come emerge dalle lezioni, egli ha il \"dono della ==sintesi==\": riesce a esprimere un...",
+      "timestamp": "2026-08-24T22:33:51.211480"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Seneca - il Filosofo Stoico Che Ha Modellato la Mente Umana.md": {
+      "summary": "Immagina di vivere in un'epoca di imperatori capricciosi, intrighi di palazzo e un impero che si estendeva dal Mediterraneo all'Atlantico. In mezzo a questo caos, emerge una figura che non solo sop...",
+      "timestamp": "2026-08-24T22:33:51.261471"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/AI Sc Plinio il Giovane.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:51.312278"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Eco.md": {
+      "summary": "Immaginate un bosco silenzioso, rotto solo dal suono di una voce che ripete, come un’ombra sonora, le parole di chi parla. Immaginate un giovane così innamorato della propria immagine da lasciarsi ...",
+      "timestamp": "2026-08-24T22:33:51.362596"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Sc Vivere da Squattrinati.md": {
+      "summary": "Uno dei pezzi più cattivi, volgari e perfetti che abbia mai scritto. È un insulto diretto a una donna di nome Galla, che si dà un sacco di arie da intellettuale raffinata, ma in realtà è una puttan...",
+      "timestamp": "2026-08-24T22:33:51.412445"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/AI Sc Marziale.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:51.463494"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Sc Lucano.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:51.514323"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Sc Petronio.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:51.564429"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Sc Svetonio.md": {
+      "summary": "poche informazioni sulla vita, solo da autori successivi",
+      "timestamp": "2026-08-24T22:33:51.613494"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Sc Seneca.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:51.662885"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Sc Tacito.md": {
+      "summary": "Qual è lo stile di Tacito?",
+      "timestamp": "2026-08-24T22:33:51.711799"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Latino/Sc Lettera di Seneca a Lucilio.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:51.761220"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Fisica/Sc Piano di Studio - Fisica.md": {
+      "summary": "5 giorni - onde, entropia e termodinamica",
+      "timestamp": "2026-08-24T22:33:51.809855"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Inglese/AI Sc i Dwell in Possibility.md": {
+      "summary": "La poesia 657, nota come I dwell in Possibility, è una delle opere più celebri di Emily Dickinson, scritta intorno al 1862. In questo componimento, la poetessa esplora il potere dell’immaginazione ...",
+      "timestamp": "2026-08-24T22:33:51.859118"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Inglese/Sc the Picture of Dorian Gray.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:51.912224"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Inglese/AI Sc the Soul Has Bandaged Moments.md": {
+      "summary": "La poesia 512, nota come The Soul has Bandaged Moments, è un’opera intensa e complessa di Emily Dickinson, scritta intorno al 1862. In questo componimento, la poetessa esplora le vicissitudini emot...",
+      "timestamp": "2026-08-24T22:33:51.964580"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Inglese/Esercizi Inglese.md": {
+      "summary": "1. It deals with the duality of human nature (good vs evil).",
+      "timestamp": "2026-08-24T22:33:52.016605"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Inglese/AI Sc Emily Dickinson.md": {
+      "summary": "Emily Dickinson (1830–1886) was an American poet born in Amherst, Massachusetts. She lived a largely reclusive life, rarely leaving her family’s home and maintaining close relationships through let...",
+      "timestamp": "2026-08-24T22:33:52.065975"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Inglese/Sc Oscar Wilde.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:52.114748"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Inglese/Sc Edwardian Age.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:52.164286"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Inglese/Sc Robert Louis Stevenson.md": {
+      "summary": "he has nightmares, dr. Jekyll and mr. Hyde is one of them",
+      "timestamp": "2026-08-24T22:33:52.214389"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/Sc Metafisica & Surrealismo.md": {
+      "summary": "Oggetti comuni e architetture classiche sono accostati in modo insolito, creando scene immobili e misteriose, come “indovinelli” visivi da decifrare.artesvelata+2",
+      "timestamp": "2026-08-24T22:33:52.265043"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/AI Sc Cubismo & Futurismo.md": {
+      "summary": "1) Cosa divide i due movimenti (Confronto)",
+      "timestamp": "2026-08-24T22:33:52.313975"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/AI Sc Arte 1800.md": {
+      "summary": "Questo documento analizza l'evoluzione dell'arte europea dalla seconda metà del Settecento alle soglie del XX secolo, un periodo di trasformazioni radicali. In una dialettica ininterrotta di azione...",
+      "timestamp": "2026-08-24T22:33:52.365336"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/Sc Confronto Artistico Tra Neoclassicismo e Romanticismo.md": {
+      "summary": "Il Neoclassicismo nasce perché si sviluppa un interesse per il passato attraverso le scoperte archeologiche",
+      "timestamp": "2026-08-24T22:33:52.417166"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/Sc Art Noveau.md": {
+      "summary": "non è legato esclusivamente alla pittura → come se fosse una moda",
+      "timestamp": "2026-08-24T22:33:52.467036"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/Sc Macchiaioli.md": {
+      "summary": "I Macchiaioli, movimento artistico italiano della seconda metà dell’800, si distinguono per:",
+      "timestamp": "2026-08-24T22:33:52.517039"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/Sc Astrattismo e Dadaismo.md": {
+      "summary": "L’Astrattismo propone una nuova strada rifiutando la rappresentazione realistica di oggetti e persone per concentrarsi su linee, forme e colori puri. Gli artisti astratti vo gliono esprimere emozio...",
+      "timestamp": "2026-08-24T22:33:52.566677"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/Sc Espressionismo.md": {
+      "summary": "diviso in francese e tedesco, con la stessa parola intendiamo due movimenti",
+      "timestamp": "2026-08-24T22:33:52.617145"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/AI Sc Post-Impressionismo.md": {
+      "summary": "RICHIESTA: In che modo viene superato l'Impressionismo da ogni singolo autore?",
+      "timestamp": "2026-08-24T22:33:52.665930"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/Sc Novecento - le Avanguardie.md": {
+      "summary": "| Espressionismo                                       | Fauves | Cubismo                                                                     | Futurismo                                           |...",
+      "timestamp": "2026-08-24T22:33:52.716229"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/Nodo Tematico - Imperialismo, Scienza e Rappresentazione Dell'Altro.md": {
+      "summary": "giornata del giocattolo italiano",
+      "timestamp": "2026-08-24T22:33:52.765196"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/Sc Impressionismo.md": {
+      "summary": "movimento → si usa solo quando un gruppo di persone è considerato tale e si organizzano nel cambiamento",
+      "timestamp": "2026-08-24T22:33:52.814564"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/AI Sc Dibattito Tra Classicismo e Romanticismo.md": {
+      "summary": "All'alba del XIX secolo, il panorama culturale italiano si trovava a un bivio, sospeso tra la gloriosa eredità del Neoclassicismo e le nuove inquietudini che attraversavano l'Europa. In questo cont...",
+      "timestamp": "2026-08-24T22:33:52.863673"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Arte/Sc Realismo.md": {
+      "summary": "quando qualcosa è estremamente realistico → es. descrizione ‘’",
+      "timestamp": "2026-08-24T22:33:52.912661"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Scienze/Sc Chimica Organica.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:52.961196"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Scienze/Sc Dal DNA Alla Genetica Dei Microrganismi.md": {
+      "summary": "Appunti concettuali e sintesi di studio per Sc dal DNA alla Genetica dei Microrganismi.",
+      "timestamp": "2026-08-24T22:33:53.011651"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Scienze/Sc Ripasso Scienze.md": {
+      "summary": "minerali → materiali della terra solida",
+      "timestamp": "2026-08-24T22:33:53.060477"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Scienze/Sc Introduzione Scienze.md": {
+      "summary": "1. proprietà fisiche e chimiche",
+      "timestamp": "2026-08-24T22:33:53.110103"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Scienze/Sc Polimeri.md": {
+      "summary": "Introduzione ai Polimeri",
+      "timestamp": "2026-08-24T22:33:53.158896"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Scienze/Sc Antropocene.md": {
+      "summary": "problema per i geologi → non devono più studiare il passato ma il presente",
+      "timestamp": "2026-08-24T22:33:53.212710"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Scienze/Sc Biomolecole.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:53.263804"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc la Sacra Maria e la Profana Elena.md": {
+      "summary": "RICHIESTA: Trovare i punti di stile caratteristici di d’Annunzio nel piacere",
+      "timestamp": "2026-08-24T22:33:53.313385"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Canti di Castelvecchio.md": {
+      "summary": "I Canti di Castelvecchio, pubblicati per la prima volta nel 1903 e ampliati fino all'edizione postuma del 1912, rappresentano il vertice della maturità poetica di Giovanni Pascoli e lo zenit del su...",
+      "timestamp": "2026-08-24T22:33:53.364346"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/AI Sc Naturalismo & Verismo.md": {
+      "summary": "Questo documento analizza in modo approfondito i movimenti letterari del Naturalismo francese e del Verismo italiano, emersi nella seconda metà dell'Ottocento nel contesto culturale del Realismo e ...",
+      "timestamp": "2026-08-24T22:33:53.427819"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Anacoluto.md": {
+      "summary": "L'anacoluto è una figura retorica che consiste in una rottura della coerenza sintattica all'interno di una frase. Si verifica quando una costruzione grammaticale inizia in un modo ma poi cambia dir...",
+      "timestamp": "2026-08-24T22:33:53.479069"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/AI Sc Dialogo della Natura e di Un Islandese.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:53.531309"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Giovanni Pascoli.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:53.584645"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/AI Sc i Promessi Sposi.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:53.634047"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Compiti 15-12-2025.md": {
+      "summary": "Giovanni Pascoli si configura come una figura cardine nel panorama letterario italiano, agendo come un ponte tra la tradizione ottocentesca e le avanguardie del Novecento. Il nucleo della sua poeti...",
+      "timestamp": "2026-08-24T22:33:53.683441"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc il Lampo.md": {
+      "summary": "uso eccellente della sintassi e della punteggiatura",
+      "timestamp": "2026-08-24T22:33:53.732741"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/AI Sc la Monaca di Monza - Confronto Tra le Varie Versioni.md": {
+      "summary": "L'esame delle diverse redazioni dell'episodio della Monaca di Monza offre una finestra privilegiata sulle scelte poetiche, stilistiche e morali che hanno informato l'opera di Alessandro Manzoni. Qu...",
+      "timestamp": "2026-08-24T22:33:53.782096"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Ripasso Generale d'Italiano.md": {
+      "summary": "Appunti concettuali e sintesi di studio per Sc Ripasso Generale D'italiano.",
+      "timestamp": "2026-08-24T22:33:53.831305"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc la Pioggia Nel Pineto.md": {
+      "summary": "ermione →  Eleonora Duse",
+      "timestamp": "2026-08-24T22:33:53.881555"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Alessandro Manzoni.md": {
+      "summary": "Nasce da Giulia Beccaria e Pietro Manzoni, padre non naturale.",
+      "timestamp": "2026-08-24T22:33:53.931353"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/AI Sc Gabriele d'Annunzio.md": {
+      "summary": "SINTESI ESECUTIVA (EXECUTIVE SUMMARY)",
+      "timestamp": "2026-08-24T22:33:53.982021"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/AI Sc Madame De Stael Contro Pietro Giordani.md": {
+      "summary": "Nel 1816, un articolo pubblicato sulla rivista \"Biblioteca italiana\" divenne l'epicentro di una delle più importanti polemiche culturali dell'Ottocento. A innescarla fu un'intellettuale cosmopolita...",
+      "timestamp": "2026-08-24T22:33:54.037896"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Madame De Stael e Pietro Giordani.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:54.094819"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc il Trovatore - Berchet.md": {
+      "summary": "lai termine medievale, Berchet s’impegna a ricreare l’ambiente medievale",
+      "timestamp": "2026-08-24T22:33:54.150646"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/AI Sc Giacomo Leopardi.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:54.207258"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Appunti 15-12-2025.md": {
+      "summary": "trascolare del Verismo → bozzetti e apparente verismo",
+      "timestamp": "2026-08-24T22:33:54.260486"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/AI Sc Scapigliatura.md": {
+      "summary": "La Scapigliatura è un movimento letterario e culturale sviluppatosi principalmente a ==Milano== tra gli anni '60 e '70 dell'Ottocento, caratterizzato da un profondo spirito di ribellione contro la ...",
+      "timestamp": "2026-08-24T22:33:54.317003"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Unione Fonosintattica.md": {
+      "summary": "È un fenomeno linguistico che riguarda la modifica della pronuncia di una parola in relazione alla parola precedente.",
+      "timestamp": "2026-08-24T22:33:54.369454"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Giacomo Leopardi.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:54.420359"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Gelsomino Notturno.md": {
+      "summary": "Il documento analizza il celebre componimento \"Il gelsomino notturno\" di Giovanni Pascoli, evidenziando come l'autore intrecci la celebrazione di un matrimonio con una profonda e tormentata rifless...",
+      "timestamp": "2026-08-24T22:33:54.470570"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/AI Sc le Correzioni Dei Promessi Sposi Dalla Ventisettana Alla Quarantana.md": {
+      "summary": "Il passaggio dall'edizione del 1827 de I Promessi Sposi, nota come \"Ventisettana\", a quella definitiva del 1840, la \"Quarantana\", rappresenta uno degli eventi più significativi nella storia della l...",
+      "timestamp": "2026-08-24T22:33:54.523496"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Nebbia.md": {
+      "summary": "In questo componimento tratto dai Canti di Castelvecchio, Giovanni Pascoli utilizza la nebbia come uno scudo protettivo per isolarsi dal mondo esterno e dal dolore del passato. Attraverso una strut...",
+      "timestamp": "2026-08-24T22:33:54.573839"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Futurismo.md": {
+      "summary": "Le avanguardie storiche del primo Novecento, sono movimenti di rottura radicale che miravano a sovvertire la tradizione attraverso uno sperimentalismo estremo e un’idea di arte totale.",
+      "timestamp": "2026-08-24T22:33:54.624188"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Decadentismo.md": {
+      "summary": "Il Decadentismo emerge in Europa negli ultimi decenni del XIX secolo come un vasto movimento culturale in reazione al razionalismo positivista, al materialismo della società borghese e al sentiment...",
+      "timestamp": "2026-08-24T22:33:54.675796"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/AI Sc Crepuscolarismo.md": {
+      "summary": "Il Crepuscolarismo è una corrente letteraria italiana sviluppatasi nei primissimi anni del Novecento (incirca tra il 1903 e il 1915). Il termine fu coniato nel 1910 dal critico letterario ==Giusepp...",
+      "timestamp": "2026-08-24T22:33:54.725893"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Riflessione Sul Concetto di Letteratura.md": {
+      "summary": "Definizione di Letteratura:",
+      "timestamp": "2026-08-24T22:33:54.775232"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Pentecoste.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:54.825437"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/AI Sc Giovanni Verga.md": {
+      "summary": "Il presente documento offre una sintesi esaustiva dell'opera e del pensiero di Giovanni Verga, figura centrale del Verismo italiano. L'analisi si concentra sui principi della sua poetica, sull'esam...",
+      "timestamp": "2026-08-24T22:33:54.876359"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Correzioni Testo d'Italiano.md": {
+      "summary": "evitare il ‘tu’ generico (diatribico)",
+      "timestamp": "2026-08-24T22:33:54.931749"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Alessandro Manzoni Old.md": {
+      "summary": "ROMANZO PICARESCO (O DI FORMAZIONE) → PICARO PROTAGONISTA ]DA CERCARE[",
+      "timestamp": "2026-08-24T22:33:54.982045"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Malavoglia.md": {
+      "summary": "Ambientazione: Aci Trezza (Sicilia), dal 1863, con servizio militare post-unitario.",
+      "timestamp": "2026-08-24T22:33:55.033307"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Italiano/Sc Assiuolo.md": {
+      "summary": "il cielo notava → ‘notava’ ha un monottongamento, da -uo a -o",
+      "timestamp": "2026-08-24T22:33:55.082678"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc Pace di Versailles.md": {
+      "summary": "al tavolo solo i vinti",
+      "timestamp": "2026-08-24T22:33:55.132474"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/AI Sc Storia d'Italia.md": {
+      "summary": "L'Italia unita nel 1861 era un paese economicamente arretrato con 22 milioni di abitanti, un reddito pro capite molto inferiore rispetto a Inghilterra e Francia, e diffuse condizioni di miseria dov...",
+      "timestamp": "2026-08-24T22:33:55.183923"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc gli Opposti Nazionalismi Alla Vigilia del 1914.md": {
+      "summary": "italia non è una grande potenza",
+      "timestamp": "2026-08-24T22:33:55.238638"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc Stato e Societa Nell'Italia Unita.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:55.290655"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc Storia d'Italia.md": {
+      "summary": "politica moderale-conservativa",
+      "timestamp": "2026-08-24T22:33:55.341704"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc Dall'Illuminismo All'Idealismo.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:55.393019"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc 2ª Rivoluzione Industriale.md": {
+      "summary": "epoca: fine ‘800, invece 1ª a inizio ‘800",
+      "timestamp": "2026-08-24T22:33:55.443847"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc Rivoluzione Sovietica.md": {
+      "summary": "momento cruciale della storia",
+      "timestamp": "2026-08-24T22:33:55.496613"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc Crisi del '29.md": {
+      "summary": "Dopo la Prima Guerra Mondiale, l'assetto economico globale si trasforma radicalmente e gli Stati Uniti emergono come i nuovi, incontrastati leader mondiali. Avendo finanziato i paesi alleati durant...",
+      "timestamp": "2026-08-24T22:33:55.546951"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc Imperialismo.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:55.601392"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc Stalinismo.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:55.652474"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc Comunismo e Liberalismo a Confronto.md": {
+      "summary": "Gli stati attualmente guidati da partiti comunisti sono molteplici, come Cina e Corea del Nord (quest'ultima ha ufficialmente abbandonato il riferimento al marxismo-leninismo nella costituzione nel...",
+      "timestamp": "2026-08-24T22:33:55.705967"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc l'Italia di Giolitti.md": {
+      "summary": "]non dire ‘popolo’ ma chiamarlo ‘stato civile’[",
+      "timestamp": "2026-08-24T22:33:55.756715"
+    },
+    "02 - Atlas/Education & Learning/Archivio Scuola/2025-26/Storia/Sc Prima Guerra Mondiale.md": {
+      "summary": "[!done] Parole Chiave",
+      "timestamp": "2026-08-24T22:33:55.806441"
+    },
+    "02 - Atlas/Education & Learning/Memory/Metodo di Studio - PACRAR.md": {
+      "summary": "In un mondo in cui le informazioni e le opportunità di apprendimento si moltiplicano rapidamente, è essenziale disporre di un approccio sistematico per affrontare lo studio in modo efficace. Molte ...",
+      "timestamp": "2026-08-24T22:33:55.855709"
+    },
+    "02 - Atlas/Education & Learning/Memory/6 Tecniche per Leggere Meglio e Ricordare Cio Che Leggi.md": {
+      "summary": "Leggere in modo efficace è una abilità fondamentale che permette di apprendere rapidamente, evitare errori e crescere intellettualmente. Per migliorare le proprie capacità di lettura e di memorizza...",
+      "timestamp": "2026-08-24T22:33:55.906044"
+    },
+    "02 - Atlas/Education & Learning/University/Come Scegliere l'Universita Giusta in 6 Step.md": {
+      "summary": "Ecco una guida strutturata in 6 step per scegliere la facoltà universitaria ideale, basata sul video di Alessandro de Concini ([Link al video di YouTube](https://youtu.be/qwGLBzfTSz0?si=ey76SZFTwO5...",
+      "timestamp": "2026-08-24T22:33:55.955165"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Progetto Pilota AIRO/PIlota Airo - 04 Interazione Umana e Messaggi.md": {
+      "summary": "Il passaggio dalla navigazione autonoma all'interazione sociale rappresenta un salto di paradigma nell'architettura di SMARRtino. Non operiamo più in un ambiente di soli ostacoli fisici, ma in un e...",
+      "timestamp": "2026-08-24T22:33:56.005133"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Progetto Pilota AIRO/Pilota Airo - 01 Introduzione e Linguaggio Naturale.md": {
+      "summary": "Analisi Strategica: Il corso \"Laboratorio di Programmazione di Robot Sociali e Intelligenza Artificiale\" si pone come un ponte metodologico tra la programmazione deterministica tradizionale e la nu...",
+      "timestamp": "2026-08-24T22:33:56.055578"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Progetto Pilota AIRO/Pilota Airo - 05 Gestione della Conoscenza.md": {
+      "summary": "Nel dominio della robotica avanzata, il passaggio dalla reattività procedurale alla persistenza cognitiva segna la transizione tra un semplice automa e un agente intelligente. La gestione della con...",
+      "timestamp": "2026-08-24T22:33:56.106423"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Progetto Pilota AIRO/Pilota Airo - 02 Ambiente e Modelli Visuali.md": {
+      "summary": "Nel primo modulo abbiamo affrontato la cinematica di base e la navigazione reattiva. Tuttavia, per un robot sociale come SMARRtino, muoversi nello spazio è solo una precondizione: la vera sfida ris...",
+      "timestamp": "2026-08-24T22:33:56.155847"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Progetto Pilota AIRO/Pilota Airo - 03 Ambienti Dinamici e Domotica.md": {
+      "summary": "In un'architettura di simulazione avanzata basata su Gazebo, un \"ambiente dinamico\" non si limita alla presenza di entità in movimento regolate dal motore fisico, ma si definisce propriamente come ...",
+      "timestamp": "2026-08-24T22:33:56.214550"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Progetto ENEA/ENEA - 03 Stampa 3d.md": {
+      "summary": "M1 (montecchi): rudimenti di computer vision",
+      "timestamp": "2026-08-24T22:33:56.265475"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Progetto ENEA/ENEA - 02 Meshroom.md": {
+      "summary": "M1 (montecchi): rudimenti di computer vision",
+      "timestamp": "2026-08-24T22:33:56.314853"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Progetto ENEA/ENEA - 01 Rudimenti di Computer Vision.md": {
+      "summary": "M1 (montecchi): rudimenti di computer vision",
+      "timestamp": "2026-08-24T22:33:56.364148"
+    },
+    "02 - Atlas/Education & Learning/Corsi/CS50’s Artificial Intelligence with Python/1 - Search.md": {
+      "summary": "Artificial Intelligence (AI) covers a range of techniques that appear as sentient behavior by the computer. For example, AI is used to recognize faces in photographs on your social media, beat the ...",
+      "timestamp": "2026-08-24T22:33:56.414535"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Azzardo della matematica - Corso STEM/02 Psicologia - Azzardo della Matematica.md": {
+      "summary": "Il 📊 valore atteso di un'azione rappresenta la media ponderata dei possibili rendimenti futuri, ciascuno moltiplicato per la probabilità che si verifichi. Questo concetto è fondamentale per gli 🏦 i...",
+      "timestamp": "2026-08-24T22:33:56.463828"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Azzardo della matematica - Corso STEM/01 Introduzione Probabilita - Azzardo della Matematica.md": {
+      "summary": "Valore medio (media aritmetica): È la somma di tutti i valori divisa per il numero totale di elementi.",
+      "timestamp": "2026-08-24T22:33:56.514621"
+    },
+    "02 - Atlas/Education & Learning/Corsi/CS50's Python/8 - Object-Oriented Programming.md": {
+      "summary": "There are different paradigms of programming. As you learn other languages, you will start recognizing patterns like these.",
+      "timestamp": "2026-08-24T22:33:56.565366"
+    },
+    "02 - Atlas/Education & Learning/Corsi/CS50's Python/1 - Conditionals.md": {
+      "summary": "Conditionals allow you, the programmer, to allow your program to make decisions: As if your program has the choice between taking the left-hand road or the right-hand road based upon certain condit...",
+      "timestamp": "2026-08-24T22:33:56.615928"
+    },
+    "02 - Atlas/Education & Learning/Corsi/CS50's Python/7 - Regular Expressions.md": {
+      "summary": "Regular expressions or “regexes” will enable us to examine patterns within our code. For example, we might want to validate that an email address is formatted correctly. Regular expressions will en...",
+      "timestamp": "2026-08-24T22:33:56.668888"
+    },
+    "02 - Atlas/Education & Learning/Corsi/CS50's Python/2 - Loops.md": {
+      "summary": "Essentially, loops are a way to do something over and over again.",
+      "timestamp": "2026-08-24T22:33:56.724382"
+    },
+    "02 - Atlas/Education & Learning/Corsi/CS50's Python/6 - File I-o.md": {
+      "summary": "Up until now, everything we’ve programmed has stored information in memory. That is, once the program is ended, all information gathered from the user or generated by the program is lost.",
+      "timestamp": "2026-08-24T22:33:56.773845"
+    },
+    "02 - Atlas/Education & Learning/Corsi/CS50's Python/0 - Functions, Variables.md": {
+      "summary": "VS Code is a text editor. In addition to editing text, you can visually browse files and run text-based commands at a terminal.",
+      "timestamp": "2026-08-24T22:33:56.824881"
+    },
+    "02 - Atlas/Education & Learning/Corsi/CS50's Python/4 - Libraries.md": {
+      "summary": "Generally, libraries are bits of code written by you or others that you can use in your program.",
+      "timestamp": "2026-08-24T22:33:56.875056"
+    },
+    "02 - Atlas/Education & Learning/Corsi/CS50's Python/3 - Exceptions.md": {
+      "summary": "Exceptions are things that go wrong within our coding.",
+      "timestamp": "2026-08-24T22:33:56.925269"
+    },
+    "02 - Atlas/Education & Learning/Corsi/CS50's Python/5 - Unit Tests.md": {
+      "summary": "Up until now, you have been likely testing your own code using print statements.",
+      "timestamp": "2026-08-24T22:33:56.976817"
+    },
+    "02 - Atlas/Education & Learning/Corsi/IA Avanzato - Corso STEM/Ia Avanzato - 09 Allenamento del Modello.md": {
+      "summary": "La sentiment analysis è una tecnica di elaborazione del linguaggio naturale (NLP) che permette di determinare l'atteggiamento emotivo espresso in un testo. Nel nostro caso, vogliamo classificare fr...",
+      "timestamp": "2026-08-24T22:33:57.030384"
+    },
+    "02 - Atlas/Education & Learning/Corsi/IA Avanzato - Corso STEM/Ia Avanzato - 05 Disinfestazione del Dataset.md": {
+      "summary": "La \"disinfestazione del dataset\" (o data cleaning/preprocessing) è un processo fondamentale nella preparazione dei dati per l'analisi, specialmente quando si lavora con dataset di sentiment analysi...",
+      "timestamp": "2026-08-24T22:33:57.081554"
+    },
+    "02 - Atlas/Education & Learning/Corsi/IA Avanzato - Corso STEM/Ia Avanzato - 06 Prompt Engineering.md": {
+      "summary": "Appunti concettuali e sintesi di studio per Ia Avanzato - 06 Prompt Engineering.",
+      "timestamp": "2026-08-24T22:33:57.131954"
+    },
+    "02 - Atlas/Education & Learning/Corsi/IA Avanzato - Corso STEM/Ia Avanzato - 08 Pubblicazione del Dataset.md": {
+      "summary": "La pubblicazione di un dataset per sentiment analysis è un passaggio fondamentale per condividerlo con la comunità scientifica e gli sviluppatori, promuovendo la ricerca e l'innovazione. Pubblicare...",
+      "timestamp": "2026-08-24T22:33:57.181659"
+    },
+    "02 - Atlas/Education & Learning/Corsi/IA Avanzato - Corso STEM/Ia Avanzato - 03 Progettazione Database.md": {
+      "summary": "L’input embedding è il processo con cui i dati grezzi, come parole, immagini o suoni, vengono trasformati in rappresentazioni numeriche (vettori) che le reti neurali possono elaborare. Questo passa...",
+      "timestamp": "2026-08-24T22:33:57.232636"
+    },
+    "02 - Atlas/Education & Learning/Corsi/IA Avanzato - Corso STEM/Ia Avanzato - 07 Creazione del Dataset.md": {
+      "summary": "La creazione di un dataset per sentiment analysis è un passaggio cruciale nello sviluppo di modelli di intelligenza artificiale avanzati. Un dataset ben strutturato, pulito e rappresentativo garant...",
+      "timestamp": "2026-08-24T22:33:57.282885"
+    },
+    "02 - Atlas/Education & Learning/Corsi/IA Avanzato - Corso STEM/Ia Avanzato - 01 Hugging Face.md": {
+      "summary": "La Home Page e Navigazione:",
+      "timestamp": "2026-08-24T22:33:57.334080"
+    },
+    "02 - Atlas/Education & Learning/Corsi/IA Avanzato - Corso STEM/Ia Avanzato - 02 NLP.md": {
+      "summary": "L'Elaborazione del Linguaggio Naturale (NLP) è un campo dell'intelligenza artificiale che permette alle macchine di comprendere, interpretare e generare il linguaggio umano.",
+      "timestamp": "2026-08-24T22:33:57.383442"
+    },
+    "02 - Atlas/Education & Learning/Corsi/IA Avanzato - Corso STEM/Ia Avanzato - 04 Interfaccia Gradio.md": {
+      "summary": "Gradio è una libreria Python che permette di creare facilmente interfacce web per modelli di machine learning, funzioni e algoritmi. È particolarmente utile per creare demo e prototipi rapidamente.",
+      "timestamp": "2026-08-24T22:33:57.433688"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Back To Focus/01 l'Attenzione - il Bene Piu Prezioso del Xxi Secolo.md": {
+      "summary": "Viviamo in un’epoca in cui una risorsa fondamentale, spesso sottovalutata, è sotto costante attacco: la nostra attenzione. Questo bene, essenziale per il nostro benessere, la nostra produttività e ...",
+      "timestamp": "2026-08-24T22:33:57.490615"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Back To Focus/02 Ottimizzare la Concentrazione - Strategie per Massimizzare le Performance Mentali.md": {
+      "summary": "La concentrazione è una risorsa preziosa, una sorta di carburante mentale che determina la qualità delle nostre performance e, di conseguenza, i risultati che otteniamo nella vita. Tuttavia, ciò ch...",
+      "timestamp": "2026-08-24T22:33:57.544767"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Back To Focus/04 Strategie per la Concentrazione Ottimale.md": {
+      "summary": "In un mondo caratterizzato da continue distrazioni e da un sovraccarico di informazioni, mantenere la concentrazione è una sfida quotidiana. La nostra mente, spesso frammentata da pensieri casuali,...",
+      "timestamp": "2026-08-24T22:33:57.594130"
+    },
+    "02 - Atlas/Education & Learning/Corsi/Back To Focus/03 l'Arte di Vivere con Intenzione - Combattere le Distrazioni.md": {
+      "summary": "In un mondo in cui la nostra attenzione è costantemente sotto assedio, vivere in modo intenzionale rappresenta una sfida cruciale. Le distrazioni, spesso percepite come semplici fastidi, sono in re...",
+      "timestamp": "2026-08-24T22:33:57.650475"
+    },
+    "02 - Atlas/Education & Learning/School/Bravo a Scuola vs Bravo nella Vita.md": {
+      "summary": "iHome MOC|Home / Personal Growth & Health MOC|Mentality / School MOC|School / Bravo a Scuola vs Bravo nella Vita",
+      "timestamp": "2026-08-24T22:33:57.699825"
+    },
+    "02 - Atlas/Projects/Animator2D/Animator2D.md": {
+      "summary": "Un Viaggio nella Generazione di Animazioni Sprite con l’Intelligenza Artificiale",
+      "timestamp": "2026-08-24T22:33:57.750295"
+    },
+    "02 - Atlas/Projects/AI Second Brain System/Rapporto Analisi Architetturale Ken Vault.md": {
+      "summary": "Data Analisi: 20 luglio 2026",
+      "timestamp": "2026-08-24T22:33:57.800639"
+    },
+    "02 - Atlas/Projects/AI Second Brain System/AI Second Brain System.md": {
+      "summary": "Questa nota descrive la struttura tecnica, le metodologie integrate e i comandi operativi che orchestrano il funzionamento automatico del Vault. Il sistema fonde le metodologie Second Brain (CODE),...",
+      "timestamp": "2026-08-24T22:33:57.850975"
+    },
+    "02 - Atlas/Tech & AI/Conferenza AI 29-10-2025.md": {
+      "summary": "figlio della Disanto",
+      "timestamp": "2026-08-24T22:33:57.900591"
+    },
+    "02 - Atlas/Tech & AI/Analisi Completa della Situazione Python Sul Tuo Mac.md": {
+      "summary": "Data Analisi: 26 Agosto 2025",
+      "timestamp": "2026-08-24T22:33:57.950881"
+    },
+    "02 - Atlas/Tech & AI/L'Evoluzione del Vibe Coding.md": {
+      "summary": "Nel marzo 2025, il mondo della programmazione è stato travolto da un fenomeno tanto affascinante quanto controverso: il vibe coding. Questo approccio, nato dall’intuizione di un influente esperto d...",
+      "timestamp": "2026-08-24T22:33:58.000738"
+    },
+    "02 - Atlas/Tech & AI/Guida Completa a Cursor.md": {
+      "summary": "Cursor è un editor di codice innovativo che sfrutta l’intelligenza artificiale per accelerare il processo di programmazione, rendendolo accessibile sia ai principianti che agli sviluppatori esperti...",
+      "timestamp": "2026-08-24T22:33:58.052999"
+    },
+    "02 - Atlas/Tech & AI/Come Tornare a Leggere Libri.md": {
+      "summary": "Video URL: https://youtu.be/UUkdab6HatQ",
+      "timestamp": "2026-08-24T22:33:58.103124"
+    },
+    "02 - Atlas/Tech & AI/Antigravity AI CLI Personal Agent.md": {
+      "summary": "Il Vault è strutturato secondo una logica modulare e semantica per facilitare la navigazione sia dell'utente che dei sotto-agenti AI:",
+      "timestamp": "2026-08-24T22:33:58.152778"
+    },
+    "02 - Atlas/Tech & AI/Evoluzione Dell'Agente AI.md": {
+      "summary": "Il panorama dello sviluppo software assistito dall'Intelligenza Artificiale sta subendo una trasformazione radicale. Se inizialmente l'interazione si limitava a suggerimenti di codice, oggi assisti...",
+      "timestamp": "2026-08-24T22:33:58.202970"
+    },
+    "02 - Atlas/Tech & AI/La Gente Chiede Tutto Alle AI Perche Non Ha Scelta.md": {
+      "summary": "Video URL: https://youtu.be/KGlkNmKLEWs",
+      "timestamp": "2026-08-24T22:33:58.253768"
+    },
+    "02 - Atlas/Tech & AI/Terminal Setup.md": {
+      "summary": "Oggi ho aggiornato e personalizzato la configurazione del mio custom terminal per ottimizzare il flusso di lavoro e l'estetica dell'interfaccia.",
+      "timestamp": "2026-08-24T22:33:58.306046"
+    },
+    "02 - Atlas/Tech & AI/Prompt/School Notes - Chapter.md": {
+      "summary": "Scrivi una spiegazione dettagliata, completa e coinvolgente sul testo letterario [inserire parte specifica], come se fosse una sezione di una nota di studio in Obsidian, di circa 5-7 pagine. La ris...",
+      "timestamp": "2026-08-24T22:33:58.359092"
+    },
+    "02 - Atlas/Tech & AI/Prompt/School Notes - Topic.md": {
+      "summary": "Scrivi una spiegazione dettagliata, completa e coinvolgente sull'argomento [inserire argomento], come se fosse un capitolo di un libro di testo scolastico di circa 20 pagine, adatto alla materia [i...",
+      "timestamp": "2026-08-24T22:33:58.409048"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Flashcard Parole Tra Parentesi.md": {
+      "summary": "Sei un Professore esperto e uno sviluppatore specializzato in Anki.",
+      "timestamp": "2026-08-24T22:33:58.457969"
+    },
+    "02 - Atlas/Tech & AI/Prompt/School Note Generator Grok.md": {
+      "summary": "Sono uno studente di scuola superiore che deve creare appunti scolastici organizzati per un corso di letteratura italiana, da utilizzare nel mio vault scolastico su Obsidian. Il mio obiettivo è cap...",
+      "timestamp": "2026-08-24T22:33:58.507372"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Roadmap Google Cursor.md": {
+      "summary": "If I want to learn {argument}. Would you please create a Learning Roadmap for me?",
+      "timestamp": "2026-08-24T22:33:58.556125"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Report.md": {
+      "summary": "Sei un assistente esperto nella creazione di note Obsidian per l'esame di maturità (Esame di Stato italiano). ## Obiettivo Questa vault Obsidian (School/) è una base di conoscenza personale per pre...",
+      "timestamp": "2026-08-24T22:33:58.605532"
+    },
+    "02 - Atlas/Tech & AI/Prompt/How to Write Effective Planning Prompts for AI Assistants.md": {
+      "summary": "The traditional way of writing instructions for intelligent AI assistants involves a highly specific approach: providing every detail, every coordinate, every variable, and expecting the model to e...",
+      "timestamp": "2026-08-24T22:33:58.655681"
+    },
+    "02 - Atlas/Tech & AI/Prompt/School Notes - Text.md": {
+      "summary": "Scrivi una spiegazione dettagliata, completa e coinvolgente sul testo letterario [inserire testo], come se fosse un capitolo di un libro di testo scolastico di circa 20 pagine. La risposta deve ess...",
+      "timestamp": "2026-08-24T22:33:58.705452"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Notion NotebookLM Workflow.md": {
+      "summary": "Devi leggere TUTTO il notebook allegato e trasformarlo in un briefing operativo per Perplexity, che dovrà creare una pagina Notion di letteratura italiana per l'Esame di Stato 2026.",
+      "timestamp": "2026-08-24T22:33:58.755896"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Notebook to Anki.md": {
+      "summary": "Sei un assistente esperto di Anki.",
+      "timestamp": "2026-08-24T22:33:58.805122"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Imbuto Blog.md": {
+      "summary": "Sei il mio assistente editoriale per un Digital Garden in Quartz + Obsidian.",
+      "timestamp": "2026-08-24T22:33:58.853708"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Mastering AI Prompting.md": {
+      "summary": "Prompting AI effectively remains a crucial skill, even as technology advances. Many users feel confident in their abilities, but deeper exploration often reveals room for improvement. This guide de...",
+      "timestamp": "2026-08-24T22:33:58.904212"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Roadmap.md": {
+      "summary": "Crea un file Markdown che rappresenti una roadmap per l'argomento \"[argomento]\". La roadmap deve essere organizzata in sezioni logiche e coerenti che riflettano le principali categorie, temi o fasi...",
+      "timestamp": "2026-08-24T22:33:58.957142"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Figurine.md": {
+      "summary": "Create a 1/7 scale commercialized figurine of the characters in the picture, in a realistic style, in a real environment. The figurine is placed on a computer desk. The figurine has a round transpa...",
+      "timestamp": "2026-08-24T22:33:59.011161"
+    },
+    "02 - Atlas/Tech & AI/Prompt/School Notes.md": {
+      "summary": "Scrivi una spiegazione dettagliata, completa e coinvolgente sull'argomento [inserire argomento], come se fosse un capitolo di un libro di testo scolastico di circa 20 pagine. La risposta deve esser...",
+      "timestamp": "2026-08-24T22:33:59.060249"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Content Memory.md": {
+      "summary": "Prendi la trascrizione che ti fornirò di seguito e trasformala in un testo dettagliato, fluido e ben strutturato che approfondisca i concetti, le idee e le informazioni presentate. Il testo deve es...",
+      "timestamp": "2026-08-24T22:33:59.109069"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Andrea Maturita.md": {
+      "summary": "Agisci come un analizzatore testuale avanzato, progettato per creare guide di studio letterarie destinate a studenti dell'ultimo anno delle superiori (Maturità). Il documento finale deve essere un ...",
+      "timestamp": "2026-08-24T22:33:59.161630"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Flashcards.md": {
+      "summary": "Ho allegato un documento con flashcards, genera file .txt distinti per ogni tipo di flashcard (es. Basic e Cloze). Ogni file deve contenere solo le carte di quel tipo, formattate per l'importazione...",
+      "timestamp": "2026-08-24T22:33:59.211573"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Report Gemini.md": {
+      "summary": "Crea un report personalizzato in italiano per lo studio in vista dell'Esame di Stato. Deve essere scritto con tono sintetico ma discorsivo, non accademico: spiega sempre il perché dietro i fatti, n...",
+      "timestamp": "2026-08-24T22:33:59.261337"
+    },
+    "02 - Atlas/Tech & AI/Prompt/Gemini Sketchnote.md": {
+      "summary": "Individua e spiega [inserisci il tuo argomento]. Sii specifico e vai al punto. Fornisci esempi pertinenti. Il pubblico è [definisci il pubblico dello sketchnote]",
+      "timestamp": "2026-08-24T22:33:59.311082"
+    },
+    "02 - Atlas/Tech & AI/Programming/Versioning Conventions.md": {
+      "summary": "In italiano, quando si parla di \"convenzioni nel scrivere versioni di un progetto\", ci si riferisce solitamente alle pratiche standardizzate per identificare e numerare le versioni di un documento,...",
+      "timestamp": "2026-08-24T22:33:59.360495"
+    },
+    "02 - Atlas/Tech & AI/Programming/Appunti Sul Clean Code.md": {
+      "summary": "Oggi ho letto delle cose interessanti sul Clean Code di Uncle Bob.",
+      "timestamp": "2026-08-24T22:33:59.408978"
+    },
+    "02 - Atlas/Tech & AI/Programming/Vibe Coding/Vibe Coding.md": {
+      "summary": "Il vibe coding è un metodo di programmazione che utilizza strumenti basati su IA per scrivere codice in modo collaborativo e iterativo. L’idea è di lasciare che l’IA generi gran parte del codice, m...",
+      "timestamp": "2026-08-24T22:33:59.459371"
+    },
+    "02 - Atlas/Tech & AI/Programming/GitHub/Submodule.md": {
+      "summary": "I submoduli su GitHub sono una funzionalità di Git che consente di includere un repository Git all'interno di un altro repository. Questo è utile per mantenere progetti separati all'interno di uno ...",
+      "timestamp": "2026-08-24T22:33:59.508798"
+    },
+    "02 - Atlas/Tech & AI/Programming/GitHub/Versioning on GitHub.md": {
+      "summary": "Il versioning è il modo in cui tieni traccia delle diverse versioni del tuo progetto, assegnando loro un identificativo (di solito un numero o un nome) per sapere cosa è cambiato e quando. Su GitHu...",
+      "timestamp": "2026-08-24T22:33:59.559358"
+    },
+    "02 - Atlas/Tech & AI/Programming/AI/Hermes Agent.md": {
+      "summary": "Video URL: https://youtu.be/QQEgIo4Juxg",
+      "timestamp": "2026-08-24T22:33:59.609518"
+    },
+    "02 - Atlas/Tech & AI/Programming/AI/L'AI Inventa Lingue, Trasforma Foto in Video e Ti Fa Creare App in Un Click.md": {
+      "summary": "Ogni giorno c'è una notizia, con aspettative di nuove notizie ogni mattina, come ad esempio un'ipotetica invasione [(00:00:14)](https://www.youtube.com/watch?v=rQBzbMBxSJg&t=14s)",
+      "timestamp": "2026-08-24T22:33:59.664445"
+    },
+    "02 - Atlas/Tech & AI/Programming/AI/Agenti AI Cosa Sono e Come Usarli 6 Tool Imperdibili.md": {
+      "summary": "Il 2025 è considerato l'anno degli agenti AI, con un'uscita di nuovi agenti ogni 2 minuti [(00:00:08)](https://www.youtube.com/watch?v=J2qSEL1Wcqs&t=8s)",
+      "timestamp": "2026-08-24T22:33:59.714791"
+    },
+    "02 - Atlas/Tech & AI/Programming/AI/Context Windows in LLM - How They Work and Why They Can Slow Down.md": {
+      "summary": "I modelli linguistici di grandi dimensioni (LLM), come quelli utilizzati per conversazioni interattive, sono strumenti potenti che simulano il linguaggio umano con una sorprendente naturalezza. Tut...",
+      "timestamp": "2026-08-24T22:33:59.764996"
+    },
+    "02 - Atlas/Tech & AI/AI/La Commoditizzazione dell'Intelligenza Artificiale e la Guerra dell'Hardware.md": {
+      "summary": "Video URL: https://youtu.be/3Elkmmon2vE",
+      "timestamp": "2026-08-24T22:33:59.815991"
+    },
+    "02 - Atlas/Tech & AI/AI/Costruire Knowledge Base per AI con LLM Wiki.md": {
+      "summary": "Video URL: https://youtu.be/LLxBccbMS8",
+      "timestamp": "2026-08-24T22:33:59.867349"
+    },
+    "02 - Atlas/Tech & AI/AI/DS4.md": {
+      "summary": "Salvatore Sanfilippo, meglio noto come Antirez, è il creatore di Redis, il database in‑memory più diffuso al mondo. Oltre a gestire il progetto, Antirez è anche divulgatore scientifico e ha recente...",
+      "timestamp": "2026-08-24T22:33:59.917399"
+    },
+    "02 - Atlas/Tech & AI/Hacking/CoinJoin.md": {
+      "summary": "Il CoinJoin è un meccanismo utilizzato in blockchain, particolarmente popolare nel mondo della criptovaluta. L'obiettivo principale del CoinJoin è di migliorare la privacy e l'anonimizzazione dei t...",
+      "timestamp": "2026-08-24T22:33:59.967671"
+    },
+    "02 - Atlas/Finance/Una Nuova Visione Economica - il Piano Strategico Dietro i Dazi Americani.md": {
+      "summary": "Negli ultimi anni, la politica economica statunitense ha seguito una traiettoria che, a prima vista, può sembrare disordinata e contraddittoria, fatta di dazi imposti anche agli alleati storici, mi...",
+      "timestamp": "2026-08-24T22:34:00.018955"
+    },
+    "02 - Atlas/Finance/Strategia per Guadagnare con le Criptovalute - Un Approccio Duraturo.md": {
+      "summary": "Le criptovalute rappresentano un'opportunità unica per generare rendimenti nel tempo, ma richiedono una strategia solida basata su principi concreti, lontani da illusioni di guadagni rapidi. Invece...",
+      "timestamp": "2026-08-24T22:34:00.070740"
+    },
+    "02 - Atlas/Finance/Come le Banche Creano Magicamente il Denaro.md": {
+      "summary": "Produzione fisica di denaro: A Washington D.C., una struttura governativa trasforma carta in denaro 24/7, producendo oltre 500 milioni di dollari al giorno per l’economia statunitense. Tuttavia, qu...",
+      "timestamp": "2026-08-24T22:34:00.121217"
+    },
+    "02 - Atlas/Finance/Come Evadere il Fisco Legalmente.md": {
+      "summary": "L'[Evasione fiscale](https://it.wikipedia.org/wiki/Evasionefiscale) non può essere legale, ma l'elusione fiscale può essere un [Comportamento](https://it.wikipedia.org/wiki/Comportamento) lecito pe...",
+      "timestamp": "2026-08-24T22:34:00.172874"
+    },
+    "02 - Atlas/Finance/Guida Investimenti 2025.md": {
+      "summary": "considerando il tuo profilo (studente del quinto anno di liceo, età stimata 17-19 anni, ambizioni imprenditoriali, patrimonio di circa 4.578€ e un flusso mensile di 100€ dalla paghetta), questa gui...",
+      "timestamp": "2026-08-24T22:34:00.226220"
+    },
+    "03 - Inbox/Review Dashboard.md": {
+      "summary": "Benvenuto nella Dashboard di Revisione dell'Inbox. Questo pannello ti permette di revisionare, perfezionare e approvare le note grezze catturate per integrarle armoniosamente nel tuo Second Brain.",
+      "timestamp": "2026-08-24T22:34:00.279307"
+    },
+    "03 - Inbox/Audit Report - 2026-08-24.md": {
+      "summary": "Diagnostica automatica dello stato di coerenza e integrità semantica del Second Brain.",
+      "timestamp": "2026-08-24T22:34:00.340025"
+    }
+  },
+  "stats": {
+    "total": 0,
+    "processed": 654,
+    "skipped": 0,
+    "failed": 0,
+    "last_run": "2026-08-24T22:34:00.340032"
+  }
+}

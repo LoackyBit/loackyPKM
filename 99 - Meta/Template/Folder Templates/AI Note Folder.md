@@ -1,10 +1,13 @@
 ---
+status: permanent
+type: concept
+area: meta
+related: []
+source: original
 title: "AI Note Folder"
-date: 2026-01-31
+date: '2026-01-31'
 updated: 2026-01-31T17:14
 tags: []
-status: permanent
-macro_area: meta
 ---
 [[Home MOC|Home]] / [[Template]] / [[AI Note Folder]]
 

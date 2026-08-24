@@ -1,3 +1,15 @@
+---
+status: permanent
+type: concept
+area: meta
+related: []
+source: original
+title: "Raw Inbox Note"
+date: '2026-07-16'
+updated: 2026-08-24T22:28
+tags: []
+---
+
 <%*
 // ========== CONFIGURAZIONE ==========
 const INBOX_FOLDER = "03 - Inbox";

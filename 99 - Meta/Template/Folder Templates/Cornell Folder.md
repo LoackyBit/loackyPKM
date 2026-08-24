@@ -1,10 +1,13 @@
 ---
+status: permanent
+type: lecture
+area: meta
+related: []
+source: original
 title: "Cornell Folder"
-date: 2026-01-31
+date: '2026-01-31'
 updated: 2026-01-31T17:15
 tags: []
-status: permanent
-macro_area: meta
 ---
 [[Home MOC|Home]] / [[Template]] / [[Cornell Folder]]
 

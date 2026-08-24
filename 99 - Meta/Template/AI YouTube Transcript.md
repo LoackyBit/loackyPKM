@@ -5,8 +5,8 @@ area: tech
 related: []
 aliases: []
 source: original
-title: "Titolo Dell'Articolo in Title Case"
-date: 2026-07-17
+title: "Titolo Dell'articolo in Title Case"
+date: '2026-07-17'
 updated: 2026-07-17T22:27
 tags: [tech/video, tech/transcript]
 summary: "Trascrizione e sintesi strutturata di un video tecnico da YouTube."

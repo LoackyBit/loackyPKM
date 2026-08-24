@@ -1,6 +1,5 @@
 ---
-stage: seed 🌱
-draft: true
+status: permanent
 type: article
 area: tech
 related: []

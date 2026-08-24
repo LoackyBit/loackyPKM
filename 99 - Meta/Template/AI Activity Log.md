@@ -6,9 +6,9 @@ related: []
 aliases: []
 source: original
 title: "Nome Attivita in Title Case"
-date: 2026-07-16
+date: '2026-07-16'
 updated: 2026-07-16T23:32
-tags: [meta/log, meta/setup, tech]
+tags: [meta/log, meta/setup, meta/tech]
 summary: "Registro operativo di attività e log delle sessioni di sviluppo ed evoluzione del vault."
 ---
 [[Home MOC|Home]] / [[Template]] / [[AI Activity Log|Nome Attivita in Title Case]]

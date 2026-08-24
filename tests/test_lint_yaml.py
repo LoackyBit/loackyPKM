@@ -6,9 +6,9 @@ import shutil
 from pathlib import Path
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, os.path.join(PROJECT_ROOT, ".agents", "skills", "meta", "scripts"))
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts"))
 
-import lint_yaml
+import brain_health as lint_yaml
 
 class TestLintYaml(unittest.TestCase):
     def setUp(self):

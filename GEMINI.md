@@ -2,14 +2,14 @@
 status: permanent
 type: concept
 area: meta
-related: []
+related: ["[[Home MOC]]", "[[Vault Health Dashboard]]"]
 aliases: []
 source: original
 title: "Gemini"
 date: '2026-07-17'
-updated: 2026-08-24T22:30
+updated: 2026-08-25T00:10
 tags: [meta/system, tech/ai]
-summary: "Questo documento costituisce la memoria di sistema e il system prompt permanente per l'assistente AI Gemini (Assistente di Sistema Principale) operante all'interno di questo Vault Obsidian (Ken vau..."
+summary: "Memoria di sistema e system prompt permanente per l'assistente AI Gemini operante nel Vault Obsidian (Second Brain)."
 ---
 [[Home MOC|Home]] / [[Meta]] / [[Gemini]]
 
@@ -37,8 +37,8 @@ Il Vault è organizzato rigorosamente secondo la seguente topologia di cartelle:
    - **Regola:** È il luogo in cui vivono le note permanenti ed elaborate. Favorire collegamenti cross-disciplinari.
 
 3. `03 - Inbox/`
-   - **Funzione:** Punto di ingresso grezzo (*Landing Zone*). Contiene file temporanei, note rapide, catture vocali/testuali e idee da elaborare (`status: draft`).
-   - **Regola:** Deve essere svuotata e processata regolarmente (*Workflow GTD*). Nessuna nota deve rimanere qui a lungo termine.
+   - **Funzione:** Punto di ingresso grezzo e staging area (`status: draft`).
+   - **Regola:** Le note generate dall'AI atterrano qui e vengono gestite tramite il workflow GTD in `03 - Inbox/Review Dashboard.md`. Nessuna nota deve rimanere qui a lungo termine.
 
 4. `04 - Calendar/` (Journaling)
    - **Funzione:** Registro cronologico e diari giornalieri (`type: journal`, `area: calendar`).
@@ -49,12 +49,29 @@ Il Vault è organizzato rigorosamente secondo la seguente topologia di cartelle:
    - **Regola:** Contiene bozze, saggi e articoli tecnici pronti o in lavorazione per la pubblicazione web.
 
 6. `99 - Meta/` (Logica & Automazione)
-   - **Funzione:** Il centro di controllo del Vault. Contiene template di Obsidian, guide e script di automazione.
+   - **Funzione:** Il centro di controllo del Vault. Contiene template di Obsidian, guide, script di automazione (`brain_health.py`, `brain_ingest.py`, `youtube_helper.py`, `watch.sh`) e la dashboard diagnostica statica `99 - Meta/Vault Health Dashboard.md`.
    - **Regola:** Ogni automazione, prompt di tool o script deve risiedere all'interno di questa struttura. Le nostre **Agent Skills** risiedono nella directory di configurazione degli agenti (`.agents/skills/`).
 
 ---
 
-## ⚙️ 3. Regole e Convenzioni Operative
+## ⚡ 3. Macro-Skills e Flussi Operativi Unificati
+
+L'ecosistema agentico è consolidato in **3 sole macro-skills ufficiali** in `.agents/skills/`:
+
+1. **`brain-health` (`.agents/skills/brain-health/SKILL.md`):**
+   - Governance qualitativa del Vault, validazione AST dello schema YAML canonico a 10 campi, Title Case normalization, audit intelligente dei link (distinzione tra forward-links intenzionali e broken-links reali), orfani, e generazione statica di `99 - Meta/Vault Health Dashboard.md`.
+   - *Comando:* `python3 "99 - Meta/Scripts/brain_health.py" --interactive` (o `--dry-run`, `--auto-fix`, `--dashboard-only`).
+
+2. **`brain-ingest` (`.agents/skills/brain-ingest/SKILL.md`):**
+   - Ingestione universale polimorfica (URL YouTube con timestamp/capitoli e frame opzionali in `99 - Meta/Clipboard/`, articoli web, testo libero, file locali), profondità modulare (`sintesi` vs `approfondimento`), formattazione Style Guide, autolinking semantico su note esistenti, lock per-fonte (`/tmp/brain_ingest_<hash>.lock`), staging in `03 - Inbox/` e aggiornamento tri-state di `03 - Inbox/Review Dashboard.md`.
+   - *Comando:* `python3 "99 - Meta/Scripts/brain_ingest.py" --url <URL> --depth <sintesi|approfondimento>` o `--process-approvals`.
+
+3. **`brain-recall` (`.agents/skills/brain-recall/SKILL.md`):**
+   - Esperienza di consultazione e sintesi stile NotebookLM (invocazione duale CLI slash command `/brain-recall <query>` o chat naturale), risposte strutturate con sintesi esecutiva, citazioni esatte `[[Nome Nota]]` (e timestamp video), e guardia rigida anti-allucinazione (nessuna informazione inventata se assente nel Vault).
+
+---
+
+## ⚙️ 4. Regole e Convenzioni Operative
 
 - **Allineamento della Memoria:** All'inizio di ogni sessione o quando necessario, l'agente deve leggere il file di memoria persistente `[[.agents/MEMORY.md]]` (e se necessario le note collegate in `.agents/memory/`) per allinearsi sul profilo utente, sullo stato dei progetti e sulle correzioni critiche da non ripetere.
 - **Wiki-links:** Utilizzare sempre la sintassi standard di Obsidian `[[Nome Nota]]` per i riferimenti incrociati. Evitare di linkare parole o concetti generici se la nota relativa non è presente nel Vault.
@@ -71,5 +88,7 @@ Il Vault è organizzato rigorosamente secondo la seguente topologia di cartelle:
   10. `tags` (array flow-style di tag gerarchici: `[area/topic, ...]`)
   11. `summary` (stringa a doppi apici: sintesi esecutiva densa tra 120 e 180 caratteri, max 200)
 - **Giunzione YAML-Markdown:** Esattamente una riga vuota dopo la chiusura `---`, seguita dalla riga Breadcrumb (`[[Home MOC|Home]] / ...`), e poi il corpo Markdown. Nessun tag HTML o hashtag isolato nel corpo del testo.
+- **Evidenziazioni HTML (Style Guide):** Utilizzare `<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>` (giallo) e `<mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>` (viola). **Mai racchiudere i tag `<mark>` tra backtick markdown.**
 - **Integrità File System:** Non creare file al di fuori delle 6 directory principali (eccetto file di configurazione nella root come questo `GEMINI.md`).
 - **Approccio Proattivo:** Quando si analizzano o modificano note, cercare sempre proattivamente opportunità di auto-linking semantico con il resto del Vault, ma **solo ed esclusivamente** verso note effettivamente esistenti.
+- **Divieto Assoluto di Dataview:** Le dashboard devono rimanere in puro Markdown statico autogenerato da Python.

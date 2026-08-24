@@ -6,7 +6,7 @@ related: ["[[Home MOC]]", "[[Review Dashboard]]"]
 source: original
 title: "Vault Health Dashboard"
 date: '2026-08-25'
-updated: 2026-08-25T00:09
+updated: 2026-08-25T00:10
 tags: [meta/dashboard, meta/health]
 summary: "Pannello di controllo statico del Second Brain: monitoraggio dello stato di salute, note in staging, bozze del blog e diagnostica del grafo."
 ---
@@ -16,17 +16,17 @@ summary: "Pannello di controllo statico del Second Brain: monitoraggio dello sta
 
 Pannello di controllo in **puro Markdown statico** per monitorare la salute del Vault, le note in staging e l'integrità del grafo semantico.
 
-*Ultimo aggiornamento:* `2026-08-25 00:09`
+*Ultimo aggiornamento:* `2026-08-25 00:10`
 
 ---
 
 ## 📈 Metriche Generali del Vault
-- **Note Totali:** 575
+- **Note Totali:** 576
 - **Note in Staging (Inbox):** 392
 - **Bozze Blog:** 3
 - **Note Orfane:** 0
 - **Link Interrotti:** 87
-- **Forward-Links Pianificati:** 623
+- **Forward-Links Pianificati:** 624
 
 ---
 

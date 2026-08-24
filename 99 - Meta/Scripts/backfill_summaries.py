@@ -15,19 +15,11 @@ import tempfile
 import subprocess
 from pathlib import Path
 
-# Add meta script dir to sys.path to reuse AST linter helpers
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-VAULT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
-META_SCRIPT_DIR = os.path.join(VAULT_ROOT, ".agents", "skills", "meta", "scripts")
-if META_SCRIPT_DIR not in sys.path:
-    sys.path.insert(0, META_SCRIPT_DIR)
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
 
-try:
-    import lint_yaml
-except ImportError:
-    # Fallback to local import if run from repo root
-    sys.path.insert(0, os.path.join(os.getcwd(), ".agents", "skills", "meta", "scripts"))
-    import lint_yaml
+import brain_health as lint_yaml
 
 CHECKPOINT_FILE = os.path.join("99 - Meta", ".backfill_checkpoint.json")
 

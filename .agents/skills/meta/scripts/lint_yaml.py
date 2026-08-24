@@ -39,7 +39,7 @@ CONTROLLED_AREAS = {
 
 IGNORE_FOLDERS = {
     '.git', '.obsidian', '.agents', '.gemini', '.trash', '.vscode',
-    '.space', '.makemd', '.smart-env', '.antigravitycli', '.codacy', 'node_modules'
+    '.space', '.makemd', '.smart-env', '.antigravitycli', '.codacy', 'node_modules', 'tests'
 }
 
 TAG_HIERARCHY_MAP = {

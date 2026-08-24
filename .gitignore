@@ -1,0 +1,11 @@
+.gemini/
+gha-creds-*.json
+.obsidian/*
+.trash/
+.DS_Store
+**/.DS_Store
+.vscode/
+.antigravitycli/
+.makemd/
+.smart-env/
+.space/.planning/

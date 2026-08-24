@@ -9,3 +9,5 @@ gha-creds-*.json
 .makemd/
 .smart-env/
 .space/.planning/
+__pycache__/
+*.pyc

@@ -1,0 +1,204 @@
+import unittest
+import os
+import sys
+import tempfile
+import shutil
+from pathlib import Path
+from unittest.mock import patch
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts"))
+
+import brain_health
+
+class TestBrainHealth(unittest.TestCase):
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_canonical_frontmatter_order(self):
+        """Asserts format_canonical_frontmatter serializes keys in exact sequence:
+        status (or stage+draft), type, area, related, aliases, source, title, date, updated, tags, summary per D-04, D-10.
+        """
+        meta = {
+            "status": "permanent",
+            "type": "concept",
+            "area": "tech",
+            "related": ["[[Test Note]]", "[[Another Note]]"],
+            "aliases": ["Alias 1"],
+            "source": "original",
+            "title": "Test Title",
+            "date": "2026-08-25",
+            "updated": "2026-08-25T12:00",
+            "tags": ["tech/ai", "tech/python"],
+            "summary": "Test executive summary text for health test."
+        }
+        yaml_str = brain_health.format_canonical_frontmatter(meta, is_blog=False)
+        keys = [line.split(":")[0].strip() for line in yaml_str.splitlines() if ":" in line]
+        expected_atlas = ["status", "type", "area", "related", "aliases", "source", "title", "date", "updated", "tags", "summary"]
+        self.assertEqual(keys, expected_atlas)
+
+        # Also test blog mode (stage + draft instead of status)
+        blog_meta = dict(meta)
+        blog_meta["stage"] = "seed 🌱"
+        blog_meta["draft"] = True
+        blog_yaml = brain_health.format_canonical_frontmatter(blog_meta, is_blog=True)
+        blog_keys = [line.split(":")[0].strip() for line in blog_yaml.splitlines() if ":" in line]
+        expected_blog = ["stage", "draft", "type", "area", "related", "aliases", "source", "title", "date", "updated", "tags", "summary"]
+        self.assertEqual(blog_keys, expected_blog)
+
+    def test_forward_link_classification(self):
+        """Asserts VaultHealthAuditor.audit_file_links classifies uncreated Title Cased notes
+        in outlines/lists as [FORWARD-LINK] and malformed/broken paths as [BROKEN-LINK] without false positives per D-02.
+        """
+        # Create a sample note in test vault
+        os.makedirs(os.path.join(self.test_dir, "02 - Atlas", "Tech"), exist_ok=True)
+        sample_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Existing Note.md")
+        with open(sample_file, "w", encoding="utf-8") as f:
+            f.write("# Existing Note\nSome content.")
+
+        auditor = brain_health.VaultHealthAuditor(self.test_dir)
+        test_content = """---
+title: "Test Caller"
+---
+Here is a valid link to [[Existing Note]].
+Here is a planned forward link to [[Planned Concept Note]].
+Here is another forward link to [[Architecture Design Pattern]].
+Here is a malformed link to [[invalid/broken/path]].
+Here is a malformed link to [[http://example.com/bad]].
+"""
+        valid, forward, broken = auditor.audit_file_links("02 - Atlas/Tech/Test Caller.md", test_content)
+        self.assertIn("Existing Note", valid)
+        self.assertIn("Planned Concept Note", forward)
+        self.assertIn("Architecture Design Pattern", forward)
+        self.assertIn("invalid/broken/path", broken)
+        self.assertIn("http://example.com/bad", broken)
+        self.assertNotIn("Existing Note", forward)
+        self.assertNotIn("Existing Note", broken)
+
+    def test_orphan_detection(self):
+        """Asserts notes in 02 - Atlas/ with 0 incoming links and missing from 01 - Map of Content/ MOCs
+        are flagged as orphans per D-02.
+        """
+        os.makedirs(os.path.join(self.test_dir, "01 - Map of Content"), exist_ok=True)
+        os.makedirs(os.path.join(self.test_dir, "02 - Atlas", "Tech"), exist_ok=True)
+
+        # 1. Connected note referenced in MOC
+        moc_file = os.path.join(self.test_dir, "01 - Map of Content", "Tech MOC.md")
+        with open(moc_file, "w", encoding="utf-8") as f:
+            f.write("# Tech MOC\n- [[Connected Note]]")
+
+        connected_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Connected Note.md")
+        with open(connected_file, "w", encoding="utf-8") as f:
+            f.write("# Connected Note\nContent.")
+
+        # 2. Orphan note not referenced anywhere
+        orphan_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Isolated Orphan Note.md")
+        with open(orphan_file, "w", encoding="utf-8") as f:
+            f.write("# Isolated Orphan Note\nLonely content.")
+
+        auditor = brain_health.VaultHealthAuditor(self.test_dir)
+        # Scan links for all files
+        for clean_name, rel_path in auditor.all_notes.items():
+            abs_p = os.path.join(self.test_dir, rel_path)
+            with open(abs_p, "r", encoding="utf-8") as f:
+                c = f.read()
+            auditor.audit_file_links(rel_path, c)
+
+        orphans = auditor.detect_orphans()
+        orphan_rel = os.path.normpath("02 - Atlas/Tech/Isolated Orphan Note.md")
+        orphans_norm = [os.path.normpath(o) for o in orphans]
+        self.assertIn(orphan_rel, orphans_norm)
+        self.assertNotIn(os.path.normpath("02 - Atlas/Tech/Connected Note.md"), orphans_norm)
+
+    def test_title_case_and_breadcrumb_sync(self):
+        """Asserts intelligent Title Case formatting preserves uppercase acronyms (AI, MOC, REST, CLI)
+        and minor words (di, del, per, in) while updating breadcrumbs and filename per D-13.
+        """
+        title_raw = "guida pratica all'uso di rest api per ai e cli"
+        cleaned_title = brain_health.clean_title_str(title_raw)
+        self.assertIn("REST", cleaned_title)
+        self.assertIn("API", cleaned_title)
+        self.assertIn("AI", cleaned_title)
+        self.assertIn("CLI", cleaned_title)
+        self.assertIn("di", cleaned_title)
+        self.assertIn("per", cleaned_title)
+        self.assertIn("e", cleaned_title)
+
+        filename_clean = brain_health.clean_filename("01 - introduzione all'ai e moc!.md")
+        self.assertIn("AI", filename_clean)
+        self.assertIn("MOC", filename_clean)
+        self.assertNotIn("!", filename_clean)
+
+        breadcrumb = brain_health.get_breadcrumbs("02 - Atlas/Tech/REST API Guide.md", "REST API Guide")
+        self.assertEqual(breadcrumb, "[[Home MOC|Home]] / [[Tech]] / [[REST API Guide]]")
+
+    def test_static_dashboard_rendering(self):
+        """Asserts generate_health_dashboard outputs 100% pure static Markdown (metrics, staging notes table,
+        blog seeds table, recent notes) without any dataview codeblocks to 99 - Meta/Vault Health Dashboard.md per D-03.
+        """
+        notes_data = [
+            {
+                "name": "Draft Note 1",
+                "rel_path": "03 - Inbox/Draft Note 1.md",
+                "mtime": 1700000000,
+                "metadata": {"status": "draft", "date": "2026-08-25", "area": "tech"}
+            },
+            {
+                "name": "Blog Post 1",
+                "rel_path": "05 - Blog/Blog Post 1.md",
+                "mtime": 1700000000,
+                "metadata": {"stage": "seed 🌱", "draft": True, "date": "2026-08-25"}
+            },
+            {
+                "name": "Permanent Note 1",
+                "rel_path": "02 - Atlas/Tech/Permanent Note 1.md",
+                "mtime": 1700000000,
+                "metadata": {"status": "permanent", "date": "2026-08-20", "area": "tech"}
+            }
+        ]
+        audit_stats = {
+            "total_notes": 42,
+            "orphan_count": 2,
+            "broken_link_count": 1,
+            "forward_link_count": 5
+        }
+        dashboard_md = brain_health.generate_health_dashboard(self.test_dir, notes_data, audit_stats)
+        self.assertNotIn("```dataview", dashboard_md)
+        self.assertNotIn("```dataviewjs", dashboard_md)
+        self.assertIn("# 📊 Vault Health Dashboard", dashboard_md)
+        self.assertIn("42", dashboard_md)
+        self.assertIn("[[Draft Note 1]]", dashboard_md)
+        self.assertIn("[[Blog Post 1]]", dashboard_md)
+        self.assertIn("[[Permanent Note 1]]", dashboard_md)
+
+        # Check writing to dashboard path
+        out_path = brain_health.write_health_dashboard(self.test_dir, notes_data, audit_stats)
+        self.assertTrue(os.path.exists(out_path))
+        self.assertTrue(out_path.endswith("99 - Meta/Vault Health Dashboard.md"))
+
+    def test_cli_flags_and_interactive_defaults(self):
+        """Asserts --dry-run performs read-only checks, --auto-fix applies deterministic fixes,
+        and default mode is interactive step-by-step confirmation per D-01.
+        """
+        parser = brain_health.build_arg_parser()
+        args_default = parser.parse_args([])
+        self.assertTrue(args_default.interactive)
+        self.assertFalse(args_default.dry_run)
+        self.assertFalse(args_default.auto_fix)
+
+        args_dry = parser.parse_args(["--dry-run"])
+        self.assertTrue(args_dry.dry_run)
+        self.assertFalse(args_dry.auto_fix)
+
+        args_fix = parser.parse_args(["--auto-fix"])
+        self.assertTrue(args_fix.auto_fix)
+        self.assertFalse(args_fix.dry_run)
+
+        args_dash = parser.parse_args(["--dashboard-only"])
+        self.assertTrue(args_dash.dashboard_only)
+
+if __name__ == "__main__":
+    unittest.main()

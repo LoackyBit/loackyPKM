@@ -369,13 +369,20 @@ def ingest_youtube_source(url: str, depth: str, extract_frames: bool, vault_root
     text_blocks = []
     if chapters:
         for ch in chapters:
-            ch_title = ch.get('title', 'Capitolo')
-            start = ch.get('start_time', 0)
-            end = ch.get('end_time', 0)
-            ch_text = " ".join([t.get('text', '') for t in transcript if start <= t.get('start', 0) < end])
+            ch_title = ch.get('title', 'Capitolo') if isinstance(ch, dict) else getattr(ch, 'title', 'Capitolo')
+            start = ch.get('start_time', 0) if isinstance(ch, dict) else getattr(ch, 'start_time', 0)
+            end = ch.get('end_time', 0) if isinstance(ch, dict) else getattr(ch, 'end_time', 0)
+            ch_text = " ".join([
+                getattr(t, 'text', t.get('text', '') if isinstance(t, dict) else str(t))
+                for t in transcript
+                if start <= (getattr(t, 'start', t.get('start', 0) if isinstance(t, dict) else 0)) < end
+            ])
             text_blocks.append(f"### {ch_title}\n{ch_text}\n")
     else:
-        text_blocks.append(" ".join([t.get('text', '') for t in transcript]))
+        text_blocks.append(" ".join([
+            getattr(t, 'text', t.get('text', '') if isinstance(t, dict) else str(t))
+            for t in transcript
+        ]))
 
     raw_text = "\n".join(text_blocks)
     body = format_structured_note(title, raw_text, depth=depth, source_type="youtube", source_url=url, channel=channel)

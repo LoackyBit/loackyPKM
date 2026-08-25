@@ -21,4 +21,4 @@ Benvenuto nella **Dashboard di Revisione dell'Inbox**. Questo pannello ti permet
 
 ## 📋 Note in Attesa di Approvazione
 
-Tutte le note sono state elaborate con successo! Dashboard vuota.
+- [ ] Approva [[Palantir: Cosa Fa l'Azienda Che Aiuta i Governi e Perché È Preoccupante]] (area: tech, type: video, target: 02 - Atlas/Tech)

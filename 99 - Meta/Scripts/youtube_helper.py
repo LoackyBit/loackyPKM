@@ -107,7 +107,13 @@ def extract_youtube_data(url: str, output_note_path: Optional[str] = None,
     transcript_list = []
     if YouTubeTranscriptApi is not None:
         try:
-            transcript_list = YouTubeTranscriptApi().fetch(video_id, languages=['it', 'en'])
+            fetched = YouTubeTranscriptApi().fetch(video_id, languages=['it', 'en'])
+            for snippet in fetched:
+                transcript_list.append({
+                    'text': getattr(snippet, 'text', snippet.get('text', '') if isinstance(snippet, dict) else str(snippet)),
+                    'start': getattr(snippet, 'start', snippet.get('start', 0) if isinstance(snippet, dict) else 0),
+                    'duration': getattr(snippet, 'duration', snippet.get('duration', 0) if isinstance(snippet, dict) else 0)
+                })
         except Exception as e:
             print(f"Warning: Transcript unavailable for {video_id}: {e}", file=sys.stderr)
 

@@ -6,7 +6,7 @@ related: ["[[Home MOC]]", "[[Review Dashboard]]"]
 source: original
 title: "Vault Health Dashboard"
 date: '2026-08-25'
-updated: 2026-08-25T00:10
+updated: 2026-08-25T14:20
 tags: [meta/dashboard, meta/health]
 summary: "Pannello di controllo statico del Second Brain: monitoraggio dello stato di salute, note in staging, bozze del blog e diagnostica del grafo."
 ---
@@ -16,16 +16,16 @@ summary: "Pannello di controllo statico del Second Brain: monitoraggio dello sta
 
 Pannello di controllo in **puro Markdown statico** per monitorare la salute del Vault, le note in staging e l'integrità del grafo semantico.
 
-*Ultimo aggiornamento:* `2026-08-25 00:10`
+*Ultimo aggiornamento:* `2026-08-25 14:20`
 
 ---
 
 ## 📈 Metriche Generali del Vault
-- **Note Totali:** 576
-- **Note in Staging (Inbox):** 392
+- **Note Totali:** 577
+- **Note in Staging (Inbox):** 393
 - **Bozze Blog:** 3
 - **Note Orfane:** 0
-- **Link Interrotti:** 87
+- **Link Interrotti:** 88
 - **Forward-Links Pianificati:** 624
 
 ---
@@ -33,6 +33,7 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 ## 📥 Note in Staging (Inbox / Bozze)
 | Nota | Creazione | Area | Stato |
 |---|---|---|---|
+| [[Palantir: Cosa Fa l'Azienda Che Aiuta i Governi e Perché È Preoccupante]] | 2026-08-25 | tech | `draft` |
 | [[Review Dashboard]] | 2026-08-17 | meta | `draft` |
 | [[Art Nouveau]] | 2026-07-07 | education | `draft` |
 | [[Riassunto Testi]] | 2026-06-23 | education | `draft` |
@@ -442,6 +443,8 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 ## 🕒 Note Modificate di Recente
 | Nota | Ultima Modifica | Area |
 |---|---|---|
+| [[Review Dashboard]] | 2026-08-25 14:20 | meta |
+| [[Palantir: Cosa Fa l'Azienda Che Aiuta i Governi e Perché È Preoccupante]] | 2026-08-25 14:20 | tech |
 | [[Audit Report - 2026-08-24]] | 2026-08-24 22:34 | meta |
 | [[Come Evadere il Fisco Legalmente]] | 2026-08-24 22:34 | finance |
 | [[Come le Banche Creano Magicamente il Denaro]] | 2026-08-24 22:34 | finance |
@@ -450,8 +453,6 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 | [[Agenti AI Cosa Sono e Come Usarli 6 Tool Imperdibili]] | 2026-08-24 22:33 | tech |
 | [[L'AI Inventa Lingue, Trasforma Foto in Video e Ti Fa Creare App in Un Click]] | 2026-08-24 22:33 | tech |
 | [[Hermes Agent]] | 2026-08-24 22:33 | tech |
-| [[Vibe Coding]] | 2026-08-24 22:33 | tech |
-| [[Gemini Sketchnote]] | 2026-08-24 22:33 | tech |
 
 
 ---

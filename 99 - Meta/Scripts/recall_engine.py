@@ -497,3 +497,375 @@ def load_or_rebuild_cache(vault_root: str, force_reindex: bool = False) -> Dict[
         os.replace(tmp_path, cache_path)
 
     return cache_data
+
+
+ZERO_MATCH_MESSAGE = """⚠️ **Nessuna corrispondenza trovata nel Vault**: Il concetto "{query}" non è presente tra le note del Second Brain. Nessuna informazione esterna è stata integrata per preservare l'integrità della tua knowledge base."""
+
+
+def extract_relevant_snippet_and_timestamps(
+    vault_root: str,
+    rel_path: str,
+    query_tokens: List[str]
+) -> Tuple[List[Dict[str, Any]], List[str]]:
+    """
+    Extracts top matching H2/H3 section snippets and [MM:SS] or [HH:MM:SS] video timestamps.
+    """
+    abs_path = os.path.join(vault_root, rel_path)
+    if not os.path.exists(abs_path):
+        return [], []
+
+    try:
+        with open(abs_path, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+    except Exception:
+        return [], []
+
+    _, _, _, body = split_markdown_note(content)
+
+    # Extract video timestamps like [12:34] or [01:23:45]
+    timestamps = re.findall(r'\[([0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?)\]', body)
+
+    # Extract headings and paragraphs
+    sections: List[Tuple[str, str]] = []
+    current_heading = "Introduzione"
+    current_lines: List[str] = []
+
+    for line in body.splitlines():
+        if line.startswith(('## ', '### ', '# ')):
+            if current_lines:
+                sec_content = "\n".join(current_lines).strip()
+                if sec_content:
+                    sections.append((current_heading, sec_content))
+                current_lines = []
+            current_heading = line.lstrip('#').strip()
+        else:
+            current_lines.append(line)
+    if current_lines:
+        sec_content = "\n".join(current_lines).strip()
+        if sec_content:
+            sections.append((current_heading, sec_content))
+
+    snippets: List[Dict[str, Any]] = []
+    scored_sections: List[Tuple[int, str, str]] = []
+
+    for heading, text in sections:
+        sec_tokens = tokenize(text)
+        overlap = sum(1 for t in query_tokens if t in sec_tokens)
+        scored_sections.append((overlap, heading, text))
+
+    scored_sections.sort(key=lambda x: x[0], reverse=True)
+    if scored_sections and scored_sections[0][0] > 0:
+        top_overlap, top_heading, top_text = scored_sections[0]
+        # Clean whitespace and truncate text snippet to first 300 characters
+        snippet_text = " ".join(top_text.split())
+        truncated = snippet_text[:300] + ("..." if len(snippet_text) > 300 else "")
+        snippets.append({
+            "heading": top_heading,
+            "text": truncated
+        })
+    elif sections:
+        first_heading, first_text = sections[0]
+        snippet_text = " ".join(first_text.split())
+        truncated = snippet_text[:300] + ("..." if len(snippet_text) > 300 else "")
+        snippets.append({
+            "heading": first_heading,
+            "text": truncated
+        })
+
+    return snippets, timestamps[:3]
+
+
+def execute_query(
+    vault_root: str,
+    query: str = "",
+    area: Optional[str] = None,
+    type_filter: Optional[str] = None,
+    tag_filter: Optional[str] = None,
+    limit: int = 5,
+    similar_to: Optional[str] = None,
+    force_reindex: bool = False
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """
+    Executes hybrid search or similarity retrieval with structured filtering and snippet extraction.
+    Returns (results, drilldown_suggestions).
+    """
+    cache_data = load_or_rebuild_cache(vault_root, force_reindex=force_reindex)
+    files = cache_data.get("files", {})
+
+    if not files:
+        return [], []
+
+    query_tokens = tokenize(query) if query else []
+    ranked_candidates: List[Tuple[str, float, Dict[str, int]]] = []
+
+    if similar_to:
+        sim_results = find_similar_notes(vault_root, similar_to, cache_data, limit=len(files))
+        ranked_candidates = [(rel_path, score, {"dense": idx + 1}) for idx, (rel_path, score) in enumerate(sim_results)]
+        if not query_tokens:
+            query_tokens = tokenize(similar_to)
+    else:
+        if not query_tokens:
+            return [], []
+
+        # 1. YAML Metadata Ranking
+        yaml_scores: List[Tuple[str, float]] = []
+        for rel_path, entry in files.items():
+            s = score_yaml_metadata(entry, query_tokens)
+            if s > 0.0:
+                yaml_scores.append((rel_path, s))
+        yaml_scores.sort(key=lambda x: x[1], reverse=True)
+        yaml_ranks = [rel_path for rel_path, _ in yaml_scores]
+
+        # 2. BM25 Lexical Ranking
+        corpus = {rel_path: entry.get("tokens", []) for rel_path, entry in files.items()}
+        bm25_index = BM25Index(k1=1.5, b=0.75)
+        bm25_index.build_from_corpus(corpus)
+        bm25_scores = bm25_index.score(query_tokens)
+        bm25_ranks = [rel_path for rel_path, _ in bm25_scores]
+
+        # 3. Dense Semantic Track (if query matches a note title)
+        dense_ranks: List[str] = []
+        cleaned_query = query.strip('[]"\'').lower()
+        matching_target = None
+        for rel_path, entry in files.items():
+            stem = Path(rel_path).stem.lower()
+            title = entry.get("title", "").lower()
+            if stem == cleaned_query or title == cleaned_query:
+                matching_target = rel_path
+                break
+        if matching_target:
+            sim_notes = find_similar_notes(vault_root, matching_target, cache_data, limit=len(files))
+            dense_ranks = [rel_path for rel_path, _ in sim_notes]
+
+        # RRF Fusion
+        ranked_candidates = reciprocal_rank_fusion(yaml_ranks, bm25_ranks, dense_ranks, k=60)
+
+    if not ranked_candidates:
+        return [], []
+
+    # Ambiguity and multi-domain drilldown suggestion generation
+    matched_areas: Counter = Counter()
+    for rel_path, score, _ in ranked_candidates:
+        note_area = files.get(rel_path, {}).get("area", "")
+        if note_area:
+            matched_areas[note_area.lower()] += 1
+
+    drilldown_suggestions: List[Dict[str, Any]] = []
+    if area:
+        for a, count in matched_areas.items():
+            if a.lower() != area.lower() and count > 0:
+                drilldown_suggestions.append({
+                    "area": a,
+                    "count": count,
+                    "hint": f"Trovate corrispondenze anche in {a.capitalize()} ({count}). Usa --area {a} per raffinare."
+                })
+    elif len(matched_areas) > 1:
+        sorted_areas = matched_areas.most_common()
+        for a, count in sorted_areas[1:]:
+            drilldown_suggestions.append({
+                "area": a,
+                "count": count,
+                "hint": f"Trovate corrispondenze anche in {a.capitalize()} ({count}). Usa --area {a} per raffinare."
+            })
+
+    # Apply Structured Filters
+    filtered_results: List[Dict[str, Any]] = []
+    for rel_path, score, rank_details in ranked_candidates:
+        entry = files.get(rel_path, {})
+        if not entry:
+            continue
+
+        # Area filter
+        if area and entry.get("area", "").lower() != area.lower():
+            continue
+
+        # Type filter
+        if type_filter and entry.get("type", "").lower() != type_filter.lower():
+            continue
+
+        # Tag filter (exact or hierarchical prefix)
+        if tag_filter:
+            note_tags = [t.lower() for t in entry.get("tags", [])]
+            tag_query = tag_filter.lower()
+            tag_match = any(t == tag_query or t.startswith(tag_query + "/") for t in note_tags)
+            if not tag_match:
+                continue
+
+        snippets, timestamps = extract_relevant_snippet_and_timestamps(vault_root, rel_path, query_tokens)
+
+        filtered_results.append({
+            "title": entry.get("title") or Path(rel_path).stem,
+            "path": rel_path,
+            "area": entry.get("area", ""),
+            "type": entry.get("type", ""),
+            "tags": entry.get("tags", []),
+            "summary": entry.get("summary", ""),
+            "score": round(score, 4),
+            "rrf_ranks": rank_details,
+            "exact_citation": f"[[{entry.get('title') or Path(rel_path).stem}]]",
+            "snippets": snippets,
+            "video_timestamps": timestamps,
+            "related": entry.get("related", [])
+        })
+
+        if len(filtered_results) >= limit:
+            break
+
+    return filtered_results, drilldown_suggestions
+
+
+def format_output(
+    results: List[Dict[str, Any]],
+    query_str: str,
+    output_format: str = 'auto',
+    drilldown_suggestions: Optional[List[Dict[str, Any]]] = None
+) -> str:
+    """Formats search results as JSON, Markdown (3-section contract), or ANSI pretty."""
+    if output_format == 'auto':
+        output_format = 'pretty' if sys.stdout.isatty() else 'json'
+
+    if not results:
+        if output_format == 'json':
+            return json.dumps({
+                "status": "empty",
+                "query": query_str,
+                "total_matches": 0,
+                "drilldown_suggestions": [],
+                "results": [],
+                "message": ZERO_MATCH_MESSAGE.format(query=query_str)
+            }, ensure_ascii=False, indent=2)
+        else:
+            return ZERO_MATCH_MESSAGE.format(query=query_str)
+
+    if output_format == 'json':
+        payload = {
+            "status": "success",
+            "query": query_str,
+            "total_matches": len(results),
+            "drilldown_suggestions": drilldown_suggestions or [],
+            "results": results
+        }
+        return json.dumps(payload, ensure_ascii=False, indent=2)
+
+    elif output_format == 'markdown':
+        # Section 1: Executive Summary synthesis
+        summary_bullets = []
+        for r in results:
+            if r.get('summary'):
+                summary_bullets.append(f"- **[[{r['title']}]]**: {r['summary']}")
+
+        exec_text = "\n".join(summary_bullets) if summary_bullets else "- Sintesi dei concetti rilevanti estratti dal Vault."
+
+        # Section 2: Sources & Citations
+        sources = []
+        for r in results:
+            cit = f"- [[{r['title']}]]"
+            snippets = r.get('snippets', [])
+            if snippets and snippets[0].get('heading'):
+                cit += f" (sezione: *{snippets[0]['heading']}*)"
+            timestamps = r.get('video_timestamps', [])
+            if timestamps:
+                cit += f" (timestamp: `[{timestamps[0]}]`)"
+            sources.append(cit)
+        sources_text = "\n".join(sources)
+
+        # Section 3: Related Connections
+        related_set: Set[str] = set()
+        result_titles = {r['title'].lower() for r in results}
+        for r in results:
+            for rel in r.get('related', []):
+                if rel:
+                    clean_rel = rel.strip('[]').strip()
+                    if clean_rel.lower() not in result_titles:
+                        related_set.add(f"[[{clean_rel}]]")
+
+        suggested = sorted(list(related_set))[:2]
+        if suggested:
+            related_text = "\n".join(f"- {s}: Approfondimento correlato nel grafo semantico." for s in suggested)
+        else:
+            related_text = "- [[Home MOC]]: Per la navigazione delle mappe concettuali generali."
+
+        drill_text = ""
+        if drilldown_suggestions:
+            drill_hints = " ".join(d['hint'] for d in drilldown_suggestions)
+            drill_text = f"\n\n> 💡 **Suggerimento:** {drill_hints}"
+
+        return f"""### 🎯 Sintesi Esecutiva\n{exec_text}\n\n---\n\n### 📚 Fonti & Citazioni\n{sources_text}\n\n---\n\n### 🔗 Connessioni Correlate\n{related_text}{drill_text}"""
+
+    else:
+        # Pretty interactive terminal output
+        lines = [f"\n🔍 Risultati Recall per: \033[1m{query_str}\033[0m\n"]
+        for idx, r in enumerate(results, start=1):
+            lines.append(f"\033[32m{idx}. [[{r['title']}]]\033[0m (Score: {r['score']:.4f}, Area: {r['area']}, Type: {r['type']})")
+            if r.get('summary'):
+                lines.append(f"   \033[90m{r['summary']}\033[0m")
+            for snip in r.get('snippets', []):
+                lines.append(f"   📌 \033[33m{snip['heading']}:\033[0m {snip['text']}")
+            if r.get('video_timestamps'):
+                lines.append(f"   ⏱️ \033[36mTimestamps:\033[0m {', '.join(r['video_timestamps'])}")
+            lines.append("")
+        if drilldown_suggestions:
+            lines.append("\033[35m💡 Suggerimenti Drill-down:\033[0m")
+            for d in drilldown_suggestions:
+                lines.append(f"   - {d['hint']}")
+            lines.append("")
+        return "\n".join(lines)
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    """Builds CLI argument parser with structured filters and auto-formatting."""
+    parser = argparse.ArgumentParser(
+        description="recall_engine.py - Hybrid Retrieval & Conversational Search Engine."
+    )
+    parser.add_argument('query', nargs='*', help="Search query terms or natural language question.")
+    parser.add_argument('--area', choices=sorted(CONTROLLED_AREAS), default=None, help="Filter by macro-area.")
+    parser.add_argument('--type', choices=sorted(CONTROLLED_TYPES), default=None, help="Filter by note type.")
+    parser.add_argument('--tag', type=str, default=None, help="Filter by hierarchical tag prefix (e.g. tech/ai).")
+    parser.add_argument('--limit', type=int, default=5, help="Maximum number of results to return (default: 5).")
+    parser.add_argument('--format', choices=['auto', 'json', 'markdown', 'pretty'], default='auto', help="Output format.")
+    parser.add_argument('--similar-to', type=str, default=None, help="Note title to find semantic neighbors via 384-d vectors.")
+    parser.add_argument('--reindex', action='store_true', help="Force full index rebuild.")
+    parser.add_argument('--vault-root', type=str, default=None, help="Custom vault root directory.")
+    return parser
+
+
+def main(cli_args: Optional[List[str]] = None) -> int:
+    """Main CLI entrypoint."""
+    parser = build_arg_parser()
+    args = parser.parse_args(cli_args)
+
+    query_str = " ".join(args.query).strip() if args.query else ""
+    if not query_str and not args.similar_to and not args.reindex:
+        parser.print_help()
+        return 1
+
+    vault_root = get_vault_root(args.vault_root)
+    if not os.path.isdir(vault_root):
+        sys.stderr.write(f"Error: Vault root '{vault_root}' is not a valid directory.\n")
+        return 1
+
+    if args.reindex:
+        load_or_rebuild_cache(vault_root, force_reindex=True)
+        if not query_str and not args.similar_to:
+            print("Index rebuild completed successfully.")
+            return 0
+
+    results, drilldowns = execute_query(
+        vault_root=vault_root,
+        query=query_str,
+        area=args.area,
+        type_filter=args.type,
+        tag_filter=args.tag,
+        limit=args.limit,
+        similar_to=args.similar_to,
+        force_reindex=False
+    )
+
+    display_query = args.similar_to if args.similar_to else query_str
+    output = format_output(results, display_query, args.format, drilldowns)
+    print(output)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

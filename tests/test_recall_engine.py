@@ -384,5 +384,285 @@ class TestRecallEngineTask2(unittest.TestCase):
         self.assertEqual(unknown_sim, [])
 
 
+class TestRecallEngineTask1_0402(unittest.TestCase):
+    """Test suite for Phase 04 Plan 02 Task 1: Filters, Snippets, Timestamps, Drilldown, and Polymorphic Output."""
+
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+        os.makedirs(os.path.join(self.test_dir, "01 - Map of Content"), exist_ok=True)
+        os.makedirs(os.path.join(self.test_dir, "02 - Atlas", "Tech"), exist_ok=True)
+        os.makedirs(os.path.join(self.test_dir, "02 - Atlas", "Education"), exist_ok=True)
+        os.makedirs(os.path.join(self.test_dir, "99 - Meta", "Scripts"), exist_ok=True)
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_cli_filters_and_predicates(self):
+        """Asserts query execution filters results accurately when passed --area tech, --type concept, --tag tech/ai, or --limit 2 per D-06."""
+        notes = [
+            ("02 - Atlas/Tech/AI Models.md", """---
+title: "AI Models"
+area: tech
+type: concept
+tags: [tech/ai, tech/neural]
+summary: "Panoramica sui modelli di AI."
+---
+Modelli avanzati di intelligenza artificiale.
+"""),
+            ("02 - Atlas/Education/Education Models.md", """---
+title: "Education Models"
+area: education
+type: lecture
+tags: [education/math]
+summary: "Lezione sui modelli matematici."
+---
+Modelli matematici per l'insegnamento universitario.
+"""),
+            ("02 - Atlas/Tech/Video Cloud.md", """---
+title: "Video Cloud"
+area: tech
+type: video
+tags: [tech/cloud]
+summary: "Video sui modelli cloud."
+---
+Infrastrutture cloud per il deployment di modelli.
+"""),
+            ("02 - Atlas/Tech/Deep Learning.md", """---
+title: "Deep Learning"
+area: tech
+type: concept
+tags: [tech/ai/deeplearning]
+summary: "Deep learning e reti neurali."
+---
+Modelli di deep learning e trasformatori.
+""")
+        ]
+        for rel_path, content in notes:
+            abs_p = os.path.join(self.test_dir, rel_path)
+            with open(abs_p, 'w', encoding='utf-8') as f:
+                f.write(content)
+
+        # 1. Test --area tech filter
+        res_area, _ = recall_engine.execute_query(self.test_dir, query="modelli", area="tech")
+        self.assertTrue(len(res_area) > 0)
+        for r in res_area:
+            self.assertEqual(r["area"], "tech")
+
+        # 2. Test --type concept filter
+        res_type, _ = recall_engine.execute_query(self.test_dir, query="modelli", type_filter="concept")
+        self.assertTrue(len(res_type) > 0)
+        for r in res_type:
+            self.assertEqual(r["type"], "concept")
+
+        # 3. Test --tag tech/ai prefix filter
+        res_tag, _ = recall_engine.execute_query(self.test_dir, query="modelli", tag_filter="tech/ai")
+        self.assertEqual(len(res_tag), 2)
+        titles = {r["title"] for r in res_tag}
+        self.assertIn("AI Models", titles)
+        self.assertIn("Deep Learning", titles)
+
+        # 4. Test --limit 2
+        res_lim, _ = recall_engine.execute_query(self.test_dir, query="modelli", limit=2)
+        self.assertEqual(len(res_lim), 2)
+
+    def test_video_timestamps_and_snippet_extraction(self):
+        """Asserts extract_relevant_snippet_and_timestamps() extracts [MM:SS] or [HH:MM:SS] timestamps from video notes and returns top H2/H3 section snippet with highest query term overlap per D-07."""
+        note_rel_path = "02 - Atlas/Tech/Transformer Video.md"
+        note_abs_path = os.path.join(self.test_dir, note_rel_path)
+        content = """---
+title: "Transformer Video"
+area: tech
+type: video
+tags: [tech/ai]
+summary: "Video lecture sui Transformers."
+---
+[[Home MOC]] / [[Tech MOC]]
+
+# Transformer Video
+
+## Introduzione
+Panoramica iniziale del video senza dettagli.
+
+## Meccanismo di Self-Attention
+In questa sezione spieghiamo l'attenzione dinamica e matrici Query Key Value [12:45] e poi la multi-head attention [01:23:45].
+
+## Conclusioni
+Riepilogo finale dei risultati.
+"""
+        with open(note_abs_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+        snippets, timestamps = recall_engine.extract_relevant_snippet_and_timestamps(
+            self.test_dir,
+            note_rel_path,
+            ["attenzione", "dinamica", "matrici"]
+        )
+
+        self.assertEqual(len(snippets), 1)
+        self.assertEqual(snippets[0]["heading"], "Meccanismo di Self-Attention")
+        self.assertIn("attenzione dinamica", snippets[0]["text"])
+
+        self.assertEqual(len(timestamps), 2)
+        self.assertIn("12:45", timestamps)
+        self.assertIn("01:23:45", timestamps)
+
+    def test_drilldown_multi_domain_suggestions(self):
+        """Asserts ambiguous queries matching multiple macro-areas produce proactive drilldown suggestions (e.g. area: education, count: 2, hint: 'Trovate corrispondenze anche in Education. Usa --area education per raffinare') per D-07."""
+        notes = [
+            ("02 - Atlas/Tech/Quantum Tech.md", """---
+title: "Quantum Tech"
+area: tech
+type: concept
+tags: [tech/quantum]
+---
+Algoritmi di calcolo quantistico e qubit.
+"""),
+            ("02 - Atlas/Education/Quantum Physics 1.md", """---
+title: "Quantum Physics 1"
+area: education
+type: lecture
+tags: [education/physics]
+---
+Corso universitario introduttivo sul calcolo quantistico.
+"""),
+            ("02 - Atlas/Education/Quantum Physics 2.md", """---
+title: "Quantum Physics 2"
+area: education
+type: lecture
+tags: [education/physics]
+---
+Lezione di laboratorio sul calcolo quantistico.
+""")
+        ]
+        for rel_path, content in notes:
+            abs_p = os.path.join(self.test_dir, rel_path)
+            with open(abs_p, 'w', encoding='utf-8') as f:
+                f.write(content)
+
+        # Search with --area tech filter -> should suggest Education
+        res, drilldowns = recall_engine.execute_query(self.test_dir, query="quantistico", area="tech")
+        self.assertEqual(len(res), 1)
+        self.assertEqual(len(drilldowns), 1)
+        self.assertEqual(drilldowns[0]["area"], "education")
+        self.assertEqual(drilldowns[0]["count"], 2)
+        self.assertIn("Education", drilldowns[0]["hint"])
+        self.assertIn("--area education", drilldowns[0]["hint"])
+
+    def test_polymorphic_output_formats(self):
+        """Asserts format_output() returns valid structured JSON under --format json, ANSI-colored output under --format pretty, and auto-detects TTY vs pipe per D-05."""
+        results = [{
+            "title": "Sample Note Alpha",
+            "path": "02 - Atlas/Tech/Sample Note Alpha.md",
+            "area": "tech",
+            "type": "concept",
+            "tags": ["tech/ai"],
+            "summary": "Introduzione ai modelli alpha.",
+            "score": 0.0482,
+            "rrf_ranks": {"yaml": 1, "bm25": 1},
+            "exact_citation": "[[Sample Note Alpha]]",
+            "snippets": [{"heading": "Sezione Chiave", "text": "Testo dello snippet di test."}],
+            "video_timestamps": ["04:15"],
+            "related": ["[[Sample Note Beta]]"]
+        }]
+        drilldowns = [{"area": "education", "count": 2, "hint": "Trovate corrispondenze anche in Education. Usa --area education per raffinare."}]
+
+        # 1. JSON Format
+        json_out = recall_engine.format_output(results, "alpha", output_format="json", drilldown_suggestions=drilldowns)
+        parsed = json.loads(json_out)
+        self.assertEqual(parsed["status"], "success")
+        self.assertEqual(parsed["total_matches"], 1)
+        self.assertEqual(len(parsed["drilldown_suggestions"]), 1)
+        self.assertEqual(parsed["results"][0]["title"], "Sample Note Alpha")
+
+        # 2. Pretty Format (ANSI colors)
+        pretty_out = recall_engine.format_output(results, "alpha", output_format="pretty", drilldown_suggestions=drilldowns)
+        self.assertIn("Sample Note Alpha", pretty_out)
+        self.assertIn("Sezione Chiave", pretty_out)
+        self.assertIn("04:15", pretty_out)
+        self.assertIn("Suggerimenti Drill-down", pretty_out)
+
+        # 3. Markdown Format (NotebookLM Schema)
+        md_out = recall_engine.format_output(results, "alpha", output_format="markdown", drilldown_suggestions=drilldowns)
+        self.assertIn("### 🎯 Sintesi Esecutiva", md_out)
+        self.assertIn("### 📚 Fonti & Citazioni", md_out)
+        self.assertIn("### 🔗 Connessioni Correlate", md_out)
+        self.assertIn("[[Sample Note Alpha]]", md_out)
+        self.assertIn("(sezione: *Sezione Chiave*)", md_out)
+        self.assertIn("(timestamp: `[04:15]`)", md_out)
+        self.assertIn("> 💡 **Suggerimento:**", md_out)
+
+
+class TestRecallEngineTask2_0402(unittest.TestCase):
+    """Test suite for Phase 04 Plan 02 Task 2: NotebookLM Schema, Zero-Hallucination Guard, and System Integration."""
+
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+        os.makedirs(os.path.join(self.test_dir, "01 - Map of Content"), exist_ok=True)
+        os.makedirs(os.path.join(self.test_dir, "02 - Atlas", "Tech"), exist_ok=True)
+        os.makedirs(os.path.join(self.test_dir, "99 - Meta", "Scripts"), exist_ok=True)
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_zero_hallucination_guard(self):
+        """Asserts unknown queries return the exact refusal message without external hallucination in markdown and empty status in JSON per D-09."""
+        query = "TermineTotalmenteInesistente12345"
+
+        # Markdown refusal
+        md_out = recall_engine.format_output([], query, output_format="markdown")
+        self.assertIn("⚠️ **Nessuna corrispondenza trovata nel Vault**", md_out)
+        self.assertIn(query, md_out)
+        self.assertIn("Nessuna informazione esterna è stata integrata", md_out)
+
+        # JSON refusal
+        json_out = recall_engine.format_output([], query, output_format="json")
+        data = json.loads(json_out)
+        self.assertEqual(data["status"], "empty")
+        self.assertEqual(data["total_matches"], 0)
+        self.assertEqual(data["results"], [])
+        self.assertIn("Nessuna corrispondenza trovata nel Vault", data["message"])
+
+    def test_notebooklm_3section_markdown_synthesis(self):
+        """Asserts 3-section Markdown output formats executive synthesis, verified citations, and graph connections cleanly per D-08."""
+        results = [
+            {
+                "title": "Reti Neurali Ricorrenti",
+                "path": "02 - Atlas/Tech/Reti Neurali Ricorrenti.md",
+                "area": "tech",
+                "type": "concept",
+                "tags": ["tech/ai"],
+                "summary": "Struttura delle reti ricorrenti e limiti del gradiente.",
+                "score": 0.045,
+                "rrf_ranks": {"bm25": 1},
+                "exact_citation": "[[Reti Neurali Ricorrenti]]",
+                "snippets": [{"heading": "Problema del Vanishing Gradient", "text": "Le RNN soffrono di vanishing gradient."}],
+                "video_timestamps": [],
+                "related": ["[[Transformers MOC]]", "[[LSTM Networks]]"]
+            }
+        ]
+
+        md_out = recall_engine.format_output(results, "RNN", output_format="markdown")
+        self.assertIn("### 🎯 Sintesi Esecutiva", md_out)
+        self.assertIn("- **[[Reti Neurali Ricorrenti]]**: Struttura delle reti ricorrenti e limiti del gradiente.", md_out)
+
+        self.assertIn("### 📚 Fonti & Citazioni", md_out)
+        self.assertIn("- [[Reti Neurali Ricorrenti]] (sezione: *Problema del Vanishing Gradient*)", md_out)
+
+        self.assertIn("### 🔗 Connessioni Correlate", md_out)
+        self.assertIn("[[LSTM Networks]]", md_out)
+        self.assertIn("[[Transformers MOC]]", md_out)
+
+    def test_gitignore_contains_recall_cache(self):
+        """Asserts .gitignore contains .recall_cache.json rules to prevent tracking local indexes per D-01."""
+        gitignore_path = os.path.join(PROJECT_ROOT, ".gitignore")
+        self.assertTrue(os.path.exists(gitignore_path))
+        with open(gitignore_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        self.assertIn(".recall_cache.json", content)
+        self.assertIn("**/.recall_cache.json", content)
+        self.assertIn("*.recall_cache.json.tmp", content)
+
+
 if __name__ == '__main__':
     unittest.main()

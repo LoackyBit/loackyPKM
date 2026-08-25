@@ -1,24 +1,34 @@
 ---
-status: draft
-type: concept
+status: permanent
+type: moc
 area: meta
-related: []
+related: ["[[Home MOC]]", "[[Vault Health Dashboard]]"]
+aliases: []
 source: original
 title: "Review Dashboard"
 date: '2026-08-17'
-updated: 2026-08-17T13:24
-tags: [meta/meta, meta/dashboard, calendar/review]
-summary: "Benvenuto nella Dashboard di Revisione dell'Inbox. Questo pannello ti permette di revisionare, perfezionare e approvare le note grezze catturate per integrarle armoniosamente nel tuo Second Brain."
+updated: 2026-08-25T15:11
+tags: [meta/dashboard, meta/gtd]
+summary: "Dashboard di revisione GTD per l'approvazione, smistamento o scarto delle note in Inbox."
 ---
+[[Home MOC|Home]] / [[Meta]] / [[Review Dashboard]]
 
 # 📥 Inbox Review Dashboard
 
-Benvenuto nella **Dashboard di Revisione dell'Inbox**. Questo pannello ti permette di revisionare, perfezionare e approvare le note grezze catturate per integrarle armoniosamente nel tuo Second Brain.
+Benvenuto nella **Dashboard di Revisione dell'Inbox**. Questo pannello ti permette di revisionare, approvare o scartare le note grezze elaborate dall'AI.
 
 ## ⚙️ Istruzioni per la Revisione
-* Per **APPROVARE** una proposta: Sostituisci `[ ]` con `[x]` o premi CLICK (sarà spostata nella cartella di destinazione definitiva del Vault con metadati aggiornati).
-* Per **RIFIUTARE** una proposta: Sostituisci `[ ]` con `[-]` o premi CTRL+CLICK (la proposta e il file grezzo verranno eliminati definitivamente dall'Inbox).
+* **APPROVARE** una proposta: Sostituisci `[ ]` con `[x]` (la nota passerà a `status: permanent` e verrà spostata nella cartella target).
+* **RIFIUTARE** una proposta: Sostituisci `[ ]` con `[-]` (la bozza e i file multimediali associati verranno eliminati).
 
 ## 📋 Note in Attesa di Approvazione
 
-- [ ] Approva [[Palantir: Cosa Fa l'Azienda Che Aiuta i Governi e Perché È Preoccupante]] (area: tech, type: video, target: 02 - Atlas/Tech)
+Tutte le note sono state elaborate con successo! Dashboard vuota.
+
+## ⚠️ Errori di Acquisizione & Azioni Richieste
+
+Nessun errore di acquisizione segnalato.
+
+## 📜 Ultime Azioni Elaborate
+
+- 2026-08-25 15:11 | [REJECTED] | [[Palantir: Cosa Fa l'Azienda Che Aiuta i Governi e Perché È Preoccupante]] (Purged)

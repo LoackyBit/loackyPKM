@@ -2,8 +2,10 @@
 """brain_ingest.py - Unified Polymorphic Ingestion Pipeline for Second Brain.
 
 Accepts YouTube URLs, web articles, pasted text, and local files.
-Features per-note hash locking, contextual autolinking, Style Guide highlight sanitization,
-processing depth options, protected staging in 03 - Inbox/, and tri-state Review Dashboard GTD review.
+Features per-note hash locking with stale auto-healing, global duplicate detection,
+heuristic Atlas routing, contextual keyframe embedding, non-invasive raw note intake,
+Style Guide highlight sanitization, processing depth options, protected staging in 03 - Inbox/,
+pure static Review Dashboard GTD management, and append-only inbox history logging.
 """
 
 import os
@@ -24,6 +26,7 @@ if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 
 import brain_health
+import youtube_helper
 
 # Regex for detecting URLs
 YT_URL_REGEX = re.compile(r'(?:https?://)?(?:www\.|m\.)?(?:youtube\.com/(?:watch\?v=|embed/|v/)|youtu\.be/)([a-zA-Z0-9_-]{11})')
@@ -151,6 +154,185 @@ def autolink_content(vault_root: str, body_text: str, current_title: str) -> Tup
     return linked_body, sorted(list(inserted_links))
 
 
+def check_duplicate_resource(vault_root: str, source_url: str, title: str) -> Optional[Tuple[str, str]]:
+    """Scans permanent notes in 02 - Atlas/ and 05 - Blog/ for matching source URL or title per D-11."""
+    clean_target_title = brain_health.clean_title_str(title).lower().strip()
+    norm_source = source_url.strip().rstrip('/') if source_url and source_url != "original" else None
+
+    # Strip YouTube tracking params for canonical matching
+    if norm_source and ("youtube.com" in norm_source or "youtu.be" in norm_source):
+        vid_id = youtube_helper.get_video_id(norm_source)
+        if vid_id:
+            norm_source = f"https://www.youtube.com/watch?v={vid_id}"
+
+    search_dirs = [
+        os.path.join(vault_root, "02 - Atlas"),
+        os.path.join(vault_root, "05 - Blog")
+    ]
+
+    yaml_engine = brain_health.build_yaml_engine()
+
+    for sdir in search_dirs:
+        if not os.path.exists(sdir):
+            continue
+        for root, _, files in os.walk(sdir):
+            for file in files:
+                if not file.endswith(".md"):
+                    continue
+                file_path = os.path.join(root, file)
+                try:
+                    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                        content = f.read(2048) # Read frontmatter portion
+
+                    has_fm, fm_text, _, _ = brain_health.split_markdown_note(content)
+                    if has_fm:
+                        meta = brain_health.safe_load_frontmatter(fm_text, yaml_engine)
+                        existing_source = str(meta.get("source", "")).strip().rstrip('/')
+                        existing_title = brain_health.clean_title_str(str(meta.get("title", file[:-3]))).lower().strip()
+
+                        if existing_source and ("youtube.com" in existing_source or "youtu.be" in existing_source):
+                            ex_vid = youtube_helper.get_video_id(existing_source)
+                            if ex_vid:
+                                existing_source = f"https://www.youtube.com/watch?v={ex_vid}"
+
+                        if norm_source and existing_source and existing_source != "original" and norm_source == existing_source:
+                            return (file_path, "source_url")
+
+                        if existing_title and clean_target_title and existing_title == clean_target_title:
+                            return (file_path, "title")
+                except Exception:
+                    continue
+
+    return None
+
+
+def classify_target_directory(title: str, tags: Optional[List[str]] = None, content: str = '') -> str:
+    """Heuristically classifies note into optimal Atlas/Blog destination based on title, tags, and content per D-10."""
+    tags_list = tags or []
+    tags_lower = [t.lower() for t in tags_list]
+    combined_text = (title + " " + " ".join(tags_list) + " " + content[:1000]).lower()
+
+    if any(t.startswith("blog") for t in tags_lower) or "blog" in tags_lower:
+        return "05 - Blog"
+
+    # Finance
+    if any("financ" in t or "fisc" in t for t in tags_lower) or any(kw in combined_text for kw in ['fisco', 'tasse', 'invest', 'soldi', 'finanz', 'patrimonio', 'crypto', 'bitcoin']):
+        return "02 - Atlas/Finance"
+
+    # Education & Learning
+    if any("educat" in t or "school" in t or "studio" in t for t in tags_lower) or any(kw in combined_text for kw in ['universit', 'esame', 'studio', 'lezione', 'corso', 'ingegneria', 'didattica']):
+        return "02 - Atlas/Education & Learning"
+
+    # Mentality / Personal Growth
+    if any("mental" in t or "mindset" in t or "habit" in t for t in tags_lower) or any(kw in combined_text for kw in ['mindset', 'abitudini', 'produttivita', 'crescita personale', 'focus', 'disciplina']):
+        return "02 - Atlas/Personal Growth & Health/Mentality"
+
+    # Palestra
+    if any("palestr" in t or "fitness" in t or "workout" in t for t in tags_lower) or any(kw in combined_text for kw in ['allenamento', 'palestra', 'workout', 'dieta', 'scheda']):
+        return "02 - Atlas/Personal Growth & Health/Palestra"
+
+    # Projects
+    if any("project" in t for t in tags_lower):
+        return "02 - Atlas/Projects"
+
+    # AI / LLM
+    if any("ai" in t or "llm" in t or "rag" in t for t in tags_lower) or any(kw in combined_text for kw in ['ai', 'artificial intelligence', 'llm', 'gpt', 'claude', 'gemini', 'rag', 'agente', 'agent', 'deep learning', 'neural', 'reti neurali', 'transformer']):
+        return "02 - Atlas/Tech & AI/AI"
+
+    # Programming
+    if any("programm" in t or "code" in t or "dev" in t or "python" in t for t in tags_lower) or any(kw in combined_text for kw in ['python', 'javascript', 'typescript', 'react', 'coding', 'programmazione', 'git', 'backend', 'frontend', 'rust', 'golang']):
+        return "02 - Atlas/Tech & AI/Programming"
+
+    # Hacking / Security
+    if any("secur" in t or "hack" in t for t in tags_lower) or any(kw in combined_text for kw in ['security', 'cybersecurity', 'vulnerabil', 'exploit', 'pentest', 'hacker']):
+        return "02 - Atlas/Tech & AI/Hacking"
+
+    # Prompt
+    if any("prompt" in t for t in tags_lower) or any(kw in combined_text for kw in ['prompt engineering', 'system prompt']):
+        return "02 - Atlas/Tech & AI/Prompt"
+
+    return "02 - Atlas/Tech & AI"
+
+
+def append_inbox_history(vault_root: str, action: str, note_title: str, target: str = '', source: str = ''):
+    """Appends processed GTD actions to persistent audit log 99 - Meta/logs/inbox_history.md per D-14."""
+    logs_dir = os.path.join(vault_root, "99 - Meta", "logs")
+    os.makedirs(logs_dir, exist_ok=True)
+    history_file = os.path.join(logs_dir, "inbox_history.md")
+
+    if not os.path.exists(history_file):
+        with open(history_file, "w", encoding="utf-8") as f:
+            f.write("# 📜 Inbox History & Audit Log\n\nRegistro cronologico delle azioni di approvazione, smistamento e scarto eseguite dal motore GTD.\n\n")
+
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    log_line = f"- {timestamp} | [{action.upper()}] | [[{note_title}]] -> {target} | {source}\n"
+
+    with open(history_file, "a", encoding="utf-8") as f:
+        f.write(log_line)
+
+
+def record_ingest_error(vault_root: str, source_or_url: str, reason: str):
+    """Registers an acquisition error into Review Dashboard.md and history log per D-18, D-21."""
+    append_inbox_history(vault_root, "ERROR", source_or_url, "Review Dashboard", reason)
+
+    dashboard_path = os.path.join(vault_root, "03 - Inbox", "Review Dashboard.md")
+    error_entry = f"- [ ] [!] Riprova: {source_or_url} — Motivo: {reason}\n"
+
+    if os.path.exists(dashboard_path):
+        with open(dashboard_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        if f"Riprova: {source_or_url}" in content:
+            return
+
+        if "## ⚠️ Errori di Acquisizione & Azioni Richieste" in content:
+            parts = content.split("## ⚠️ Errori di Acquisizione & Azioni Richieste")
+            header = parts[0] + "## ⚠️ Errori di Acquisizione & Azioni Richieste\n\n"
+            rest = parts[1].replace("Nessun errore di acquisizione segnalato.\n", "").lstrip()
+            new_content = header + error_entry + rest
+        else:
+            new_content = content.rstrip() + f"\n\n## ⚠️ Errori di Acquisizione & Azioni Richieste\n\n{error_entry}"
+    else:
+        today_iso = datetime.date.today().strftime("%Y-%m-%d")
+        new_content = f"""---
+status: permanent
+type: moc
+area: meta
+related: ["[[Home MOC]]", "[[Vault Health Dashboard]]"]
+source: original
+title: "Review Dashboard"
+date: '{today_iso}'
+updated: {datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")}
+tags: [meta/dashboard, meta/gtd]
+summary: "Dashboard di revisione GTD per l'approvazione, smistamento o scarto delle note in Inbox."
+---
+[[Home MOC|Home]] / [[Meta]] / [[Review Dashboard]]
+
+# 📥 Inbox Review Dashboard
+
+Benvenuto nella **Dashboard di Revisione dell'Inbox**. Questo pannello ti permette di revisionare, approvare o scartare le note grezze elaborate dall'AI.
+
+## ⚙️ Istruzioni per la Revisione
+* **APPROVARE** una proposta: Sostituisci `[ ]` con `[x]` (la nota passerà a `status: permanent` e verrà spostata nella cartella target).
+* **RIFIUTARE** una proposta: Sostituisci `[ ]` con `[-]` (la bozza e i file multimediali associati verranno eliminati).
+
+## 📋 Note in Attesa di Approvazione
+
+Tutte le note sono state elaborate con successo! Dashboard vuota.
+
+## ⚠️ Errori di Acquisizione & Azioni Richieste
+
+{error_entry}
+
+## 📜 Ultime Azioni Elaborate
+
+Nessuna azione recente.
+"""
+
+    with open(dashboard_path, "w", encoding="utf-8") as f:
+        f.write(new_content)
+
+
 def format_structured_note(title: str, raw_content: str, depth: str = "executive",
                            source_type: str = "text", source_url: str = "original",
                            channel: Optional[str] = None) -> str:
@@ -212,7 +394,7 @@ Come applicare questi concetti all'interno dei progetti attivi nel Second Brain.
 
 
 def stage_note(vault_root: str, title: str, body: str, metadata: Optional[Dict[str, Any]] = None,
-               target_dir: str = "02 - Atlas/Tech") -> str:
+               target_dir: Optional[str] = None) -> str:
     """Writes note to 03 - Inbox/<Title>.md with status: draft and registers it in Review Dashboard.md."""
     inbox_dir = os.path.join(vault_root, "03 - Inbox")
     os.makedirs(inbox_dir, exist_ok=True)
@@ -231,6 +413,9 @@ def stage_note(vault_root: str, title: str, body: str, metadata: Optional[Dict[s
     meta['tags'] = meta.get('tags', [f"{meta['area']}/draft"])
     if 'summary' not in meta:
         meta['summary'] = f"Bozza di elaborazione e sintesi concettuale per {clean_title}."
+
+    # Heuristic target directory determination
+    resolved_target = target_dir or classify_target_directory(clean_title, meta.get('tags', []), body)
 
     # Autolink content against vault
     linked_body, inserted_links = autolink_content(vault_root, body, clean_title)
@@ -262,7 +447,7 @@ def stage_note(vault_root: str, title: str, body: str, metadata: Optional[Dict[s
         note_title=clean_title,
         area=meta['area'],
         typ=meta['type'],
-        target_dir=target_dir
+        target_dir=resolved_target
     )
 
     return file_path
@@ -314,14 +499,92 @@ Benvenuto nella **Dashboard di Revisione dell'Inbox**. Questo pannello ti permet
 
 ## 📋 Note in Attesa di Approvazione
 
-{entry_line}"""
+{entry_line}
+
+## ⚠️ Errori di Acquisizione & Azioni Richieste
+
+Nessun errore di acquisizione segnalato.
+
+## 📜 Ultime Azioni Elaborate
+
+Nessuna azione recente.
+"""
 
     with open(dashboard_path, 'w', encoding='utf-8') as f:
         f.write(new_content)
 
 
+def process_inbox_raw_notes(vault_root: str) -> List[str]:
+    """Scans 03 - Inbox/ for notes with status: ready (or process) and transforms them to drafts per D-15, D-16."""
+    inbox_dir = os.path.join(vault_root, "03 - Inbox")
+    if not os.path.exists(inbox_dir):
+        return []
+
+    processed = []
+    yaml_engine = brain_health.build_yaml_engine()
+
+    for file in os.listdir(inbox_dir):
+        if not file.endswith(".md") or file == "Review Dashboard.md":
+            continue
+
+        file_path = os.path.join(inbox_dir, file)
+        try:
+            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+
+            has_fm, fm_text, breadcrumb, body = brain_health.split_markdown_note(content)
+            if not has_fm:
+                continue
+
+            meta = brain_health.safe_load_frontmatter(fm_text, yaml_engine)
+            status_val = str(meta.get("status", "")).lower().strip()
+
+            if status_val in ("ready", "process"):
+                title = meta.get("title") or file[:-3]
+                clean_title = brain_health.clean_title_str(title)
+
+                target_dir = classify_target_directory(clean_title, meta.get("tags", []), body)
+                meta["status"] = "draft"
+                meta["title"] = clean_title
+                meta["updated"] = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
+
+                # Autolink body
+                linked_body, inserted_links = autolink_content(vault_root, body, clean_title)
+                existing_related = meta.get("related", [])
+                if isinstance(existing_related, str):
+                    existing_related = [r.strip() for r in existing_related.split(",") if r.strip()]
+                meta["related"] = list(set(existing_related + inserted_links))
+
+                sanitized_body = sanitize_style_highlights(linked_body)
+                if "## Collegamenti" not in sanitized_body:
+                    sanitized_body = sanitized_body.rstrip() + "\n\n---\n## Collegamenti\n"
+                    for lk in meta["related"][:5]:
+                        sanitized_body += f"- {lk}\n"
+
+                canonical_yaml = brain_health.format_canonical_frontmatter(meta, is_blog=False)
+                new_breadcrumb = f"[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[{clean_title}]]"
+                new_content = brain_health.assemble_markdown_note(canonical_yaml, new_breadcrumb, sanitized_body)
+
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.write(new_content)
+
+                update_review_dashboard_with_draft(
+                    vault_root=vault_root,
+                    note_title=clean_title,
+                    area=meta.get("area", "tech"),
+                    typ=meta.get("type", "concept"),
+                    target_dir=target_dir
+                )
+                processed.append(file_path)
+                print(f"[RAW INTAKE] Processed raw note {file} -> draft")
+        except Exception as e:
+            print(f"Warning: Failed to process raw note {file}: {e}", file=sys.stderr)
+
+    return processed
+
+
 def process_tri_state_approvals(vault_root: str) -> int:
-    """Processes [x] (promote to permanent & move) or [-] (delete draft) in 03 - Inbox/Review Dashboard.md."""
+    """Processes [x] (promote to permanent & move) or [-] (delete draft) in 03 - Inbox/Review Dashboard.md per D-07, D-12, D-13, D-14."""
     dashboard_path = os.path.join(vault_root, "03 - Inbox", "Review Dashboard.md")
     if not os.path.exists(dashboard_path):
         return 0
@@ -334,7 +597,9 @@ def process_tri_state_approvals(vault_root: str) -> int:
 
     updated_lines = []
     actions_count = 0
+    recent_actions = []
     inbox_dir = os.path.join(vault_root, "03 - Inbox")
+    yaml_engine = brain_health.build_yaml_engine()
 
     for line in lines:
         m_app = re_app.match(line)
@@ -342,7 +607,7 @@ def process_tri_state_approvals(vault_root: str) -> int:
 
         if m_app:
             note_name = m_app.group(1).strip()
-            target_dest = m_app.group(2).strip() if m_app.group(2) else "02 - Atlas/Tech"
+            target_dest = m_app.group(2).strip() if m_app.group(2) else "02 - Atlas/Tech & AI"
 
             src_file = os.path.join(inbox_dir, f"{note_name}.md")
             if os.path.exists(src_file):
@@ -350,15 +615,28 @@ def process_tri_state_approvals(vault_root: str) -> int:
                     content = f.read()
 
                 has_fm, fm_text, breadcrumb, body = brain_health.split_markdown_note(content)
-                yaml_engine = brain_health.build_yaml_engine()
                 meta = brain_health.safe_load_frontmatter(fm_text, yaml_engine) if has_fm else {}
-
-                meta['status'] = 'permanent'
-                meta['updated'] = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
 
                 dest_dir = os.path.join(vault_root, target_dest)
                 os.makedirs(dest_dir, exist_ok=True)
                 dest_file = os.path.join(dest_dir, f"{note_name}.md")
+
+                # Collision check per D-12
+                if os.path.exists(dest_file):
+                    try:
+                        with open(dest_file, "r", encoding="utf-8", errors="ignore") as df:
+                            dest_content = df.read(2048)
+                        _, df_fm, _, _ = brain_health.split_markdown_note(dest_content)
+                        dest_meta = brain_health.safe_load_frontmatter(df_fm, yaml_engine)
+                        if str(dest_meta.get("source", "")) != str(meta.get("source", "")):
+                            print(f"[COLLISION] Filename collision for {note_name} in {target_dest}/ with differing source. Move blocked.")
+                            updated_lines.append(f"- [!] Conflitto nome file: [[{note_name}]] esiste già in [[{target_dest}/{note_name}]] con sorgente diversa. Rinomina prima di approvare.\n")
+                            continue
+                    except Exception:
+                        pass
+
+                meta['status'] = 'permanent'
+                meta['updated'] = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
 
                 new_rel = os.path.relpath(dest_file, vault_root)
                 new_breadcrumb = brain_health.get_breadcrumbs(new_rel, note_name)
@@ -369,6 +647,8 @@ def process_tri_state_approvals(vault_root: str) -> int:
                     f.write(new_content)
 
                 os.remove(src_file)
+                append_inbox_history(vault_root, "APPROVED", note_name, target_dest, meta.get("source", "original"))
+                recent_actions.append(f"- {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')} | [APPROVED] | [[{note_name}]] -> {target_dest}")
                 print(f"[APPROVED] Promoted {note_name} -> {target_dest}/")
                 actions_count += 1
             continue
@@ -379,7 +659,7 @@ def process_tri_state_approvals(vault_root: str) -> int:
             if os.path.exists(src_file):
                 os.remove(src_file)
 
-            # Clean clipboard images
+            # Clean clipboard images per D-07
             clipboard_dir = os.path.join(vault_root, "99 - Meta", "Clipboard")
             if os.path.exists(clipboard_dir):
                 for f in os.listdir(clipboard_dir):
@@ -389,6 +669,8 @@ def process_tri_state_approvals(vault_root: str) -> int:
                         except Exception:
                             pass
 
+            append_inbox_history(vault_root, "REJECTED", note_name, "Purged", "Clipboard assets cleaned")
+            recent_actions.append(f"- {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')} | [REJECTED] | [[{note_name}]] (Purged)")
             print(f"[REJECTED] Discarded staging draft {note_name}")
             actions_count += 1
             continue
@@ -396,41 +678,92 @@ def process_tri_state_approvals(vault_root: str) -> int:
         else:
             updated_lines.append(line)
 
-    if actions_count > 0:
+    if updated_lines != lines or actions_count > 0:
+        # Append recent actions to dashboard's recent actions section
+        full_text = "".join(updated_lines)
+        if recent_actions:
+            new_actions_block = "\n".join(recent_actions) + "\n"
+            if "## 📜 Ultime Azioni Elaborate" in full_text:
+                parts = full_text.split("## 📜 Ultime Azioni Elaborate")
+                header = parts[0] + "## 📜 Ultime Azioni Elaborate\n\n"
+                rest = parts[1].replace("Nessuna azione recente.\n", "").lstrip()
+                # Keep top 10 lines
+                existing_lines = [l for l in rest.splitlines() if l.strip()]
+                combined = (recent_actions + existing_lines)[:10]
+                full_text = header + "\n".join(combined) + "\n"
+            else:
+                full_text = full_text.rstrip() + f"\n\n## 📜 Ultime Azioni Elaborate\n\n{new_actions_block}"
+
         with open(dashboard_path, 'w', encoding='utf-8') as f:
-            f.writelines(updated_lines)
+            f.write(full_text)
 
     return actions_count
 
 
-def ingest_youtube_source(url: str, depth: str, extract_frames: bool, vault_root: str, target_dir: str) -> str:
-    """Ingests YouTube video transcript and metadata via youtube_helper.py."""
-    import youtube_helper
-    data = youtube_helper.extract_youtube_data(url, extract_frames=extract_frames)
+def ingest_youtube_source(url: str, depth: str, extract_frames: bool, vault_root: str, target_dir: Optional[str] = None) -> str:
+    """Ingests YouTube video transcript and metadata via youtube_helper.py with duplicate detection and frame embedding per D-05, D-11, D-18."""
+    # Check duplicate resource
+    dup = check_duplicate_resource(vault_root, url, "")
+    if dup:
+        dup_path, reason = dup
+        rel_dup = os.path.relpath(dup_path, vault_root)
+        print(f"[DUPLICATE] Source URL already exists in {rel_dup}. Ingestion blocked.", file=sys.stderr)
+        record_ingest_error(vault_root, url, f"Duplicato rilevato: la risorsa esiste già in [[{rel_dup}]].")
+        return dup_path
+
+    try:
+        data = youtube_helper.extract_youtube_data(url, extract_frames=extract_frames, vault_root=vault_root)
+    except youtube_helper.TranscriptUnavailableError as e:
+        record_ingest_error(vault_root, url, f"Trascrizione non disponibile: {e}")
+        raise
+    except Exception as e:
+        record_ingest_error(vault_root, url, f"Errore estrazione dati YouTube: {e}")
+        raise
 
     title = brain_health.clean_title_str(data.get('title', 'Video YouTube'))
     channel = data.get('channel', 'YouTube')
-    chapters = data.get('chapters', [])
-    transcript = data.get('transcript', [])
+    chapters = data.get('chapters', []) or []
+    transcript = data.get('transcript', []) or []
+    extracted_images = data.get('extracted_images', []) or []
 
-    # Format transcript text
+    # Check title duplicate
+    dup_t = check_duplicate_resource(vault_root, "", title)
+    if dup_t:
+        dup_path, _ = dup_t
+        rel_dup = os.path.relpath(dup_path, vault_root)
+        print(f"[DUPLICATE] Note with title '{title}' already exists in {rel_dup}. Ingestion blocked.", file=sys.stderr)
+        record_ingest_error(vault_root, url, f"Duplicato rilevato: nota omonima in [[{rel_dup}]].")
+        return dup_path
+
+    # Format transcript text with contextual frame insertion per D-05
     text_blocks = []
     if chapters:
-        for ch in chapters:
-            ch_title = ch.get('title', 'Capitolo') if isinstance(ch, dict) else getattr(ch, 'title', 'Capitolo')
-            start = ch.get('start_time', 0) if isinstance(ch, dict) else getattr(ch, 'start_time', 0)
-            end = ch.get('end_time', 0) if isinstance(ch, dict) else getattr(ch, 'end_time', 0)
+        for idx, ch in enumerate(chapters):
+            ch_title = ch.get('title', f'Capitolo {idx + 1}') if isinstance(ch, dict) else f'Capitolo {idx + 1}'
+            start = ch.get('start_time', 0) if isinstance(ch, dict) else 0
+            end = ch.get('end_time', 0) if isinstance(ch, dict) else 0
             ch_text = " ".join([
                 getattr(t, 'text', t.get('text', '') if isinstance(t, dict) else str(t))
                 for t in transcript
                 if start <= (getattr(t, 'start', t.get('start', 0) if isinstance(t, dict) else 0)) < end
             ])
-            text_blocks.append(f"### {ch_title}\n{ch_text}\n")
+
+            # Find matching frame for this chapter index
+            frame_embed = ""
+            if idx < len(extracted_images):
+                img_name = os.path.basename(extracted_images[idx])
+                frame_embed = f"![[{img_name}]]\n\n"
+
+            text_blocks.append(f"### {ch_title}\n{frame_embed}{ch_text}\n")
     else:
-        text_blocks.append(" ".join([
+        main_text = " ".join([
             getattr(t, 'text', t.get('text', '') if isinstance(t, dict) else str(t))
             for t in transcript
-        ]))
+        ])
+        if extracted_images:
+            frames_block = "\n### 🖼️ Frame Salienti\n\n" + "\n".join([f"![[{os.path.basename(img)}]]" for img in extracted_images]) + "\n"
+            main_text = main_text + frames_block
+        text_blocks.append(main_text)
 
     raw_text = "\n".join(text_blocks)
     body = format_structured_note(title, raw_text, depth=depth, source_type="youtube", source_url=url, channel=channel)
@@ -445,16 +778,37 @@ def ingest_youtube_source(url: str, depth: str, extract_frames: bool, vault_root
     return stage_note(vault_root, title, body, meta, target_dir=target_dir)
 
 
-def ingest_web_source(url: str, depth: str, vault_root: str, target_dir: str) -> str:
-    """Ingests Web article content."""
-    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    with urllib.request.urlopen(req, timeout=15) as response:
-        html = response.read().decode('utf-8', errors='ignore')
+def ingest_web_source(url: str, depth: str, vault_root: str, target_dir: Optional[str] = None) -> str:
+    """Ingests Web article content with duplicate checking per D-11."""
+    dup = check_duplicate_resource(vault_root, url, "")
+    if dup:
+        dup_path, _ = dup
+        rel_dup = os.path.relpath(dup_path, vault_root)
+        print(f"[DUPLICATE] Web article already exists in {rel_dup}. Ingestion blocked.", file=sys.stderr)
+        record_ingest_error(vault_root, url, f"Duplicato rilevato: articolo già presente in [[{rel_dup}]].")
+        return dup_path
+
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=15) as response:
+            html = response.read().decode('utf-8', errors='ignore')
+    except Exception as e:
+        record_ingest_error(vault_root, url, f"Errore download pagina web: {e}")
+        raise
 
     # Basic title extraction
     m_title = re.search(r'<title>(.*?)</title>', html, re.IGNORECASE)
     raw_title = m_title.group(1).strip() if m_title else "Web Article"
     clean_title = brain_health.clean_title_str(raw_title)
+
+    # Check title duplicate
+    dup_t = check_duplicate_resource(vault_root, "", clean_title)
+    if dup_t:
+        dup_path, _ = dup_t
+        rel_dup = os.path.relpath(dup_path, vault_root)
+        print(f"[DUPLICATE] Note with title '{clean_title}' already exists in {rel_dup}. Ingestion blocked.", file=sys.stderr)
+        record_ingest_error(vault_root, url, f"Duplicato rilevato: nota omonima in [[{rel_dup}]].")
+        return dup_path
 
     # Strip basic HTML tags
     clean_text = re.sub(r'<script.*?</script>', '', html, flags=re.DOTALL | re.IGNORECASE)
@@ -474,7 +828,7 @@ def ingest_web_source(url: str, depth: str, vault_root: str, target_dir: str) ->
     return stage_note(vault_root, clean_title, body, meta, target_dir=target_dir)
 
 
-def ingest_file_or_text_source(source: str, input_type: str, depth: str, vault_root: str, target_dir: str) -> str:
+def ingest_file_or_text_source(source: str, input_type: str, depth: str, vault_root: str, target_dir: Optional[str] = None) -> str:
     """Ingests local markdown/text file or pasted text."""
     if input_type == "file":
         with open(source, 'r', encoding='utf-8', errors='ignore') as f:
@@ -503,17 +857,15 @@ def ingest_source(source: str, depth: str = "executive", extract_frames: bool = 
                   vault_root: Optional[str] = None, target_dir: Optional[str] = None) -> str:
     """Main entrypoint routing polymorphic inputs through per-note lock and staging."""
     root = brain_health.get_vault_root(vault_root)
-    dest_dir = target_dir or "02 - Atlas/Tech"
-
     input_type = detect_input_type(source)
 
     with NoteLock(source):
         if input_type == "youtube":
-            return ingest_youtube_source(source, depth, extract_frames, root, dest_dir)
+            return ingest_youtube_source(source, depth, extract_frames, root, target_dir)
         elif input_type == "web":
-            return ingest_web_source(source, depth, root, dest_dir)
+            return ingest_web_source(source, depth, root, target_dir)
         else:
-            return ingest_file_or_text_source(source, input_type, depth, root, dest_dir)
+            return ingest_file_or_text_source(source, input_type, depth, root, target_dir)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -524,8 +876,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('source', nargs='?', default=None, help="Input source (YouTube URL, Web URL, file path, or text).")
     parser.add_argument('--depth', choices=['executive', 'sintesi', 'deep', 'approfondimento'], default='executive', help="Processing depth level (default: executive).")
     parser.add_argument('--extract-frames', action='store_true', help="Extract keyframe screenshots for visual YouTube videos.")
-    parser.add_argument('--target-dir', default="02 - Atlas/Tech", help="Target permanent directory after GTD approval.")
+    parser.add_argument('--target-dir', default=None, help="Target permanent directory after GTD approval (auto-classified if omitted).")
     parser.add_argument('--process-approvals', action='store_true', help="Process approved [x] or rejected [-] notes in Review Dashboard.md.")
+    parser.add_argument('--scan-inbox', action='store_true', help="Scan 03 - Inbox/ for notes with status: ready and convert to drafts.")
     parser.add_argument('--vault-root', type=str, default=None, help="Custom vault root directory.")
     return parser
 
@@ -539,6 +892,11 @@ def main():
     if args.process_approvals:
         processed = process_tri_state_approvals(vault_root)
         print(f"Processed {processed} review dashboard actions.")
+        return
+
+    if args.scan_inbox:
+        processed_raw = process_inbox_raw_notes(vault_root)
+        print(f"Processed {len(processed_raw)} raw notes in Inbox.")
         return
 
     if not args.source:

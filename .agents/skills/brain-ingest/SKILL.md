@@ -4,7 +4,7 @@ description: Polymorphic intake engine for YouTube videos, web articles, pasted 
 ---
 # Skill: /brain-ingest (Universal Ingestion Pipeline)
 
-Pipeline universale di ingestione e trasformazione della conoscenza per il Second Brain.
+Pipeline universale di ingestione, arricchimento e trasformazione della conoscenza per il Second Brain.
 Sostituisce e consolida le precedenti micro-skills `process-inbox`, `link` e `nota`.
 
 ---
@@ -12,23 +12,27 @@ Sostituisce e consolida le precedenti micro-skills `process-inbox`, `link` e `no
 ## 🎯 Obiettivi e Flusso Operativo
 
 1. **Routing Polimorfico dell'Input:**
-   - **YouTube URL:** Estrazione metadati, trascrizione con timestamp cliccabili, capitoli e screenshot visivi opzionali in `99 - Meta/Clipboard/`.
+   - **YouTube URL:** Estrazione metadati, trascrizione con timestamp cliccabili, capitoli e screenshot visivi 720p `-q:v 2` in `99 - Meta/Clipboard/`.
    - **Articoli Web / URL:** Scraping e conversione in Markdown pulito privo di boilerplate/ads.
    - **Testo Libero / Appunti:** Strutturazione di testi grezzi incollati in chat o catture veloci.
-   - **File Locali:** Elaborazione di file `.md`, `.txt` o documenti presenti in `03 - Inbox/`.
+   - **File Locali & Inbox Scanner:** Rilevamento automatico di appunti grezzi in `03 - Inbox/` con `status: ready` (o `status: process`).
 2. **Profondità Modulare di Elaborazione:**
    - **`sintesi` (Executive Summary):** Sintesi ad alta densità informativa, definizioni chiave e takeaway azionabili (~500-1000 parole).
-   - **`approfondimento` (Studio Accademico / Deep Study):** Analisi dettagliata, meccanismi di funzionamento, tabelle comparative, callout ed esempi applicativi (>2000 parole, ex standard `nota`).
+   - **`approfondimento` (Studio Accademico / Deep Study):** Analisi dettagliata, meccanismi di funzionamento, tabelle comparative, callout ed esempi applicativi (>2000 parole).
 3. **Staging Protetto & Tri-State GTD Review:**
    - La nota generata atterra sempre in `03 - Inbox/<Titolo in Title Case>.md` con `status: draft`.
-   - Viene registrata automaticamente in `03 - Inbox/Review Dashboard.md` come checkbox `- [ ] Approva [[Titolo]]`.
-   - Approvazione utente (`[x]`) -> Promozione a `status: permanent` e smistamento in `02 - Atlas/` o `05 - Blog/`.
-   - Rifiuto utente (`[-]`) -> Cancellazione sicura della bozza e pulizia degli screenshot temporanei.
-4. **Autolinking Semantico Contestuale:**
+   - Viene registrata automaticamente in `03 - Inbox/Review Dashboard.md` come checkbox `- [ ] Approva [[Titolo]] (area: ..., type: ..., target: ...)`.
+   - Approvazione utente (`[x]`) -> Promozione a `status: permanent` e smistamento nella cartella target di `02 - Atlas/` o `05 - Blog/`.
+   - Rifiuto utente (`[-]`) -> Cancellazione sicura della bozza e pulizia degli screenshot associati in `99 - Meta/Clipboard/`.
+   - Storico audit persistente salvato in `99 - Meta/logs/inbox_history.md`.
+4. **Rilevamento Globale Anti-Duplicati & Collisioni:**
+   - Scansione preventiva di `02 - Atlas/` e `05 - Blog/` per URL `source:` e `title:`. In caso di risorsa già esistente, l'ingestion viene bloccata e registrata come avviso nella dashboard.
+   - Protezione da collisioni omonime in Atlas prima dello spostamento finale.
+5. **Autolinking Semantico Contestuale:**
    - Scansione automatica dell'indice dei titoli reali del Vault per collegare concetti chiave (`[[Nota Esistente]]`, max 2 occorrenze per target) senza allucinare note inesistenti.
    - Sincronizzazione automatica del campo `related: [...]` nel frontmatter YAML e della sezione `## Collegamenti`.
-5. **Concorrenza & Locking per-Fonte:**
-   - Lock fine-grained basato su SHA-256 (`/tmp/brain_ingest_<hash>.lock`) che consente l'ingestione simultanea di sorgenti diverse senza collisioni.
+6. **Concorrenza & Auto-Healing dei Lockfile:**
+   - Lock fine-grained basato su SHA-256 (`/tmp/brain_ingest_<hash>.lock`) con verifica vivacità processo (`kill -0`) e scadenza TTL (10 minuti) per prevenire deadlock.
 
 ---
 
@@ -38,25 +42,25 @@ Il motore Python sottostante è `99 - Meta/Scripts/brain_ingest.py`.
 
 ### Ingestione da CLI
 ```bash
-# Ingestione YouTube (Sintesi esecutiva con timestamp)
-python3 "99 - Meta/Scripts/brain_ingest.py" --url "https://www.youtube.com/watch?v=..." --depth sintesi
+# Ingestione YouTube (Sintesi esecutiva con timestamp e capitoli)
+python3 "99 - Meta/Scripts/brain_ingest.py" "https://www.youtube.com/watch?v=..." --depth sintesi
 
-# Ingestione YouTube con estrazione screenshot in Clipboard
-python3 "99 - Meta/Scripts/brain_ingest.py" --url "https://www.youtube.com/watch?v=..." --depth approfondimento --screenshots
+# Ingestione YouTube con estrazione forzata frame 720p in Clipboard/
+python3 "99 - Meta/Scripts/brain_ingest.py" "https://www.youtube.com/watch?v=..." --depth approfondimento --extract-frames
 
-# Ingestione Articolo Web
-python3 "99 - Meta/Scripts/brain_ingest.py" --url "https://example.com/article" --area tech
+# Ingestione Articolo Web con classificazione euristica automatica
+python3 "99 - Meta/Scripts/brain_ingest.py" "https://example.com/article"
 
-# Ingestione File Locale in Inbox
-python3 "99 - Meta/Scripts/brain_ingest.py" --file "03 - Inbox/raw-notes.md" --title "Calcolo Differenziale" --area education
+# Ingestione File Locale o Testo Diretto
+python3 "99 - Meta/Scripts/brain_ingest.py" "03 - Inbox/raw-notes.md" --target-dir "02 - Atlas/Education & Learning"
 
-# Ingestione Testo Diretto
-python3 "99 - Meta/Scripts/brain_ingest.py" --text "Contenuto raw..." --title "Architettura Transformers" --area tech
+# Scansione automatica appunti grezzi in Inbox (con status: ready)
+python3 "99 - Meta/Scripts/brain_ingest.py" --scan-inbox
 ```
 
 ### Processamento Approvazioni GTD
 ```bash
-# Processa tutte le righe [x] e [-] segnate in Review Dashboard.md
+# Processa tutte le righe [x] (promozione) e [-] (scarto) in Review Dashboard.md
 python3 "99 - Meta/Scripts/brain_ingest.py" --process-approvals
 ```
 

@@ -373,5 +373,162 @@ Ed anche `<font color="#8a5cf6"><b>secondario</b></font>` con backticks.
             self.assertTrue(img1.endswith("12345678901_0_01__introduzion.jpg") or "12345678901_0_" in img1)
             self.assertTrue("12345678901_1_" in img2)
 
+    def test_global_duplicate_detection(self):
+        """Asserts check_duplicate_resource scans Atlas and Blog notes, returning match when source URL or title exists per D-11."""
+        atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech & AI")
+        os.makedirs(atlas_dir, exist_ok=True)
+        existing_note = os.path.join(atlas_dir, "Nota Esistente.md")
+        with open(existing_note, "w", encoding="utf-8") as f:
+            f.write("""---
+status: permanent
+type: concept
+area: tech
+source: https://youtube.com/watch?v=existing123
+title: "Nota Esistente"
+---
+Content.
+""")
+        # Duplicate URL check
+        dup_url = brain_ingest.check_duplicate_resource(self.test_dir, "https://youtube.com/watch?v=existing123", "Altro Titolo")
+        self.assertIsNotNone(dup_url)
+        self.assertEqual(dup_url[0], existing_note)
+        self.assertEqual(dup_url[1], "source_url")
+
+        # Duplicate Title check
+        dup_title = brain_ingest.check_duplicate_resource(self.test_dir, "https://youtube.com/watch?v=new456", "Nota Esistente")
+        self.assertIsNotNone(dup_title)
+        self.assertEqual(dup_title[0], existing_note)
+        self.assertEqual(dup_title[1], "title")
+
+        # Non-duplicate check
+        no_dup = brain_ingest.check_duplicate_resource(self.test_dir, "https://youtube.com/watch?v=unique789", "Nuova Nota Unica")
+        self.assertIsNone(no_dup)
+
+    def test_heuristic_atlas_routing(self):
+        """Asserts classify_target_directory suggests appropriate subfolder based on tags/title/content per D-10."""
+        # AI
+        dest_ai = brain_ingest.classify_target_directory("Costruire Agenti LLM con RAG", ["tech/ai"], "Modelli transformer")
+        self.assertIn("Tech & AI", dest_ai)
+
+        # Finance
+        dest_fin = brain_ingest.classify_target_directory("Guida alla Gestione Fiscale e Investimenti", ["finance/tax"], "Tasse e investimenti")
+        self.assertEqual(dest_fin, "02 - Atlas/Finance")
+
+        # Education
+        dest_edu = brain_ingest.classify_target_directory("Appunti Esame Analisi Matematica", ["education/math"], "Studio universitario")
+        self.assertEqual(dest_edu, "02 - Atlas/Education & Learning")
+
+        # Mentality
+        dest_men = brain_ingest.classify_target_directory("Come Sviluppare Disciplina e Focus", ["mentality/habits"], "Abitudini atomiche")
+        self.assertIn("Personal Growth & Health", dest_men)
+
+        # Blog
+        dest_blog = brain_ingest.classify_target_directory("Articolo Pubblico sul Blog", ["blog/post"], "Post divulgativo")
+        self.assertEqual(dest_blog, "05 - Blog")
+
+    def test_inbox_raw_note_intake_on_status_ready(self):
+        """Asserts process_inbox_raw_notes scans 03 - Inbox/ and converts notes with status: ready into formatted drafts per D-15, D-16."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        raw_note = os.path.join(inbox_dir, "Appunto Rapido.md")
+        with open(raw_note, "w", encoding="utf-8") as f:
+            f.write("""---
+status: ready
+type: concept
+area: tech
+title: "Appunto Rapido"
+---
+Questo è un appunto grezzo da formattare.
+""")
+
+        processed = brain_ingest.process_inbox_raw_notes(self.test_dir)
+        self.assertEqual(len(processed), 1)
+
+        with open(raw_note, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        self.assertIn("status: draft", content)
+        self.assertIn("[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[Appunto Rapido]]", content)
+
+        # Review dashboard should have it registered
+        dash_path = os.path.join(inbox_dir, "Review Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        self.assertIn("- [ ] Approva [[Appunto Rapido]]", dash_content)
+
+    def test_filename_collision_protection(self):
+        """Asserts destination filename collisions with differing source URLs are detected and flagged without overwriting per D-12."""
+        dest_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech & AI")
+        os.makedirs(dest_dir, exist_ok=True)
+        existing_dest = os.path.join(dest_dir, "Nota Collisione.md")
+        with open(existing_dest, "w", encoding="utf-8") as f:
+            f.write("""---
+status: permanent
+source: https://original.url/article1
+title: "Nota Collisione"
+---
+Original permanent content.
+""")
+
+        # Stage a new note in Inbox with same title but different source
+        staged_path = brain_ingest.stage_note(
+            vault_root=self.test_dir,
+            title="Nota Collisione",
+            body="New incoming content.",
+            metadata={"source": "https://different.url/article2", "title": "Nota Collisione"},
+            target_dir="02 - Atlas/Tech & AI"
+        )
+
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write(dash_content.replace("- [ ] Approva [[Nota Collisione]]", "- [x] Approva [[Nota Collisione]]"))
+
+        # Process approvals
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 0) # Should be blocked due to collision
+
+        # Original note must NOT be overwritten
+        with open(existing_dest, "r", encoding="utf-8") as f:
+            self.assertIn("Original permanent content.", f.read())
+
+        # Dashboard should contain collision warning
+        with open(dash_path, "r", encoding="utf-8") as f:
+            updated_dash = f.read()
+        self.assertIn("Conflitto nome file", updated_dash)
+
+    def test_inbox_history_persistence(self):
+        """Asserts processed actions append timestamp, action type, note title, and destination to 99 - Meta/logs/inbox_history.md per D-14."""
+        log_file = os.path.join(self.test_dir, "99 - Meta", "logs", "inbox_history.md")
+        brain_ingest.append_inbox_history(
+            vault_root=self.test_dir,
+            action="APPROVED",
+            note_title="Nota di Prova Storia",
+            target="02 - Atlas/Tech & AI",
+            source="https://youtube.com/watch?v=123"
+        )
+        self.assertTrue(os.path.exists(log_file))
+        with open(log_file, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("[APPROVED]", content)
+        self.assertIn("[[Nota di Prova Storia]]", content)
+        self.assertIn("02 - Atlas/Tech & AI", content)
+
+    def test_error_registration_in_dashboard(self):
+        """Asserts record_ingest_error adds failing resource with retry checkbox to ## ⚠️ Errori di Acquisizione per D-18, D-21."""
+        brain_ingest.record_ingest_error(
+            vault_root=self.test_dir,
+            source_or_url="https://youtube.com/watch?v=no_subtitles",
+            reason="Nessuna trascrizione disponibile."
+        )
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+        with open(dash_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("## ⚠️ Errori di Acquisizione & Azioni Richieste", content)
+        self.assertIn("https://youtube.com/watch?v=no_subtitles", content)
+        self.assertIn("Nessuna trascrizione disponibile.", content)
+
 if __name__ == "__main__":
     unittest.main()

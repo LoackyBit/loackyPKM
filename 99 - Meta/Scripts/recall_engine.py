@@ -58,6 +58,8 @@ STOPWORDS = {
 }
 
 CACHE_FILENAME = ".recall_cache.json"
+VEC_DIM = 384
+VEC_BYTES = VEC_DIM * 4  # 1536 bytes for 384 float32 values
 
 
 def get_vault_root(start_path: Optional[str] = None) -> str:
@@ -203,6 +205,206 @@ def safe_parse_frontmatter(fm_text: str) -> Dict[str, Any]:
     return data
 
 
+def load_smart_connections_metadata(vault_root: str) -> Dict[str, Tuple[str, int]]:
+    """
+    Parses .smart-env/smart_sources/smart_sources.ajson using line-based reduction.
+    Returns mapping {relative_path: (vector_file_name, vector_file_i)}.
+    """
+    ajson_path = os.path.join(vault_root, '.smart-env', 'smart_sources', 'smart_sources.ajson')
+    if not os.path.exists(ajson_path):
+        return {}
+
+    sources: Dict[str, Any] = {}
+    with open(ajson_path, 'r', encoding='utf-8', errors='ignore') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            if line.endswith(','):
+                line = line[:-1]
+            idx = line.find(': ')
+            if idx == -1:
+                continue
+            key = line[:idx].strip('\"')
+            val = line[idx + 2:]
+            if val == 'null':
+                sources.pop(key, None)
+            else:
+                try:
+                    sources[key] = json.loads(val)
+                except Exception:
+                    pass
+
+    vector_refs: Dict[str, Tuple[str, int]] = {}
+    for key, data in sources.items():
+        if not isinstance(data, dict):
+            continue
+        path = data.get('path') or key.replace('smart_sources:', '')
+        default_emb = data.get('embedding', {}).get('default', {})
+        if isinstance(default_emb, dict) and default_emb:
+            # Pick latest entry by timestamp 'at'
+            latest = max(default_emb.values(), key=lambda x: x.get('at', 0) if isinstance(x, dict) else 0)
+            if isinstance(latest, dict):
+                v_file = latest.get('file')
+                v_idx = latest.get('file_i')
+                if v_file and v_idx is not None:
+                    vector_refs[path] = (v_file, int(v_idx))
+
+    return vector_refs
+
+
+def read_vector(vault_root: str, vector_file: str, file_i: int) -> Optional[Tuple[float, ...]]:
+    """Reads a 384-dimensional float32 unit vector directly from binary mf_* file."""
+    bin_path = os.path.join(vault_root, '.smart-env', 'smart_sources', vector_file)
+    if not os.path.exists(bin_path):
+        return None
+    offset = file_i * VEC_BYTES
+    if offset + VEC_BYTES > os.path.getsize(bin_path):
+        return None
+    try:
+        with open(bin_path, 'rb') as f:
+            f.seek(offset)
+            data = f.read(VEC_BYTES)
+            if len(data) != VEC_BYTES:
+                return None
+            return struct.unpack('<384f', data)
+    except Exception:
+        return None
+
+
+def cosine_similarity(vec_a: Tuple[float, ...], vec_b: Tuple[float, ...]) -> float:
+    """Calculates dot product of two unit-normalized 384-d vectors."""
+    return sum(a * b for a, b in zip(vec_a, vec_b))
+
+
+def score_yaml_metadata(metadata: Dict[str, Any], query_tokens: List[str]) -> float:
+    """
+    Computes weighted YAML metadata score:
+    - title: 10x
+    - summary: 6x
+    - tags & area: 4x
+    - related & aliases: 2x
+    """
+    if not query_tokens:
+        return 0.0
+
+    title_text = str(metadata.get('title', '')).lower()
+    summary_text = str(metadata.get('summary', '')).lower()
+    area_text = str(metadata.get('area', '')).lower()
+    tags = metadata.get('tags', [])
+    tags_text = " ".join(str(t).lower() for t in tags if t) if isinstance(tags, list) else str(tags).lower()
+    related = metadata.get('related', [])
+    related_text = " ".join(str(r).lower() for r in related if r) if isinstance(related, list) else str(related).lower()
+    aliases = metadata.get('aliases', [])
+    aliases_text = " ".join(str(a).lower() for a in aliases if a) if isinstance(aliases, list) else str(aliases).lower()
+
+    score = 0.0
+    for tok in query_tokens:
+        if tok in title_text:
+            score += 10.0
+        if tok in summary_text:
+            score += 6.0
+        if tok in area_text or tok in tags_text:
+            score += 4.0
+        if tok in related_text or tok in aliases_text:
+            score += 2.0
+
+    return score
+
+
+def find_similar_notes(
+    vault_root: str,
+    target_note: str,
+    cache_data: Dict[str, Any],
+    limit: int = 5
+) -> List[Tuple[str, float]]:
+    """
+    Finds semantically similar notes based on Smart Connections 384-d vector embeddings.
+    """
+    cleaned_target = target_note.strip('[]"\'').replace('.md', '').strip()
+    files = cache_data.get('files', {})
+
+    # Resolve target note key
+    target_key = None
+    target_entry = None
+
+    for rel_path, entry in files.items():
+        stem = Path(rel_path).stem
+        title = entry.get('title', '')
+        if (rel_path == target_note or
+            rel_path == f"{cleaned_target}.md" or
+            stem.lower() == cleaned_target.lower() or
+            title.lower() == cleaned_target.lower()):
+            target_key = rel_path
+            target_entry = entry
+            break
+
+    if not target_entry:
+        return []
+
+    target_v_file = target_entry.get('vector_file')
+    target_v_i = target_entry.get('vector_i')
+    if not target_v_file or target_v_i is None:
+        return []
+
+    target_vec = read_vector(vault_root, target_v_file, target_v_i)
+    if not target_vec:
+        return []
+
+    similarities: List[Tuple[str, float]] = []
+    for rel_path, entry in files.items():
+        if rel_path == target_key:
+            continue
+        v_file = entry.get('vector_file')
+        v_i = entry.get('vector_i')
+        if not v_file or v_i is None:
+            continue
+        vec = read_vector(vault_root, v_file, v_i)
+        if vec:
+            sim = cosine_similarity(target_vec, vec)
+            similarities.append((rel_path, sim))
+
+    similarities.sort(key=lambda x: x[1], reverse=True)
+    return similarities[:limit]
+
+
+def reciprocal_rank_fusion(
+    yaml_ranks: List[str],
+    bm25_ranks: List[str],
+    dense_ranks: List[str],
+    k: int = 60,
+    weights: Optional[Dict[str, float]] = None
+) -> List[Tuple[str, float, Dict[str, int]]]:
+    """
+    Combines ranked lists from YAML, BM25, and Dense Semantic tracks using RRF:
+    RRF(d) = sum_m [ w_m / (k + r_m(d)) ]
+    Gracefully handles empty lists (e.g. dense_ranks=[]) without degradation.
+    """
+    if weights is None:
+        weights = {'yaml': 1.0, 'bm25': 1.0, 'dense': 1.2}
+
+    scores: Dict[str, float] = {}
+    rank_details: Dict[str, Dict[str, int]] = {}
+
+    tracks = [
+        ('yaml', yaml_ranks, weights.get('yaml', 1.0)),
+        ('bm25', bm25_ranks, weights.get('bm25', 1.0)),
+        ('dense', dense_ranks, weights.get('dense', 1.2))
+    ]
+
+    for name, rank_list, w in tracks:
+        for rank_idx, doc_id in enumerate(rank_list, start=1):
+            if doc_id not in scores:
+                scores[doc_id] = 0.0
+                rank_details[doc_id] = {}
+            scores[doc_id] += w / (k + rank_idx)
+            rank_details[doc_id][name] = rank_idx
+
+    fused = [(doc_id, score, rank_details[doc_id]) for doc_id, score in scores.items()]
+    fused.sort(key=lambda x: x[1], reverse=True)
+    return fused
+
+
 def load_or_rebuild_cache(vault_root: str, force_reindex: bool = False) -> Dict[str, Any]:
     """
     Loads cache from .recall_cache.json with mtime invalidation.
@@ -226,6 +428,9 @@ def load_or_rebuild_cache(vault_root: str, force_reindex: bool = False) -> Dict[
     updated = False
     current_files = set()
 
+    # Load Smart Connections vector references
+    vector_refs = load_smart_connections_metadata(vault_root)
+
     for root, dirs, files in os.walk(vault_root):
         dirs[:] = [d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')]
         for file in files:
@@ -237,8 +442,16 @@ def load_or_rebuild_cache(vault_root: str, force_reindex: bool = False) -> Dict[
                 mtime = os.stat(abs_path).st_mtime
                 cached_entry = cached_files.get(rel_path)
 
-                if cached_entry and cached_entry.get('mtime') == mtime and not force_reindex:
-                    # Valid cache hit, zero I/O
+                v_info = vector_refs.get(rel_path)
+                v_file = v_info[0] if v_info else None
+                v_i = v_info[1] if v_info else None
+
+                if (cached_entry and cached_entry.get('mtime') == mtime and not force_reindex):
+                    # Check if vector reference updated
+                    if cached_entry.get('vector_file') != v_file or cached_entry.get('vector_i') != v_i:
+                        cached_entry['vector_file'] = v_file
+                        cached_entry['vector_i'] = v_i
+                        updated = True
                     continue
 
                 # Read and parse file
@@ -263,8 +476,8 @@ def load_or_rebuild_cache(vault_root: str, force_reindex: bool = False) -> Dict[
                     "aliases": meta.get('aliases') if isinstance(meta.get('aliases'), list) else ([str(meta.get('aliases'))] if meta.get('aliases') else []),
                     "tokens": tokens,
                     "term_freq": dict(Counter(tokens)),
-                    "vector_file": None,
-                    "vector_i": None
+                    "vector_file": v_file,
+                    "vector_i": v_i
                 }
                 updated = True
 

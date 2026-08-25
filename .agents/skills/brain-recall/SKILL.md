@@ -1,22 +1,22 @@
 ---
 name: brain-recall
-description: Retrieval and synthesis interface modeled after NotebookLM. Provides executive answers backed by exact [[Note]] citations and strict zero-hallucination guards.
+description: Retrieval and synthesis interface modeled after NotebookLM. Provides executive answers backed by exact [[Note]] citations, video timestamps, and strict zero-hallucination guards.
 ---
 # Skill: /brain-recall (NotebookLM Retrieval & Synthesis)
 
 Interfaccia di consultazione conversazionale e recupero della conoscenza personale sul Second Brain, modellata sull'esperienza **NotebookLM**.
-Fornisce sintesi esecutive dirette, radicate esclusivamente nelle note e fonti presenti nel Vault, con citazioni esatte `[[Nome Nota]]` e rigore anti-allucinazione.
+Fornisce sintesi esecutive dirette, radicate esclusivamente nelle note e fonti presenti nel Vault, con citazioni esatte `[[Nome Nota]]`, sezioni contestuali, timestamp video `[MM:SS]` e rigore anti-allucinazione.
 
 ---
 
 ## 🎯 Obiettivi e Contratto di Interfaccia
 
 1. **Dual Invocation Paradigm:**
-   - **CLI Slash Command:** Sintassi esplicita `/brain-recall <query>` con filtri opzionali (`--area`, `--type`).
+   - **CLI Slash Command:** Sintassi esplicita `/brain-recall <query>` con filtri opzionali (`--area`, `--type`, `--tag`, `--limit`, `--similar-to`).
    - **Linguaggio Naturale:** Interrogazione conversazionale ("Cosa ho annotato riguardo a RAG?", "Quali sono i concetti chiave su Calcolo Differenziale?").
 2. **Standardized Response Schema (Schema di Risposta in 3 Sezioni):**
    - 🎯 **1. Sintesi Esecutiva:** Risposta concisa, densa e direttamente orientata al quesito dell'utente, strutturata con punti elenco logici o brevi paragrafi.
-   - 📚 **2. Fonti & Citazioni:** Elenco accurato di wiki-link esatti `[[Nome Nota]]` da cui sono state tratte le informazioni (con timestamp cliccabili `[MM:SS]` se provenienti da note video).
+   - 📚 **2. Fonti & Citazioni:** Elenco accurato di wiki-link esatti `[[Nome Nota]]` con indicazione della sezione H2/H3 rilevante `(sezione: *Heading*)` e timestamp `[MM:SS]` o `[HH:MM:SS]` per note video.
    - 🔗 **3. Connessioni Correlate:** 1-2 suggerimenti proattivi di collegamenti semantici o note adiacenti presenti nel grafo per stimolare esplorazioni interdisciplinari.
 3. **Guardia Anti-Allucinazione Assoluta (Zero-Hallucination Guard):**
    - Se il concetto richiesto non è presente tra le note indicizzate del Vault, l'assistente **NON deve inventare risposte** né attingere a conoscenze generiche senza esplicita dichiarazione.
@@ -25,27 +25,58 @@ Fornisce sintesi esecutive dirette, radicate esclusivamente nelle note e fonti p
 
 ---
 
-## 🛠️ Modalità di Invocazione
+## 🛠️ Modalità Operative & CLI Backend
 
-### Invocazione via Slash Command
+Il motore Python di retrieval ibrido a 3 vie (YAML + BM25 + Smart Connections Dense Vectors) è `99 - Meta/Scripts/recall_engine.py`.
+
+### Comandi CLI Backend Supportati
+
 ```bash
-# Query generale libera
-/brain-recall "Come funziona il meccanismo di Self-Attention nei Transformers?"
+# 1. Query generale libera (Output JSON per agenti AI)
+python3 "99 - Meta/Scripts/recall_engine.py" "Come funziona il meccanismo di Self-Attention?" --format json
 
-# Query filtrata per macro-area
-/brain-recall "Teorema di Fermat" --area education
+# 2. Query filtrata per macro-area
+python3 "99 - Meta/Scripts/recall_engine.py" "Teorema di Fermat" --area education --format json
 
-# Query filtrata per tipo di nota
-/brain-recall "Architetture RAG" --type concept
+# 3. Query filtrata per tipologia di nota
+python3 "99 - Meta/Scripts/recall_engine.py" "Architetture RAG" --type concept --format json
 
-# Query combinata
-/brain-recall "Analisi Finanziaria 2025" --area finance --type article
+# 4. Query filtrata per prefisso tag gerarchico
+python3 "99 - Meta/Scripts/recall_engine.py" "Neural Networks" --tag tech/ai --format json
+
+# 5. Ricerca per similarità semantica vettoriale (384-d Dense Embeddings)
+python3 "99 - Meta/Scripts/recall_engine.py" --similar-to "Architettura Transformers e Attention" --format json
+
+# 6. Ricostruzione forzata della cache incrementale
+python3 "99 - Meta/Scripts/recall_engine.py" --reindex
 ```
 
-### Invocazione Conversazionale Naturale
-- *"Cosa so riguardo a Docker e containerizzazione nel mio Vault?"*
-- *"Riassumi i punti principali delle note sul Dopamine Detox."*
-- *"Quali progetti ho attivi nell'area Tech?"*
+### Parametri e Filtri CLI
+
+| Parametro | Tipo | Valori Ammessi | Descrizione |
+|---|---|---|---|
+| `query` | Posizionale | String / Tokens | Termini di ricerca o quesito in linguaggio naturale |
+| `--area` | Scelta controllata | `tech`, `education`, `mentality`, `finance`, `projects`, `meta`, `calendar` | Filtra per macro-area del Vault |
+| `--type` | Scelta controllata | `concept`, `video`, `article`, `lecture`, `book`, `project`, `moc`, `journal` | Filtra per tipologia di nota |
+| `--tag` | String | Prefisso tag (es. `tech/ai`) | Filtra note contenenti il tag o un sotto-tag |
+| `--limit` | Intero | Default: `5` | Numero massimo di note restituite |
+| `--format` | Scelta | `auto`, `json`, `markdown`, `pretty` | Formato di serializzazione output |
+| `--similar-to` | String | Titolo nota o `[[Nome Nota]]` | Ricerca semantica vettoriale dei vicini più prossimi |
+| `--reindex` | Flag | Boolean | Forza la ricostruzione completa della cache locale |
+| `--vault-root` | Path | Percorso cartella | Radice personalizzata del Vault (default: root repository) |
+
+---
+
+## 🤖 Protocollo di Esecuzione per l'Agente AI
+
+Quando l'utente richiede una consultazione tramite `/brain-recall` o con domanda in linguaggio naturale:
+
+1. **Mapping Query & Parametri:** L'agente estrae termini di ricerca ed eventuali filtri (`--area`, `--type`, `--tag`, `--similar-to`).
+2. **Invocazione Backend:** Esegue il comando CLI `python3 "99 - Meta/Scripts/recall_engine.py" <query> [opzioni] --format json`.
+3. **Valutazione Risultati & Zero-Hallucination:**
+   - Se `status == "empty"` (0 risultati): Restituisce **immediatamente ed esclusivamente** il messaggio di Zero-Hallucination Guard.
+   - Se `status == "success"`: Sintetizza i risultati ricevuti rispettando rigorosamente lo **Schema in 3 Sezioni NotebookLM**.
+4. **Suggerimenti di Drill-down Multi-Dominio:** Se `drilldown_suggestions` contiene aree adiacenti con corrispondenze rilevanti, include il box di suggerimento proattivo per facilitare l'esplorazione dell'utente.
 
 ---
 
@@ -71,10 +102,15 @@ Nel contesto del Vault, le implementazioni evidenziano come la parallelizzazione
 ### 🔗 Connessioni Correlate
 - [[Large Language Models MOC]]: Per la panoramica completa sui modelli generativi basati su transformer.
 - [[Embedding Spaziali]]: Per comprendere come i vettori di input vengono mappati prima del livello di attenzione.
+
+> 💡 **Suggerimento:** Trovate corrispondenze anche in Education (2). Usa `--area education` per raffinare.
 ```
 
 ---
 
-## 🔗 Integrazione di Sistema & Fase 4
+## 🔒 Regole di Integrità e Robustezza
 
-Questa skill definisce il contratto formale per il motore di ricerca ibrido (BM25 + Dense Semantic Embeddings) che verrà implementato nella Fase 4 con `recall_engine.py`.
+- **Click-Ready Wiki-Links:** Tutti i titoli citati devono essere formattati come `[[Nome Esatto Nota]]` corrispondenti a note reali del Vault.
+- **Isolamento della Conoscenza:** Non utilizzare conoscenza generica di modelli esterni per completare dettagli non presenti nelle note richiamate.
+- **Cache Local-Only:** Il file di cache `.recall_cache.json` non deve mai essere tracciato su Git ed è protetto in `.gitignore`.
+

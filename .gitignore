@@ -11,3 +11,6 @@ gha-creds-*.json
 .space/.planning/
 __pycache__/
 *.pyc
+.recall_cache.json
+**/.recall_cache.json
+*.recall_cache.json.tmp

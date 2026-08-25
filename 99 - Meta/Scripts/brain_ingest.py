@@ -30,22 +30,70 @@ YT_URL_REGEX = re.compile(r'(?:https?://)?(?:www\.|m\.)?(?:youtube\.com/(?:watch
 WEB_URL_REGEX = re.compile(r'^https?://[^\s/$.?#].[^\s]*$', re.IGNORECASE)
 
 
+def is_pid_alive(pid: int) -> bool:
+    """Checks if a process with given PID is alive."""
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except (OSError, ProcessLookupError):
+        return False
+
+
 class NoteLock:
-    """Fine-grained hash-based mutex lock preventing duplicate/concurrent runs per source."""
-    def __init__(self, identifier: str):
+    """Fine-grained hash-based mutex lock preventing duplicate/concurrent runs per source with stale auto-healing."""
+    def __init__(self, identifier: str, ttl_seconds: int = 600):
         slug = hashlib.sha256(identifier.encode('utf-8')).hexdigest()[:12]
         self.lock_file = f"/tmp/brain_ingest_{slug}.lock"
+        self.ttl_seconds = ttl_seconds
         self.acquired = False
 
+    def _clean_stale_lock_if_needed(self):
+        if not os.path.exists(self.lock_file):
+            return
+        try:
+            is_stale = False
+            # Check file age (TTL: default 10 minutes)
+            mtime = os.path.getmtime(self.lock_file)
+            if (datetime.datetime.now().timestamp() - mtime) > self.ttl_seconds:
+                is_stale = True
+
+            # Check recorded PID liveness
+            if not is_stale:
+                with open(self.lock_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                m = re.search(r'pid:\s*(\d+)', content)
+                if m:
+                    pid = int(m.group(1))
+                    if not is_pid_alive(pid):
+                        is_stale = True
+                else:
+                    is_stale = True
+
+            if is_stale:
+                os.remove(self.lock_file)
+        except Exception:
+            pass
+
     def __enter__(self):
+        self._clean_stale_lock_if_needed()
         try:
             fd = os.open(self.lock_file, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            os.write(fd, f"pid: {os.getpid()}\n".encode('utf-8'))
+            os.write(fd, f"pid: {os.getpid()}\ntimestamp: {datetime.datetime.now().isoformat()}\n".encode('utf-8'))
             os.close(fd)
             self.acquired = True
             return self
         except FileExistsError:
-            raise RuntimeError(f"Lock already active for target source ({self.lock_file}). Ingestion in progress.")
+            self._clean_stale_lock_if_needed()
+            try:
+                fd = os.open(self.lock_file, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.write(fd, f"pid: {os.getpid()}\ntimestamp: {datetime.datetime.now().isoformat()}\n".encode('utf-8'))
+                os.close(fd)
+                self.acquired = True
+                return self
+            except FileExistsError:
+                raise RuntimeError(f"Lock already active for target source ({self.lock_file}). Ingestion in progress.")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.acquired and os.path.exists(self.lock_file):

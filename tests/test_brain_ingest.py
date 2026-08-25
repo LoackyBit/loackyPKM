@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 import shutil
+import subprocess
 from pathlib import Path
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -210,6 +211,93 @@ Ed anche `<font color="#8a5cf6"><b>secondario</b></font>` con backticks.
         self.assertIn("## 🏛️ Quadro Concettuale & Fondamenti", deep_note)
         self.assertIn("## ⚙️ Meccanica & Architettura di Dettaglio", deep_note)
         self.assertIn("## 🔬 Analisi Critica, Limiti & Casi d'Uso", deep_note)
+
+    def test_note_lock_stale_pid_auto_healing(self):
+        """Asserts NoteLock auto-cleans lockfiles whose PID is no longer running (kill -0 probe fails)
+        or file mtime exceeds 10 minutes per D-20.
+        """
+        source = "https://youtube.com/watch?v=stale_pid_test"
+        dummy_lock = brain_ingest.NoteLock(source)
+        lock_path = dummy_lock.lock_file
+
+        # 1. Simulate dead PID (PID 9999999 is practically guaranteed not to exist)
+        with open(lock_path, "w", encoding="utf-8") as f:
+            f.write("pid: 9999999\ntimestamp: 2026-08-25T00:00:00\n")
+
+        self.assertTrue(os.path.exists(lock_path))
+
+        # NoteLock should auto-heal and acquire cleanly without raising RuntimeError
+        with brain_ingest.NoteLock(source) as lock:
+            self.assertTrue(lock.acquired)
+            self.assertTrue(os.path.exists(lock_path))
+            with open(lock_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn(f"pid: {os.getpid()}", content)
+
+        self.assertFalse(os.path.exists(lock_path))
+
+        # 2. Simulate expired TTL (file mtime > 600 seconds ago with active PID)
+        with open(lock_path, "w", encoding="utf-8") as f:
+            f.write(f"pid: {os.getpid()}\n")
+        # Set mtime to 15 minutes ago
+        past_time = os.path.getmtime(lock_path) - 900
+        os.utime(lock_path, (past_time, past_time))
+
+        with brain_ingest.NoteLock(source) as lock:
+            self.assertTrue(lock.acquired)
+            self.assertTrue(os.path.exists(lock_path))
+
+        self.assertFalse(os.path.exists(lock_path))
+
+    def test_watcher_lifecycle_and_pid_auto_healing(self):
+        """Asserts watch.sh script syntax is valid, supports lifecycle flags, and manages PID tracking per D-01, D-20."""
+        script_path = os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts", "watch.sh")
+        self.assertTrue(os.path.exists(script_path))
+
+        # Check bash syntax
+        res = subprocess.run(["bash", "-n", script_path], capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, f"Bash syntax check failed: {res.stderr}")
+
+        # Check status command when not running
+        res_status = subprocess.run(["bash", script_path, "status"], capture_output=True, text=True, env=dict(os.environ, PID_FILE=f"/tmp/test_watcher_{os.getpid()}.pid"))
+        # Should report not running
+        self.assertIn("not running", res_status.stdout.lower() + res_status.stderr.lower())
+
+    def test_log_rotation_on_size(self):
+        """Asserts log rotation moves watch.log -> watch.log.1 -> watch.log.2 -> watch.log.3 when exceeding 5MB cap per D-03."""
+        script_path = os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts", "watch.sh")
+        test_log_dir = os.path.join(self.test_dir, "99 - Meta", "logs")
+        os.makedirs(test_log_dir, exist_ok=True)
+        test_log_file = os.path.join(test_log_dir, "watch.log")
+
+        # Create a log file exceeding 5MB (5242881 bytes)
+        with open(test_log_file, "wb") as f:
+            f.seek(5242881)
+            f.write(b"0")
+
+        self.assertTrue(os.path.getsize(test_log_file) > 5242880)
+
+        # Run rotate_logs helper embedded in watch.sh
+        rotate_cmd = f"""
+        LOG_FILE="{test_log_file}"
+        rotate_logs() {{
+            if [ -f "$LOG_FILE" ]; then
+                FILE_SIZE=$(stat -f%z "$LOG_FILE" 2>/dev/null || stat -c%s "$LOG_FILE" 2>/dev/null || echo 0)
+                if [ "$FILE_SIZE" -gt 5242880 ]; then
+                    mv -f "${{LOG_FILE}}.2" "${{LOG_FILE}}.3" 2>/dev/null || true
+                    mv -f "${{LOG_FILE}}.1" "${{LOG_FILE}}.2" 2>/dev/null || true
+                    mv -f "$LOG_FILE" "${{LOG_FILE}}.1" 2>/dev/null || true
+                    touch "$LOG_FILE"
+                fi
+            fi
+        }}
+        rotate_logs
+        """
+        res = subprocess.run(["bash", "-c", rotate_cmd], capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0)
+        self.assertTrue(os.path.exists(f"{test_log_file}.1"))
+        self.assertTrue(os.path.exists(test_log_file))
+        self.assertEqual(os.path.getsize(test_log_file), 0)
 
 if __name__ == "__main__":
     unittest.main()

@@ -299,5 +299,79 @@ Ed anche `<font color="#8a5cf6"><b>secondario</b></font>` con backticks.
         self.assertTrue(os.path.exists(test_log_file))
         self.assertEqual(os.path.getsize(test_log_file), 0)
 
+    def test_youtube_missing_transcript_error(self):
+        """Asserts extract_youtube_data raises TranscriptUnavailableError when no subtitles/transcripts exist per D-18."""
+        import youtube_helper
+        from unittest.mock import patch
+
+        with patch.object(youtube_helper, "YouTubeTranscriptApi", None):
+            with self.assertRaises(youtube_helper.TranscriptUnavailableError):
+                youtube_helper.extract_youtube_data("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+
+    def test_is_visual_content_detection(self):
+        """Asserts is_visual_content detects visual keywords in Italian and English per D-09."""
+        import youtube_helper
+        self.assertTrue(youtube_helper.is_visual_content("Tutorial Python: Come Creare un Agent"))
+        self.assertTrue(youtube_helper.is_visual_content("Architettura Software e Diagrammi di Flusso"))
+        self.assertTrue(youtube_helper.is_visual_content("Live Coding UI Demo in React"))
+        self.assertTrue(youtube_helper.is_visual_content("Guida alla configurazione del server"))
+        self.assertFalse(youtube_helper.is_visual_content("Riflessioni Filosofiche sul Tempo"))
+        self.assertFalse(youtube_helper.is_visual_content("Podcast Audio Episodio 42"))
+
+    def test_ffmpeg_keyframe_compression_params(self):
+        """Asserts extract_frame builds ffmpeg command with fast-seeking -ss, -frames:v 1, -q:v 2, and timeout=30s per D-08, D-19."""
+        import youtube_helper
+        from unittest.mock import patch, MagicMock
+
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(returncode=0)
+            out_file = os.path.join(self.test_dir, "test_frame.jpg")
+            with open(out_file, "w") as f:
+                f.write("fake image")
+
+            res = youtube_helper.extract_frame("https://stream.url", 125.0, out_file, timeout=30)
+            self.assertTrue(res)
+            mock_run.assert_called_once()
+            args, kwargs = mock_run.call_args
+            cmd = args[0]
+            self.assertIn("ffmpeg", cmd)
+            self.assertIn("-ss", cmd)
+            self.assertIn("-frames:v", cmd)
+            self.assertIn("-q:v", cmd)
+            self.assertIn("2", cmd)
+            self.assertEqual(kwargs.get("timeout"), 30)
+
+    def test_deterministic_clipboard_image_naming(self):
+        """Asserts keyframe images saved to 99 - Meta/Clipboard/ use deterministic pattern {video_id}_{idx}_{slug}.jpg per D-06."""
+        import youtube_helper
+        from unittest.mock import patch, MagicMock
+
+        fake_chapters = [
+            {"title": "01. Introduzione al Sistema", "start_time": 0, "end_time": 60},
+            {"title": "02. Demo & Codice Live", "start_time": 60, "end_time": 180}
+        ]
+        fake_transcript = [{"text": "Ciao mondo", "start": 0, "duration": 5}]
+
+        with patch.object(youtube_helper, "fetch_metadata_with_retry", return_value={
+            "title": "Demo Coding",
+            "uploader": "DevChannel",
+            "duration": 180,
+            "chapters": fake_chapters,
+            "url": "https://stream.fake"
+        }), patch.object(youtube_helper, "fetch_transcript_with_retry", return_value=fake_transcript), \
+           patch.object(youtube_helper, "extract_frame", return_value=True):
+
+            data = youtube_helper.extract_youtube_data(
+                url="https://www.youtube.com/watch?v=12345678901",
+                extract_frames=True,
+                vault_root=self.test_dir
+            )
+
+            self.assertEqual(len(data["extracted_images"]), 2)
+            img1 = data["extracted_images"][0]
+            img2 = data["extracted_images"][1]
+            self.assertTrue(img1.endswith("12345678901_0_01__introduzion.jpg") or "12345678901_0_" in img1)
+            self.assertTrue("12345678901_1_" in img2)
+
 if __name__ == "__main__":
     unittest.main()

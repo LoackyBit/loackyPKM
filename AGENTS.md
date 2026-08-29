@@ -157,21 +157,16 @@ updated: 2026-02-01T20:32
 tags: [tech/ai, tech/rag]   # Tassonomia gerarchica
 summary: "Sintesi concettuale esecutiva (120-180 caratteri, max 200) per retrieval sub-secondo."
 ---
-```
-
 ## Sezione Principale
 
-## Collegamenti
-
-- [[Nota Correlata 1]]
-- [[Nota Correlata 2]]
+Trattazione concettuale arricchita con evidenziazioni Style Guide ed eventuali diagrammi o formule LaTeX. I collegamenti semantici a [[Nota Correlata 1]] e [[Nota Correlata 2]] sono integrati direttamente nel discorso e sincronizzati nel frontmatter YAML `related: [...]`.
 
 ### 2. Blog Notes (`05 - Blog/`)
 
 ### 3. Visual Formatting & Highlights (Style Guide)
 
-- **Primary Concepts (Yellow Highlight):** `<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>`
-- **Secondary Concepts (Purple Highlight):** `<mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>`
+- **Primary Concepts (Yellow Highlight):** <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>
+- **Secondary Concepts (Purple Highlight):** <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>
 - **CRITICAL Highlight Rule:** Never wrap `<mark>` HTML tags in markdown backticks (e.g. `` `<mark...>` `` ❌). They must be rendered as raw HTML inline.
 - **Mermaid Diagrams:** Always quote node labels containing spaces or parentheses (e.g. `A["Nodo Principale (dettaglio)"]`), start blocks immediately with diagram header (`flowchart TD`), and never use raw HTML tags inside mermaid node labels.
 
@@ -272,7 +267,7 @@ summary: "Sintesi concettuale esecutiva (120-180 caratteri, max 200) per retriev
 - Depends on: Atlas and Blog notes for outbound references.
 - Purpose: Consolidated, permanent study notes, course notes, mindset articles, and public blog posts.
 - Location: `02 - Atlas/` (subdivided into `Animator2D`, `Corsi`, `Education`, `Finance`, `Mentality`, `Obsidian Second Brain`, `Palestra`, `Prompt`, `Technology`), `05 - Blog/`.
-- Contains: Long-form permanent notes with standardized YAML frontmatter, breadcrumbs, and `## Collegamenti`.
+- Contains: Long-form permanent notes with standardized YAML frontmatter, breadcrumbs, and organic inline wiki-links synchronized in `related: [...]`.
 - Purpose: Vault configurations, style guides, templates, system memory, and plugins.
 - Location: `99 - Meta/`, `.agents/`, `.obsidian/`
 
@@ -280,13 +275,13 @@ summary: "Sintesi concettuale esecutiva (120-180 caratteri, max 200) per retriev
 
 ### Primary Request Path (Raw Note Ingestion Pipeline)
 
-1. User ingests URL, raw text, or file via `brain-ingest` (`python3 "99 - Meta/Scripts/brain_ingest.py" --url ...`).
+1. User ingests URL, raw text, or file via `brain-ingest` (`python3 "99 - Meta/Scripts/brain_ingest.py" "<Sorgente>" --depth approfondimento`).
 2. `brain_ingest.py` acquires per-source lock `/tmp/brain_ingest_<hash>.lock`.
 3. If YouTube URL: `youtube_helper.py` fetches transcripts and optional screenshots into `99 - Meta/Clipboard/`.
-4. `brain_ingest.py` applies Style Guide formatting, autolinks concepts against vault titles, and writes `03 - Inbox/<Title>.md` with `status: draft`.
-5. `brain_ingest.py` registers the draft in `03 - Inbox/Review Dashboard.md` with checkbox `- [ ] Approva [[<Title>]]`.
+4. `brain_ingest.py` applies Style Guide formatting, autolinks concepts organically in prose, and writes `03 - Inbox/Draft/<Title>.md` with `status: draft`.
+5. `brain_ingest.py` registers the draft in `03 - Inbox/Review Dashboard.md` with checkbox `- [ ] Approva [[Draft/<Title>]]`.
 6. User checks checkbox to `- [x] Approva`: `watch.sh` or `brain_ingest.py --process-approvals` sets `status: permanent` and moves file to `02 - Atlas/...` or `05 - Blog/`.
-7. User checks checkbox to `[-] Approva`: `brain_ingest.py --process-approvals` deletes the staging note and associated clipboard screenshots.
+7. User checks checkbox to `[-] Approva`: `brain_ingest.py --process-approvals` deletes the staging draft, source note, and associated clipboard screenshots.
 
 ### State Management:
 
@@ -300,7 +295,7 @@ summary: "Sintesi concettuale esecutiva (120-180 caratteri, max 200) per retriev
 - Pattern: Navigational index with grouped wiki-links and short section overviews.
 - Purpose: Atomic or comprehensive conceptual note with high information density, standard breadcrumbs, and outbound connections.
 - Examples: `02 - Atlas/Technology/AI/Costruire Knowledge Base per AI con LLM Wiki.md`, `02 - Atlas/Finance/Come Evadere il Fisco Legalmente.md`.
-- Pattern: Frontmatter + Single-line Breadcrumb + Structured H2/H3 body with color highlights + `---` + `## Collegamenti`.
+- Pattern: Frontmatter + Single-line Breadcrumb + Structured H2/H3 body with color highlights + organic inline wiki-links.
 - Purpose: Encapsulated operational capability defining workflows, rules, and scripts for the 3 macro-flows.
 - Examples: `.agents/skills/brain-health/SKILL.md`, `.agents/skills/brain-ingest/SKILL.md`, `.agents/skills/brain-recall/SKILL.md`.
 - Pattern: YAML frontmatter metadata + step-by-step markdown protocol + helper scripts in `99 - Meta/Scripts/`.

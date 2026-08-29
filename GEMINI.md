@@ -7,7 +7,7 @@ aliases: []
 source: original
 title: "Gemini"
 date: '2026-07-17'
-updated: 2026-08-25T00:10
+updated: 2026-08-29T16:00
 tags: [meta/system, tech/ai]
 summary: "Memoria di sistema e system prompt permanente per l'assistente AI Gemini operante nel Vault Obsidian (Second Brain)."
 ---
@@ -49,7 +49,7 @@ Il Vault è organizzato rigorosamente secondo la seguente topologia di cartelle:
    - **Regola:** Contiene bozze, saggi e articoli tecnici pronti o in lavorazione per la pubblicazione web.
 
 6. `99 - Meta/` (Logica & Automazione)
-   - **Funzione:** Il centro di controllo del Vault. Contiene template di Obsidian, guide, script di automazione (`brain_health.py`, `brain_ingest.py`, `youtube_helper.py`, `watch.sh`) e la dashboard diagnostica statica `99 - Meta/Vault Health Dashboard.md`.
+   - **Funzione:** Il centro di controllo del Vault. Contiene template di Obsidian (`Nota Vault.md`, `Articolo Blog.md`, `Raw Inbox Note.md`), guide, script di automazione (`brain_health.py`, `brain_ingest.py`, `youtube_helper.py`, `watch.sh`) e la dashboard diagnostica statica `99 - Meta/Vault Health Dashboard.md`.
    - **Regola:** Ogni automazione, prompt di tool o script deve risiedere all'interno di questa struttura. Le nostre **Agent Skills** risiedono nella directory di configurazione degli agenti (`.agents/skills/`).
 
 ---
@@ -63,8 +63,10 @@ L'ecosistema agentico è consolidato in **3 sole macro-skills ufficiali** in `.a
    - *Comando:* `python3 "99 - Meta/Scripts/brain_health.py" --interactive` (o `--dry-run`, `--auto-fix`, `--dashboard-only`).
 
 2. **`brain-ingest` (`.agents/skills/brain-ingest/SKILL.md`):**
-   - Ingestione universale polimorfica (URL YouTube con timestamp/capitoli e frame opzionali in `99 - Meta/Clipboard/`, articoli web, testo libero, file locali), profondità modulare (`sintesi` vs `approfondimento`), formattazione Style Guide, autolinking semantico su note esistenti, lock per-fonte (`/tmp/brain_ingest_<hash>.lock`), staging in `03 - Inbox/` e aggiornamento tri-state di `03 - Inbox/Review Dashboard.md`.
-   - *Comando:* `python3 "99 - Meta/Scripts/brain_ingest.py" --url <URL> --depth <sintesi|approfondimento>` o `--process-approvals`.
+   - Ingestione universale polimorfica (URL YouTube con transcript/frame, articoli web, testo libero, file locali) articolata in 3 sole macro-fasi snelle (`Fase 1/3: Estrazione Sorgente`, `Fase 2/3: Rielaborazione Concettuale AI`, `Fase 3/3: Autolinking & Staging`).
+   - Modalità di default `--depth approfondimento` (trattazione densa, ricca ed esaustiva) con `--depth sintesi` opzionale (compatta, 1-2 schermate).
+   - Filtro aggressivo anti-sponsor/anti-slop, distillazione principi primi, anatomia adattiva senza emoji nei titoli H1-H3, nessun blocco finale `## Collegamenti`, evidenziazioni Style Guide, autolinking organico nella prosa sincronizzato in `related: [...]`, lock per-fonte (`/tmp/brain_ingest_<hash>.lock`), staging in `03 - Inbox/Draft/` e gestione tri-state in `03 - Inbox/Review Dashboard.md`.
+   - *Comando:* `python3 "99 - Meta/Scripts/brain_ingest.py" "<Sorgente>" --depth approfondimento` o `--process-approvals`.
 
 3. **`brain-recall` (`.agents/skills/brain-recall/SKILL.md`):**
    - Esperienza di consultazione e sintesi stile NotebookLM (invocazione duale CLI slash command `/brain-recall <query>` o chat naturale), risposte strutturate con sintesi esecutiva, citazioni esatte `[[Nome Nota]]` (e timestamp video), e guardia rigida anti-allucinazione (nessuna informazione inventata se assente nel Vault).
@@ -74,6 +76,9 @@ L'ecosistema agentico è consolidato in **3 sole macro-skills ufficiali** in `.a
 ## ⚙️ 4. Regole e Convenzioni Operative
 
 - **Allineamento della Memoria:** All'inizio di ogni sessione o quando necessario, l'agente deve leggere il file di memoria persistente `[[.agents/MEMORY.md]]` (e se necessario le note collegate in `.agents/memory/`) per allinearsi sul profilo utente, sullo stato dei progetti e sulle correzioni critiche da non ripetere.
+- **Titoli e Intestazioni (H1, H2, H3):** DIVIETO ASSOLUTO DI EMOJI nei titoli di note e intestazioni markdown (solo testo pulito: es. `# Titolo Nota`, `## Sintesi Esecutiva`, `## Quadro Concettuale`). Mai `# 🎯 Titolo`, `## 🔑 Takeaways`, `## 🏛️ Fondamenti`.
+- **Assorbimento Organico dei Collegamenti:** Nessuna sezione finale `## Collegamenti`, `## Note Correlate` o `## Vedi anche`. I wiki-link `[[Target Note]]` sono integrati direttamente nel discorso (max 2 per target) e indicizzati nel campo frontmatter `related: [...]`.
+- **Ecosistema Template Razionalizzato:** Esistono solo 2 template universali in `99 - Meta/Template/` (`Nota Vault.md` per Atlas e `Articolo Blog.md` per il Blog Quartz), oltre a `Raw Inbox Note.md` per le catture grezze.
 - **Wiki-links:** Utilizzare sempre la sintassi standard di Obsidian `[[Nome Nota]]` per i riferimenti incrociati. Evitare di linkare parole o concetti generici se la nota relativa non è presente nel Vault.
 - **YAML Frontmatter Standard a 10 Campi:** Tutte le note del Vault devono possedere un frontmatter YAML rigorosamente ordinato secondo la sequenza canonica:
   1. `status` (o `stage` + `draft` per il Blog)
@@ -88,7 +93,8 @@ L'ecosistema agentico è consolidato in **3 sole macro-skills ufficiali** in `.a
   10. `tags` (array flow-style di tag gerarchici: `[area/topic, ...]`)
   11. `summary` (stringa a doppi apici: sintesi esecutiva densa tra 120 e 180 caratteri, max 200)
 - **Giunzione YAML-Markdown:** Esattamente una riga vuota dopo la chiusura `---`, seguita dalla riga Breadcrumb (`[[Home MOC|Home]] / ...`), e poi il corpo Markdown. Nessun tag HTML o hashtag isolato nel corpo del testo.
-- **Evidenziazioni HTML (Style Guide):** Utilizzare `<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>` (giallo) e `<mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>` (viola). **Mai racchiudere i tag `<mark>` tra backtick markdown.**
+- **Evidenziazioni HTML (Style Guide):** Utilizzare <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark> (giallo) e <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark> (viola). **Mai racchiudere i tag `<mark>` tra backtick markdown.**
+- **Diagrammi Mermaid e LaTeX:** Quote sempre obbligatorie nei nodi Mermaid con caratteri speciali (`id["Etichetta"]`); formule LaTeX `$..$` o `$$..$$`.
 - **Integrità File System:** Non creare file al di fuori delle 6 directory principali (eccetto file di configurazione nella root come questo `GEMINI.md`).
 - **Approccio Proattivo:** Quando si analizzano o modificano note, cercare sempre proattivamente opportunità di auto-linking semantico con il resto del Vault, ma **solo ed esclusivamente** verso note effettivamente esistenti.
 - **Divieto Assoluto di Dataview:** Le dashboard devono rimanere in puro Markdown statico autogenerato da Python.

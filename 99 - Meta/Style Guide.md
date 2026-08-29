@@ -1,17 +1,3 @@
----
-status: permanent
-type: concept
-area: meta
-related: []
-source: original
-title: "Style Guide"
-date: '2026-04-21'
-updated: 2026-07-07T01:20
-tags: []
-summary: "<mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bparola</b</font</mark — parole chiave ASSOLUTE, concetti-cardine, tesi critiche fondamentali"
----
-[[Home MOC|Home]] / [[Meta]] / [[Style Guide]]
-
 ## Gerarchia evidenziatori (FONDAMENTALE)
 
 - `<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>parola</b></font></mark>` — parole chiave ASSOLUTE, concetti-cardine, tesi critiche fondamentali
@@ -20,15 +6,23 @@ summary: "<mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc88
 
 - Non abusare dei colori: le evidenziazioni gialle devono restare più rare e marcate, quelle viola più frequenti ma sempre mirate. Per capire ‘quanto’ colore usare, guarda la frequenza delle evidenziazioni presenti in [[Gabriele d'Annunzio]] e [[Giovanni Pascoli]] (le due note create da me, originali)
 
-- applica il codice html così com'è, sostituendo 'parola'
+- **Regola Critica HTML**: applica il codice html così com'è, sostituendo 'parola'. **Mai racchiudere i tag `<mark>` o `<font>` tra backtick markdown.**
 
 - **grassetto normale** senza html — enfasi generica su parole o frasi rilevanti
 
-## Formattazione
+## Anatomia delle Note e Tipografia
+
+- **Titoli e Intestazioni (H1, H2, H3)**: DIVIETO ASSOLUTO DI EMOJI nei titoli. I titoli devono contenere solo testo pulito (es. `# Titolo Nota`, `## Sintesi Esecutiva`, `## Quadro Concettuale`). Mai inserire emoji decorative come `# 🎯`, `## 🔑`, `## 🏛️`.
+- **Collegamenti Interni (Wiki-links)**: Incorporati organicamente nel flusso della prosa (es. `[[Target Note]]`, max 2 menzioni per nota target).
+- **Divieto Sezione Collegamenti**: Non inserire mai una sezione finale separata come `## Collegamenti`, `## Note Correlate` o `## Vedi anche`. I collegamenti sono tessuti nel testo e sincronizzati nel frontmatter YAML (`related: [...]`).
+- **Diagrammi Mermaid**: Tutti i nodi con spazi o caratteri speciali devono avere etichette tra virgolette (es. `A["Nodo Principale (dettaglio)"]`). Mai inserire tag HTML all'interno dei nodi Mermaid.
+- **Formule Matematiche (LaTeX)**: Usa la sintassi standard LaTeX inline (`$E = mc^2$`) o in blocco (`$$\int_a^b f(x)dx$$`).
+
+## Formattazione e Callouts
 
 - Corsivo (_titolo_) per titoli di opere
 
-- callouts:
+- Callouts:
 	- es:
 	  ```
 	  >[!quote] Autore
@@ -48,44 +42,38 @@ summary: "<mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc88
 	- example  
 	- quote, cite
 
-- checkbox:
+- Checkbox (Tri-State Review & Tasking):
 	- | Syntax  | Description |
 	  | --- | --- |
-	  | `- [ ]` | To-do       |
-| `- [/]` | Incomplete  |
-| `- [x]` | Done        |
-| `- [-]` | Canceled    |
-| `- [>]` | Forwarded   |
-| `- [<]` | Scheduling  |
-| `- [?]` | Question    |
-| `- [!]` | Important   |
-| `- [*]` | Star        |
-| `- ["]` | Quote       |
-| `- [l]` | Location    |
-| `- [b]` | Bookmark    |
-| `- [i]` | Information |
-| `- [S]` | Savings     |
-| `- [I]` | Idea        |
-| `- [p]` | Pros        |
-| `- [c]` | Cons        |
-| `- [f]` | Fire        |
-| `- [k]` | Key         |
-| `- [w]` | Win         |
-| `- [u]` | Up          |
-| `- [d]` | Down        |
-| `- [+]` | Add         |
-| `- [B]` | Brainstorm  |
-| `- [a]` | Alarm       |
-| `- [n]` | Note        |
-| `- [R]` | Review      |
-| `- [t]` | Time        |
-| `- [P]` | Phone       |
-| `- [L]` | Love        |
+	  | `- [ ]` | To-do / Pending Ingestion |
+	  | `- [/]` | Incomplete  |
+	  | `- [x]` | Done / Approved Ingestion |
+	  | `- [-]` | Canceled / Rejected Draft |
+	  | `- [>]` | Forwarded   |
+	  | `- [<]` | Scheduling  |
+	  | `- [?]` | Question    |
+	  | `- [!]` | Important   |
+	  | `- [*]` | Star        |
+	  | `- ["]` | Quote       |
+	  | `- [l]` | Location    |
+	  | `- [b]` | Bookmark    |
+	  | `- [i]` | Information |
+	  | `- [S]` | Savings     |
+	  | `- [I]` | Idea        |
+	  | `- [p]` | Pros        |
+	  | `- [c]` | Cons        |
+	  | `- [f]` | Fire        |
+	  | `- [k]` | Key         |
+	  | `- [w]` | Win         |
+	  | `- [u]` | Up          |
+	  | `- [d]` | Down        |
+	  | `- [+]` | Add         |
+	  | `- [B]` | Brainstorm  |
+	  | `- [a]` | Alarm       |
+	  | `- [n]` | Note        |
+	  | `- [R]` | Review      |
+	  | `- [t]` | Time        |
+	  | `- [P]` | Phone       |
+	  | `- [L]` | Love        |
 
-- Tabelle: usa sempre il formato **Markdown standard** (no HTML) per garantire la corretta visualizzazione in Obsidian
-
-- Link interni: incorporati inline — mai in una sezione separata "Vedi anche". esempio: [[Giovanni Pascoli#^4ae267|Giovanni Pascoli - esempio collegamento blocco ‘fonosimbolismo’]]
-
----
-
-## Collegamenti
+- Tabelle: usa sempre il formato **Markdown standard** (no HTML) per garantire la corretta visualizzazione in Obsidian.

@@ -1,15 +1,3 @@
----
-status: permanent
-type: concept
-area: meta
-related: []
-source: original
-title: "Raw Inbox Note"
-date: '2026-07-16'
-updated: 2026-08-24T22:28
-tags: []
----
-
 <%*
 // ========== CONFIGURAZIONE ==========
 const INBOX_FOLDER = "03 - Inbox";
@@ -26,76 +14,74 @@ if (title.startsWith('Untitled') || title === "") {
 
 // 2. SELEZIONE TIPO DI NOTA
 const options = [
-    "🎥 Trascrizione YouTube",
-    "💻 Log Attività / Nota Veloce",
-    "📝 Altro (Generico)"
+    "Trascrizione YouTube",
+    "Log Attività / Nota Veloce",
+    "Altro (Generico)"
 ];
 const selectedType = await tp.system.suggester(options, options, true, "Seleziona il tipo di nota grezza:");
 
 let tags = ["raw"];
 let typePlaceholder = "";
-let visualIcon = "📝";
-let noteType = "concept";
-let noteSource = "original";
+let videoUrl = "";
+let isReady = false;
 
-if (selectedType === "🎥 Trascrizione YouTube") {
-    tags = ["tech/video", "tech/transcript", "raw"];
-    visualIcon = "🎥";
-    noteType = "video";
+if (selectedType === "Trascrizione YouTube") {
+    tags = ["youtube", "transcript", "raw"];
     
     // Chiede l'URL del video
-    let videoUrl = await tp.system.prompt("Inserisci l'URL del video YouTube (opzionale):") || "";
+    videoUrl = await tp.system.prompt("Inserisci l'URL del video YouTube (opzionale):") || "";
+    
+    // Se ha inserito un URL, chiede se vuole elaborarlo subito
     if (videoUrl) {
-        noteSource = videoUrl;
+        const readyOptions = ["Sì (Elabora subito)", "No (Modifica prima la nota)"];
+        const readyChoice = await tp.system.suggester(readyOptions, [true, false], true, "Vuoi contrassegnare la nota come pronta per l'IA subito?");
+        if (readyChoice === true) {
+            isReady = true;
+        }
     }
     
     typePlaceholder = `- **Data Trascrizione**: ${tp.date.now("YYYY-MM-DD")}
 
 ---
-## 📝 Testo Grezzo della Trascrizione
-<!-- Incolla qui sotto il testo grezzo della trascrizione audio del video da elaborare -->
+## Testo Grezzo della Trascrizione
+<!-- Incolla qui sotto il testo grezzo della trascrizione audio del video da elaborare (opzionale se hai inserito video_url) -->
 
 `;
-} else if (selectedType === "💻 Log Attività / Nota Veloce") {
-    tags = ["tech/log", "raw"];
-    visualIcon = "💻";
-    noteType = "project";
+} else if (selectedType === "Log Attività / Nota Veloce") {
+    tags = ["log", "personal", "raw"];
     typePlaceholder = `- **Data Attività**: ${tp.date.now("YYYY-MM-DD")}
 - **Tipo**: [es. Configurazione, Sviluppo, Studio, ecc.]
 
 ---
-## 🛠️ Cosa ho fatto / Azioni eseguite
+## Cosa ho fatto / Azioni eseguite
 <!-- Descrivi qui in modo sintetico cosa hai fatto, i comandi usati, link utili, ecc. -->
 
 `;
 } else {
     tags = ["raw"];
-    visualIcon = "📝";
-    noteType = "concept";
     typePlaceholder = `---
-## 📝 Appunti Grezzi / Idee
+## Appunti Grezzi / Idee
 <!-- Scrivi o incolla qui sotto i tuoi appunti grezzi -->
 
 `;
 }
 
-// Costruisci il contenuto della nota con schema canonico
+let videoUrlYaml = "";
+if (selectedType === "Trascrizione YouTube") {
+    videoUrlYaml = `\nvideo_url: "${videoUrl}"\nchannel: ""`;
+}
+
+// Costruisci il contenuto della nota
 let fileContent = `---
-status: draft
-type: ${noteType}
-area: tech
-related: []
-aliases: []
-source: ${noteSource}
+ready: ${isReady}
 title: "${title}"
 date: ${tp.date.now("YYYY-MM-DD")}
-updated: ${tp.date.now("YYYY-MM-DDTHH:mm")}
 tags: [${tags.join(", ")}]
-summary: "Bozza grezza in attesa di elaborazione GTD."
+area: ""${videoUrlYaml}
 ---
 [[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[${title}]]
 
-# ${visualIcon} ${title}
+# ${title}
 
 ${typePlaceholder}
 `;
@@ -116,6 +102,3 @@ try {
     new Notice(`⚠ Errore nello spostamento: ${error.message}`);
 }
 -%>
-
----
-## Collegamenti

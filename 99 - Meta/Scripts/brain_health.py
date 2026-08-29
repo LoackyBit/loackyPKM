@@ -44,7 +44,7 @@ CONTROLLED_AREAS = {
 }
 
 VAULT_DIRECTORIES = {
-    '01 - Map of Content', '02 - Atlas', '03 - Inbox', '04 - Calendar', '05 - Blog', '99 - Meta'
+    '01 - Map of Content', '02 - Atlas', '03 - Inbox', '04 - Calendar', '05 - Blog'
 }
 
 IGNORE_FILES = {
@@ -53,7 +53,8 @@ IGNORE_FILES = {
 
 IGNORE_FOLDERS = {
     '.git', '.obsidian', '.agents', '.gemini', '.trash', '.vscode',
-    '.space', '.makemd', '.smart-env', '.antigravitycli', '.codacy', 'node_modules', 'tests', '.planning'
+    '.space', '.makemd', '.smart-env', '.antigravitycli', '.codacy',
+    'node_modules', 'tests', '.planning', '99 - Meta', 'Template'
 }
 
 TAG_HIERARCHY_MAP = {
@@ -182,17 +183,22 @@ def clean_filename(filename: str) -> str:
 
 
 def clean_title_str(title: str) -> str:
-    """Formats string to intelligent Title Case preserving Templater syntax, minor words, and acronyms."""
+    """Formats string to intelligent Title Case preserving Templater syntax, minor words, and acronyms, strictly excluding / : \\."""
     base = title.strip()
     if '<%' in base:
         return base
     if base.endswith('.md'):
         base = base[:-3]
     base = base.replace('’', "'")
-    base = ''.join(c for c in base if ord(c) < 128 or c.isalnum() or c.isspace() or c == "'")
-    for spec in ['+', '?', '!', '(', ')', '[', ']', '_']:
+    # Strictly disallow and sanitize / : \ into hyphen separators
+    for forbidden in ['/', '\\', ':']:
+        base = base.replace(forbidden, ' - ')
+    base = ''.join(c for c in base if ord(c) < 128 or c.isalnum() or c.isspace() or c in ("'", "-"))
+    for spec in ['+', '?', '!', '(', ')', '[', ']', '_', '.']:
         base = base.replace(spec, ' ')
-    base = ' '.join(base.split())
+    base = re.sub(r'\s*-\s*', ' - ', base)
+    base = re.sub(r'(\s*-\s*)+', ' - ', base)
+    base = ' '.join(base.split()).strip(' -.')
 
     words = base.split()
     title_words = []
@@ -562,6 +568,22 @@ def format_canonical_frontmatter(metadata: Dict[str, Any], is_blog: bool = False
         sum_str = str(metadata['summary']).strip().replace('\n', ' ').strip('"').strip("'")
         if sum_str:
             doc['summary'] = DoubleQuotedScalarString(sum_str)
+
+    # 11. Extra optional metadata based on type and staging (e.g. video_url, channel, target_path)
+    if 'target_path' in metadata and metadata['target_path']:
+        doc['target_path'] = DoubleQuotedScalarString(str(metadata['target_path']).strip().strip('"'))
+
+    type_val = str(doc.get('type', '')).lower()
+    if type_val == 'video':
+        if 'video_url' in metadata and metadata['video_url']:
+            doc['video_url'] = DoubleQuotedScalarString(str(metadata['video_url']).strip().strip('"'))
+        if 'channel' in metadata and metadata['channel']:
+            doc['channel'] = DoubleQuotedScalarString(str(metadata['channel']).strip().strip('"'))
+    elif type_val in ('lecture', 'lesson'):
+        if 'subject' in metadata and metadata['subject']:
+            doc['subject'] = DoubleQuotedScalarString(str(metadata['subject']).strip().strip('"'))
+        if 'professor' in metadata and metadata['professor']:
+            doc['professor'] = DoubleQuotedScalarString(str(metadata['professor']).strip().strip('"'))
 
     stream = StringIO()
     yaml.dump(doc, stream)

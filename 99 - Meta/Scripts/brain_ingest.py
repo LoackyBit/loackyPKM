@@ -314,14 +314,28 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
 
     if finish_in_progress:
         f_clean = brain_health.clean_title_str(finish_in_progress).lower()
-        new_prog = []
-        for l in prog_lines:
-            m_pr = re.search(r'\[\[Draft/(?P<name>.*?)\]\]', l)
-            name_clean = brain_health.clean_title_str(m_pr.group('name')).lower() if m_pr else l.lower()
-            if f_clean in name_clean or name_clean in f_clean or finish_in_progress.lower() in l.lower():
-                continue
-            new_prog.append(l)
-        prog_lines = new_prog
+        fp_draft = os.path.join(draft_dir, f"{finish_in_progress}.md")
+        keep_in_prog = False
+        if os.path.exists(fp_draft):
+            try:
+                with open(fp_draft, 'r', encoding='utf-8', errors='ignore') as d_f:
+                    d_c = d_f.read(800)
+                has_fm, d_fm, _, _ = brain_health.split_markdown_note(d_c)
+                if has_fm:
+                    meta = brain_health.safe_load_frontmatter(d_fm, brain_health.build_yaml_engine())
+                    if meta.get('status') == 'in-progress':
+                        keep_in_prog = True
+            except Exception:
+                pass
+        if not keep_in_prog:
+            new_prog = []
+            for l in prog_lines:
+                m_pr = re.search(r'\[\[Draft/(?P<name>.*?)\]\]', l)
+                name_clean = brain_health.clean_title_str(m_pr.group('name')).lower() if m_pr else l.lower()
+                if f_clean in name_clean or name_clean in f_clean or finish_in_progress.lower() in l.lower():
+                    continue
+                new_prog.append(l)
+            prog_lines = new_prog
 
     if add_error:
         entry = f"- [ ] [!] Riprova: {add_error[0]} — Motivo: {add_error[1]}"
@@ -340,6 +354,25 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
             if f.endswith('.md') and not f.startswith('.'):
                 t = f[:-3]
                 t_clean = brain_health.clean_title_str(t).lower()
+                fp = os.path.join(draft_dir, f)
+                is_in_prog = False
+                try:
+                    with open(fp, 'r', encoding='utf-8', errors='ignore') as d_f:
+                        d_content = d_f.read(800)
+                    has_fm, d_fm, _, _ = brain_health.split_markdown_note(d_content)
+                    if has_fm:
+                        meta = brain_health.safe_load_frontmatter(d_fm, brain_health.build_yaml_engine())
+                        if meta.get('status') == 'in-progress':
+                            is_in_prog = True
+                except Exception:
+                    pass
+
+                if is_in_prog:
+                    if not any(f"[[Draft/{t}]]" in pl or t_clean in pl.lower() for pl in prog_lines):
+                        prog_lines.append(f"- ⏳ [[Draft/{t}]] (In Rielaborazione...)")
+                    active_in_prog_names.append(t_clean)
+                    continue
+
                 if any(t_clean in ap or ap in t_clean for ap in active_in_prog_names):
                     continue
                 src = os.path.exists(os.path.join(source_dir, f))
@@ -386,13 +419,18 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
 
 
 def stage_note(vault_root: str, title: str, body: str, metadata: Optional[Dict[str, Any]] = None,
-               target_dir: str = "02 - Atlas", source_content: Optional[str] = None) -> str:
+               target_dir: str = "02 - Atlas", source_content: Optional[str] = None,
+               status: Optional[str] = None) -> str:
     """Writes draft to 03 - Inbox/Draft/<Title>.md and source to 03 - Inbox/Source/<Title>.md."""
     clean_title = brain_health.clean_title_str(title)
     draft_dir, source_dir = os.path.join(vault_root, "03 - Inbox", "Draft"), os.path.join(vault_root, "03 - Inbox", "Source")
     os.makedirs(draft_dir, exist_ok=True); os.makedirs(source_dir, exist_ok=True)
     meta = dict(metadata) if metadata else {}
-    meta['title'], meta['status'] = clean_title, 'draft'
+    meta['title'] = clean_title
+    if status is not None:
+        meta['status'] = status
+    else:
+        meta.setdefault('status', 'draft')
     meta['target_path'] = meta.get('target_path', f"{target_dir}/{clean_title}.md")
     for k, v in [('date', datetime.date.today().isoformat()), ('type', 'concept'), ('area', 'tech'), ('source', 'original'), ('tags', [f"{meta.get('area', 'tech')}/raw"])]:
         meta.setdefault(k, v)
@@ -406,7 +444,10 @@ def stage_note(vault_root: str, title: str, body: str, metadata: Optional[Dict[s
     if source_content is not None:
         with open(os.path.join(source_dir, f"{clean_title}.md"), "w", encoding="utf-8") as f: f.write(source_content)
 
-    update_review_dashboard(vault_root, finish_in_progress=clean_title)
+    if meta.get('status') == 'in-progress':
+        update_review_dashboard(vault_root, in_progress=clean_title, phase="In Rielaborazione...")
+    else:
+        update_review_dashboard(vault_root, finish_in_progress=clean_title)
     return draft_path
 
 

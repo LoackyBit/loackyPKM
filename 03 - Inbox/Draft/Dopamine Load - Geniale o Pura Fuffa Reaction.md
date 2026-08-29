@@ -1,5 +1,5 @@
 ---
-status: draft
+status: in-progress
 type: video
 area: mentality
 related: ["[[Guida al Dopamine Detox]]", "[[Come Organizzare le Giornate]]", "[[Learning to Learn ITA]]"]

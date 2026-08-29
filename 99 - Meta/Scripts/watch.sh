@@ -13,12 +13,26 @@ PID_FILE="${PID_FILE:-/tmp/brain_watcher.pid}"
 OPENED_FLAG="/tmp/obsidian_dashboard_opened"
 
 mkdir -p "$LOG_DIR"
-export PATH="/Users/lorenzo/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+# Python interpreter discovery with dependency check
+PYTHON_BIN=""
+for p in "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3" "$(command -v python3 2>/dev/null)" "/usr/local/bin/python3" "/opt/homebrew/bin/python3" "/usr/bin/python3"; do
+    if [ -n "$p" ] && [ -x "$p" ] && "$p" -c "import ruamel.yaml" >/dev/null 2>&1; then
+        PYTHON_BIN="$p"
+        break
+    fi
+done
+if [ -z "$PYTHON_BIN" ]; then
+    PYTHON_BIN="python3"
+fi
+
+export PATH="$(dirname "$PYTHON_BIN"):$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 rotate_logs() {
     if [ -f "$LOG_FILE" ]; then
         FILE_SIZE=$(stat -f%z "$LOG_FILE" 2>/dev/null || stat -c%s "$LOG_FILE" 2>/dev/null || echo 0)
-        if [ "$FILE_SIZE" -gt 5242880 ]; then
+        FILE_SIZE="${FILE_SIZE:-0}"
+        if [ "$FILE_SIZE" -gt 5242880 ] 2>/dev/null; then
             mv -f "${LOG_FILE}.2" "${LOG_FILE}.3" 2>/dev/null || true
             mv -f "${LOG_FILE}.1" "${LOG_FILE}.2" 2>/dev/null || true
             mv -f "$LOG_FILE" "${LOG_FILE}.1" 2>/dev/null || true
@@ -52,6 +66,9 @@ is_running() {
 }
 
 cleanup() {
+    if [ -n "$SCAN_PID" ] && kill -0 "$SCAN_PID" 2>/dev/null; then
+        kill -9 "$SCAN_PID" 2>/dev/null || true
+    fi
     rm -f "$PID_FILE" "$OPENED_FLAG"
     log_msg "Watcher daemon stopped."
 }
@@ -65,11 +82,49 @@ run_loop() {
     echo "$$" > "$PID_FILE"
     trap cleanup EXIT SIGTERM SIGINT
 
+    SCAN_PID=""
     log_msg "Starting Second Brain Watcher daemon on $VAULT_PATH (PID $$)"
 
     while true; do
         shopt -s nullglob
         has_work=false
+
+        # Re-check background scan status
+        if [ -n "$SCAN_PID" ] && ! kill -0 "$SCAN_PID" 2>/dev/null; then
+            SCAN_PID=""
+        fi
+
+        # High-priority check for Panic Button in Review Dashboard
+        if [ -f "$DASHBOARD_FILE" ]; then
+            if grep -Eq '^[[:space:]]*\-[[:space:]]+\[[xX\-]\][[:space:]]+.*(🛑|Interrompi|Panic[[:space:]]+Button)' "$DASHBOARD_FILE" 2>/dev/null; then
+                log_msg "Panic button triggered in Review Dashboard! Aborting active ingestions..."
+                if [ -n "$SCAN_PID" ] && kill -0 "$SCAN_PID" 2>/dev/null; then
+                    kill -15 "$SCAN_PID" 2>/dev/null || true
+                    sleep 0.2
+                    kill -9 "$SCAN_PID" 2>/dev/null || true
+                    SCAN_PID=""
+                fi
+                "$PYTHON_BIN" "$VAULT_PATH/99 - Meta/Scripts/brain_ingest.py" --panic >> "$LOG_FILE" 2>&1
+            fi
+        fi
+
+        # Check for pending raw notes ready for intake in Inbox
+        has_raw_work=false
+        for inbox_file in "$INBOX_PATH"/*.md; do
+            bname="$(basename "$inbox_file")"
+            if [ -f "$inbox_file" ] && [ "$bname" != "Review Dashboard.md" ]; then
+                if grep -Eq '^[[:space:]]*ready:[[:space:]]*(true|"true"|1)' "$inbox_file" 2>/dev/null; then
+                    has_raw_work=true
+                    break
+                fi
+            fi
+        done
+
+        if [ "$has_raw_work" = true ] && [ -z "$SCAN_PID" ]; then
+            log_msg "Raw inbox note ready for processing detected. Invoking scan-inbox in background..."
+            "$PYTHON_BIN" "$VAULT_PATH/99 - Meta/Scripts/brain_ingest.py" --scan-inbox >> "$LOG_FILE" 2>&1 &
+            SCAN_PID=$!
+        fi
 
         # Check for pending approvals/rejections in Review Dashboard with debouncing
         if [ -f "$DASHBOARD_FILE" ]; then
@@ -78,8 +133,8 @@ run_loop() {
             sleep 1
             size2=$(stat -f%z "$DASHBOARD_FILE" 2>/dev/null || stat -c%s "$DASHBOARD_FILE" 2>/dev/null || echo 0)
 
-            if [ "$size1" -eq "$size2" ]; then
-                if grep -q "\- \[x\] Approva" "$DASHBOARD_FILE" || grep -q "\- \[\-\] Approva" "$DASHBOARD_FILE"; then
+            if [ "${size1:-0}" -eq "${size2:-0}" ] 2>/dev/null; then
+                if grep -Eq '\- \[[x\-]\]' "$DASHBOARD_FILE"; then
                     has_work=true
                 fi
             fi
@@ -87,14 +142,18 @@ run_loop() {
 
         if [ "$has_work" = true ]; then
             log_msg "Dashboard review activity detected. Invoking brain_ingest.py..."
-            python3 "$VAULT_PATH/99 - Meta/Scripts/brain_ingest.py" --process-approvals >> "$LOG_FILE" 2>&1
+            "$PYTHON_BIN" "$VAULT_PATH/99 - Meta/Scripts/brain_ingest.py" --process-approvals >> "$LOG_FILE" 2>&1
         fi
 
         # Obsidian Launch Integration (Non-stealing single notification per session)
         if pgrep -x "Obsidian" >/dev/null 2>&1; then
             if [ -f "$DASHBOARD_FILE" ] && grep -q "\- \[ \]" "$DASHBOARD_FILE" && [ ! -f "$OPENED_FLAG" ]; then
                 log_msg "Obsidian running with pending reviews. Opening Review Dashboard..."
-                open "obsidian://open?vault=loackyPKM&file=03%20-%20Inbox%2FReview%20Dashboard" 2>/dev/null || true
+                if command -v open >/dev/null 2>&1; then
+                    open "obsidian://open?vault=loackyPKM&file=03%20-%20Inbox%2FReview%20Dashboard" 2>/dev/null || true
+                elif command -v xdg-open >/dev/null 2>&1; then
+                    xdg-open "obsidian://open?vault=loackyPKM&file=03%20-%20Inbox%2FReview%20Dashboard" 2>/dev/null || true
+                fi
                 touch "$OPENED_FLAG"
             fi
         else
@@ -114,7 +173,7 @@ start_daemon() {
     fi
 
     echo "Starting Second Brain Watcher daemon..."
-    nohup "$0" run >/dev/null 2>&1 &
+    nohup "$SCRIPT_DIR/watch.sh" run >/dev/null 2>&1 &
     sleep 1
 
     if is_running; then

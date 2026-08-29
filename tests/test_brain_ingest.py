@@ -14,7 +14,8 @@ import brain_ingest
 class TestBrainIngest(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
-        os.makedirs(os.path.join(self.test_dir, "03 - Inbox"), exist_ok=True)
+        os.makedirs(os.path.join(self.test_dir, "03 - Inbox", "Draft"), exist_ok=True)
+        os.makedirs(os.path.join(self.test_dir, "03 - Inbox", "Source"), exist_ok=True)
         os.makedirs(os.path.join(self.test_dir, "02 - Atlas", "Tech"), exist_ok=True)
         os.makedirs(os.path.join(self.test_dir, "99 - Meta", "Clipboard"), exist_ok=True)
 
@@ -72,11 +73,57 @@ class TestBrainIngest(unittest.TestCase):
         raw_text = "Ecco alcuni appunti sparsi presi durante la conferenza sul deep learning..."
         self.assertEqual(brain_ingest.detect_input_type(raw_text), "text")
 
+    def test_inbox_staging_folders(self):
+        """Asserts staging writes draft to 03 - Inbox/Draft/<Title>.md and source to 03 - Inbox/Source/<Title>.md without legacy prefixes."""
+        title = "Architettura Trasformatore"
+        body = "Corpo della nota bozza generata."
+        raw_source = "Trascrizione o appunti originali grezzi."
+        meta = {"title": title, "area": "tech"}
+
+        draft_path = brain_ingest.stage_note(
+            vault_root=self.test_dir,
+            title=title,
+            body=body,
+            metadata=meta,
+            target_dir="02 - Atlas/Tech & AI",
+            source_content=raw_source
+        )
+
+        expected_draft = os.path.join(self.test_dir, "03 - Inbox", "Draft", f"{title}.md")
+        expected_source = os.path.join(self.test_dir, "03 - Inbox", "Source", f"{title}.md")
+
+        self.assertEqual(draft_path, expected_draft)
+        self.assertTrue(os.path.exists(expected_draft))
+        self.assertTrue(os.path.exists(expected_source))
+
+        # Verify no legacy prefix in filename
+        self.assertFalse(os.path.basename(draft_path).startswith(("seen-", "proposed-", "raw-")))
+        self.assertFalse(os.path.basename(expected_source).startswith(("seen-", "proposed-", "raw-")))
+
+        with open(draft_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("status: draft", content)
+        self.assertIn('target_path: "02 - Atlas/Tech & AI/Architettura Trasformatore.md"', content)
+        self.assertIn("[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[Architettura Trasformatore]]", content)
+
+    def test_autolinking_strictly_real_notes(self):
+        """Asserts autolink_content scans only real note titles on disk and strictly refuses to create speculative links per D-03."""
+        # Create real target notes in test vault
+        note1 = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Reti Neurali.md")
+        with open(note1, "w", encoding="utf-8") as f:
+            f.write("# Reti Neurali\nContent.")
+
+        raw_text = "Studiamo le Reti Neurali e anche Concetto Inesistente Che Non Esiste nel Vault."
+        linked_text, links = brain_ingest.autolink_content(self.test_dir, raw_text, "Nuova Nota")
+
+        self.assertIn("[[Reti Neurali]]", linked_text)
+        self.assertNotIn("[[Concetto Inesistente Che Non Esiste nel Vault]]", linked_text)
+        self.assertEqual(links, ["[[Reti Neurali]]"])
+
     def test_contextual_autolinking(self):
         """Asserts autolink_content scans real vault titles, wraps occurrences in [[Target Note]]
-        (max 2 per target), and populates related: ['[[Target Note]]'] and ## Collegamenti per D-07.
+        (max 2 per target), and populates related: ['[[Target Note]]'] per D-07.
         """
-        # Create target notes in test vault
         note1 = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Prompt Engineering.md")
         with open(note1, "w", encoding="utf-8") as f:
             f.write("# Prompt Engineering\nContent.")
@@ -101,6 +148,27 @@ Anche una terza menzione di Prompt Engineering non dovrebbe superare il cap.
         occurrences = linked_body.count("[[Prompt Engineering]]")
         self.assertEqual(occurrences, 2)
 
+    def test_autolink_preserves_code_blocks(self):
+        """Asserts autolink_content does not inject wiki-links inside fenced code blocks or inline code."""
+        note1 = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Prompt Engineering.md")
+        with open(note1, "w", encoding="utf-8") as f:
+            f.write("# Prompt Engineering\nContent.")
+
+        raw_body = """# Test Code
+Ecco del codice Python:
+```python
+# Prompt Engineering in code
+def run_prompt():
+    return "Prompt Engineering"
+```
+E qui del codice inline `Prompt Engineering`.
+Mentre qui nel testo normale Prompt Engineering deve essere linkato.
+"""
+        linked_body, links = brain_ingest.autolink_content(self.test_dir, raw_body, "Test Code")
+        self.assertIn("```python\n# Prompt Engineering in code\ndef run_prompt():\n    return \"Prompt Engineering\"\n```", linked_body)
+        self.assertIn("`Prompt Engineering`", linked_body)
+        self.assertIn("Mentre qui nel testo normale [[Prompt Engineering]] deve essere linkato.", linked_body)
+
     def test_style_guide_highlight_sanitization(self):
         """Asserts sanitize_style_highlights strips markdown backticks from <mark> and <font> tags per D-10."""
         dirty = """Qui abbiamo `<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>` con backticks.
@@ -113,84 +181,10 @@ Ed anche `<font color="#8a5cf6"><b>secondario</b></font>` con backticks.
         self.assertIn('<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>', cleaned)
         self.assertIn('<font color="#8a5cf6"><b>secondario</b></font>', cleaned)
 
-    def test_staging_and_review_dashboard_tri_state(self):
-        """Asserts staging notes are written to 03 - Inbox/<Title>.md with status: draft,
-        registered in 03 - Inbox/Review Dashboard.md, and process_tri_state_approvals promotes
-        [x] to status: permanent (moving to target) or deletes draft on [-] per D-06, D-11.
-        """
-        # 1. Stage a note
-        title = "Guida Architetture LLM"
-        body = "Corpo della nota di prova per architetture transformer."
-        meta = {
-            "title": title,
-            "type": "concept",
-            "area": "tech",
-            "source": "original",
-            "date": "2026-08-25",
-            "tags": ["tech/ai", "tech/llm"],
-            "summary": "Guida introduttiva ai modelli linguistici transformer."
-        }
-        staged_path = brain_ingest.stage_note(
-            vault_root=self.test_dir,
-            title=title,
-            body=body,
-            metadata=meta,
-            target_dir="02 - Atlas/Tech"
-        )
-        self.assertTrue(os.path.exists(staged_path))
-        with open(staged_path, "r", encoding="utf-8") as f:
-            content = f.read()
-        self.assertIn("status: draft", content)
-        self.assertIn("[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[Guida Architetture LLM]]", content)
-
-        # Check Review Dashboard
-        dashboard_file = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
-        self.assertTrue(os.path.exists(dashboard_file))
-        with open(dashboard_file, "r", encoding="utf-8") as f:
-            dash_content = f.read()
-        self.assertIn("- [ ] Approva [[Guida Architetture LLM]]", dash_content)
-
-        # 2. Simulate User Approval [x]
-        with open(dashboard_file, "w", encoding="utf-8") as f:
-            f.write(dash_content.replace("- [ ] Approva [[Guida Architetture LLM]]", "- [x] Approva [[Guida Architetture LLM]]"))
-
-        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
-        self.assertEqual(processed, 1)
-
-        # Staged note moved to 02 - Atlas/Tech/
-        promoted_path = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Guida Architetture LLM.md")
-        self.assertTrue(os.path.exists(promoted_path))
-        self.assertFalse(os.path.exists(staged_path))
-
-        with open(promoted_path, "r", encoding="utf-8") as f:
-            promoted_content = f.read()
-        self.assertIn("status: permanent", promoted_content)
-        self.assertIn("[[Home MOC|Home]] / [[Tech]] / [[Guida Architetture LLM]]", promoted_content)
-
-        # 3. Simulate User Rejection [-] for a second note
-        rej_title = "Nota da Rifiutare"
-        staged_rej = brain_ingest.stage_note(
-            vault_root=self.test_dir,
-            title=rej_title,
-            body="Bozza da scartare.",
-            metadata={"title": rej_title, "area": "tech"},
-            target_dir="02 - Atlas/Tech"
-        )
-        self.assertTrue(os.path.exists(staged_rej))
-
-        with open(dashboard_file, "r", encoding="utf-8") as f:
-            dash_content = f.read()
-        with open(dashboard_file, "w", encoding="utf-8") as f:
-            f.write(dash_content.replace(f"- [ ] Approva [[{rej_title}]]", f"- [-] Approva [[{rej_title}]]"))
-
-        processed_rej = brain_ingest.process_tri_state_approvals(self.test_dir)
-        self.assertEqual(processed_rej, 1)
-        self.assertFalse(os.path.exists(staged_rej))
-
     def test_processing_depth_modes(self):
-        """Asserts format_ingest_note produces appropriate structures for executive vs deep modes per D-08."""
+        """Asserts format_structured_note produces appropriate structures for executive vs deep modes per D-08."""
         raw_text = "Descrizione dei concetti e architetture chiave dei moderni modelli di deep learning."
-        
+
         exec_note = brain_ingest.format_structured_note(
             title="Sintesi Deep Learning",
             raw_content=raw_text,
@@ -220,13 +214,12 @@ Ed anche `<font color="#8a5cf6"><b>secondario</b></font>` con backticks.
         dummy_lock = brain_ingest.NoteLock(source)
         lock_path = dummy_lock.lock_file
 
-        # 1. Simulate dead PID (PID 9999999 is practically guaranteed not to exist)
+        # 1. Simulate dead PID
         with open(lock_path, "w", encoding="utf-8") as f:
             f.write("pid: 9999999\ntimestamp: 2026-08-25T00:00:00\n")
 
         self.assertTrue(os.path.exists(lock_path))
 
-        # NoteLock should auto-heal and acquire cleanly without raising RuntimeError
         with brain_ingest.NoteLock(source) as lock:
             self.assertTrue(lock.acquired)
             self.assertTrue(os.path.exists(lock_path))
@@ -239,7 +232,6 @@ Ed anche `<font color="#8a5cf6"><b>secondario</b></font>` con backticks.
         # 2. Simulate expired TTL (file mtime > 600 seconds ago with active PID)
         with open(lock_path, "w", encoding="utf-8") as f:
             f.write(f"pid: {os.getpid()}\n")
-        # Set mtime to 15 minutes ago
         past_time = os.path.getmtime(lock_path) - 900
         os.utime(lock_path, (past_time, past_time))
 
@@ -249,35 +241,182 @@ Ed anche `<font color="#8a5cf6"><b>secondario</b></font>` con backticks.
 
         self.assertFalse(os.path.exists(lock_path))
 
+    def test_staging_and_review_dashboard_tri_state(self):
+        """Asserts staging notes are written to 03 - Inbox/Draft/<Title>.md with status: draft,
+        registered in 03 - Inbox/Review Dashboard.md, and process_tri_state_approvals promotes
+        [x] to status: permanent (moving to target) or deletes draft on [-] per D-06, D-11.
+        """
+        title = "Guida Architetture LLM"
+        body = "Corpo della nota di prova per architetture transformer."
+        meta = {
+            "title": title,
+            "type": "concept",
+            "area": "tech",
+            "source": "original",
+            "date": "2026-08-25",
+            "tags": ["tech/ai", "tech/llm"],
+            "summary": "Guida introduttiva ai modelli linguistici transformer."
+        }
+        staged_path = brain_ingest.stage_note(
+            vault_root=self.test_dir,
+            title=title,
+            body=body,
+            metadata=meta,
+            target_dir="02 - Atlas/Tech"
+        )
+        self.assertTrue(os.path.exists(staged_path))
+        with open(staged_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("status: draft", content)
+        self.assertIn("[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[Guida Architetture LLM]]", content)
+
+        # Check Review Dashboard
+        dashboard_file = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        self.assertTrue(os.path.exists(dashboard_file))
+        with open(dashboard_file, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        self.assertTrue("- [ ] Approva [[Draft/Guida Architetture LLM]]" in dash_content or "- [ ] Approva [[Guida Architetture LLM]]" in dash_content)
+
+        # 2. Simulate User Approval [x]
+        with open(dashboard_file, "w", encoding="utf-8") as f:
+            f.write(dash_content.replace("- [ ] Approva [[Draft/Guida Architetture LLM]]", "- [x] Approva [[Draft/Guida Architetture LLM]]"))
+
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 1)
+
+        # Staged note moved to 02 - Atlas/Tech/
+        promoted_path = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Guida Architetture LLM.md")
+        self.assertTrue(os.path.exists(promoted_path))
+        self.assertFalse(os.path.exists(staged_path))
+
+        with open(promoted_path, "r", encoding="utf-8") as f:
+            promoted_content = f.read()
+        self.assertIn("status: permanent", promoted_content)
+        self.assertIn("[[Home MOC|Home]] / [[Tech]] / [[Guida Architetture LLM]]", promoted_content)
+
+        # 3. Simulate User Rejection [-] for a second note
+        rej_title = "Nota da Rifiutare"
+        staged_rej = brain_ingest.stage_note(
+            vault_root=self.test_dir,
+            title=rej_title,
+            body="Bozza da scartare.",
+            metadata={"title": rej_title, "area": "tech"},
+            target_dir="02 - Atlas/Tech"
+        )
+        self.assertTrue(os.path.exists(staged_rej))
+
+        with open(dashboard_file, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        with open(dashboard_file, "w", encoding="utf-8") as f:
+            f.write(dash_content.replace(f"- [ ] Approva [[Draft/{rej_title}]]", f"- [-] Approva [[Draft/{rej_title}]]"))
+
+        processed_rej = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed_rej, 1)
+        self.assertFalse(os.path.exists(staged_rej))
+
+    def test_approval_workflow_with_source_handling(self):
+        """Asserts process_tri_state_approvals on [x] deletes YouTube/Web source but archives manual note to 99 - Meta/Archive/."""
+        # 1. YouTube/Web source -> deleted on approval
+        yt_title = "Video AI Transformers"
+        yt_draft = brain_ingest.stage_note(
+            vault_root=self.test_dir,
+            title=yt_title,
+            body="Contenuto estratto dal video.",
+            metadata={"title": yt_title, "type": "video", "source": "https://youtube.com/watch?v=12345678901"},
+            target_dir="02 - Atlas/Tech",
+            source_content="Trascrizione raw."
+        )
+        yt_source = os.path.join(self.test_dir, "03 - Inbox", "Source", f"{yt_title}.md")
+        self.assertTrue(os.path.exists(yt_source))
+
+        dash_file = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_file, "r", encoding="utf-8") as f:
+            dash = f.read()
+        with open(dash_file, "w", encoding="utf-8") as f:
+            f.write(dash.replace(f"- [ ] Approva [[Draft/{yt_title}]]", f"- [x] Approva [[Draft/{yt_title}]]"))
+
+        brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertTrue(os.path.exists(os.path.join(self.test_dir, "02 - Atlas", "Tech", f"{yt_title}.md")))
+        self.assertFalse(os.path.exists(yt_source))
+
+        # 2. Manual note (source: original) -> archived to 99 - Meta/Archive/
+        man_title = "Appunti Personali Strategia"
+        man_draft = brain_ingest.stage_note(
+            vault_root=self.test_dir,
+            title=man_title,
+            body="Contenuto elaborato da appunti manuali.",
+            metadata={"title": man_title, "source": "original"},
+            target_dir="02 - Atlas/Tech",
+            source_content="ready: true\nAppunti scritti a mano originali."
+        )
+        man_source = os.path.join(self.test_dir, "03 - Inbox", "Source", f"{man_title}.md")
+        self.assertTrue(os.path.exists(man_source))
+
+        with open(dash_file, "r", encoding="utf-8") as f:
+            dash = f.read()
+        with open(dash_file, "w", encoding="utf-8") as f:
+            f.write(dash.replace(f"- [ ] Approva [[Draft/{man_title}]]", f"- [x] Approva [[Draft/{man_title}]]"))
+
+        brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertTrue(os.path.exists(os.path.join(self.test_dir, "02 - Atlas", "Tech", f"{man_title}.md")))
+        self.assertFalse(os.path.exists(man_source))
+        self.assertTrue(os.path.exists(os.path.join(self.test_dir, "99 - Meta", "Archive", f"{man_title}.md")))
+
+    def test_rejection_workflow_atomic_purge(self):
+        """Asserts process_tri_state_approvals on [-] purges Draft, Source, and Clipboard frame."""
+        title = "Video da Rigettare"
+        draft_path = brain_ingest.stage_note(
+            vault_root=self.test_dir,
+            title=title,
+            body="Bozza da cancellare.",
+            metadata={"title": title},
+            target_dir="02 - Atlas/Tech",
+            source_content="Trascrizione da cancellare."
+        )
+        source_path = os.path.join(self.test_dir, "03 - Inbox", "Source", f"{title}.md")
+        self.assertTrue(os.path.exists(draft_path))
+        self.assertTrue(os.path.exists(source_path))
+
+        # Create dummy clipboard frame
+        frame_file = os.path.join(self.test_dir, "99 - Meta", "Clipboard", f"{title[:10]}_frame.jpg")
+        with open(frame_file, "w") as f:
+            f.write("image bytes")
+        self.assertTrue(os.path.exists(frame_file))
+
+        dash_file = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_file, "r", encoding="utf-8") as f:
+            dash = f.read()
+        with open(dash_file, "w", encoding="utf-8") as f:
+            f.write(dash.replace(f"- [ ] Approva [[Draft/{title}]]", f"- [-] Approva [[Draft/{title}]]"))
+
+        brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertFalse(os.path.exists(draft_path))
+        self.assertFalse(os.path.exists(source_path))
+        self.assertFalse(os.path.exists(frame_file))
+
     def test_watcher_lifecycle_and_pid_auto_healing(self):
         """Asserts watch.sh script syntax is valid, supports lifecycle flags, and manages PID tracking per D-01, D-20."""
         script_path = os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts", "watch.sh")
         self.assertTrue(os.path.exists(script_path))
 
-        # Check bash syntax
         res = subprocess.run(["bash", "-n", script_path], capture_output=True, text=True)
         self.assertEqual(res.returncode, 0, f"Bash syntax check failed: {res.stderr}")
 
-        # Check status command when not running
         res_status = subprocess.run(["bash", script_path, "status"], capture_output=True, text=True, env=dict(os.environ, PID_FILE=f"/tmp/test_watcher_{os.getpid()}.pid"))
-        # Should report not running
         self.assertIn("not running", res_status.stdout.lower() + res_status.stderr.lower())
 
     def test_log_rotation_on_size(self):
         """Asserts log rotation moves watch.log -> watch.log.1 -> watch.log.2 -> watch.log.3 when exceeding 5MB cap per D-03."""
-        script_path = os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts", "watch.sh")
         test_log_dir = os.path.join(self.test_dir, "99 - Meta", "logs")
         os.makedirs(test_log_dir, exist_ok=True)
         test_log_file = os.path.join(test_log_dir, "watch.log")
 
-        # Create a log file exceeding 5MB (5242881 bytes)
         with open(test_log_file, "wb") as f:
             f.seek(5242881)
             f.write(b"0")
 
         self.assertTrue(os.path.getsize(test_log_file) > 5242880)
 
-        # Run rotate_logs helper embedded in watch.sh
         rotate_cmd = f"""
         LOG_FILE="{test_log_file}"
         rotate_logs() {{
@@ -300,13 +439,20 @@ Ed anche `<font color="#8a5cf6"><b>secondario</b></font>` con backticks.
         self.assertEqual(os.path.getsize(test_log_file), 0)
 
     def test_youtube_missing_transcript_error(self):
-        """Asserts extract_youtube_data raises TranscriptUnavailableError when no subtitles/transcripts exist per D-18."""
+        """Asserts extract_youtube_data raises TranscriptUnavailableError when no subtitles/transcripts exist and records error in Review Dashboard per D-11, D-18."""
         import youtube_helper
         from unittest.mock import patch
 
         with patch.object(youtube_helper, "YouTubeTranscriptApi", None):
             with self.assertRaises(youtube_helper.TranscriptUnavailableError):
-                youtube_helper.extract_youtube_data("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+                brain_ingest.ingest_source("https://www.youtube.com/watch?v=dQw4w9WgXcQ", vault_root=self.test_dir, force=True)
+
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        self.assertIn("## ⚠️ Errori di Acquisizione & Azioni Richieste", dash_content)
+        self.assertIn("dQw4w9WgXcQ", dash_content)
 
     def test_is_visual_content_detection(self):
         """Asserts is_visual_content detects visual keywords in Italian and English per D-09."""
@@ -344,7 +490,7 @@ Ed anche `<font color="#8a5cf6"><b>secondario</b></font>` con backticks.
     def test_deterministic_clipboard_image_naming(self):
         """Asserts keyframe images saved to 99 - Meta/Clipboard/ use deterministic pattern {video_id}_{idx}_{slug}.jpg per D-06."""
         import youtube_helper
-        from unittest.mock import patch, MagicMock
+        from unittest.mock import patch
 
         fake_chapters = [
             {"title": "01. Introduzione al Sistema", "start_time": 0, "end_time": 60},
@@ -426,13 +572,13 @@ Content.
         dest_blog = brain_ingest.classify_target_directory("Articolo Pubblico sul Blog", ["blog/post"], "Post divulgativo")
         self.assertEqual(dest_blog, "05 - Blog")
 
-    def test_inbox_raw_note_intake_on_status_ready(self):
-        """Asserts process_inbox_raw_notes scans 03 - Inbox/ and converts notes with status: ready into formatted drafts per D-15, D-16."""
+    def test_inbox_raw_note_intake_on_ready_true(self):
+        """Asserts process_inbox_raw_notes scans 03 - Inbox/ and converts notes with ready: true into Draft/ and Source/ and queues them in Note in Attesa."""
         inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
         raw_note = os.path.join(inbox_dir, "Appunto Rapido.md")
         with open(raw_note, "w", encoding="utf-8") as f:
             f.write("""---
-status: ready
+ready: true
 type: concept
 area: tech
 title: "Appunto Rapido"
@@ -443,18 +589,24 @@ Questo è un appunto grezzo da formattare.
         processed = brain_ingest.process_inbox_raw_notes(self.test_dir)
         self.assertEqual(len(processed), 1)
 
-        with open(raw_note, "r", encoding="utf-8") as f:
+        draft_file = os.path.join(inbox_dir, "Draft", "Appunto Rapido.md")
+        source_file = os.path.join(inbox_dir, "Source", "Appunto Rapido.md")
+        self.assertFalse(os.path.exists(raw_note))
+        self.assertTrue(os.path.exists(draft_file))
+        self.assertTrue(os.path.exists(source_file))
+
+        with open(draft_file, "r", encoding="utf-8") as f:
             content = f.read()
-
         self.assertIn("status: draft", content)
-        self.assertIn("[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[Appunto Rapido]]", content)
 
-        # Review dashboard should have it registered
+        # Review dashboard should have it registered under Note in Attesa di Approvazione
         dash_path = os.path.join(inbox_dir, "Review Dashboard.md")
         self.assertTrue(os.path.exists(dash_path))
         with open(dash_path, "r", encoding="utf-8") as f:
             dash_content = f.read()
-        self.assertIn("- [ ] Approva [[Appunto Rapido]]", dash_content)
+        self.assertIn("## 📥 Note in Attesa di Approvazione", dash_content)
+        self.assertIn("- [ ] Approva [[Draft/Appunto Rapido]] (fonte: [[Source/Appunto Rapido]])", dash_content)
+        self.assertIn("*Nessun processo attivo.*", dash_content)
 
     def test_filename_collision_protection(self):
         """Asserts destination filename collisions with differing source URLs are detected and flagged without overwriting per D-12."""
@@ -470,7 +622,6 @@ title: "Nota Collisione"
 Original permanent content.
 """)
 
-        # Stage a new note in Inbox with same title but different source
         staged_path = brain_ingest.stage_note(
             vault_root=self.test_dir,
             title="Nota Collisione",
@@ -483,17 +634,14 @@ Original permanent content.
         with open(dash_path, "r", encoding="utf-8") as f:
             dash_content = f.read()
         with open(dash_path, "w", encoding="utf-8") as f:
-            f.write(dash_content.replace("- [ ] Approva [[Nota Collisione]]", "- [x] Approva [[Nota Collisione]]"))
+            f.write(dash_content.replace("- [ ] Approva [[Draft/Nota Collisione]]", "- [x] Approva [[Draft/Nota Collisione]]"))
 
-        # Process approvals
         processed = brain_ingest.process_tri_state_approvals(self.test_dir)
-        self.assertEqual(processed, 0) # Should be blocked due to collision
+        self.assertEqual(processed, 0)
 
-        # Original note must NOT be overwritten
         with open(existing_dest, "r", encoding="utf-8") as f:
             self.assertIn("Original permanent content.", f.read())
 
-        # Dashboard should contain collision warning
         with open(dash_path, "r", encoding="utf-8") as f:
             updated_dash = f.read()
         self.assertIn("Conflitto nome file", updated_dash)
@@ -529,6 +677,484 @@ Original permanent content.
         self.assertIn("## ⚠️ Errori di Acquisizione & Azioni Richieste", content)
         self.assertIn("https://youtube.com/watch?v=no_subtitles", content)
         self.assertIn("Nessuna trascrizione disponibile.", content)
+
+    def test_process_inbox_raw_notes_ready_true_and_string(self):
+        """Asserts process_inbox_raw_notes converts raw notes with ready: true and ready: 'true' into Draft/ and Source/ notes and queues them in Review Dashboard.md."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        raw_note_1 = os.path.join(inbox_dir, "Nota Bozza Bool.md")
+        with open(raw_note_1, "w", encoding="utf-8") as f:
+            f.write("""---
+ready: true
+title: "Nota Bozza Bool"
+date: 2026-08-25
+tags: [tech/ai, raw]
+---
+[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[Nota Bozza Bool]]
+
+# 💻 Nota Bozza Bool
+
+Testo descrittivo dell'attività svolta con comandi di prova.
+""")
+
+        raw_note_2 = os.path.join(inbox_dir, "Nota Bozza String.md")
+        with open(raw_note_2, "w", encoding="utf-8") as f:
+            f.write("""---
+ready: "true"
+title: "Nota Bozza String"
+date: 2026-08-25
+tags: [education, raw]
+---
+[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[Nota Bozza String]]
+
+# 📝 Nota Bozza String
+
+Appunti di studio per la lezione.
+""")
+
+        processed = brain_ingest.process_inbox_raw_notes(self.test_dir)
+        self.assertEqual(len(processed), 2)
+
+        draft_1 = os.path.join(inbox_dir, "Draft", "Nota Bozza Bool.md")
+        source_1 = os.path.join(inbox_dir, "Source", "Nota Bozza Bool.md")
+        draft_2 = os.path.join(inbox_dir, "Draft", "Nota Bozza String.md")
+        source_2 = os.path.join(inbox_dir, "Source", "Nota Bozza String.md")
+
+        self.assertFalse(os.path.exists(raw_note_1))
+        self.assertFalse(os.path.exists(raw_note_2))
+        self.assertTrue(os.path.exists(draft_1))
+        self.assertTrue(os.path.exists(source_1))
+        self.assertTrue(os.path.exists(draft_2))
+        self.assertTrue(os.path.exists(source_2))
+
+        dash_path = os.path.join(inbox_dir, "Review Dashboard.md")
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash = f.read()
+            self.assertIn("## 📥 Note in Attesa di Approvazione", dash)
+            self.assertIn("- [ ] Approva [[Draft/Nota Bozza Bool]] (fonte: [[Source/Nota Bozza Bool]])", dash)
+            self.assertIn("- [ ] Approva [[Draft/Nota Bozza String]] (fonte: [[Source/Nota Bozza String]])", dash)
+
+    def test_process_inbox_raw_notes_ready_false_ignored(self):
+        """Asserts process_inbox_raw_notes leaves notes with ready: false or ready: 'false' completely untouched per D-06."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        raw_note = os.path.join(inbox_dir, "Nota In Lavorazione.md")
+        original_content = """---
+ready: false
+title: "Nota In Lavorazione"
+date: 2026-08-25
+tags: [raw]
+---
+[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[Nota In Lavorazione]]
+
+# 📝 Nota In Lavorazione
+
+Sto ancora scrivendo questa nota...
+"""
+        with open(raw_note, "w", encoding="utf-8") as f:
+            f.write(original_content)
+
+        processed = brain_ingest.process_inbox_raw_notes(self.test_dir)
+        self.assertEqual(len(processed), 0)
+        self.assertTrue(os.path.exists(raw_note))
+
+    def test_path_traversal_blocked_in_approvals(self):
+        """Asserts process_tri_state_approvals rejects paths traversing outside vault root."""
+        staged_path = brain_ingest.stage_note(
+            vault_root=self.test_dir,
+            title="Nota Invasiva",
+            body="Tentativo di traversal.",
+            metadata={"title": "Nota Invasiva", "target_path": "../../outside/vault/Nota Invasiva.md"},
+            target_dir="../../outside/vault"
+        )
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write(dash_content.replace("- [ ] Approva [[Draft/Nota Invasiva]]", "- [x] Approva [[Draft/Nota Invasiva]]"))
+
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 0)
+        self.assertFalse(os.path.exists(os.path.join(self.test_dir, "..", "outside", "vault", "Nota Invasiva.md")))
+
+    def test_youtube_video_id_regex_parsing(self):
+        """Asserts get_video_id correctly extracts valid video IDs and rejects false matches."""
+        import youtube_helper
+        self.assertEqual(youtube_helper.get_video_id("https://www.youtube.com/watch?v=dQw4w9WgXcQ"), "dQw4w9WgXcQ")
+        self.assertEqual(youtube_helper.get_video_id("https://youtu.be/dQw4w9WgXcQ"), "dQw4w9WgXcQ")
+        self.assertEqual(youtube_helper.get_video_id("https://www.youtube.com/embed/dQw4w9WgXcQ"), "dQw4w9WgXcQ")
+        self.assertEqual(youtube_helper.get_video_id("https://www.youtube.com/shorts/dQw4w9WgXcQ"), "dQw4w9WgXcQ")
+        self.assertIsNone(youtube_helper.get_video_id("https://example.com/12345678901/article"))
+
+    def test_ingest_source_unifies_with_daemon_lifecycle(self):
+        """Asserts ingest_source replicates daemon + Raw Inbox Note lifecycle producing Draft and Source notes."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        text_source = "Analisi Architettura Distribuita\nAppunti dettagliati sul funzionamento dei cluster microservizi."
+
+        draft_path = brain_ingest.ingest_source(
+            source=text_source,
+            vault_root=self.test_dir,
+            target_dir="02 - Atlas/Tech"
+        )
+
+        self.assertTrue(os.path.exists(draft_path))
+        self.assertIn("Draft", draft_path)
+        self.assertFalse(os.path.basename(draft_path).startswith(("proposed-", "raw-", "seen-")))
+
+        source_path = os.path.join(inbox_dir, "Source", "Analisi Architettura Distribuita.md")
+        self.assertTrue(os.path.exists(source_path))
+
+        dash_path = os.path.join(inbox_dir, "Review Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash = f.read()
+        self.assertIn("- [ ] Approva [[Draft/Analisi Architettura Distribuita]] (fonte: [[Source/Analisi Architettura Distribuita]])", dash)
+
+    def test_ingest_source_respects_custom_target_dir(self):
+        """Asserts ingest_source embeds target_path in proposed frontmatter when custom target_dir is passed."""
+        text_source = "Principi Clean Code\nRegole di refactoring per software di alta qualita."
+
+        draft_path = brain_ingest.ingest_source(
+            source=text_source,
+            vault_root=self.test_dir,
+            target_dir="02 - Atlas/Tech/Programming"
+        )
+
+        with open(draft_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn('target_path: "02 - Atlas/Tech/Programming/Principi Clean Code.md"', content)
+
+    def test_inbox_raw_note_duplicate_blocked_and_error_recorded(self):
+        """Asserts process_inbox_raw_notes blocks raw notes matching existing Atlas/Blog URLs and registers error in Review Dashboard."""
+        atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Finance")
+        os.makedirs(atlas_dir, exist_ok=True)
+        existing_file = os.path.join(atlas_dir, "La Bugia del Questa Volta e Diverso.md")
+        with open(existing_file, "w", encoding="utf-8") as f:
+            f.write("""---
+status: permanent
+type: video
+source: "https://youtu.be/vi0BYzyWnFg"
+video_url: "https://youtu.be/vi0BYzyWnFg"
+title: "La Bugia del Questa Volta e Diverso"
+---
+Contenuto esistente.
+""")
+
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        dup_raw_note = os.path.join(inbox_dir, "Raw Note 2026-08-25 23-44.md")
+        with open(dup_raw_note, "w", encoding="utf-8") as f:
+            f.write("""---
+ready: true
+title: "Raw Note 2026-08-25 23-44"
+date: 2026-08-25
+tags: [youtube, transcript, raw]
+area: ""
+video_url: "https://www.youtube.com/watch?v=vi0BYzyWnFg"
+---
+Testo trascrizione grezza.
+""")
+
+        processed = brain_ingest.process_inbox_raw_notes(self.test_dir)
+        self.assertEqual(len(processed), 0)
+
+        with open(dup_raw_note, "r", encoding="utf-8") as f:
+            dup_content = f.read()
+        self.assertIn("ready: false", dup_content)
+
+        dash_path = os.path.join(inbox_dir, "Review Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        self.assertIn("## ⚠️ Errori di Acquisizione & Azioni Richieste", dash_content)
+        self.assertIn("Duplicato rilevato", dash_content)
+        self.assertIn("https://www.youtube.com/watch?v=vi0BYzyWnFg", dash_content)
+
+    def test_approval_duplicate_source_blocked(self):
+        """Asserts process_tri_state_approvals blocks promotion when a different file in Atlas already has the same source URL."""
+        atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Finance")
+        os.makedirs(atlas_dir, exist_ok=True)
+        existing_file = os.path.join(atlas_dir, "Nota Precedente.md")
+        with open(existing_file, "w", encoding="utf-8") as f:
+            f.write("""---
+status: permanent
+type: video
+source: "https://youtu.be/vi0BYzyWnFg"
+title: "Nota Precedente"
+---
+Contenuto.
+""")
+
+        staged_path = brain_ingest.stage_note(
+            vault_root=self.test_dir,
+            title="Nuovo Nome File",
+            body="Altro testo.",
+            metadata={"source": "https://www.youtube.com/watch?v=vi0BYzyWnFg", "title": "Nuovo Nome File"},
+            target_dir="02 - Atlas/Finance"
+        )
+
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write(dash_content.replace("- [ ] Approva [[Draft/Nuovo Nome File]]", "- [x] Approva [[Draft/Nuovo Nome File]]"))
+
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 0)
+
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_updated = f.read()
+        self.assertIn("Duplicato sorgente", dash_updated)
+
+    def test_review_dashboard_four_sections(self):
+        """Asserts Review Dashboard.md is rendered with exact 4 sections (In Elaborazione, Note in Attesa, Errori, Storico) and canonical frontmatter per D-14."""
+        brain_ingest.update_review_dashboard(self.test_dir)
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+        with open(dash_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("## ⏳ In Elaborazione", content)
+        self.assertIn("## 📥 Note in Attesa di Approvazione", content)
+        self.assertIn("## ⚠️ Errori di Acquisizione & Azioni Richieste", content)
+        self.assertIn("## 📜 Storico Recente", content)
+        self.assertIn("status: draft", content)
+        self.assertIn("type: moc", content)
+        self.assertIn("area: meta", content)
+
+    def test_extract_frames_flag(self):
+        """Asserts YouTube frame extraction via ffmpeg is executed ONLY when --extract-frames flag is explicitly provided per D-10."""
+        from unittest.mock import patch
+
+        fake_data = {
+            "title": "Video Senza Frame",
+            "channel": "Canale Test",
+            "duration": 120,
+            "chapters": [],
+            "transcript": [{"text": "Trascrizione di prova", "start": 0, "duration": 5}],
+            "extracted_images": []
+        }
+
+        with patch("youtube_helper.extract_youtube_data", return_value=fake_data) as mock_extract:
+            brain_ingest.ingest_source(
+                source="https://youtube.com/watch?v=12345678901",
+                vault_root=self.test_dir,
+                extract_frames=False,
+                force=True
+            )
+            mock_extract.assert_called_with("https://youtube.com/watch?v=12345678901", force_frames=False, vault_root=self.test_dir)
+
+            brain_ingest.ingest_source(
+                source="https://youtube.com/watch?v=12345678901",
+                vault_root=self.test_dir,
+                extract_frames=True,
+                force=True
+            )
+            mock_extract.assert_called_with("https://youtube.com/watch?v=12345678901", force_frames=True, vault_root=self.test_dir)
+
+    def test_in_progress_state_excludes_note_from_pending_approvals(self):
+        """Asserts that an active in_progress note appears under In Elaborazione and is strictly excluded from Note in Attesa."""
+        title = "Nota in Rielaborazione"
+        draft_file = os.path.join(self.test_dir, "03 - Inbox", "Draft", f"{title}.md")
+        with open(draft_file, "w", encoding="utf-8") as f:
+            f.write("# Titolo\nBozza in corso...")
+
+        # Update dashboard with in_progress
+        brain_ingest.update_review_dashboard(self.test_dir, in_progress=title)
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Must appear in In Elaborazione
+        self.assertIn("## ⏳ In Elaborazione", content)
+        self.assertIn(f"- ⏳ [[Draft/{title}]] (Fase 1/4: Acquisizione & Estrazione Trascrizione...)", content)
+
+        # Must NOT appear in Note in Attesa di Approvazione
+        self.assertNotIn(f"- [ ] Approva [[Draft/{title}]]", content)
+
+        # Once in_progress is finished (e.g. stage_note completed)
+        brain_ingest.update_review_dashboard(self.test_dir, finish_in_progress=title)
+        with open(dash_path, "r", encoding="utf-8") as f:
+            content_after = f.read()
+
+        self.assertIn("*Nessun processo attivo.*", content_after)
+        self.assertIn(f"- [ ] Approva [[Draft/{title}]]", content_after)
+
+    def test_error_retry_and_dismiss_in_approvals(self):
+        """Asserts that checking [x] on an error line retries ingestion, while [-] dismisses it."""
+        from unittest.mock import patch
+
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+
+        # 1. Error Retry [x]
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: moc
+title: "Review Dashboard"
+---
+## ⏳ In Elaborazione
+*Nessun processo attivo.*
+
+## 📥 Note in Attesa di Approvazione
+*Nessuna nota in attesa di approvazione.*
+
+## ⚠️ Errori di Acquisizione & Azioni Richieste
+- [x] [!] Riprova: https://example.com/retry-test — Motivo: Timeout
+
+## 📜 Storico Recente
+*Nessuna azione recente registrata.*
+""")
+
+        with patch("brain_ingest.ingest_source") as mock_ingest:
+            mock_ingest.return_value = os.path.join(self.test_dir, "03 - Inbox", "Draft", "Retry Test.md")
+            processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+            self.assertEqual(processed, 1)
+            mock_ingest.assert_called_with("https://example.com/retry-test", vault_root=self.test_dir, force=True)
+
+        with open(dash_path, "r", encoding="utf-8") as f:
+            content_after = f.read()
+        self.assertIn("## ⚠️ Errori di Acquisizione & Azioni Richieste\n*Nessun errore registrato.*", content_after)
+
+        # 2. Error Dismiss [-] on raw file
+        raw_to_dismiss = os.path.join(self.test_dir, "03 - Inbox", "Nota Fallita.md")
+        with open(raw_to_dismiss, "w", encoding="utf-8") as f:
+            f.write("# Fallimento")
+
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: moc
+title: "Review Dashboard"
+---
+## ⏳ In Elaborazione
+*Nessun processo attivo.*
+
+## 📥 Note in Attesa di Approvazione
+*Nessuna nota in attesa di approvazione.*
+
+## ⚠️ Errori di Acquisizione & Azioni Richieste
+- [-] [!] Riprova: Nota Fallita.md — Motivo: Errore sintassi
+
+## 📜 Storico Recente
+*Nessuna azione recente registrata.*
+""")
+
+        processed_dismiss = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed_dismiss, 1)
+        self.assertFalse(os.path.exists(raw_to_dismiss))
+
+        with open(dash_path, "r", encoding="utf-8") as f:
+            content_dismiss = f.read()
+        self.assertIn("## ⚠️ Errori di Acquisizione & Azioni Richieste\n*Nessun errore registrato.*", content_dismiss)
+
+    def test_panic_button_presence_in_review_dashboard(self):
+        """Asserts Review Dashboard includes the Panic Button line and review instruction."""
+        brain_ingest.update_review_dashboard(self.test_dir)
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("PANIC BUTTON", content)
+        self.assertIn("- [ ] 🛑 Interrompi elaborazioni attive (Panic Button)", content)
+
+    def test_trigger_panic_abort(self):
+        """Asserts trigger_panic_abort cleans locks, resets ready: true to ready: false, clears in_progress, and records history."""
+        # 1. Create a dummy lock file
+        dummy_lock = "/tmp/brain_ingest_testpanic123.lock"
+        with open(dummy_lock, "w", encoding="utf-8") as f:
+            f.write("pid: 9999999\ntime: 2026-08-29T00:00:00\n")
+        self.assertTrue(os.path.exists(dummy_lock))
+
+        # 2. Create raw note with ready: true
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        raw_note = os.path.join(inbox_dir, "Nota In Corso.md")
+        with open(raw_note, "w", encoding="utf-8") as f:
+            f.write("---\nready: true\ntitle: Nota In Corso\n---\nCorpo.")
+
+        # 3. Set dashboard with in-progress
+        brain_ingest.update_review_dashboard(self.test_dir, in_progress="Nota In Corso", phase="Fase 2/4: Elaborazione...")
+
+        # 4. Trigger panic abort
+        brain_ingest.trigger_panic_abort(self.test_dir)
+
+        # Assert lock cleaned
+        self.assertFalse(os.path.exists(dummy_lock))
+
+        # Assert raw note ready reset to false
+        with open(raw_note, "r", encoding="utf-8") as f:
+            self.assertIn("ready: false", f.read())
+
+        # Assert dashboard cleared
+        dash_path = os.path.join(inbox_dir, "Review Dashboard.md")
+        with open(dash_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("*Nessun processo attivo.*", content)
+        self.assertIn("- [ ] 🛑 Interrompi elaborazioni attive (Panic Button)", content)
+
+        # Assert history logged
+        hist_path = os.path.join(self.test_dir, "99 - Meta", "logs", "inbox_history.md")
+        with open(hist_path, "r", encoding="utf-8") as f:
+            self.assertIn("[PANIC_ABORT]", f.read())
+
+    def test_trigger_panic_abort_preserves_watcher(self):
+        """Asserts trigger_panic_abort excludes the watcher daemon PID from termination."""
+        from unittest.mock import patch
+
+        watcher_pid = 12345
+        pid_file = "/tmp/brain_watcher.pid"
+        with open(pid_file, "w", encoding="utf-8") as f:
+            f.write(str(watcher_pid))
+
+        try:
+            with patch("os.kill") as mock_kill, patch("brain_ingest.is_pid_alive", return_value=True):
+                lock1 = "/tmp/brain_ingest_watchertest.lock"
+                lock2 = "/tmp/brain_ingest_othertest.lock"
+                with open(lock1, "w") as f: f.write(f"pid: {watcher_pid}\n")
+                with open(lock2, "w") as f: f.write("pid: 67890\n")
+
+                brain_ingest.trigger_panic_abort(self.test_dir)
+
+                killed_pids = [call.args[0] for call in mock_kill.call_args_list]
+                self.assertNotIn(watcher_pid, killed_pids)
+                self.assertIn(67890, killed_pids)
+        finally:
+            if os.path.exists(pid_file):
+                os.remove(pid_file)
+
+    def test_process_tri_state_approvals_with_panic(self):
+        """Asserts that checking the Panic Button [x] in Review Dashboard executes panic abort and resets the checkbox."""
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: moc
+title: "Review Dashboard"
+---
+## ⏳ In Elaborazione
+- [x] 🛑 Interrompi elaborazioni attive (Panic Button)
+- ⏳ [[Draft/Test Ingest]] (Fase 2/4: Test...)
+
+## 📥 Note in Attesa di Approvazione
+*Nessuna nota in attesa di approvazione.*
+
+## ⚠️ Errori di Acquisizione & Azioni Richieste
+*Nessun errore registrato.*
+
+## 📜 Storico Recente
+*Nessuna azione recente registrata.*
+""")
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 1)
+
+        with open(dash_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        self.assertIn("- [ ] 🛑 Interrompi elaborazioni attive (Panic Button)", content)
+        self.assertIn("*Nessun processo attivo.*", content)
+
+    def test_panic_cli_flag(self):
+        """Asserts brain_ingest.py --panic executes successfully and prints confirmation."""
+        script_path = os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts", "brain_ingest.py")
+        res = subprocess.run([sys.executable, script_path, "--panic", "--vault-root", self.test_dir], capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("Panic abort executed", res.stdout)
+        self.assertIn("Watcher is active", res.stdout)
 
 if __name__ == "__main__":
     unittest.main()

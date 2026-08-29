@@ -7,7 +7,7 @@ aliases: []
 source: original
 title: "Review Dashboard"
 date: '2026-08-29'
-updated: 2026-08-29T02:32
+updated: 2026-08-29T02:35
 tags: [meta/dashboard, meta/gtd]
 summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in Inbox."
 ---
@@ -37,7 +37,6 @@ summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in I
 
 ## 📜 Storico Recente
 - 2026-08-26 00:13 | [ERROR] | [[https://youtu.be/r0Dciuq0knU]] -> Review Dashboard | WARNING: [youtube] r0Dciuq0knU: Unable to download webpage: HTTP Error 429: Too Many Requests (caused by <HTTPError 429: Too Many Requests>)
-- 2026-08-26 00:13 | [ERROR] | [[https://youtu.be/r0Dciuq0knU]] -> Review Dashboard | WARNING: [youtube] r0Dciuq0knU: Unable to download webpage: HTTP Error 429: Too Many Requests (caused by <HTTPError 429: Too Many Requests>)
 - 2026-08-26 00:14 | [ERROR] | [[https://youtu.be/r0Dciuq0knU]] -> Review Dashboard | WARNING: [youtube] r0Dciuq0knU: Unable to download webpage: HTTP Error 429: Too Many Requests (caused by <HTTPError 429: Too Many Requests>)
 - 2026-08-26 00:14 | [ERROR] | [[https://youtu.be/r0Dciuq0knU]] -> Review Dashboard | Processo interrotto dall'utente per eliminazione della nota
 - 2026-08-29 01:13 | [RETRY_SUCCESS] | [[https://youtu.be/r0Dciuq0knU]] -> 03 - Inbox/Draft
@@ -46,3 +45,4 @@ summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in I
 - 2026-08-29 01:47 | [ERROR_DISMISSED] | [[Raw Note 2026-08-29 01-44.md]] -> DISMISSED
 - 2026-08-29 02:05 | [REJECTED] | [[Dopamine Load - Geniale o Pura Fuffa Reaction]] -> PURGED
 - 2026-08-29 02:31 | [PANIC_ABORT] | [[Tutti i processi]] -> STOPPED (source: Review Dashboard)
+- 2026-08-29 02:33 | [REJECTED] | [[Dopamine Load - Geniale o Pura Fuffa Reaction]] -> PURGED

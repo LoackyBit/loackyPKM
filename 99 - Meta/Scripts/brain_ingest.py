@@ -267,7 +267,8 @@ def trigger_panic_abort(vault_root: str) -> int:
 def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
                             phase: Optional[str] = None,
                             add_error: Optional[Tuple[str, str]] = None,
-                            finish_in_progress: Optional[str] = None):
+                            finish_in_progress: Optional[str] = None,
+                            replace_in_progress: Optional[str] = None):
     """Synchronizes 03 - Inbox/Review Dashboard.md in static Markdown across 4 sections with progressive phase feedback."""
     inbox_dir = os.path.join(vault_root, "03 - Inbox")
     draft_dir, source_dir = os.path.join(inbox_dir, "Draft"), os.path.join(inbox_dir, "Source")
@@ -298,8 +299,12 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
             p_phase = phase or "Fase 1/4: Acquisizione & Estrazione Trascrizione..."
             p_line = f"- ⏳ [[Draft/{p_item}]] ({p_phase})" if not p_item.startswith("http") else f"- ⏳ {p_item} ({p_phase})"
             existing_idx = None
+            p_clean = brain_health.clean_title_str(p_item).lower()
             for idx, pl in enumerate(prog_lines):
-                if f"[[Draft/{p_item}]]" in pl or (p_item.startswith("http") and p_item in pl):
+                if (replace_in_progress and replace_in_progress.lower() in pl.lower()) or \
+                   f"[[Draft/{p_item}]]" in pl or \
+                   (p_item.startswith("http") and p_item in pl) or \
+                   (not p_item.startswith("http") and p_clean in pl.lower()):
                     existing_idx = idx
                     break
             if existing_idx is not None:
@@ -309,7 +314,14 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
 
     if finish_in_progress:
         f_clean = brain_health.clean_title_str(finish_in_progress).lower()
-        prog_lines = [l for l in prog_lines if f_clean not in l.lower() and finish_in_progress.lower() not in l.lower()]
+        new_prog = []
+        for l in prog_lines:
+            m_pr = re.search(r'\[\[Draft/(?P<name>.*?)\]\]', l)
+            name_clean = brain_health.clean_title_str(m_pr.group('name')).lower() if m_pr else l.lower()
+            if f_clean in name_clean or name_clean in f_clean or finish_in_progress.lower() in l.lower():
+                continue
+            new_prog.append(l)
+        prog_lines = new_prog
 
     if add_error:
         entry = f"- [ ] [!] Riprova: {add_error[0]} — Motivo: {add_error[1]}"
@@ -606,16 +618,17 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                     record_ingest_error(root, source, f"Trascrizione non disponibile: {e}")
                     raise
                 title, channel = data['title'], data['channel']
-                update_review_dashboard(root, in_progress=title, phase="Fase 2/4: Estrazione Dati & Trascrizione...")
+                clean_title = brain_health.clean_title_str(title)
+                update_review_dashboard(root, in_progress=clean_title, phase="Fase 2/4: Estrazione Dati & Trascrizione...", replace_in_progress=prov)
                 raw_text = " ".join([t.get('text', '') for t in data['transcript']])
-                dest_dir = target_dir or classify_target_directory(title, ['tech/ai', 'video'], raw_text)
-                update_review_dashboard(root, in_progress=title, phase="Fase 3/4: Rielaborazione Concettuale AI...")
-                body = format_structured_note(title, raw_text, depth=depth, source_type="video", source_url=source)
-                linked_body, links = autolink_content(root, body, title)
-                meta = {'title': title, 'type': 'video', 'area': 'tech', 'source': source, 'video_url': source, 'channel': channel, 'tags': ['tech/ai', 'video']}
+                dest_dir = target_dir or classify_target_directory(clean_title, ['tech/ai', 'video'], raw_text)
+                update_review_dashboard(root, in_progress=clean_title, phase="Fase 3/4: Rielaborazione Concettuale AI...")
+                body = format_structured_note(clean_title, raw_text, depth=depth, source_type="video", source_url=source)
+                linked_body, links = autolink_content(root, body, clean_title)
+                meta = {'title': clean_title, 'type': 'video', 'area': 'tech', 'source': source, 'video_url': source, 'channel': channel, 'tags': ['tech/ai', 'video']}
                 if links: meta['related'] = links
-                update_review_dashboard(root, in_progress=title, phase="Fase 4/4: Scrittura Bozza & Staging...")
-                return stage_note(root, title, linked_body, meta, target_dir=dest_dir, source_content=raw_text)
+                update_review_dashboard(root, in_progress=clean_title, phase="Fase 4/4: Scrittura Bozza & Staging...")
+                return stage_note(root, clean_title, linked_body, meta, target_dir=dest_dir, source_content=raw_text)
 
             elif in_type == "file":
                 with open(source, 'r', encoding='utf-8') as f: content = f.read()

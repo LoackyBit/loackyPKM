@@ -7,7 +7,7 @@ aliases: []
 source: original
 title: "Review Dashboard"
 date: '2026-08-29'
-updated: 2026-08-29T02:27
+updated: 2026-08-29T02:32
 tags: [meta/dashboard, meta/gtd]
 summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in Inbox."
 ---
@@ -30,12 +30,12 @@ summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in I
 - [ ] Approva [[Draft/Se Non Ti Piaci in Foto Ci Sono Questi 5 Motivi Psicologici]] (fonte: [[Source/Se Non Ti Piaci in Foto Ci Sono Questi 5 Motivi Psicologici]])
 - [ ] Approva [[Draft/Top 3 RAG Retrieval Strategies - Sparse, Dense, & Hybrid Explained]] (fonte: [[Source/Top 3 RAG Retrieval Strategies - Sparse, Dense, & Hybrid Explained]])
 - [ ] Approva [[Draft/You Need to Switch to Linux Right Now]] (fonte: [[Source/You Need to Switch to Linux Right Now]]
+- [ ] Approva [[Draft/Dopamine Load - Geniale o Pura Fuffa Reaction]] (fonte: [[Source/Dopamine Load - Geniale o Pura Fuffa Reaction]])
 
 ## ⚠️ Errori di Acquisizione & Azioni Richieste
 *Nessun errore registrato.*
 
 ## 📜 Storico Recente
-- 2026-08-26 00:13 | [ERROR] | [[https://youtu.be/r0Dciuq0knU]] -> Review Dashboard | WARNING: [youtube] r0Dciuq0knU: Unable to download webpage: HTTP Error 429: Too Many Requests (caused by <HTTPError 429: Too Many Requests>)
 - 2026-08-26 00:13 | [ERROR] | [[https://youtu.be/r0Dciuq0knU]] -> Review Dashboard | WARNING: [youtube] r0Dciuq0knU: Unable to download webpage: HTTP Error 429: Too Many Requests (caused by <HTTPError 429: Too Many Requests>)
 - 2026-08-26 00:13 | [ERROR] | [[https://youtu.be/r0Dciuq0knU]] -> Review Dashboard | WARNING: [youtube] r0Dciuq0knU: Unable to download webpage: HTTP Error 429: Too Many Requests (caused by <HTTPError 429: Too Many Requests>)
 - 2026-08-26 00:14 | [ERROR] | [[https://youtu.be/r0Dciuq0knU]] -> Review Dashboard | WARNING: [youtube] r0Dciuq0knU: Unable to download webpage: HTTP Error 429: Too Many Requests (caused by <HTTPError 429: Too Many Requests>)
@@ -45,3 +45,4 @@ summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in I
 - 2026-08-29 01:47 | [ERROR_DISMISSED] | [[Raw Note 2026-08-29 01-39.md]] -> DISMISSED
 - 2026-08-29 01:47 | [ERROR_DISMISSED] | [[Raw Note 2026-08-29 01-44.md]] -> DISMISSED
 - 2026-08-29 02:05 | [REJECTED] | [[Dopamine Load - Geniale o Pura Fuffa Reaction]] -> PURGED
+- 2026-08-29 02:31 | [PANIC_ABORT] | [[Tutti i processi]] -> STOPPED (source: Review Dashboard)

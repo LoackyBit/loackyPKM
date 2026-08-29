@@ -65,7 +65,7 @@ def is_visual_content(title: str, chapter_title: str = '') -> bool:
 
 def get_video_id(url: str) -> Optional[str]:
     """Extracts 11-character YouTube video ID from URL string."""
-    match = re.search(r'(?:v=|/|embed/|youtu\.be/)([a-zA-Z0-9_-]{11})', url)
+    match = re.search(r'(?:v=|/embed/|/v/|/shorts/|youtu\.be/)([a-zA-Z0-9_-]{11})', url)
     return match.group(1) if match else None
 
 
@@ -92,12 +92,18 @@ def fetch_metadata_with_retry(url: str, timeout: int = 15, max_retries: int = 1,
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
+                stream_url = info.get('url')
+                if not stream_url and info.get('formats'):
+                    for f in reversed(info.get('formats', [])):
+                        if f.get('url') and f.get('vcodec') != 'none':
+                            stream_url = f.get('url')
+                            break
                 return {
                     'title': info.get('title', 'Video YouTube'),
                     'uploader': info.get('uploader', 'Canale YouTube'),
                     'duration': info.get('duration', 0),
                     'chapters': info.get('chapters', []) or [],
-                    'url': info.get('url')
+                    'url': stream_url
                 }
         except Exception as e:
             last_exc = e
@@ -145,7 +151,7 @@ def extract_frame(stream_url: str, timestamp: float, output_path: str, timeout: 
     try:
         cmd = [
             'ffmpeg', '-y',
-            '-ss', str(datetime.timedelta(seconds=int(timestamp))),
+            '-ss', str(int(timestamp)),
             '-i', stream_url,
             '-frames:v', '1',
             '-q:v', '2',
@@ -231,6 +237,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     """Builds CLI argument parser for youtube_helper."""
     parser = argparse.ArgumentParser(description="YouTube transcript & multimedia extraction helper.")
     parser.add_argument('url', help="YouTube video URL")
+    parser.add_argument('note_path', nargs='?', default=None, help="Optional raw note path to update with transcript and frames")
     parser.add_argument('--extract-frames', action='store_true', help="Force keyframe extraction")
     parser.add_argument('--no-frames', action='store_true', help="Disable keyframe extraction")
     parser.add_argument('--json', action='store_true', help="Output results as JSON")
@@ -254,6 +261,68 @@ def main():
             force_frames=force_frames,
             vault_root=args.vault_root
         )
+
+        if args.note_path:
+            note_path = args.note_path
+            if os.path.exists(note_path):
+                title = data['title']
+                channel = data['channel']
+                chapters = data['chapters']
+                transcript_list = data['transcript']
+                extracted_images = data['extracted_images']
+                url = data['url']
+
+                raw_content = []
+                if chapters:
+                    for idx, ch in enumerate(chapters):
+                        ch_title = ch.get('title', f"Parte {idx + 1}") if isinstance(ch, dict) else f"Parte {idx + 1}"
+                        start = ch.get('start_time', 0) if isinstance(ch, dict) else 0
+                        end = ch.get('end_time', data['duration']) if isinstance(ch, dict) else data['duration']
+
+                        ch_text = []
+                        for entry in transcript_list:
+                            s_time = getattr(entry, 'start', entry.get('start', 0) if isinstance(entry, dict) else 0)
+                            if start <= s_time < end:
+                                t_str = getattr(entry, 'text', entry.get('text', '') if isinstance(entry, dict) else str(entry))
+                                ch_text.append(t_str)
+
+                        raw_content.append(f"## {ch_title}\n")
+                        if idx < len(extracted_images):
+                            img_name = os.path.basename(extracted_images[idx])
+                            raw_content.append(f"![[{img_name}]]\n")
+
+                        raw_content.append(" ".join(ch_text) + "\n")
+                else:
+                    ch_text = [getattr(entry, 'text', entry.get('text', '') if isinstance(entry, dict) else str(entry)) for entry in transcript_list]
+                    raw_content.append(" ".join(ch_text) + "\n")
+                    if extracted_images:
+                        for img in extracted_images:
+                            raw_content.append(f"![[{os.path.basename(img)}]]\n")
+
+                date_str = datetime.date.today().strftime("%Y-%m-%d")
+                clean_t = title.replace('"', '\\"')
+                clean_c = channel.replace('"', '\\"')
+                updated_yaml = (
+                    f"---\n"
+                    f"ready: true\n"
+                    f"title: \"{clean_t}\"\n"
+                    f"date: {date_str}\n"
+                    f"tags: [tech/video, tech/transcript, raw]\n"
+                    f"video_url: \"{url}\"\n"
+                    f"channel: \"{clean_c}\"\n"
+                    f"---\n"
+                    f"[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[{title}]]\n\n"
+                    f"# {title}\n\n"
+                    f"- **Canale**: {channel}\n"
+                    f"- **Video URL**: {url}\n\n"
+                    f"---\n"
+                    + "\n".join(raw_content)
+                )
+
+                with open(note_path, 'w', encoding='utf-8') as f:
+                    f.write(updated_yaml)
+                print(f"Nota grezza '{note_path}' aggiornata con successo con trascrizione e frame.")
+
         if args.json:
             print(json.dumps(data, indent=2, ensure_ascii=False))
         else:

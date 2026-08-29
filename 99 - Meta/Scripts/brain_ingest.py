@@ -10,7 +10,7 @@ Features:
 - Preventative duplicate and missing transcript guards
 """
 
-import os, sys, re, datetime, hashlib, argparse, shutil, glob, time
+import os, sys, re, datetime, hashlib, argparse, shutil, glob, time, subprocess
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Any, Set
 
@@ -21,8 +21,8 @@ import brain_health, youtube_helper
 
 YT_URL_REGEX = re.compile(r'(?:https?://)?(?:www\.|m\.)?(?:youtube\.com/(?:watch\?v=|embed/|v/|shorts/)|youtu\.be/)([a-zA-Z0-9_-]{11})')
 WEB_URL_REGEX = re.compile(r'^https?://[^\s/$.?#].[^\s]*$', re.IGNORECASE)
-RE_APPROVAL_LINE = re.compile(r'^\s*-\s+\[(?P<status>[ x-])\]\s+Approva\s+\[\[(?:Draft/)?(?P<name>[^\]]+)\]\](?:\s+\(fonte:\s+\[\[(?:Source/)?(?P<src>[^\]]+)\]\]\))?(?:\s+\(.*target:\s*(?P<target>.*?)\))?')
-RE_ERROR_LINE = re.compile(r'^\s*-\s+\[(?P<status>[ x-])\]\s+\[!\]\s+Riprova:\s+(?P<src>.*?)(?:\s+—\s+Motivo:\s*(?P<reason>.*))?$')
+RE_APPROVAL_LINE = re.compile(r'^\s*-\s+\[(?P<status>[ xX\-])\]\s+Approva\s+\[\[(?:Draft/)?(?P<name>[^\]]+)\]\](?:\s+\(fonte:\s+\[\[(?:Source/)?(?P<src>[^\]]+)\]\]\))?(?:\s+\(.*target:\s*(?P<target>.*?)\))?')
+RE_ERROR_LINE = re.compile(r'^\s*-\s+\[(?P<status>[ xX\-])\]\s+\[!\]\s+Riprova:\s+(?P<src>.*?)(?:\s+—\s+Motivo:\s*(?P<reason>.*))?$')
 RE_PANIC_LINE = re.compile(r'^\s*-\s+\[(?P<status>[ xX\-])\]\s+.*(?:🛑|Interrompi|Panic\s+Button).*', re.IGNORECASE)
 PANIC_BUTTON_LINE = "- [ ] 🛑 Interrompi elaborazioni attive (Panic Button)"
 
@@ -68,6 +68,27 @@ class NoteLock:
         if self.acquired and os.path.exists(self.lock_file):
             try: os.remove(self.lock_file)
             except Exception: pass
+
+def get_source_lock_file(source: str) -> str:
+    """Returns the deterministic lock file path for a source identifier."""
+    slug = hashlib.sha256(source.encode('utf-8')).hexdigest()[:12]
+    return f"/tmp/brain_ingest_{slug}.lock"
+
+def is_source_lock_active(source: str) -> bool:
+    """Checks if a lock file for the given source exists with an active PID."""
+    lf = get_source_lock_file(source)
+    if not os.path.exists(lf): return False
+    try:
+        with open(lf, 'r', encoding='utf-8', errors='ignore') as f: content = f.read()
+        m = re.search(r'pid:\s*(\d+)', content)
+        if m and is_pid_alive(int(m.group(1))):
+            return True
+        try: os.remove(lf)
+        except Exception: pass
+        return False
+    except Exception:
+        return False
+
 
 def detect_input_type(source: str) -> str:
     """Classifies polymorphic input into youtube, web, file, or text."""
@@ -135,22 +156,130 @@ def sanitize_style_highlights(text: str) -> str:
     """Strips backticks from HTML <mark> and <font> tags."""
     return re.sub(r'`(<(?:mark|font)\b[^>]*>[\s\S]*?</(?:mark|font)>)`', r'\1', text)
 
-def format_structured_note(title: str, raw_content: str, depth: str = "executive", source_type: str = "text", source_url: str = "original") -> str:
-    """Formats note body with executive or deep structure and style guide highlights."""
+def format_structured_note(title: str, raw_content: str, depth: str = "approfondimento", source_type: str = "text", source_url: str = "original") -> str:
+    """Formats note body with clean headings (no emoji, no ## Collegamenti) and style guide highlights."""
     c_title = brain_health.clean_title_str(title)
     is_deep = depth in ("deep", "approfondimento")
     lead = raw_content.strip()[:250].replace('\n', ' ')
-    lines = [f"# 🎯 {c_title}\n", "## 🎯 Sintesi Esecutiva\n",
-             f'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>{c_title}</b></font></mark>: {lead}...\n']
+    lines = [
+        f"# {c_title}\n",
+        "## Sintesi Esecutiva\n",
+        f'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>{c_title}</b></font></mark>: {lead}...\n'
+    ]
     if is_deep:
-        lines.extend([f"## 🏛️ Quadro Concettuale & Fondamenti\n\n{raw_content.strip()}\n",
-                      f"## ⚙️ Meccanica & Architettura di Dettaglio\n\nAnalisi dettagliata di {c_title}.\n",
-                      "## 🔬 Analisi Critica, Limiti & Casi d'Uso\n\nValutazione limiti e casi pratici.\n"])
+        lines.extend([
+            f"## Quadro Concettuale e Fondamenti\n\n{raw_content.strip()}\n",
+            f"## Meccanica e Dettaglio Operativo\n\nAnalisi approfondita dei principi operativi di {c_title}.\n",
+            "## Analisi Critica e Casi Applicativi\n\nValutazione di limiti, compromessi architetturali e contesti d'uso.\n"
+        ])
     else:
-        lines.extend([f"## 🔑 Concetti Chiave & Takeaway\n\n- <mark style=\"background:rgba(181, 113, 255, 0.36)\"><font color=\"#9a54c1\"><b>Punto Chiave 1</b></font></mark>: {lead[:120]}\n",
-                      f"## 🏛️ Quadro Concettuale\n\n{raw_content.strip()}\n"])
-    lines.append("## 🔗 Collegamenti & Note Correlate\n\n- [[Home MOC|Home]]\n")
+        lines.extend([
+            f"## Concetti Chiave e Takeaway\n\n- <mark style=\"background:rgba(181, 113, 255, 0.36)\"><font color=\"#9a54c1\"><b>Punto Chiave 1</b></font></mark>: {lead[:120]}\n",
+            f"## Quadro Concettuale\n\n{raw_content.strip()}\n"
+        ])
     return "\n".join(lines)
+
+def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth: str = "approfondimento",
+                         source_type: str = "text", source_url: str = "original",
+                         agy_path: str = "/Users/lorenzo/.local/bin/agy", timeout: int = 45) -> tuple[str, str]:
+    """Generates enriched conceptual note body and executive summary via AI (agy CLI) with heuristic fallback.
+    Returns (enriched_body, summary)."""
+    c_title = brain_health.clean_title_str(title)
+    is_deep = depth in ("deep", "approfondimento")
+
+    if os.environ.get("BRAIN_INGEST_NO_AI") == "1":
+        fallback_body = format_structured_note(c_title, source_content, depth=depth, source_type=source_type, source_url=source_url)
+        fallback_summary = f"Trattazione concettuale ed evidenze operative per {c_title}."
+        return fallback_body, fallback_summary
+
+    depth_instruction = (
+        "LIVELLO DI DETTAGLIO: APPROFONDIMENTO (DEFAULT)\n"
+        "Fornisci una trattazione ricca, densa ed esaustiva di tutti i passaggi logici, modelli mentali e meccanismi di dettaglio. "
+        "Non sintetizzare eccessivamente: sviluppa i concetti con ampiezza e precisione terminologica."
+        if is_deep else
+        "LIVELLO DI DETTAGLIO: SINTESI\n"
+        "Fornisci una trattazione compatta (1-2 schermate) focalizzata sulla tesi centrale, definizioni essenziali e takeaway operativi."
+    )
+
+    prompt = f"""Sei il motore di elaborazione della conoscenza per un Second Brain PKM in Obsidian.
+Il tuo compito è rielaborare il contenuto sorgente in una nota concettuale permanente di altissima qualità letteraria e tecnica per: "{c_title}".
+
+CONTENUTO SORGENTE:
+{source_content[:9000]}
+
+{depth_instruction}
+
+REGOLE CRITICHE DI CONTENUTO E STILE:
+1. FILTRO ANTI-SLOP E ANTI-SPONSOR:
+   - Elimina categoricamente sponsor commerciali (es. corsi online, piattaforme cloud, VPN, promozioni), saluti, formule di rito, aneddoti irrilevanti e frasi riempitive.
+   - Distilla solo principi primi, definizioni rigorose, tesi argomentate, metodologie applicative e limiti critici.
+
+2. ANATOMIA E SEZIONI DELLA NOTA:
+   - Inizia sempre con il titolo H1 esatto della nota: # {c_title}
+   - Struttura le sezioni H2 e H3 in modo completamente libero e flessibile, guidato dalla natura del contenuto (es. Sintesi Esecutiva, Fondamenti Teorici, Meccanica di Funzionamento, Analisi Critica, Applicazioni Pratiche).
+   - DIVIETO ASSOLUTO DI EMOJI NEI TITOLI: I titoli H1, H2, H3 devono contenere SOLO testo pulito (es. '## Sintesi Esecutiva' e MAI '## 🎯 Sintesi Esecutiva').
+   - NESSUNA SEZIONE COLLEGAMENTI SEPARATA: Non inserire mai sezioni come '## Collegamenti', '## Note Correlate' o '## Vedi anche'. I collegamenti semantici verranno gestiti altrove.
+
+3. EVIDENZIAZIONI E ARRICCHIMENTO VISIVO:
+   - Evidenzia i concetti cardine/parole chiave assolute in GIALLO: <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>
+   - Evidenzia i concetti secondari/nomi/luoghi in VIOLA: <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>
+   - MAI racchiudere i tag <mark> o <font> tra backtick markdown (solo HTML inline grezzo).
+   - Usa diagrammi Mermaid per processi/flussi logici complessi (tutti i nodi con apici: id["Etichetta"]).
+   - Usa LaTeX per formule matematiche/tecniche ($...$ o $$...$$).
+
+4. LINGUA E SINTESI FINALE:
+   - Scrivi rigorosamente in italiano accademico, chiaro e professionale.
+   - NON includere il frontmatter YAML (sarà generato dal sistema).
+   - Alla fine assoluta della risposta, inserisci il marcatore esatto '---SUMMARY---' seguito da una singola frase densa di significato (120-180 caratteri, max 200) per il recupero sub-secondo.
+"""
+
+    agy_cmd = agy_path if os.path.exists(agy_path) else "agy"
+    env = os.environ.copy()
+    env['PATH'] = f"/Users/lorenzo/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:{env.get('PATH', '')}"
+    env['PYTHONUNBUFFERED'] = '1'
+
+    try:
+        proc = subprocess.run(
+            [agy_cmd, "--model", "gemini-3.7-flash-low", "--dangerously-skip-permissions", "--disable-slash-commands", f"--print={prompt}"],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env=env
+        )
+        if proc.returncode == 0 and proc.stdout.strip():
+            raw_out = proc.stdout.strip()
+            summary = ""
+            if "---SUMMARY---" in raw_out:
+                parts = raw_out.split("---SUMMARY---", 1)
+                body_part = parts[0].strip()
+                summary = parts[1].strip().replace('\n', ' ').strip('"').strip("'")
+            else:
+                body_part = raw_out.strip()
+
+            if not summary or len(summary) < 20:
+                summary = f"Trattazione concettuale ed evidenze chiave per {c_title}."
+            if len(summary) > 200:
+                summary = summary[:197] + "..."
+
+            cleaned_body = sanitize_style_highlights(body_part)
+            # Ensure H1 header is clean without emoji
+            cleaned_body = re.sub(r'^#\s+[\U00010000-\U0010ffff\u2600-\u27ff\u2300-\u23ff\s]*', f'# {c_title}\n\n', cleaned_body)
+            if not cleaned_body.startswith("# "):
+                cleaned_body = f"# {c_title}\n\n" + cleaned_body
+
+            # Strip any hallucinated ## Collegamenti section
+            cleaned_body = re.sub(r'\n+##\s+(?:🔗\s*)?(?:Collegamenti|Note Correlate|Vedi anche)[\s\S]*$', '', cleaned_body, flags=re.IGNORECASE)
+
+            # Strip emojis from any H2/H3 headers
+            cleaned_body = re.sub(r'^(#{2,6}\s+)[\U00010000-\U0010ffff\u2600-\u27ff\u2300-\u23ff\s]+', r'\1', cleaned_body, flags=re.MULTILINE)
+
+            return cleaned_body.strip(), summary
+    except Exception:
+        pass
+
+    fallback_body = format_structured_note(c_title, source_content, depth=depth, source_type=source_type, source_url=source_url)
+    fallback_summary = f"Trattazione concettuale ed evidenze operative per {c_title}."
+    return fallback_body, fallback_summary
 
 def append_inbox_history(vault_root: str, action: str, note_title: str, target: str, source: str = ""):
     """Appends processed action to 99 - Meta/logs/inbox_history.md."""
@@ -242,6 +371,10 @@ def trigger_panic_abort(vault_root: str) -> int:
 
     # 6. Reset ready: true to ready: false in 03 - Inbox/*.md
     inbox_dir = os.path.join(vault_root, "03 - Inbox")
+    draft_dir = os.path.join(inbox_dir, "Draft")
+    source_dir = os.path.join(inbox_dir, "Source")
+    clip_dir = os.path.join(vault_root, "99 - Meta", "Clipboard")
+
     if os.path.exists(inbox_dir):
         for f in os.listdir(inbox_dir):
             if f.endswith(".md") and not f.startswith(".") and f not in ("Review Dashboard.md", "Draft", "Source"):
@@ -258,10 +391,85 @@ def trigger_panic_abort(vault_root: str) -> int:
                     except Exception:
                         pass
 
-    # 7. Append history entry and refresh Review Dashboard
+    # 7. Clean up aborted in-progress drafts in 03 - Inbox/Draft/
+    if os.path.exists(draft_dir):
+        for f in os.listdir(draft_dir):
+            if f.endswith(".md") and not f.startswith("."):
+                dfp = os.path.join(draft_dir, f)
+                try:
+                    with open(dfp, "r", encoding="utf-8", errors="ignore") as df:
+                        content = df.read()
+                    has_fm, fm_t, _, bdy = brain_health.split_markdown_note(content)
+                    if has_fm:
+                        meta = brain_health.safe_load_frontmatter(fm_t, brain_health.build_yaml_engine())
+                        if str(meta.get('status', '')).lower() == 'in-progress':
+                            sfp = os.path.join(source_dir, f)
+                            src_val = meta.get('source', 'original')
+                            if os.path.exists(sfp):
+                                try:
+                                    with open(sfp, "r", encoding="utf-8", errors="ignore") as sf:
+                                        s_content = sf.read()
+                                    if src_val == "original" or "ready:" in s_content:
+                                        # Restore manual source note to Inbox root with ready: false
+                                        rfm = re.sub(r'ready:\s*(true|"true"|\'true\'|1)', 'ready: false', s_content, flags=re.IGNORECASE)
+                                        if "ready:" not in rfm:
+                                            rfm = f"---\nready: false\n---\n\n{s_content}"
+                                        with open(os.path.join(inbox_dir, f), "w", encoding="utf-8") as wf:
+                                            wf.write(rfm)
+                                    os.remove(sfp)
+                                except Exception:
+                                    pass
+                            # Clean up clipboard frames
+                            name_stem = f[:-3]
+                            if os.path.exists(clip_dir):
+                                for img in os.listdir(clip_dir):
+                                    if img.startswith(name_stem[:10]) or name_stem.lower().replace(' ', '_')[:10] in img:
+                                        try: os.remove(os.path.join(clip_dir, img))
+                                        except Exception: pass
+                            os.remove(dfp)
+                except Exception:
+                    pass
+
+    # 8. Append history entry and refresh Review Dashboard
     append_inbox_history(vault_root, "PANIC_ABORT", "Tutti i processi", "STOPPED", "Review Dashboard")
     update_review_dashboard(vault_root, in_progress="CLEAR_ALL")
     return len(aborted_pids)
+
+
+
+def mark_draft_ready(vault_root: str, title_or_path: str) -> bool:
+    """Transitions a note in 03 - Inbox/Draft/ from status: in-progress to status: draft,
+    moving it from In Elaborazione to Note in Attesa di Approvazione."""
+    inbox_dir = os.path.join(vault_root, "03 - Inbox")
+    draft_dir = os.path.join(inbox_dir, "Draft")
+    clean_title = brain_health.clean_title_str(title_or_path)
+    draft_path = os.path.join(draft_dir, f"{clean_title}.md")
+    if not os.path.exists(draft_path):
+        draft_path = os.path.join(draft_dir, f"{title_or_path}.md")
+    if not os.path.exists(draft_path) and os.path.isabs(title_or_path) and os.path.exists(title_or_path):
+        draft_path = title_or_path
+        clean_title = brain_health.clean_title_str(os.path.basename(draft_path)[:-3])
+    if not os.path.exists(draft_path):
+        return False
+
+    with open(draft_path, "r", encoding="utf-8", errors="ignore") as f:
+        content = f.read()
+    has_fm, fm_text, breadcrumb, body = brain_health.split_markdown_note(content)
+    if not has_fm:
+        meta = {'title': clean_title, 'status': 'draft', 'type': 'concept', 'area': 'tech'}
+    else:
+        meta = brain_health.safe_load_frontmatter(fm_text, brain_health.build_yaml_engine())
+        meta['status'] = 'draft'
+        meta['updated'] = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
+
+    fm_str = brain_health.format_canonical_frontmatter(meta)
+    bc = breadcrumb or f"[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[{clean_title}]]"
+    new_content = brain_health.assemble_markdown_note(fm_str, bc, sanitize_style_highlights(body))
+    with open(draft_path, "w", encoding="utf-8") as f:
+        f.write(new_content)
+
+    update_review_dashboard(vault_root, finish_in_progress=clean_title)
+    return True
 
 
 def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
@@ -276,35 +484,70 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
     os.makedirs(inbox_dir, exist_ok=True)
     pend_lines, err_lines, prog_lines = [], [], []
 
+    # 1. Parse existing dashboard if present
     if os.path.exists(dash_path):
         with open(dash_path, "r", encoding="utf-8", errors="ignore") as f: content = f.read()
         cur = None
         for line in content.splitlines():
             s = line.strip()
-            if s.startswith("## ⏳"): cur = "p"
-            elif s.startswith("## 📥"): cur = "w"
-            elif s.startswith("## ⚠️"): cur = "e"
-            elif s.startswith("## 📜") or s.startswith("## ⚙️"): cur = None
+            if s.startswith("## ⏳") or "in elaborazione" in s.lower() or "in rielaborazione" in s.lower(): cur = "p"
+            elif s.startswith("## 📥") or "in attesa" in s.lower() or "attesa di approvazione" in s.lower(): cur = "w"
+            elif s.startswith("## ⚠️") or "errori" in s.lower(): cur = "e"
+            elif s.startswith("## 📜") or "storico" in s.lower() or s.startswith("## ⚙️") or "istruzioni" in s.lower(): cur = None
             elif cur == "p":
                 if s.startswith("- ⏳"):
                     prog_lines.append(line)
             elif cur == "w" and s.startswith("- ["): pend_lines.append(line)
             elif cur == "e" and s.startswith("- ["): err_lines.append(line)
 
+    # 2. Reconcile on-disk Draft/ files completely without truncating frontmatter
+    draft_files: Dict[str, Dict[str, Any]] = {}
+    if os.path.exists(draft_dir):
+        for f in sorted(os.listdir(draft_dir)):
+            if f.endswith('.md') and not f.startswith('.'):
+                t = f[:-3]
+                clean_t = brain_health.clean_title_str(t)
+                t_clean_low = clean_t.lower()
+                fp = os.path.join(draft_dir, f)
+                is_in_prog = False
+                source_val, video_val = None, None
+                try:
+                    with open(fp, 'r', encoding='utf-8', errors='ignore') as d_f:
+                        d_content = d_f.read()
+                    has_fm, d_fm, _, _ = brain_health.split_markdown_note(d_content)
+                    if has_fm:
+                        meta = brain_health.safe_load_frontmatter(d_fm, brain_health.build_yaml_engine())
+                        status_val = str(meta.get('status', 'draft')).lower()
+                        if status_val == 'in-progress':
+                            is_in_prog = True
+                        source_val = meta.get('source')
+                        video_val = meta.get('video_url')
+                except Exception:
+                    pass
+                draft_files[t_clean_low] = {
+                    'title': clean_t,
+                    'is_in_prog': is_in_prog,
+                    'filename': f,
+                    'source': source_val,
+                    'video_url': video_val
+                }
+
+    # 3. Handle explicit runtime in_progress
     if in_progress:
         if in_progress == "CLEAR_ALL":
             prog_lines = []
         else:
             p_item = in_progress.strip()
-            p_phase = phase or "Fase 1/4: Acquisizione & Estrazione Trascrizione..."
-            p_line = f"- ⏳ [[Draft/{p_item}]] ({p_phase})" if not p_item.startswith("http") else f"- ⏳ {p_item} ({p_phase})"
+            p_phase = phase or "Fase 1/3: Estrazione Sorgente..."
+            clean_p = brain_health.clean_title_str(p_item)
+            p_line = f"- ⏳ [[Draft/{clean_p}]] ({p_phase})" if not p_item.startswith("http") else f"- ⏳ {p_item} ({p_phase})"
             existing_idx = None
-            p_clean = brain_health.clean_title_str(p_item).lower()
             for idx, pl in enumerate(prog_lines):
-                if (replace_in_progress and replace_in_progress.lower() in pl.lower()) or \
-                   f"[[Draft/{p_item}]]" in pl or \
-                   (p_item.startswith("http") and p_item in pl) or \
-                   (not p_item.startswith("http") and p_clean in pl.lower()):
+                if (replace_in_progress and (replace_in_progress.lower() in pl.lower() or brain_health.clean_title_str(replace_in_progress).lower() in pl.lower())) or \
+                   f"[[Draft/{clean_p}]]" in pl or \
+                   f"[[{clean_p}]]" in pl or \
+                   (p_item.startswith("http") and p_item.lower() in pl.lower()) or \
+                   (not p_item.startswith("http") and clean_p.lower() in pl.lower()):
                     existing_idx = idx
                     break
             if existing_idx is not None:
@@ -312,86 +555,103 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
             else:
                 prog_lines.append(p_line)
 
+    # 4. Handle explicit finish_in_progress
     if finish_in_progress:
-        f_clean = brain_health.clean_title_str(finish_in_progress).lower()
-        fp_draft = os.path.join(draft_dir, f"{finish_in_progress}.md")
+        f_clean_low = brain_health.clean_title_str(finish_in_progress).lower()
         keep_in_prog = False
-        if os.path.exists(fp_draft):
-            try:
-                with open(fp_draft, 'r', encoding='utf-8', errors='ignore') as d_f:
-                    d_c = d_f.read(800)
-                has_fm, d_fm, _, _ = brain_health.split_markdown_note(d_c)
-                if has_fm:
-                    meta = brain_health.safe_load_frontmatter(d_fm, brain_health.build_yaml_engine())
-                    if meta.get('status') == 'in-progress':
-                        keep_in_prog = True
-            except Exception:
-                pass
+        if f_clean_low in draft_files and draft_files[f_clean_low]['is_in_prog']:
+            keep_in_prog = True
         if not keep_in_prog:
             new_prog = []
             for l in prog_lines:
-                m_pr = re.search(r'\[\[Draft/(?P<name>.*?)\]\]', l)
-                name_clean = brain_health.clean_title_str(m_pr.group('name')).lower() if m_pr else l.lower()
-                if f_clean in name_clean or name_clean in f_clean or finish_in_progress.lower() in l.lower():
+                m_pr = re.search(r'\[\[(?:Draft/)?(?P<name>[^\]]+)\]\]', l)
+                if m_pr:
+                    name_clean = brain_health.clean_title_str(m_pr.group('name')).lower()
+                    if name_clean == f_clean_low:
+                        continue
+                elif finish_in_progress.lower() in l.lower() or f_clean_low in l.lower():
                     continue
                 new_prog.append(l)
             prog_lines = new_prog
 
+    # 5. Handle add_error
     if add_error:
         entry = f"- [ ] [!] Riprova: {add_error[0]} — Motivo: {add_error[1]}"
         if entry not in err_lines: err_lines.append(entry)
 
-    active_in_prog_names = []
+    # 6. Reconcile progress lines (## ⏳ In Elaborazione)
+    active_in_prog_names = set()
+    reconciled_prog_lines = []
+
+    if in_progress and in_progress != "CLEAR_ALL":
+        p_item = in_progress.strip()
+        if not p_item.startswith("http"):
+            active_in_prog_names.add(brain_health.clean_title_str(p_item).lower())
+
+    seen_prog_names = set()
     for pl in prog_lines:
-        m_pr = re.search(r'\[\[Draft/(?P<name>.*?)\]\]', pl)
+        m_pr = re.search(r'\[\[(?:Draft/)?(?P<name>[^\]]+)\]\]', pl)
         if m_pr:
-            active_in_prog_names.append(brain_health.clean_title_str(m_pr.group('name')).lower())
+            name_clean = brain_health.clean_title_str(m_pr.group('name'))
+            name_low = name_clean.lower()
+            if name_low in draft_files:
+                d_info = draft_files[name_low]
+                if d_info['is_in_prog'] or (in_progress and brain_health.clean_title_str(in_progress).lower() == name_low):
+                    if name_low not in seen_prog_names:
+                        reconciled_prog_lines.append(pl)
+                        seen_prog_names.add(name_low)
+                        active_in_prog_names.add(name_low)
+            else:
+                if (in_progress and brain_health.clean_title_str(in_progress).lower() == name_low) or is_source_lock_active(name_clean):
+                    if name_low not in seen_prog_names:
+                        reconciled_prog_lines.append(pl)
+                        seen_prog_names.add(name_low)
+                        active_in_prog_names.add(name_low)
         else:
-            active_in_prog_names.append(pl.lower())
-
-    if os.path.exists(draft_dir):
-        for f in sorted(os.listdir(draft_dir)):
-            if f.endswith('.md') and not f.startswith('.'):
-                t = f[:-3]
-                t_clean = brain_health.clean_title_str(t).lower()
-                fp = os.path.join(draft_dir, f)
-                is_in_prog = False
-                try:
-                    with open(fp, 'r', encoding='utf-8', errors='ignore') as d_f:
-                        d_content = d_f.read(800)
-                    has_fm, d_fm, _, _ = brain_health.split_markdown_note(d_content)
-                    if has_fm:
-                        meta = brain_health.safe_load_frontmatter(d_fm, brain_health.build_yaml_engine())
-                        if meta.get('status') == 'in-progress':
-                            is_in_prog = True
-                except Exception:
-                    pass
-
-                if is_in_prog:
-                    if not any(f"[[Draft/{t}]]" in pl or t_clean in pl.lower() for pl in prog_lines):
-                        prog_lines.append(f"- ⏳ [[Draft/{t}]] (In Rielaborazione...)")
-                    active_in_prog_names.append(t_clean)
+            m_url = re.search(r'https?://[^\s\)]+', pl)
+            url_str = m_url.group(0) if m_url else None
+            if url_str:
+                matching_draft = None
+                for d_low, d_info in draft_files.items():
+                    if d_info.get('source') == url_str or d_info.get('video_url') == url_str:
+                        matching_draft = d_info
+                        break
+                if matching_draft:
+                    if matching_draft['is_in_prog']:
+                        active_in_prog_names.add(matching_draft['title'].lower())
                     continue
+                if is_source_lock_active(url_str) or (in_progress and url_str in in_progress):
+                    reconciled_prog_lines.append(pl)
 
-                if any(t_clean in ap or ap in t_clean for ap in active_in_prog_names):
-                    continue
-                src = os.path.exists(os.path.join(source_dir, f))
-                l = f"- [ ] Approva [[Draft/{t}]] (fonte: [[Source/{t}]])" if src else f"- [ ] Approva [[Draft/{t}]]"
-                if not any(f"[[Draft/{t}]]" in pl or f"[[{t}]]" in pl for pl in pend_lines): pend_lines.append(l)
+    for name_low, d_info in draft_files.items():
+        if d_info['is_in_prog']:
+            active_in_prog_names.add(name_low)
+            if name_low not in seen_prog_names:
+                reconciled_prog_lines.append(f"- ⏳ [[Draft/{d_info['title']}]] (Fase 2/3: Rielaborazione Concettuale AI...)")
+                seen_prog_names.add(name_low)
 
-    valid_pend = []
+    prog_lines = reconciled_prog_lines
+
+    # 7. Reconcile pend_lines (## 📥 Note in Attesa di Approvazione)
+    existing_pend_map = {}
     for l in pend_lines:
         m = RE_APPROVAL_LINE.match(l)
         if m:
             n = brain_health.clean_title_str(m.group('name'))
-            n_clean = n.lower()
-            if any(n_clean in ap or ap in n_clean for ap in active_in_prog_names):
-                continue
-            if os.path.exists(os.path.join(draft_dir, f"{n}.md")) or os.path.exists(os.path.join(vault_root, "03 - Inbox", f"{n}.md")):
-                valid_pend.append(l)
+            existing_pend_map[n.lower()] = l
+
+    reconciled_pend_lines = []
+    for name_low, d_info in draft_files.items():
+        if d_info['is_in_prog'] or name_low in active_in_prog_names:
+            continue
+        src_exists = os.path.exists(os.path.join(source_dir, d_info['filename']))
+        if name_low in existing_pend_map:
+            reconciled_pend_lines.append(existing_pend_map[name_low])
         else:
-            valid_pend.append(l)
-    pend_lines = valid_pend
+            line_str = f"- [ ] Approva [[Draft/{d_info['title']}]] (fonte: [[Source/{d_info['title']}]])" if src_exists else f"- [ ] Approva [[Draft/{d_info['title']}]]"
+            reconciled_pend_lines.append(line_str)
+
+    pend_lines = reconciled_pend_lines
 
     hist_lines = []
     log_file = os.path.join(vault_root, "99 - Meta", "logs", "inbox_history.md")
@@ -416,6 +676,7 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
             "\n## 📜 Storico Recente"] + (hist_lines or ["*Nessuna azione recente registrata.*"])
 
     with open(dash_path, "w", encoding="utf-8") as f: f.write("\n".join(dash) + "\n")
+
 
 
 def stage_note(vault_root: str, title: str, body: str, metadata: Optional[Dict[str, Any]] = None,
@@ -445,7 +706,7 @@ def stage_note(vault_root: str, title: str, body: str, metadata: Optional[Dict[s
         with open(os.path.join(source_dir, f"{clean_title}.md"), "w", encoding="utf-8") as f: f.write(source_content)
 
     if meta.get('status') == 'in-progress':
-        update_review_dashboard(vault_root, in_progress=clean_title, phase="In Rielaborazione...")
+        update_review_dashboard(vault_root, in_progress=clean_title, phase="Fase 2/3: Rielaborazione Concettuale AI...")
     else:
         update_review_dashboard(vault_root, finish_in_progress=clean_title)
     return draft_path
@@ -472,7 +733,7 @@ def process_tri_state_approvals(vault_root: str) -> int:
             if status == ' ':
                 updated_lines.append(line); continue
             src_target = m_err.group('src').strip()
-            if status == 'x':
+            if status in ('x', 'X'):
                 try:
                     raw_file = os.path.join(vault_root, "03 - Inbox", src_target)
                     if not os.path.exists(raw_file) and not src_target.endswith('.md'):
@@ -505,17 +766,24 @@ def process_tri_state_approvals(vault_root: str) -> int:
         m = RE_APPROVAL_LINE.match(line)
         if not m or m.group('status') == ' ':
             updated_lines.append(line); continue
-        status, name = m.group('status'), brain_health.clean_title_str(m.group('name'))
+        status, raw_name = m.group('status'), m.group('name')
+        name = brain_health.clean_title_str(raw_name)
         draft_path = os.path.join(vault_root, "03 - Inbox", "Draft", f"{name}.md")
+        if not os.path.exists(draft_path): draft_path = os.path.join(vault_root, "03 - Inbox", "Draft", f"{raw_name}.md")
         if not os.path.exists(draft_path): draft_path = os.path.join(vault_root, "03 - Inbox", f"{name}.md")
+        if not os.path.exists(draft_path): draft_path = os.path.join(vault_root, "03 - Inbox", f"{raw_name}.md")
         source_path = os.path.join(vault_root, "03 - Inbox", "Source", f"{name}.md")
+        if not os.path.exists(source_path): source_path = os.path.join(vault_root, "03 - Inbox", "Source", f"{raw_name}.md")
 
-        if status == 'x':
+        if status in ('x', 'X'):
             if not os.path.exists(draft_path): continue
             with open(draft_path, "r", encoding="utf-8") as f: content = f.read()
             _, fm_text, _, body = brain_health.split_markdown_note(content)
             meta = brain_health.safe_load_frontmatter(fm_text, brain_health.build_yaml_engine())
-            target_rel = meta.get('target_path') or classify_target_directory(name, meta.get('tags', []), body) + f"/{name}.md"
+            target_rel = meta.get('target_path') or (classify_target_directory(name, meta.get('tags', []), body) + f"/{name}.md")
+            target_dir_part = os.path.dirname(target_rel)
+            target_file_part = brain_health.clean_title_str(os.path.basename(target_rel)[:-3]) + ".md"
+            target_rel = os.path.join(target_dir_part, target_file_part) if target_dir_part else target_file_part
             dest_abs, vault_abs = os.path.abspath(os.path.join(vault_root, target_rel)), os.path.abspath(vault_root)
 
             if not dest_abs.startswith(vault_abs + os.sep) and dest_abs != vault_abs:
@@ -613,18 +881,27 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
                 processed.append(src_url)
                 continue
 
-            # For text / markdown raw notes
-            update_review_dashboard(vault_root, in_progress=clean_title, phase="Fase 1/4: Acquisizione & Lock...")
-            update_review_dashboard(vault_root, in_progress=clean_title, phase="Fase 2/4: Lettura Nota Grezza...")
+            # -------------------------------------------------------------
+            # FASE 1/3: Estrazione Sorgente
+            # -------------------------------------------------------------
+            update_review_dashboard(vault_root, in_progress=clean_title, phase="Fase 1/3: Estrazione Sorgente...")
             target_dir = classify_target_directory(clean_title, meta.get('tags', []), body)
-            update_review_dashboard(vault_root, in_progress=clean_title, phase="Fase 3/4: Rielaborazione Concettuale & Autolinking...")
-            formatted_body = format_structured_note(clean_title, body, depth="executive", source_type="concept", source_url="original")
-            linked_body, links = autolink_content(vault_root, formatted_body, clean_title)
-            if links and 'related' not in meta: meta['related'] = links
 
-            update_review_dashboard(vault_root, in_progress=clean_title, phase="Fase 4/4: Scrittura Bozza & Staging...")
-            stage_note(vault_root, clean_title, linked_body, meta, target_dir=target_dir, source_content=content)
+            # -------------------------------------------------------------
+            # FASE 2/3: Rielaborazione Concettuale AI
+            # -------------------------------------------------------------
+            update_review_dashboard(vault_root, in_progress=clean_title, phase="Fase 2/3: Rielaborazione Concettuale AI...")
+            enriched_body, summary = enrich_draft_with_ai(vault_root, clean_title, content, depth="approfondimento", source_type="concept", source_url="original")
+            stage_note(vault_root, clean_title, enriched_body, meta, target_dir=target_dir, source_content=content, status='in-progress')
             if os.path.exists(file_path): os.remove(file_path)
+
+            # -------------------------------------------------------------
+            # FASE 3/3: Autolinking & Staging
+            # -------------------------------------------------------------
+            linked_body, links = autolink_content(vault_root, enriched_body, clean_title)
+            meta['summary'] = summary
+            if links: meta['related'] = links
+            stage_note(vault_root, clean_title, linked_body, meta, target_dir=target_dir, status='draft')
             processed.append(clean_title)
 
         except Exception as e:
@@ -639,13 +916,18 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
     return processed
 
 def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Optional[str] = None,
-                  depth: str = "executive", extract_frames: bool = False, force: bool = False) -> str:
-    """Unified entry point for ingesting any source type into 03 - Inbox/Draft/."""
+                  depth: str = "approfondimento", extract_frames: bool = False, force: bool = False, use_ai: bool = True) -> str:
+    """Unified entry point executing the lean 3-macro-phase lifecycle into 03 - Inbox/Draft/."""
     root = brain_health.get_vault_root(vault_root)
+    result_path = None
     with NoteLock(source):
         in_type = detect_input_type(source)
         prov = Path(source).stem if in_type == "file" else (source if in_type in ("youtube", "web") else source.strip().splitlines()[0].lstrip('#').strip()[:40])
-        update_review_dashboard(root, in_progress=prov, phase="Fase 1/4: Acquisizione & Lock...")
+
+        # -------------------------------------------------------------
+        # FASE 1/3: Estrazione Sorgente
+        # -------------------------------------------------------------
+        update_review_dashboard(root, in_progress=prov, phase="Fase 1/3: Estrazione Sorgente...")
         try:
             if in_type == "youtube":
                 if not force:
@@ -660,54 +942,67 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                     raise
                 title, channel = data['title'], data['channel']
                 clean_title = brain_health.clean_title_str(title)
-                update_review_dashboard(root, in_progress=clean_title, phase="Fase 2/4: Estrazione Dati & Trascrizione...", replace_in_progress=prov)
                 raw_text = " ".join([t.get('text', '') for t in data['transcript']])
                 dest_dir = target_dir or classify_target_directory(clean_title, ['tech/ai', 'video'], raw_text)
-                update_review_dashboard(root, in_progress=clean_title, phase="Fase 3/4: Rielaborazione Concettuale AI...")
-                body = format_structured_note(clean_title, raw_text, depth=depth, source_type="video", source_url=source)
-                linked_body, links = autolink_content(root, body, clean_title)
                 meta = {'title': clean_title, 'type': 'video', 'area': 'tech', 'source': source, 'video_url': source, 'channel': channel, 'tags': ['tech/ai', 'video']}
-                if links: meta['related'] = links
-                update_review_dashboard(root, in_progress=clean_title, phase="Fase 4/4: Scrittura Bozza & Staging...")
-                return stage_note(root, clean_title, linked_body, meta, target_dir=dest_dir, source_content=raw_text)
 
             elif in_type == "file":
-                with open(source, 'r', encoding='utf-8') as f: content = f.read()
+                with open(source, 'r', encoding='utf-8') as f: raw_text = f.read()
                 title = Path(source).stem
-                update_review_dashboard(root, in_progress=title, phase="Fase 2/4: Lettura File Sorgente...")
-                dest_dir = target_dir or classify_target_directory(title, ['raw'], content)
-                update_review_dashboard(root, in_progress=title, phase="Fase 3/4: Rielaborazione Concettuale & Autolinking...")
-                linked_body, links = autolink_content(root, content, title)
-                meta = {'title': title, 'type': 'concept', 'area': 'tech', 'source': 'original', 'tags': ['raw'], **({'related': links} if links else {})}
-                update_review_dashboard(root, in_progress=title, phase="Fase 4/4: Scrittura Bozza & Staging...")
-                return stage_note(root, title, linked_body, meta, target_dir=dest_dir, source_content=content)
+                clean_title = brain_health.clean_title_str(title)
+                dest_dir = target_dir or classify_target_directory(clean_title, ['raw'], raw_text)
+                meta = {'title': clean_title, 'type': 'concept', 'area': 'tech', 'source': 'original', 'tags': ['raw']}
 
             else:
                 lines = [l.strip() for l in source.strip().splitlines() if l.strip()]
                 title = lines[0].lstrip('#').strip() if lines else "Nuova Nota"
-                update_review_dashboard(root, in_progress=title, phase="Fase 2/4: Elaborazione Testo...")
-                body = format_structured_note(title, source, depth=depth, source_type=in_type, source_url=source if in_type == "web" else "original")
-                dest_dir = target_dir or classify_target_directory(title, ['tech'], source)
-                update_review_dashboard(root, in_progress=title, phase="Fase 3/4: Rielaborazione Concettuale & Autolinking...")
-                linked_body, links = autolink_content(root, body, title)
-                meta = {'title': title, 'type': 'article' if in_type == 'web' else 'concept', 'area': 'tech', 'source': source if in_type == 'web' else 'original', **({'related': links} if links else {})}
-                update_review_dashboard(root, in_progress=title, phase="Fase 4/4: Scrittura Bozza & Staging...")
-                return stage_note(root, title, linked_body, meta, target_dir=dest_dir, source_content=source)
+                clean_title = brain_health.clean_title_str(title)
+                raw_text = source
+                dest_dir = target_dir or classify_target_directory(clean_title, ['tech'], source)
+                meta = {'title': clean_title, 'type': 'article' if in_type == 'web' else 'concept', 'area': 'tech', 'source': source if in_type == 'web' else 'original'}
+
+            # -------------------------------------------------------------
+            # FASE 2/3: Rielaborazione Concettuale AI
+            # -------------------------------------------------------------
+            update_review_dashboard(root, in_progress=clean_title, phase="Fase 2/3: Rielaborazione Concettuale AI...", replace_in_progress=prov)
+            if use_ai:
+                enriched_body, summary = enrich_draft_with_ai(root, clean_title, raw_text, depth=depth, source_type=in_type, source_url=source)
+            else:
+                enriched_body = format_structured_note(clean_title, raw_text, depth=depth, source_type=in_type, source_url=source)
+                summary = f"Trattazione concettuale ed evidenze chiave per {clean_title}."
+
+            stage_note(root, clean_title, enriched_body, meta, target_dir=dest_dir, source_content=raw_text, status='in-progress')
+
+            # -------------------------------------------------------------
+            # FASE 3/3: Autolinking & Staging
+            # -------------------------------------------------------------
+            linked_body, links = autolink_content(root, enriched_body, clean_title)
+            meta['summary'] = summary
+            if links:
+                meta['related'] = links
+            result_path = stage_note(root, clean_title, linked_body, meta, target_dir=dest_dir, status='draft')
+
         except Exception:
             update_review_dashboard(root, in_progress="CLEAR_ALL")
             raise
+
+    update_review_dashboard(root)
+    return result_path or ""
 
 def main():
     parser = argparse.ArgumentParser(description="Unified Second Brain Ingestion & GTD Staging Engine.")
     parser.add_argument('input', nargs='?', default=None, help="URL, file path, or raw text to ingest")
     parser.add_argument('--scan-inbox', action='store_true', help="Scan 03 - Inbox/ for notes with ready: true")
     parser.add_argument('--process-approvals', action='store_true', help="Process [x] and [-] lines in Review Dashboard.md")
-    parser.add_argument('--depth', choices=['executive', 'deep', 'sintesi', 'approfondimento'], default='executive')
+    parser.add_argument('--ready', '--mark-ready', dest='mark_ready', default=None, help="Mark draft note as ready (status: draft) and update Review Dashboard")
+    parser.add_argument('--refresh', action='store_true', help="Refresh and reconcile Review Dashboard.md")
+    parser.add_argument('--no-ai', '--skip-ai', dest='no_ai', action='store_true', help="Skip autonomous AI Phase 2 enrichment (keeps in-progress or uses heuristic)")
+    parser.add_argument('--depth', choices=['approfondimento', 'sintesi', 'deep', 'executive'], default='approfondimento')
     parser.add_argument('--extract-frames', action='store_true', help="Extract YouTube keyframes via ffmpeg")
     parser.add_argument('--force', action='store_true', help="Bypass duplicate resource check")
     parser.add_argument('--panic', action='store_true', help="Emergency stop: terminate all active ingestion/processing jobs")
     parser.add_argument('--in-progress', dest='set_in_progress', default=None, help="Set active item in progress on Review Dashboard")
-    parser.add_argument('--phase', default=None, help="Phase description for in-progress item (e.g. 'Fase 1/4: ...')")
+    parser.add_argument('--phase', default=None, help="Phase description for in-progress item (e.g. 'Fase 1/3: ...')")
     parser.add_argument('--clear-in-progress', action='store_true', help="Clear in progress section on Review Dashboard")
     parser.add_argument('--target-dir', default=None, help="Custom target directory for promotion")
     parser.add_argument('--vault-root', default=None, help="Vault root directory")
@@ -717,9 +1012,19 @@ def main():
     if args.panic:
         count = trigger_panic_abort(root)
         print(f"Panic abort executed. Terminated {count} process(es). Watcher is active.")
+    elif args.mark_ready:
+        ok = mark_draft_ready(root, args.mark_ready)
+        if ok:
+            print(f"Marked draft ready: {args.mark_ready}")
+        else:
+            print(f"Error: Draft note '{args.mark_ready}' not found in 03 - Inbox/Draft/", file=sys.stderr)
+            sys.exit(1)
+    elif args.refresh:
+        update_review_dashboard(root)
+        print("Review Dashboard refreshed.")
     elif args.set_in_progress:
         update_review_dashboard(root, in_progress=args.set_in_progress, phase=args.phase)
-        print(f"Set in progress: {args.set_in_progress} ({args.phase or 'Fase 1/4...'})")
+        print(f"Set in progress: {args.set_in_progress} ({args.phase or 'Fase 1/3...'})")
     elif args.clear_in_progress:
         update_review_dashboard(root, in_progress="CLEAR_ALL")
         print("Cleared in progress.")
@@ -729,8 +1034,8 @@ def main():
         items = process_inbox_raw_notes(root)
         print(f"Staged {len(items)} raw inbox notes: {items}")
     elif args.input:
-        depth = "deep" if args.depth in ("deep", "approfondimento") else "executive"
-        path = ingest_source(args.input, vault_root=root, target_dir=args.target_dir, depth=depth, extract_frames=args.extract_frames, force=args.force)
+        depth = "approfondimento" if args.depth in ("deep", "approfondimento") else "sintesi"
+        path = ingest_source(args.input, vault_root=root, target_dir=args.target_dir, depth=depth, extract_frames=args.extract_frames, force=args.force, use_ai=not args.no_ai)
         print(f"Draft staged at: {path}")
     else:
         update_review_dashboard(root)
@@ -738,3 +1043,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

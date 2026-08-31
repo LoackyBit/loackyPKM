@@ -10,15 +10,15 @@ updated: 2026-07-17T00:01
 tags: [mentality/youtube, tech/transcript, mentality/mindset, mentality/philosophy]
 summary: "Video URL: https://youtu.be/FCzZZTBrSpA"
 ---
-[[Home MOC|Home]] / [[Personal Growth & Health MOC|Personal Growth & Health]] / [[5 Libri per Svegliarti]]
+[[Home MOC|Home]] / [[Personal Growth & Health]] / [[5 Libri per Svegliarti|Ti Senti Bloccato Nella Vita 5 Libri per Svegliarti]]
 
 # Ti Senti Bloccato nella Vita? 5 Libri per Svegliarti
 
 - **Video URL**: https://youtu.be/FCzZZTBrSpA
 - **Canale**: [[Rick DuFer]]
-- **Data Ingestione**: 2026-07-17
 
 ---
+
 ## Sintesi Rapida
 
 Spesso la sensazione di essere bloccati nella vita non deriva dalla mancanza di alternative, bensì da un eccesso di possibilità che genera la <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>paralisi da analisi</b></font></mark>. Attraverso una selezione di cinque opere fondamentali, tra saggi filosofici e romanzi, viene proposto un percorso di sblocco esistenziale volto a scardinare il perfezionismo, l'overthinking e la paura della scelta. L'obiettivo non è ricevere risposte pronte, ma dotarsi degli strumenti critici per assumersi la responsabilità delle proprie azioni e riprendere a muoversi.
@@ -123,5 +123,5 @@ Per evitare che la ricerca dello sblocco diventi un'ennesima forma di procrastin
 ---
 ## Collegamenti
 
-- **Macro Area**: [[Personal Growth & Health MOC]]
+- **Macro Area**: [[Personal Growth & Health]]
 - **Note Correlate**: [[Tempo]], [[Libertà]], [[Autodeterminazione]]

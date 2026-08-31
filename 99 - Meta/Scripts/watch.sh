@@ -9,8 +9,14 @@ INBOX_PATH="$VAULT_PATH/03 - Inbox"
 DASHBOARD_FILE="$INBOX_PATH/Review Dashboard.md"
 LOG_DIR="$VAULT_PATH/99 - Meta/logs"
 LOG_FILE="$LOG_DIR/watch.log"
-PID_FILE="${PID_FILE:-/tmp/brain_watcher.pid}"
-OPENED_FLAG="/tmp/obsidian_dashboard_opened"
+IS_CUSTOM_PID=0
+if [ -n "$PID_FILE" ]; then
+    IS_CUSTOM_PID=1
+fi
+# Vault-specific PID file to prevent cross-vault collisions
+VAULT_HASH=$(echo -n "$VAULT_PATH" | shasum 2>/dev/null | cut -c1-8 || echo "default")
+PID_FILE="${PID_FILE:-/tmp/brain_watcher_${VAULT_HASH}.pid}"
+OPENED_FLAG="/tmp/obsidian_dashboard_opened_${VAULT_HASH}"
 
 mkdir -p "$LOG_DIR"
 
@@ -50,11 +56,18 @@ log_msg() {
     fi
 }
 
+find_running_pids() {
+    # Find all running watch.sh processes for this script/vault excluding current subshell/process
+    local MY_PID=$$
+    local SCRIPT_NAME="watch.sh"
+    pgrep -f "$SCRIPT_NAME.*run" 2>/dev/null | grep -v "^${MY_PID}$" || true
+}
+
 is_running() {
     if [ -f "$PID_FILE" ]; then
         local PID
         PID=$(cat "$PID_FILE" 2>/dev/null)
-        if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
+        if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null && [ "$PID" -ne $$ ]; then
             return 0
         else
             # Stale PID auto-healing
@@ -62,6 +75,20 @@ is_running() {
             return 1
         fi
     fi
+
+    # Fallback to process table check only if using default vault PID_FILE
+    if [ "$IS_CUSTOM_PID" -eq 0 ]; then
+        local OTHER_PIDS
+        OTHER_PIDS=$(find_running_pids)
+        if [ -n "$OTHER_PIDS" ]; then
+            # Auto-heal PID file with first found alive PID
+            local FIRST_PID
+            FIRST_PID=$(echo "$OTHER_PIDS" | head -n 1)
+            echo "$FIRST_PID" > "$PID_FILE"
+            return 0
+        fi
+    fi
+
     return 1
 }
 
@@ -83,6 +110,7 @@ run_loop() {
     trap cleanup EXIT SIGTERM SIGINT
 
     SCAN_PID=""
+    PREV_DRAFT_STATE=""
     log_msg "Starting Second Brain Watcher daemon on $VAULT_PATH (PID $$)"
 
     while true; do
@@ -134,7 +162,7 @@ run_loop() {
             size2=$(stat -f%z "$DASHBOARD_FILE" 2>/dev/null || stat -c%s "$DASHBOARD_FILE" 2>/dev/null || echo 0)
 
             if [ "${size1:-0}" -eq "${size2:-0}" ] 2>/dev/null; then
-                if grep -Eq '\- \[[x\-]\]' "$DASHBOARD_FILE"; then
+                if grep -Eq '\- \[[xX\-]\]' "$DASHBOARD_FILE"; then
                     has_work=true
                 fi
             fi
@@ -143,6 +171,15 @@ run_loop() {
         if [ "$has_work" = true ]; then
             log_msg "Dashboard review activity detected. Invoking brain_ingest.py..."
             "$PYTHON_BIN" "$VAULT_PATH/99 - Meta/Scripts/brain_ingest.py" --process-approvals >> "$LOG_FILE" 2>&1
+        fi
+
+        # Check for status changes in Draft notes
+        if [ -d "$INBOX_PATH/Draft" ]; then
+            DRAFT_STATE="$(ls -l "$INBOX_PATH/Draft" 2>/dev/null || true)"
+            if [ "$DRAFT_STATE" != "$PREV_DRAFT_STATE" ]; then
+                PREV_DRAFT_STATE="$DRAFT_STATE"
+                "$PYTHON_BIN" "$VAULT_PATH/99 - Meta/Scripts/brain_ingest.py" --refresh >> "$LOG_FILE" 2>&1
+            fi
         fi
 
         # Obsidian Launch Integration (Non-stealing single notification per session)
@@ -185,30 +222,33 @@ start_daemon() {
 }
 
 stop_daemon() {
-    if [ -f "$PID_FILE" ]; then
-        local PID
-        PID=$(cat "$PID_FILE" 2>/dev/null)
-        if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
-            echo "Stopping Watcher daemon (PID $PID)..."
-            kill "$PID" 2>/dev/null || true
-            for _ in {1..10}; do
-                if ! kill -0 "$PID" 2>/dev/null; then
-                    break
-                fi
-                sleep 0.5
-            done
-            if kill -0 "$PID" 2>/dev/null; then
-                kill -9 "$PID" 2>/dev/null || true
-            fi
-            rm -f "$PID_FILE" "$OPENED_FLAG"
-            echo "Watcher daemon stopped."
-            return 0
-        else
-            rm -f "$PID_FILE" "$OPENED_FLAG"
-            echo "Cleaned up stale PID file. Watcher is not running."
-            return 0
+    local RUNNING_PIDS
+    RUNNING_PIDS=$(find_running_pids)
+    if [ -f "$PID_FILE" ] || [ -n "$RUNNING_PIDS" ]; then
+        local ALL_PIDS="$RUNNING_PIDS"
+        if [ -f "$PID_FILE" ]; then
+            ALL_PIDS="$ALL_PIDS $(cat "$PID_FILE" 2>/dev/null)"
         fi
+        
+        for p in $ALL_PIDS; do
+            if [ -n "$p" ] && kill -0 "$p" 2>/dev/null; then
+                echo "Stopping Watcher daemon (PID $p)..."
+                kill "$p" 2>/dev/null || true
+            fi
+        done
+        
+        sleep 0.5
+        for p in $ALL_PIDS; do
+            if [ -n "$p" ] && kill -0 "$p" 2>/dev/null; then
+                kill -9 "$p" 2>/dev/null || true
+            fi
+        done
+        
+        rm -f "$PID_FILE" "$OPENED_FLAG"
+        echo "Watcher daemon stopped."
+        return 0
     fi
+    rm -f "$PID_FILE" "$OPENED_FLAG"
     echo "Watcher is not running."
 }
 

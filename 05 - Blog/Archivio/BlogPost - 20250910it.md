@@ -11,7 +11,7 @@ updated: 2026-07-19T02:09
 tags: [tech/blog, tech/tecnologia, tech/studio]
 summary: "Qualche giorno fa ho deciso di prepararmi all'inizio della scuola ripassando la fisica del quarto anno. Conoscendo il mitico Alessandro De Concini, sono partito da uno dei suoi video, e da lì è ini..."
 ---
-[[Home MOC|Home]] / [[Blog]] / [[BlogPost - 20250910it|Come Ho Usato Anki per Prepararmi Alla Scuola con Un Tocco Personale]]
+[[Home MOC|Home]] / [[Blog]] / [[BlogPost - 20250910it|Come Ho Usato Anki per Prepararmi alla Scuola con un Tocco Personale]]
 
 # Introduzione
 

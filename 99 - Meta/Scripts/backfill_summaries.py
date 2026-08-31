@@ -25,7 +25,8 @@ CHECKPOINT_FILE = os.path.join("99 - Meta", ".backfill_checkpoint.json")
 
 IGNORE_FOLDERS = {
     '.git', '.obsidian', '.agents', '.gemini', '.trash', '.vscode',
-    '.space', '.makemd', '.smart-env', '.antigravitycli', '.codacy', 'node_modules', 'tests'
+    '.space', '.makemd', '.smart-env', '.antigravitycli', '.codacy',
+    'node_modules', 'tests', '.planning', '99 - Meta', 'Template'
 }
 
 class CheckpointManager:
@@ -190,7 +191,7 @@ def generate_ai_summary(title: str, body_text: str, rel_path: str = "", agy_path
     
     try:
         proc = subprocess.run(
-            [agy_cmd, "--print", "--dangerously-skip-permissions", "--disable-slash-commands", prompt],
+            [agy_cmd, "--model", "gemini-3.7-flash-low", "--print", "--dangerously-skip-permissions", "--disable-slash-commands", prompt],
             capture_output=True,
             text=True,
             timeout=timeout,

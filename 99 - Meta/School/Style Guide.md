@@ -1,17 +1,3 @@
----
-status: permanent
-type: concept
-area: meta
-related: []
-source: original
-title: "Style Guide"
-date: '2026-04-21'
-updated: 2026-07-07T01:20
-tags: []
-summary: "<mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bparola</b</font</mark — parole chiave ASSOLUTE, concetti-cardine, tesi critiche fondamentali"
----
-[[Home MOC|Home]] / [[School]] / [[Style Guide]]
-
 ## Gerarchia evidenziatori (FONDAMENTALE)
 
 - `<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>parola</b></font></mark>` — parole chiave ASSOLUTE, concetti-cardine, tesi critiche fondamentali

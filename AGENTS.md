@@ -2,7 +2,7 @@
 status: permanent
 type: concept
 area: tech
-related: ["[[Home MOC]]", "[[Gemini]]", "[[Vault Health Dashboard]]"]
+related: ["[[Home]]", "[[Gemini]]", "[[Vault Health Dashboard]]"]
 source: original
 title: "Agents"
 date: '2026-08-24'

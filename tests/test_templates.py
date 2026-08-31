@@ -104,5 +104,71 @@ class TestTemplates(unittest.TestCase):
                     f"Template {rel_path} references non-existent target folder '{target_folder}'."
                 )
 
+    def test_raw_inbox_note_youtube_validation(self):
+        """Asserts Raw Inbox Note template contains robust YouTube URL validation regex and user notification."""
+        raw_inbox_path = os.path.join(TEMPLATE_DIR, "Raw Inbox Note.md")
+        with open(raw_inbox_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        self.assertIn("ytRegex", content)
+        self.assertIn("Notice", content)
+        
+        # Test the regex against valid and invalid URLs
+        regex_match = re.search(r'const ytRegex = (\/.*?\/[a-z]*);', content)
+        self.assertIsNotNone(regex_match, "ytRegex definition not found in Raw Inbox Note.md")
+        
+        # Extract python-compatible regex
+        js_regex_str = regex_match.group(1).strip('/')
+        # Remove trailing regex flags like 'i'
+        flags = re.IGNORECASE if js_regex_str.endswith('i') or regex_match.group(1).endswith('/i') else 0
+        cleaned_pattern = re.sub(r'\/[a-z]*$', '', regex_match.group(1)).lstrip('/')
+        
+        valid_urls = [
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "http://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "https://youtube.com/watch?v=dQw4w9WgXcQ",
+            "https://m.youtube.com/watch?v=dQw4w9WgXcQ",
+            "https://www.youtube.com/watch?feature=shared&v=dQw4w9WgXcQ",
+            "https://youtu.be/dQw4w9WgXcQ",
+            "https://youtu.be/dQw4w9WgXcQ?t=42",
+            "https://www.youtube.com/shorts/dQw4w9WgXcQ",
+            "https://youtube.com/shorts/dQw4w9WgXcQ",
+            "https://www.youtube.com/live/dQw4w9WgXcQ",
+            "https://www.youtube.com/embed/dQw4w9WgXcQ",
+            "www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "youtube.com/watch?v=dQw4w9WgXcQ"
+        ]
+        
+        invalid_urls = [
+            "https://google.com",
+            "https://vimeo.com/123456789",
+            "https://github.com/loackyPKM",
+            "https://notyoutube.com/watch?v=dQw4w9WgXcQ",
+            "not a url",
+            "https://youtube.com/about"
+        ]
+        
+        for url in valid_urls:
+            self.assertTrue(
+                bool(re.search(cleaned_pattern, url, flags)),
+                f"Valid YouTube URL failed validation: {url}"
+            )
+            
+        for url in invalid_urls:
+            self.assertFalse(
+                bool(re.search(cleaned_pattern, url, flags)),
+                f"Invalid YouTube URL unexpectedly passed validation: {url}"
+            )
+
+    def test_templates_handle_esc_cancellation(self):
+        """Asserts all interactive templates define cancelCreation logic to abort without creating notes on ESC."""
+        for path in self.template_files:
+            rel_path = os.path.relpath(path, PROJECT_ROOT)
+            with open(path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            self.assertIn("cancelCreation", content, f"Template {rel_path} missing cancelCreation helper.")
+            self.assertIn("app.vault.trash", content, f"Template {rel_path} missing app.vault.trash call for clean abort.")
+
 if __name__ == "__main__":
     unittest.main()

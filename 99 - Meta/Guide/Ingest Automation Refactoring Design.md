@@ -1,16 +1,3 @@
----
-status: permanent
-type: concept
-area: meta
-related: []
-source: original
-title: "Ingest Automation Refactoring Design"
-date: '2026-07-18'
-updated: 2026-07-18T14:57
-tags: [meta/meta, meta/architecture, meta/design, meta/ingest]
-summary: "Questo documento definisce il design dell'architettura e dei flussi di lavoro per il rifacimento dell'automazione di ingestione del Second Brain. L'obiettivo principale è separare le responsabilità..."
----
-
 # 🛠️ Ingest Automation Refactoring Design
 
 Questo documento definisce il design dell'architettura e dei flussi di lavoro per il rifacimento dell'automazione di ingestione del Second Brain. L'obiettivo principale è separare le responsabilità meccaniche (gestite via script deterministici Python) da quelle semantiche (gestite dall'agente LLM), ottimizzando le performance e garantendo feedback in tempo reale in Obsidian.
@@ -70,7 +57,7 @@ Per ogni nota rilevata con `ready: true`:
    * Rimuove la riga dalla dashboard e pulisce eventuali residui temporanei.
 4. Una volta completata la trascrizione e l'estrazione frame, l'orchestratore invoca `agy` limitatamente a questa nota:
    ```bash
-   agy --dangerously-skip-permissions --print "Elabora solo la nota 'Nome Nota' usando i template specifici..."
+   agy --model gemini-3.7-flash-low --dangerously-skip-permissions --print "Elabora solo la nota 'Nome Nota' usando i template specifici..."
    ```
 5. A completamento avvenuto, l'orchestratore:
    * Rinominare il file originario in `raw-Nome Nota.md`.

@@ -68,6 +68,13 @@ Here is a planned forward link to [[Planned Concept Note]].
 Here is another forward link to [[Architecture Design Pattern]].
 Here is a malformed link to [[invalid/broken/path]].
 Here is a malformed link to [[http://example.com/bad]].
+
+```python
+# Code block with pandas syntax should not be treated as broken links
+df = dataset[['clean_text', 'label']]
+```
+
+Here is inline code: `code[['x', 'y']]`.
 """
         valid, forward, broken = auditor.audit_file_links("02 - Atlas/Tech/Test Caller.md", test_content)
         self.assertIn("Existing Note", valid)
@@ -77,6 +84,8 @@ Here is a malformed link to [[http://example.com/bad]].
         self.assertIn("http://example.com/bad", broken)
         self.assertNotIn("Existing Note", forward)
         self.assertNotIn("Existing Note", broken)
+        self.assertNotIn("'clean_text', 'label'", broken)
+        self.assertNotIn("'x', 'y'", broken)
 
     def test_orphan_detection(self):
         """Asserts notes in 02 - Atlas/ with 0 incoming links and missing from 01 - Map of Content/ MOCs
@@ -168,7 +177,7 @@ Here is a malformed link to [[http://example.com/bad]].
         dashboard_md = brain_health.generate_health_dashboard(self.test_dir, notes_data, audit_stats)
         self.assertNotIn("```dataview", dashboard_md)
         self.assertNotIn("```dataviewjs", dashboard_md)
-        self.assertIn("# 📊 Vault Health Dashboard", dashboard_md)
+        self.assertIn("# Vault Health Dashboard", dashboard_md)
         self.assertIn("42", dashboard_md)
         self.assertIn("[[Draft Note 1]]", dashboard_md)
         self.assertIn("[[Blog Post 1]]", dashboard_md)

@@ -10,7 +10,7 @@ updated: 2026-05-22T18:29
 tags: []
 summary: "Un Viaggio nella Generazione di Animazioni Sprite con l’Intelligenza Artificiale"
 ---
-[[Home MOC|Home]] / [[Projects MOC|Projects]] / [[Animator2D]]
+[[Home MOC|Home]] / [[Projects]] / [[Animator2D|Animator2d]]
 
 Un Viaggio nella Generazione di Animazioni Sprite con l’Intelligenza Artificiale
 

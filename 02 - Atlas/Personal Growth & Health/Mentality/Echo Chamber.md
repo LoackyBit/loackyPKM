@@ -10,7 +10,7 @@ updated: 2026-07-07T01:07
 tags: [mentality/mindset, mentality/psychology, mentality/social-media]
 summary: "Un'echo chamber è un fenomeno sociale, spesso legato ai media o ai social network, in cui una persona finisce per essere esposta solo a idee, opinioni o informazioni che confermano quello che già p..."
 ---
-[[Home MOC|Home]] / [[Personal Growth & Health MOC|Personal Growth & Health]] / [[Echo Chamber]]
+[[Home MOC|Home]] / [[Personal Growth & Health]] / [[Echo Chamber]]
 
 # Echo Chamber
 

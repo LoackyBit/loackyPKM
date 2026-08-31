@@ -4,15 +4,20 @@ type: video
 area: tech
 related: []
 source: "https://youtu.be/qwGLBzfTSz0"
-title: "Come Scegliere L'universita Giusta in 6 Step"
+title: "Come Scegliere l'Universita Giusta in 6 Step"
 date: '2026-07-16'
 updated: 2026-07-16T20:22
 tags: [tech/università, tech/orientamento, tech/studio, tech/scelte]
 summary: "Ecco una guida strutturata in 6 step per scegliere la facoltà universitaria ideale, basata sul video di Alessandro de Concini ([Link al video di YouTube](https://youtu.be/qwGLBzfTSz0?si=ey76SZFTwO5..."
 ---
-[[Home MOC|Home]] / [[Education & Learning MOC|Education & Learning]] / [[Come Scegliere l'Universita Giusta in 6 Step]]
+[[Home MOC|Home]] / [[Education & Learning]] / [[Come Scegliere l'Universita Giusta in 6 Step]]
 
 # Come Scegliere l'Università Giusta in 6 Step
+
+- **Video URL**: https://youtu.be/qwGLBzfTSz0
+- **Canale**: [[Alessandro de Concini]]
+
+---
 
 Ecco una guida strutturata in 6 step per scegliere la facoltà universitaria ideale, basata sul video di [[Alessandro de Concini]] ([Link al video di YouTube](https://youtu.be/qwGLBzfTSz0?si=ey76SZFTwO5JBMpc)).
 

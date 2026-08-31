@@ -5,13 +5,13 @@ type: article
 area: tech
 related: []
 source: original
-title: "TIL: L'inganno Dell'applauso Quintiliano"
+title: "TIL - l'Inganno Dell'Applauso Quintiliano"
 date: '2026-03-14'
 updated: 2026-07-12T21:35
 tags: [tech/quintiliano, tech/public-speaking, tech/retorica, tech/comunicazione, tech/bias-cognitivi]
 summary: "Leggendo gli appunti sull'Institutio Oratoria di Quintiliano, mi sono reso conto di quanto i suoi precetti educativi siano in realtà manuali di sopravvivenza per la comunicazione moderna. I suoi co..."
 ---
-[[Home MOC|Home]] / [[Blog]] / [[TIL l'Inganno Dell'Applauso Quintiliano|TIL: l'Inganno Dell'Applauso Quintiliano]]
+[[Home MOC|Home]] / [[Blog]] / [[TIL l'Inganno Dell'Applauso Quintiliano|TIL - l'Inganno Dell'Applauso Quintiliano]]
 
 Leggendo gli appunti sull'[[Institutio Oratoria]] di Quintiliano, mi sono reso conto di quanto i suoi precetti educativi siano in realtà manuali di sopravvivenza per la comunicazione moderna. I suoi consigli non valgono solo per il maestro romano o l'avvocato del foro, ma sono indicazioni preziose per chiunque debba affrontare attività di [[Public Speaking]], che si tratti di un keynote a una conferenza o semplicemente della necessità di esprimere un concetto complesso a un gruppo di amici senza perderli per strada.
 
@@ -37,7 +37,7 @@ Come nota acutamente la critica del tempo:
 
 «_la loro memoria[^1] si abitua a riposarsi a intervalli ben precisi, e quando vanno nel foro e non ricevono più applausi al minimo gesto, o falliscono o vacillano_».
 
-> **⚠️ Errore da evitare nel Public Speaking:**
+> ** Errore da evitare nel Public Speaking:**
 > 
 > Non strutturare mai le pause della tua esposizione contando sulle risate o sull'approvazione del pubblico. Se la sala non reagisce come speravi (pubblico freddo, stanco o disattento), il tuo ritmo salterà, andrai nel panico e dimenticherai il filo logico. Il discorso deve avere una sua solidità indipendente dalle reazioni esterne.
 

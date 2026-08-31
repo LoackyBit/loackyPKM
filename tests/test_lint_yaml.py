@@ -181,5 +181,35 @@ Altro testo.
         self.assertEqual(cal_meta["type"], "journal")
         self.assertEqual(cal_meta["area"], "calendar")
 
+    def test_clean_title_str_sanitizes_forbidden_characters(self):
+        """Asserts clean_title_str removes or replaces /, :, \\ with hyphens and keeps valid Title Case."""
+        raw_1 = "Palantir: Cosa Fa l'Azienda"
+        self.assertEqual(lint_yaml.clean_title_str(raw_1), "Palantir - Cosa Fa l'Azienda")
+
+        raw_2 = "Lezione 12/03/2026: Algoritmi & Strutture Dati"
+        self.assertEqual(lint_yaml.clean_title_str(raw_2), "Lezione 12 - 03 - 2026 - Algoritmi & Strutture Dati")
+
+        raw_3 = "C:\\Windows\\System32\\Note"
+        self.assertEqual(lint_yaml.clean_title_str(raw_3), "C - Windows - System32 - Note")
+
+    def test_format_canonical_frontmatter_type_specific_metadata(self):
+        """Asserts format_canonical_frontmatter appends video_url and channel for type: video."""
+        meta = {
+            "status": "permanent",
+            "type": "video",
+            "area": "tech",
+            "source": "https://youtube.com/watch?v=123",
+            "video_url": "https://youtube.com/watch?v=123",
+            "channel": "3Blue1Brown",
+            "title": "Essenza del Calcolo",
+            "date": "2026-02-01",
+            "tags": ["tech/video"],
+            "summary": "Sintesi visuale del calcolo infinitesimale."
+        }
+        yaml_str = lint_yaml.format_canonical_frontmatter(meta)
+        self.assertIn('video_url: "https://youtube.com/watch?v=123"', yaml_str)
+        self.assertIn('channel: "3Blue1Brown"', yaml_str)
+
+
 if __name__ == "__main__":
     unittest.main()

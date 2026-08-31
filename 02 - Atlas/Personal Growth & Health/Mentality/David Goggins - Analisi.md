@@ -10,9 +10,14 @@ updated: 2026-07-07T01:20
 tags: [mentality/self-environment, mentality/video, mentality/youtube]
 summary: "La motivazione, l'ispirazione, la carica, l'energia, la potenza, la resistenza, la disciplina e l'autocontrollo sono tutte espressioni che si trovano al centro del mondo del self-help e dell'autoai..."
 ---
-[[Home MOC|Home]] / [[Personal Growth & Health MOC|Personal Growth & Health]] / [[David Goggins - Analisi]]
+[[Home MOC|Home]] / [[Personal Growth & Health]] / [[David Goggins - Analisi]]
 
-#self-environment #video [[@AlessandroDeConcini]] [[@DavidGoggins]]
+# David Goggins - Analisi
+
+- **Video URL**: https://www.youtube.com/watch?v=uQl0gby0M_k
+- **Canale**: [[Alessandro de Concini]]
+
+---
 
 ![](https://i.ytimg.com/vi/uQl0gby0M_k/maxresdefault.jpg)
 
@@ -76,6 +81,3 @@ summary: "La motivazione, l'ispirazione, la carica, l'energia, la potenza, la re
 ## Conclusione
 - Si fa riferimento a David Goggins e al discorso fatto su di lui [(00:15:53)](https://www.youtube.com/watch?v=uQl0gby0M_k&t=953s)
 - Si conclude il video invitando gli spettatori a rivedersi nel prossimo video [(00:15:55)](https://www.youtube.com/watch?v=uQl0gby0M_k&t=955s)
-
----
-## Collegamenti

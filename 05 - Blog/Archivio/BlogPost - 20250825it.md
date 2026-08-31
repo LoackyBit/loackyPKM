@@ -5,13 +5,13 @@ type: article
 area: tech
 related: []
 source: "https://www.youtube.com/watch?v=gd7BXuUQ91w"
-title: "Imparare Vim e Neovim: la Mia Configurazione per Programmazione Python"
+title: "Imparare Vim e Neovim - la Mia Configurazione per Programmazione Python"
 date: '2025-08-25'
 updated: 2026-07-19T02:09
 tags: [tech/programmazione, tech/vim, tech/python, tech/terminale, tech/macos, tech/neovim]
 summary: "Negli ultimi giorni ho deciso di immergermi nello studio di Vim, un editor di testo potente ma notoriamente ostico, per migliorare le mie competenze di programmazione. Sto seguendo il corso [CS50's..."
 ---
-[[Home MOC|Home]] / [[Blog]] / [[BlogPost - 20250825it|Imparare Vim e Neovim: la Mia Configurazione per Programmazione Python]]
+[[Home MOC|Home]] / [[Blog]] / [[BlogPost - 20250825it|Imparare Vim e Neovim - la Mia Configurazione per Programmazione Python]]
 
 # Introduzione
 

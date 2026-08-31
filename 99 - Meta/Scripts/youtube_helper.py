@@ -302,6 +302,13 @@ def main():
                 date_str = datetime.date.today().strftime("%Y-%m-%d")
                 clean_t = title.replace('"', '\\"')
                 clean_c = channel.replace('"', '\\"')
+                chan_clean = channel.strip() if channel else ""
+                if chan_clean and not (chan_clean.startswith("[[") and chan_clean.endswith("]]")):
+                    chan_wikilink = f"[[{chan_clean}]]"
+                elif chan_clean:
+                    chan_wikilink = chan_clean
+                else:
+                    chan_wikilink = "[[]]"
                 updated_yaml = (
                     f"---\n"
                     f"ready: true\n"
@@ -313,8 +320,8 @@ def main():
                     f"---\n"
                     f"[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[{title}]]\n\n"
                     f"# {title}\n\n"
-                    f"- **Canale**: {channel}\n"
-                    f"- **Video URL**: {url}\n\n"
+                    f"- **Video URL**: {url}\n"
+                    f"- **Canale**: {chan_wikilink}\n\n"
                     f"---\n"
                     + "\n".join(raw_content)
                 )

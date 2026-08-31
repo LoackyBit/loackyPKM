@@ -10,6 +10,7 @@ updated: 2026-05-22T18:24
 tags: [calendar/daily]
 summary: "Diario giornaliero e tracciamento delle attività del 20250123."
 ---
+[[Home MOC|Home]] / [[Atlas]] / [[DailyNote - 20250123|Dailynote - 20250123]]
 
 # DAILY NOTE
 ## giovedì, gennaio 23º, 2025
@@ -30,7 +31,7 @@ All'inizio, nella mia testa mi facevo sempre "l'esempio del barbone": m'immagina
 Invece, dopo averci pensato sù, capì che in realtà magari quelle difficoltà esistono veramente e non lo capisco perché sono nato fortunato. 
 
 Da qui arriva il passo che per far capire a Jacopo ci misi un'ora: questo pensiero "le difficoltà non esistono" probabilmente l'avevo appreso dal 'periodo guru'.
-Quasi come una coincidenza divina, vidi un video di  [[@AlessandroDeConcini]] che smentiva [[@AndrewTate]], e uno dei tanti punti fu proprio questo. Le differenze sociali e mentali esistono, non tutti hanno la capacità di fare quello che puoi fare tu. 
+Quasi come una coincidenza divina, vidi un video di [[Alessandro de Concini]] che smentiva [[Andrew Tate]], e uno dei tanti punti fu proprio questo. Le differenze sociali e mentali esistono, non tutti hanno la capacità di fare quello che puoi fare tu. 
 ***
 ### Tasks
 - [ ] Task 1

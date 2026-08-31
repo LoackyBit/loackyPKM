@@ -10,7 +10,7 @@ updated: 2026-07-07T01:20
 tags: []
 summary: "Vivere in un’epoca dominata dalla brevità è una sfida che permea ogni aspetto della nostra quotidianità. La tendenza a cercare esperienze rapide, gratificazioni immediate e contenuti sintetici semb..."
 ---
-[[Home MOC|Home]] / [[Personal Growth & Health MOC|Personal Growth & Health]] / [[Contrastare la Brevita]]
+[[Home MOC|Home]] / [[Personal Growth & Health]] / [[Contrastare la Brevita]]
 
 # Combattere la **Brevità**: Strategie per Riappropriarsi della **Continuità** nella Vita Moderna
 

@@ -1,8 +1,26 @@
 <%*
+// Helper per annullare la creazione dell'articolo se l'utente preme ESC
+const cancelCreation = async (reason = "Creazione articolo annullata") => {
+    new Notice(`${reason}`);
+    try {
+        const file = tp.file.find_tfile(tp.file.path(true));
+        if (file && (tp.file.title.startsWith("Untitled") || tp.file.title === "")) {
+            await app.vault.trash(file, false);
+        }
+    } catch (e) {
+        // Fallback silenzioso
+    }
+};
+
 // 1. GESTIONE TITOLO
 let title = tp.file.title;
 if (title.startsWith('Untitled') || title === "") {
-    title = await tp.system.prompt('Inserisci il Titolo del Post Blog: ');
+    const promptedTitle = await tp.system.prompt('Inserisci il Titolo del Post Blog (ESC per annullare): ');
+    if (promptedTitle === null) {
+        await cancelCreation();
+        return;
+    }
+    title = promptedTitle.trim();
     if (!title) {
         title = "Blog Post " + tp.date.now("YYYY-MM-DD HH-mm");
     }

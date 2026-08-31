@@ -10,13 +10,12 @@ updated: 2026-08-04T16:12
 tags: [tech/youtube, tech/transcript, tech/tech]
 summary: "Video URL: https://youtu.be/LLxBccbMS8"
 ---
-[[Home MOC|Home]] / [[Tech & AI MOC|Tech & AI]] / [[Costruire Knowledge Base per AI con LLM Wiki]]
+[[Home MOC|Home]] / [[Tech & AI]] / [[Costruire Knowledge Base per AI con LLM Wiki]]
 
 # Costruire Knowledge Base per AI con LLM Wiki
 
 - **Video URL**: https://youtu.be/LLxBcc_bMS8
 - **Canale**: [[Simone Rizzo]]
-- **Data Ingestione**: 2026-08-04
 
 ---
 

@@ -10,6 +10,7 @@ updated: 2026-07-19T02:09
 tags: [calendar/daily]
 summary: "Diario giornaliero e tracciamento delle attività del 20250704."
 ---
+[[Home MOC|Home]] / [[Atlas]] / [[DailyNote - 20250704|Dailynote - 20250704]]
 
 # DAILY NOTE
 ## venerdì, luglio 4º, 2025

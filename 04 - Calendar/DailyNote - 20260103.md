@@ -10,6 +10,7 @@ updated: 2026-05-22T18:24
 tags: [calendar/daily, calendar/journal]
 summary: "Diario giornaliero e tracciamento delle attività del 20260103."
 ---
+[[Home MOC|Home]] / [[Atlas]] / [[DailyNote - 20260103|Dailynote - 20260103]]
 
 # DAILY NOTE
 ## sabato, gennaio 3º, 2026

@@ -3,10 +3,28 @@
 const INBOX_FOLDER = "03 - Inbox";
 // ===================================
 
+// Helper per annullare la creazione della nota se l'utente preme ESC
+const cancelCreation = async (reason = "Creazione nota annullata") => {
+    new Notice(`${reason}`);
+    try {
+        const file = tp.file.find_tfile(tp.file.path(true));
+        if (file && (tp.file.title.startsWith("Untitled") || tp.file.title === "")) {
+            await app.vault.trash(file, false);
+        }
+    } catch (e) {
+        // Fallback silenzioso
+    }
+};
+
 // 1. GESTIONE TITOLO
 let title = tp.file.title;
 if (title.startsWith('Untitled') || title === "") {
-    title = await tp.system.prompt('Inserisci il Titolo della Nota Grezza: ');
+    const promptedTitle = await tp.system.prompt('Inserisci il Titolo della Nota Grezza (ESC per annullare): ');
+    if (promptedTitle === null) {
+        await cancelCreation();
+        return;
+    }
+    title = promptedTitle.trim();
     if (!title) {
         title = "Raw Note " + tp.date.now("YYYY-MM-DD HH-mm");
     }
@@ -18,29 +36,74 @@ const options = [
     "Log Attività / Nota Veloce",
     "Altro (Generico)"
 ];
-const selectedType = await tp.system.suggester(options, options, true, "Seleziona il tipo di nota grezza:");
+const selectedType = await tp.system.suggester(options, options, true, "Seleziona il tipo di nota grezza (ESC per annullare):");
+if (!selectedType) {
+    await cancelCreation();
+    return;
+}
 
 let tags = ["raw"];
 let typePlaceholder = "";
 let videoUrl = "";
 let isReady = false;
+let extractFrames = false;
 
 if (selectedType === "Trascrizione YouTube") {
     tags = ["youtube", "transcript", "raw"];
     
-    // Chiede l'URL del video
-    videoUrl = await tp.system.prompt("Inserisci l'URL del video YouTube (opzionale):") || "";
+    // Regex per verificare link YouTube validi (watch, shorts, embed, live, youtu.be)
+    const ytRegex = /^(https?:\/\/)?((www|m)\.)?(youtube\.com\/(watch\?(?:.*&)?v=|embed\/|v\/|shorts\/|live\/)|youtu\.be\/)[a-zA-Z0-9_-]{11}/i;
+
+    // Chiede l'URL del video con controllo di validità
+    let isValid = false;
+    while (!isValid) {
+        const inputUrl = await tp.system.prompt("Inserisci l'URL del video YouTube (opzionale - Invio per saltare, ESC per annullare):");
+        if (inputUrl === null) {
+            // Annullato o ESC
+            await cancelCreation();
+            return;
+        }
+        const trimmedUrl = inputUrl.trim();
+        if (trimmedUrl === "") {
+            // URL opzionale lasciato vuoto (premuto Invio)
+            videoUrl = "";
+            isValid = true;
+            break;
+        }
+
+        if (ytRegex.test(trimmedUrl)) {
+            videoUrl = trimmedUrl;
+            isValid = true;
+        } else {
+            new Notice("⚠ Link non valido! Inserisci un URL YouTube valido (es. https://youtu.be/... o https://youtube.com/watch?v=...) oppure premi Invio a vuoto.");
+        }
+    }
     
-    // Se ha inserito un URL, chiede se vuole elaborarlo subito
+    // Se ha inserito un URL valido, chiede opzioni di estrazione
     if (videoUrl) {
+        const frameOptions = ["No (Rilevamento automatico / Euristica)", "Sì (Forza estrazione screenshot 720p)"];
+        const frameChoice = await tp.system.suggester(frameOptions, [false, true], true, "Vuoi forzare l'estrazione dei frame dal video? (ESC per annullare)");
+        if (frameChoice === null) {
+            await cancelCreation();
+            return;
+        }
+        if (frameChoice === true) {
+            extractFrames = true;
+        }
+
         const readyOptions = ["Sì (Elabora subito)", "No (Modifica prima la nota)"];
-        const readyChoice = await tp.system.suggester(readyOptions, [true, false], true, "Vuoi contrassegnare la nota come pronta per l'IA subito?");
+        const readyChoice = await tp.system.suggester(readyOptions, [true, false], true, "Vuoi contrassegnare la nota come pronta per l'IA subito? (ESC per annullare)");
+        if (readyChoice === null) {
+            await cancelCreation();
+            return;
+        }
         if (readyChoice === true) {
             isReady = true;
         }
     }
     
-    typePlaceholder = `- **Data Trascrizione**: ${tp.date.now("YYYY-MM-DD")}
+    typePlaceholder = `- **Video URL**: ${videoUrl}
+- **Canale**: [[Nome Canale]]
 
 ---
 ## Testo Grezzo della Trascrizione
@@ -68,7 +131,7 @@ if (selectedType === "Trascrizione YouTube") {
 
 let videoUrlYaml = "";
 if (selectedType === "Trascrizione YouTube") {
-    videoUrlYaml = `\nvideo_url: "${videoUrl}"\nchannel: ""`;
+    videoUrlYaml = `\nvideo_url: "${videoUrl}"\nchannel: ""\nextract_frames: ${extractFrames}`;
 }
 
 // Costruisci il contenuto della nota

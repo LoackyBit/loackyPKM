@@ -1,17 +1,3 @@
----
-status: permanent
-type: concept
-area: meta
-related: []
-source: original
-title: "Moc's"
-date: '2025-01-24'
-updated: 2026-07-07T01:20
-tags: []
-summary: "Quando inizi a usare Obsidian, organizzare è facile. Devi solo creare qualche appunto e lasciare che il tuo sé futuro si occupi dei tuoi problemi. Proprio come nella vita reale!"
----
-[[Home MOC|Home]] / [[Guide]] / [[MOC'S]]
-
 Quando inizi a usare Obsidian, organizzare è facile. Devi solo creare qualche appunto e lasciare che il tuo sé futuro si occupi dei tuoi problemi. Proprio come nella vita reale!
 
 Ma se stai migrando da un altro programma o stai iniziando a raccogliere centinaia di note nel tuo caveau, dovrai semplicemente iniziare a organizzare il tuo caveau in qualche modo.

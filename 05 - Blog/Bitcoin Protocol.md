@@ -32,9 +32,9 @@ Abbiamo bisogno che solo Alice possa autorizzare un pagamento proveniente da lei
 Ogni persona genera due chiavi:
 
 - **[[Chiave Privata]]**: Una password che tieni segreta. Serve a _creare_ la firma.
-    
+   
 - **[[Chiave Pubblica]]**: Un indirizzo pubblico. Serve agli altri per _verificare_ che la firma sia autentica.
-    
+   
 
 La magia matematica è che la firma digitale da 256 bit cambia a seconda del messaggio.
 
@@ -51,8 +51,8 @@ Alice paga legittimamente Bob 20$ e genera una transazione perfetta con una firm
 Bob la riceve. Poi Bob si rende conto di una cosa: _il messaggio e la firma sono file digitali_. Cosa gli impedisce di fare "Copia-Incolla" di quella riga esatta e incollarla nel registro altre 10 volte?
 
 ```
-4. Alice paga Bob 20$ (Firma123) ✅ Valida
-5. Alice paga Bob 20$ (Firma123) ✅ Valida (Bob l'ha appena incollata di nuovo!)
+4. Alice paga Bob 20$ (Firma123) Valida
+5. Alice paga Bob 20$ (Firma123) Valida (Bob l'ha appena incollata di nuovo!)
 ```
 
 Per risolvere questo, dobbiamo rendere ogni transazione unica.
@@ -108,13 +108,13 @@ Dato che l'Hash è imprevedibile, come facciamo? Aggiungiamo un numero casuale a
 I _miners_ della rete accendono i loro computer e iniziano a provare numeri (Forza Bruta):
 
 - Nonce 1? Hash `f3a2...` (Sbagliato)
-    
+   
 - Nonce 2? Hash `8b19...` (Sbagliato)
-    
+   
 - ...dopo miliardi di tentativi...
-    
+   
 - Nonce 5.483.291? Hash `0000004a...` (Giusto!)
-    
+   
 
 **Perché far fare tutta questa fatica ai computer?**
 
@@ -149,18 +149,18 @@ Ed è così che, partendo da un registro tra amici, abbiamo appena inventato Bit
 ### Errori Comuni da non fare
 
 - **"Il Bitcoin crittografa le transazioni"**: Sbagliato! Le transazioni sono in chiaro e pubbliche per tutti. La crittografia (le firme digitali) serve solo a dimostrare l'_autorizzazione_ a spendere, non a nascondere i dati.
-    
+   
 - **"I miner risolvono calcoli super complessi di matematica superiore"**: No. Come spiegato nel passaggio 6, è solo _forza bruta_. Immagina i miner come se cercassero di indovinare la password del Wi-Fi provando tutte le combinazioni possibili alla cieca.
-    
+   
 - **Credere che l'identità sia legata al nome**: Sulla blockchain non esiste "Alice" o "Bob", esistono solo le [[Chiave Pubblica|Chiavi Pubbliche]]. Bitcoin è _pseudonimo_, non anonimo.
-    
+   
 
 ### Passaggi Pratici per approfondire
 
 - **Comprendere da dove nascono i BTC**: Chi è che riceve il primo premio in denaro? Il protocollo definisce che il miner che trova la soluzione della Proof of Work ha il diritto di inserire una transazione speciale in cima al blocco (chiamata _Coinbase_) che crea nuovi Bitcoin dal nulla e li invia a se stesso. È così che l'offerta di moneta viene immessa nel sistema.
-    
+   
 - **Le Transazioni (UTXO)**: Guarda i pagamenti non come un conto in banca che va su e giù, ma come banconote virtuali che si "fondono" o si "spezzano" ogni volta che le invii per generare il resto esatto.
-    
+   
 
 ---
 ## Collegamenti

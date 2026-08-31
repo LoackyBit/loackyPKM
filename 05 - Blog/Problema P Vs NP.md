@@ -28,7 +28,7 @@ Sono i problemi che un computer può **risolvere in modo efficiente** e ragionev
 
 Sono problemi in cui **trovare** la soluzione può richiedere tempi incalcolabili (crescita esponenziale o fattoriale), ma **verificare** una soluzione già pronta è facilissimo (richiede tempo polinomiale).
 
-> ⚠️ **Errore Comune**
+> **Errore Comune**
 > 
 > Molti pensano che "NP" stia per "Non-Polinomiale". In realtà significa "Tempo Polinomiale Non Deterministico". Si riferisce al fatto che una "macchina non deterministica" (teorica, capace di tirare a indovinare sempre l'opzione giusta) potrebbe risolverli in tempo polinomiale.
 ## Esempi Intuitivi
@@ -36,7 +36,7 @@ Sono problemi in cui **trovare** la soluzione può richiedere tempi incalcolabil
 
 - **Trovare la soluzione**: Partire da una griglia quasi vuota richiede di testare un'infinità di combinazioni. Più grande è la griglia, più le combinazioni esplodono.
 - **Verificare la soluzione**: Se ti do una griglia di Sudoku già compilata, ci metti pochi secondi a controllare che non ci siano numeri ripetuti in righe, colonne e quadrati.
-- _Conclusione: È un problema NP._    
+- _Conclusione: È un problema NP._   
 ### Il Percorso più Corto (Commesso Viaggiatore / Shortest Path)
 
 Hai un numero $N$ di città e devi trovare il percorso più breve che le visiti tutte una sola volta.
@@ -48,7 +48,7 @@ Hai un numero $N$ di città e devi trovare il percorso più breve che le visiti 
 Alla base della [[Crittografia RSA]] c'è un concetto identico:
 
 - **P (Facile)**: Moltiplicare due numeri primi (es. $7 \times 13 = 91$).
-    
+   
 - **NP (Difficile)**: Scomporre in fattori primi un numero enorme. Se ti do `69420` (o un numero di 256 bit) e ti chiedo quali numeri primi lo compongono, devi andare per tentativi.
 ## I Problemi NP-Completi e l'implicazione di P = NP
 

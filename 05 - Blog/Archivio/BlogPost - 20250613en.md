@@ -11,7 +11,7 @@ updated: 2026-07-12T21:34
 tags: [tech/blog, tech/tutorial]
 summary: "Hello everyone! In this post, I’ll share how I built my blog using Obsidian, Hugo, GitHub, and Hostinger, following a tutorial by NetworkChuck and customizing it with the Stack theme ([https://stac..."
 ---
-[[Home MOC|Home]] / [[Blog]] / [[BlogPost - 20250613en|How i Built My Blog With Hugo and the Stack Theme]]
+[[Home MOC|Home]] / [[Blog]] / [[BlogPost - 20250613en|How i Built My Blog with Hugo and the Stack Theme]]
 
 # How I Built My Blog with Hugo and the Stack Theme
 

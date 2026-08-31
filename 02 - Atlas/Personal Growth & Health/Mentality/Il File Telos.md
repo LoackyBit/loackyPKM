@@ -4,21 +4,21 @@ type: video
 area: mentality
 related: []
 source: "https://youtu.be/3BXE0e3QZ4U"
-title: "Il File Telos: Hacking Personale e Red Teaming Emozionale Tramite AI"
+title: "Il File Telos - Hacking Personale e Red Teaming Emozionale Tramite AI"
 date: '2026-07-18'
 updated: 2026-07-19T02:04
 tags: [mentality/youtube, tech/transcript, mentality/productivity, mentality/self-improvement, tech/ai, mentality/telos]
 summary: "Video URL: https://youtu.be/3BXE0e3QZ4U"
 ---
-[[Home MOC|Home]] / [[Personal Growth & Health MOC|Personal Growth & Health]] / [[Il File Telos]]
+[[Home MOC|Home]] / [[Personal Growth & Health]] / [[Il File Telos|Il File Telos - Hacking Personale e Red Teaming Emozionale Tramite AI]]
 
 # Il File Telos: Hacking Personale e Red Teaming Emozionale tramite AI
 
 - **Video URL**: https://youtu.be/3BXE0e3QZ4U
 - **Canale**: [[NetworkChuck]]
-- **Data Ingestione**: 2026-07-18
 
 ---
+
 ## Sintesi Rapida
 
 Il <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>File Telos</b></font></mark> è un framework di strutturazione della conoscenza personale racchiuso in un singolo documento Markdown, concepito per delineare con nitidezza la propria identità, la propria missione e le proprie sfide in un'epoca segnata dall'incertezza tecnologica. Integrando questo schema di contesto statico e dinamico con modelli di intelligenza artificiale, è possibile effettuare un vero e proprio <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>Red Teaming personale</b></font></mark>, facendo emergere schemi di procrastinazione, incongruenze comportamentali e <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>punti ciechi</b></font></mark> altrimenti inaccessibili all'autoanalisi tradizionale.

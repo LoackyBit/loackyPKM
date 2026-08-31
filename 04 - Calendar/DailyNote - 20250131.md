@@ -10,6 +10,7 @@ updated: 2026-05-22T18:24
 tags: [calendar/daily]
 summary: "Diario giornaliero e tracciamento delle attività del 20250131."
 ---
+[[Home MOC|Home]] / [[Atlas]] / [[DailyNote - 20250131|Dailynote - 20250131]]
 
 # DAILY NOTE
 ## venerdì, gennaio 31º, 2025

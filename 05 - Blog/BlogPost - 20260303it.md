@@ -5,7 +5,7 @@ type: article
 area: tech
 related: []
 source: original
-title: "Riflessione - Marx e L'italia"
+title: "Riflessione - Marx e l'Italia"
 date: '2026-03-03'
 updated: 2026-07-12T21:34
 tags: [tech/marxismo, tech/filosofia-politica, tech/italia, tech/riflessioni]

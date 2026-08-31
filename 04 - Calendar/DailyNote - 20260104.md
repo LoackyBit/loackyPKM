@@ -10,6 +10,7 @@ updated: 2026-05-22T18:24
 tags: [calendar/daily, calendar/journal]
 summary: "Diario giornaliero e tracciamento delle attività del 20260104."
 ---
+[[Home MOC|Home]] / [[Atlas]] / [[DailyNote - 20260104|Dailynote - 20260104]]
 
 # DAILY NOTE
 ## domenica, gennaio 4º, 2026

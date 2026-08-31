@@ -4,19 +4,18 @@ type: video
 area: mentality
 related: []
 source: "https://youtu.be/zMxxEDaO0QM"
-title: "Come Organizzare le Giornate: Guida Pratica al Time Blocking"
+title: "Come Organizzare le Giornate - Guida Pratica al Time Blocking"
 date: '2026-07-19'
 updated: 2026-07-19T11:28
 tags: [mentality/youtube, tech/transcript, mentality/mindset, mentality/productivity, mentality/time-management]
 summary: "Video URL: https://youtu.be/zMxxEDaO0QM"
 ---
-[[Home MOC|Home]] / [[Personal Growth & Health MOC|Personal Growth & Health]] / [[Come Organizzare le Giornate]]
+[[Home MOC|Home]] / [[Personal Growth & Health]] / [[Come Organizzare le Giornate|Come Organizzare le Giornate - Guida Pratica al Time Blocking]]
 
 # Come Organizzare le Giornate: Guida Pratica alla Gestione del Tempo e al Time Blocking
 
 - **Video URL**: https://youtu.be/zMxxEDaO0QM
 - **Canale**: [[Andrea Muzii]]
-- **Data Ingestione**: 2026-07-19
 
 ---
 
@@ -110,5 +109,5 @@ Per mantenere il focus durante le singole sessioni operative, uno strumento chia
 
 ## Collegamenti
 
-- **Macro Area**: [[Personal Growth & Health MOC]]
-- **Note Correlate**: [[Guida Al Dopamine Detox]], [[Laser Focus]], [[Home MOC]]
+- **Macro Area**: [[Personal Growth & Health]]
+- **Note Correlate**: [[Guida al Dopamine Detox]], [[Laser Focus]], [[Home]]

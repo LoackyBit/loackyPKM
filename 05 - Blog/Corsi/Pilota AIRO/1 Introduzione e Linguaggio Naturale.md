@@ -14,7 +14,7 @@ summary: "Analisi Strategica: Il corso \"Laboratorio di Programmazione di Robot 
 [[Home MOC|Home]] / [[Blog]] / [[1 Introduzione e Linguaggio Naturale|01 Introduzione e Linguaggio Naturale]]
 
 [[Pilota AIRO]]
-# [[Pilota AIRO - 01 Introduzione e Linguaggio Naturale]]
+# [[Pilota Airo - 01 Introduzione e Linguaggio Naturale]]
 ## 1. Introduzione al Corso e all'Ecosistema SMARRtino
 
 **Analisi Strategica:** Il corso **"Laboratorio di Programmazione di Robot Sociali e Intelligenza Artificiale"** si pone come un ponte metodologico tra la programmazione deterministica tradizionale e la nuova era della Generative AI (GenAI). In un contesto tecnologico dove l'interazione uomo-macchina diventa sempre più semantica, questo percorso formativo abilita lo studente a governare sistemi complessi attraverso il linguaggio naturale. L'utilizzo strategico dei **Sapienza Remote Labs (SRL)** risponde alla necessità di democratizzare l'accesso alla robotica d'avanguardia: spostando l'hardware nel cloud, eliminiamo le barriere economiche e logistiche, permettendo una sperimentazione continua su sistemi reali e simulati indipendentemente dalla posizione geografica dell'utente.

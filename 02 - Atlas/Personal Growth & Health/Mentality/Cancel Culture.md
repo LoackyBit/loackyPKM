@@ -10,7 +10,7 @@ updated: 2025-09-30T11:25
 tags: [mentality/mindset, mentality/psychology, mentality/sociology]
 summary: "La Cancel Culture è un fenomeno in cui individui o entità vengono pubblicamente criticati e boicottati per comportamenti o dichiarazioni ritenuti problematici. Attraverso piattaforme come X, le per..."
 ---
-[[Home MOC|Home]] / [[Personal Growth & Health MOC|Personal Growth & Health]] / [[Cancel Culture]]
+[[Home MOC|Home]] / [[Personal Growth & Health]] / [[Cancel Culture]]
 
 # Cancel Culture
 

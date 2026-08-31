@@ -1,17 +1,3 @@
----
-status: permanent
-type: video
-area: meta
-related: []
-source: "https://www.youtube.com/watch?v=9gboEyrj02g"
-title: "List"
-date: '2026-05-19'
-updated: 2026-06-03T09:21
-tags: []
-summary: "CVV STUDY CONTEXT EXPORT"
----
-[[Home MOC|Home]] / [[School]] / [[List]]
-
 CVV STUDY CONTEXT EXPORT
 Generated at: 2026-06-03 09:21:25
 Agenda/Lessons range: 20250911 -> 20260608

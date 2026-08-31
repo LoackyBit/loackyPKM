@@ -4,16 +4,15 @@ type: concept
 area: tech
 related: []
 source: original
-title: "Salvatore Sanfilippo Rivoluziona L'ai ed Io Sono Gasato Ds4 Spiegato"
+title: "Salvatore Sanfilippo Rivoluziona l'AI ed Io Sono Gasato Ds4 Spiegato"
 date: '2026-07-19'
 updated: 2026-08-23T22:08
 tags: [tech/youtube, tech/ai, tech/darfstar, tech/quantizzazione, tech/inference]
 summary: "Salvatore Sanfilippo, meglio noto come Antirez, è il creatore di Redis, il database in‑memory più diffuso al mondo. Oltre a gestire il progetto, Antirez è anche divulgatore scientifico e ha recente..."
 ---
+[[Home MOC|Home]] / [[Tech & AI]] / [[Ds4|Salvatore Sanfilippo Rivoluziona l'AI ed Io Sono Gasato Ds4 Spiegato]]
 
 # Salvatore Sanfilippo rivoluziona l’AI — DS4 spiegato
-
-[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[Salvatore Sanfilippo rivoluziona l’AI ed io sono gasato (DS4 spiegato)]]
 
 ## Introduzione
 

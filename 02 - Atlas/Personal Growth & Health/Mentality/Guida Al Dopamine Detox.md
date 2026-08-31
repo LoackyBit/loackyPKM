@@ -10,7 +10,7 @@ updated: 2026-07-07T01:20
 tags: []
 summary: "Il detox dopaminico non è una sfida temporanea o una soluzione rapida per migliorare la produttività o il benessere mentale. È un processo strutturato e intenzionale per riprendere il controllo del..."
 ---
-[[Home MOC|Home]] / [[Personal Growth & Health MOC|Personal Growth & Health]] / [[Guida Al Dopamine Detox]]
+[[Home MOC|Home]] / [[Personal Growth & Health]] / [[Guida al Dopamine Detox]]
 
 # Come Riequilibrare la Tua Vita con un Detox Dopaminico
 

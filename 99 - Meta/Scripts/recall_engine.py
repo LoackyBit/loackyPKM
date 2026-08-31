@@ -31,7 +31,7 @@ CONTROLLED_AREAS = {'tech', 'education', 'mentality', 'finance', 'projects', 'me
 IGNORE_FOLDERS = {
     '.git', '.obsidian', '.agents', '.gemini', '.trash', '.vscode',
     '.space', '.makemd', '.smart-env', '.antigravitycli', '.codacy',
-    'node_modules', 'tests', '.planning'
+    'node_modules', 'tests', '.planning', '99 - Meta', 'Template'
 }
 
 STOPWORDS = {

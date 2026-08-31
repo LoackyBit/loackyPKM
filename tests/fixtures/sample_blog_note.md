@@ -11,7 +11,7 @@ updated: 2026-02-15T10:00
 tags: [tech/web]
 summary: "Pubblicare un blog con Quartz è veloce ed efficiente."
 ---
-[[Home MOC|Home]] / [[Blog MOC]] / [[Guida Introduttiva a Quartz]]
+[[Home|Home]] / [[Blog MOC]] / [[Guida Introduttiva a Quartz]]
 
 # Guida Introduttiva a Quartz
 

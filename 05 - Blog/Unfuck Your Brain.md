@@ -21,20 +21,20 @@ Ho strutturato questo processo in tre aree fondamentali su cui devo lavorare per
 
 Il focus è la capacità di dedicare il 100% dell'attenzione a una singola cosa. Se non sono concentrato, significa che sto prestando attenzione a più cose contemporaneamente. Inconsapevolmente, sto addestrando il mio cervello ad aver bisogno di continue sovrastimolazioni per funzionare.
 
-> ⚠️ **Errore comune:** Pensare di essere dipendenti dallo smartphone. In realtà, sono dipendente dal _concetto di distrazione_ in sé. Se spengo il telefono e lo lascio in un'altra stanza per 24 ore, mi renderò conto dell'astinenza da distrazione, non dall'oggetto.
+> **Errore comune:** Pensare di essere dipendenti dallo smartphone. In realtà, sono dipendente dal _concetto di distrazione_ in sé. Se spengo il telefono e lo lascio in un'altra stanza per 24 ore, mi renderò conto dell'astinenza da distrazione, non dall'oggetto.
 
 **Come fare: Il protocollo di tracciamento (30 giorni)**
 
 Per sradicare questa abitudine, devo mappare esattamente dove finisce il mio tempo:
 
 1. Divido le mie giornate in segmenti da 30 minuti.
-    
+   
 2. Per 30 giorni, traccio in modo spietato cosa ho fatto in ogni singolo blocco temporale.
-    
+   
 3. Alla fine del periodo, avrò dati chiari per analizzare le mie giornate e individuare le attività futili.
-    
+   
 4. Rimuovo chirurgicamente il "rumore" inutile dalla mia routine.
-    
+   
 
 ## 2. Uscire dall'"Anti-Zone" e Trovare Chiarezza
 
@@ -45,11 +45,11 @@ L'obiettivo è entrare nella **Zone**, ovvero quello stato di iper-focus (spesso
 **Passi operativi per entrare nella Zone:**
 
 1. **Definire la destinazione:** Devo smettere di complicare le cose. Fisso il muro, penso e decido con estrema chiarezza _cosa_ voglio ottenere.
-    
+   
 2. **Scomporre il percorso:** Una volta capito l'obiettivo, individuo i singoli passaggi necessari per arrivarci.
-    
+   
 3. **Azione quotidiana:** Se eseguo questi step ogni singolo giorno, rimarrò agganciato alla _Zone_ in modo naturale, guidato da un progresso costante e senza distrazioni.
-    
+   
 
 ## 3. Ottimizzare la Macchina: La Legge di Input e Output
 
@@ -63,11 +63,11 @@ Se leggo due righe di un libro e dimentico subito cosa ho letto, il problema spe
 ## Collegamenti
 
 - [[Gestione dell'Attenzione e del Focus]]
-    
+   
 - [[Dopamine Detox e Sovrastimolazione]]
-    
+   
 - [[Ottimizzazione del Sonno e Ritmi Circadiani]]
-    
+   
 - [[Definizione degli Obiettivi e Reverse Engineering]]
-    
+   
 - [[Stato di Flow]]

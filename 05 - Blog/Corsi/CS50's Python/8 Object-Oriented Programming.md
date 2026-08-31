@@ -5,13 +5,13 @@ type: article
 area: education
 related: []
 source: original
-title: "8 Object-oriented Programming"
+title: "8 Object - Oriented Programming"
 date: '2025-09-06'
 updated: 2026-07-12T21:34
 tags: [tech/python]
 summary: "There are different paradigms of programming. As you learn other languages, you will start recognizing patterns like these."
 ---
-[[Home MOC|Home]] / [[Blog]] / [[8 Object-Oriented Programming]]
+[[Home MOC|Home]] / [[Blog]] / [[8 Object-Oriented Programming|8 Object - Oriented Programming]]
 
 [[CS50’s Python]]
 ## Object-Oriented Programming

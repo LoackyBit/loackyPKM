@@ -579,23 +579,105 @@ Content.
         no_dup = brain_ingest.check_duplicate_resource(self.test_dir, "https://youtube.com/watch?v=unique789", "Nuova Nota Unica")
         self.assertIsNone(no_dup)
 
+    def test_blog_post_referencing_youtube_not_duplicate(self):
+        """Asserts a blog draft in 05 - Blog/ referencing or inspired by a YouTube URL is not flagged as a duplicate."""
+        blog_dir = os.path.join(self.test_dir, "05 - Blog")
+        os.makedirs(blog_dir, exist_ok=True)
+        blog_note = os.path.join(blog_dir, "Crono S.md")
+        with open(blog_note, "w", encoding="utf-8") as f:
+            f.write("""---
+stage: raw 🗂️
+draft: true
+type: article
+area: tech
+related: []
+source: "https://www.youtube.com/watch?v=mkGGOxEPV-Q"
+title: "Crono S"
+---
+libro come cura allo scrolling
+ispirato da: https://www.youtube.com/watch?v=mkGGOxEPV-Q
+""")
+        dup = brain_ingest.check_duplicate_resource(self.test_dir, "https://youtu.be/mkGGOxEPV-Q", "Raw Note 2026-08-30 22-02")
+        self.assertIsNone(dup)
+
+    def test_body_mention_youtube_not_duplicate(self):
+        """Asserts that a note in Atlas merely mentioning a YouTube URL in its body is not flagged as a duplicate."""
+        atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech & AI")
+        os.makedirs(atlas_dir, exist_ok=True)
+        mention_note = os.path.join(atlas_dir, "Guida Produttivita.md")
+        with open(mention_note, "w", encoding="utf-8") as f:
+            f.write("""---
+status: permanent
+type: concept
+area: tech
+source: original
+title: "Guida Produttivita"
+---
+Vedi anche questo video interessante: https://www.youtube.com/watch?v=mkGGOxEPV-Q per approfondire.
+""")
+        dup = brain_ingest.check_duplicate_resource(self.test_dir, "https://youtu.be/mkGGOxEPV-Q", "Titolo Nuovo")
+        self.assertIsNone(dup)
+
+    def test_generic_raw_note_title_not_duplicate(self):
+        """Asserts generic titles like 'Raw Note ...' do not trigger false duplicate title matches."""
+        atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech & AI")
+        os.makedirs(atlas_dir, exist_ok=True)
+        note = os.path.join(atlas_dir, "Raw Note 2026-01-01 10-00.md")
+        with open(note, "w", encoding="utf-8") as f:
+            f.write("""---
+status: permanent
+type: concept
+area: tech
+title: "Raw Note 2026-01-01 10-00"
+---
+Testo.
+""")
+        dup = brain_ingest.check_duplicate_resource(self.test_dir, None, "Raw Note 2026-08-30 22-02")
+        self.assertIsNone(dup)
+
     def test_heuristic_atlas_routing(self):
-        """Asserts classify_target_directory suggests appropriate subfolder based on tags/title/content per D-10."""
-        # AI
-        dest_ai = brain_ingest.classify_target_directory("Costruire Agenti LLM con RAG", ["tech/ai"], "Modelli transformer")
-        self.assertIn("Tech & AI", dest_ai)
+        """Asserts classify_target_directory suggests appropriate subfolder based on tags/title/content."""
+        # AI & Agents
+        dest_ai = brain_ingest.classify_target_directory("Costruire Agenti LLM con RAG", ["tech/agents"], "Modelli transformer e agenti autonomi")
+        self.assertEqual(dest_ai, "02 - Atlas/Tech & AI/Agents & Automation")
+
+        dest_ai_ml = brain_ingest.classify_target_directory("Architettura Transformer e Reti Neurali", ["tech/ai"], "Modelli di deep learning")
+        self.assertEqual(dest_ai_ml, "02 - Atlas/Tech & AI/AI")
+
+        # Software Development
+        dest_git = brain_ingest.classify_target_directory("Gestione Branch e Pull Request", ["tech/git"], "Flusso di lavoro su GitHub")
+        self.assertEqual(dest_git, "02 - Atlas/Tech & AI/Software Development")
+
+        dest_soft = brain_ingest.classify_target_directory("Semantic Versioning e Ciclo di Rilascio", ["tech/semver"], "Specifica SemVer 2.0.0")
+        self.assertEqual(dest_soft, "02 - Atlas/Tech & AI/Software Development")
+
+        # Security
+        dest_sec = brain_ingest.classify_target_directory("Guida al Penetration Testing", ["tech/security"], "Vulnerabilita e exploit")
+        self.assertEqual(dest_sec, "02 - Atlas/Tech & AI/Security")
 
         # Finance
-        dest_fin = brain_ingest.classify_target_directory("Guida alla Gestione Fiscale e Investimenti", ["finance/tax"], "Tasse e investimenti")
-        self.assertEqual(dest_fin, "02 - Atlas/Finance")
+        dest_fin_tax = brain_ingest.classify_target_directory("Guida alla Gestione Fiscale e Tasse", ["finance/tax"], "Tasse e partita iva")
+        self.assertEqual(dest_fin_tax, "02 - Atlas/Finance/Holdings & Tax")
+
+        dest_crypto = brain_ingest.classify_target_directory("Guida a Bitcoin e Smart Contract", ["finance/crypto"], "Blockchain e wallet")
+        self.assertEqual(dest_crypto, "02 - Atlas/Finance/Crypto")
+
+        dest_inv = brain_ingest.classify_target_directory("Investire in ETF e Borsa", ["finance/investing"], "Fondi e interesse composto")
+        self.assertEqual(dest_inv, "02 - Atlas/Finance/Investments")
 
         # Education
-        dest_edu = brain_ingest.classify_target_directory("Appunti Esame Analisi Matematica", ["education/math"], "Studio universitario")
-        self.assertEqual(dest_edu, "02 - Atlas/Education & Learning")
+        dest_edu_math = brain_ingest.classify_target_directory("Appunti Esame Analisi Matematica", ["education/math"], "Studio universitario di integrali e derivate")
+        self.assertEqual(dest_edu_math, "02 - Atlas/Education & Learning/University/Matematica & Fisica")
 
-        # Mentality
-        dest_men = brain_ingest.classify_target_directory("Come Sviluppare Disciplina e Focus", ["mentality/habits"], "Abitudini atomiche")
-        self.assertIn("Personal Growth & Health", dest_men)
+        dest_edu_method = brain_ingest.classify_target_directory("Metodo di Studio e Spaced Repetition", ["education/method"], "Active recall e memorizzazione")
+        self.assertEqual(dest_edu_method, "02 - Atlas/Education & Learning/Learning")
+
+        # Personal Growth & Health
+        dest_men_habits = brain_ingest.classify_target_directory("Come Sviluppare Disciplina e Focus", ["mentality/habits"], "Abitudini atomiche e gestione del tempo")
+        self.assertEqual(dest_men_habits, "02 - Atlas/Personal Growth & Health/Mentality")
+
+        dest_gym = brain_ingest.classify_target_directory("Scheda di Allenamento Ipertrofia", ["health/fitness"], "Palestra, pesi e workout")
+        self.assertEqual(dest_gym, "02 - Atlas/Personal Growth & Health/Gym & Health")
 
         # Blog
         dest_blog = brain_ingest.classify_target_directory("Articolo Pubblico sul Blog", ["blog/post"], "Post divulgativo")
@@ -785,6 +867,33 @@ Sto ancora scrivendo questa nota...
         self.assertEqual(len(processed), 0)
         self.assertTrue(os.path.exists(raw_note))
 
+    def test_process_inbox_raw_notes_extract_frames_option(self):
+        """Asserts process_inbox_raw_notes respects extract_frames: true from frontmatter."""
+        from unittest.mock import patch
+        raw_note = os.path.join(self.test_dir, "03 - Inbox", "Raw Video.md")
+        with open(raw_note, "w", encoding="utf-8") as f:
+            f.write("""---
+ready: true
+title: "Raw Video"
+video_url: "https://www.youtube.com/watch?v=12345678901"
+extract_frames: true
+---
+Corpo""")
+
+        fake_data = {
+            "title": "Raw Video",
+            "channel": "Canale Test",
+            "duration": 120,
+            "chapters": [],
+            "transcript": [{"text": "Test transcript", "start": 0, "duration": 5}],
+            "extracted_images": []
+        }
+
+        with patch("youtube_helper.extract_youtube_data", return_value=fake_data) as mock_extract:
+            processed = brain_ingest.process_inbox_raw_notes(self.test_dir)
+            self.assertEqual(len(processed), 1)
+            mock_extract.assert_called_with("https://www.youtube.com/watch?v=12345678901", force_frames=True, vault_root=self.test_dir)
+
     def test_path_traversal_blocked_in_approvals(self):
         """Asserts process_tri_state_approvals rejects paths traversing outside vault root."""
         staged_path = brain_ingest.stage_note(
@@ -968,7 +1077,7 @@ Contenuto.
                 extract_frames=False,
                 force=True
             )
-            mock_extract.assert_called_with("https://youtube.com/watch?v=12345678901", force_frames=False, vault_root=self.test_dir)
+            mock_extract.assert_called_with("https://youtube.com/watch?v=12345678901", force_frames=None, vault_root=self.test_dir)
 
             brain_ingest.ingest_source(
                 source="https://youtube.com/watch?v=12345678901",
@@ -1494,6 +1603,189 @@ Sintesi automatica di prova per nuova ingestione completata con successo.
                 dash_content = f.read()
             self.assertIn("Approva [[Draft/Testo di Prova da Rielaborare con AI]]", dash_content)
             self.assertNotIn("⏳ [[Draft/Testo di Prova da Rielaborare con AI]]", dash_content)
+
+    def test_format_note_header_block_youtube(self):
+        """Asserts format_note_header_block generates standard YouTube summary with Video URL and wikilinked Canale."""
+        meta_plain = {
+            "type": "video",
+            "source": "https://youtu.be/KGlkNmKLEWs",
+            "channel": "Salvatore Sanfilippo"
+        }
+        res_plain = brain_ingest.format_note_header_block("Test Title", meta_plain)
+        self.assertEqual(res_plain, "- **Video URL**: https://youtu.be/KGlkNmKLEWs\n- **Canale**: [[Salvatore Sanfilippo]]\n\n---\n")
+
+        meta_wikilink = {
+            "type": "video",
+            "source": "https://youtu.be/KGlkNmKLEWs",
+            "channel": "[[Salvatore Sanfilippo]]"
+        }
+        res_wikilink = brain_ingest.format_note_header_block("Test Title", meta_wikilink)
+        self.assertEqual(res_wikilink, "- **Video URL**: https://youtu.be/KGlkNmKLEWs\n- **Canale**: [[Salvatore Sanfilippo]]\n\n---\n")
+
+    def test_tri_state_approvals_renames_stale_raw_note_target_path(self):
+        """Asserts process_tri_state_approvals overrides stale Raw Note target_path with approved title."""
+        title = "Semantic Versioning"
+        draft_dir = os.path.join(self.test_dir, "03 - Inbox", "Draft")
+        os.makedirs(draft_dir, exist_ok=True)
+        draft_path = os.path.join(draft_dir, f"{title}.md")
+        
+        draft_content = f"""---
+status: draft
+type: concept
+area: tech
+related: []
+aliases: []
+source: original
+title: "{title}"
+date: '2026-08-31'
+updated: 2026-08-31T00:20
+tags: [tech/standards]
+summary: "Sintesi di Semantic Versioning."
+target_path: "02 - Atlas/Tech & AI/Raw Note 2026 - 08 - 31 00 - 07.md"
+---
+[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[{title}]]
+
+# {title}
+
+## Sintesi Esecutiva
+Contenuto su Semantic Versioning.
+"""
+        with open(draft_path, "w", encoding="utf-8") as f:
+            f.write(draft_content)
+
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        dash_content = f"""---
+status: draft
+type: moc
+area: meta
+related: ["[[Home MOC]]"]
+title: "Review Dashboard"
+date: '2026-08-31'
+updated: 2026-08-31T00:20
+tags: [meta/dashboard]
+summary: "Dashboard di revisione GTD."
+---
+[[Home MOC|Home]] / [[Atlas]] / [[Review Dashboard]]
+
+# 📥 Inbox Review Dashboard
+
+## ⏳ In Elaborazione
+- [ ] 🛑 Interrompi elaborazioni attive (Panic Button)
+*Nessun processo attivo.*
+
+## 📥 Note in Attesa di Approvazione
+- [x] Approva [[Draft/{title}]]
+
+## ⚠️ Errori di Acquisizione & Azioni Richieste
+*Nessun errore registrato.*
+"""
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write(dash_content)
+
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 1)
+
+        expected_dest = os.path.join(self.test_dir, "02 - Atlas", "Tech & AI", f"{title}.md")
+        unexpected_dest = os.path.join(self.test_dir, "02 - Atlas", "Tech & AI", "Raw Note 2026 - 08 - 31 00 - 07.md")
+        self.assertTrue(os.path.exists(expected_dest), f"Expected note to be created at {expected_dest}")
+        self.assertFalse(os.path.exists(unexpected_dest), f"Note should not be named with stale Raw Note target_path")
+
+        with open(expected_dest, "r", encoding="utf-8") as f:
+            saved_content = f.read()
+        self.assertIn(f"title: \"{title}\"", saved_content)
+        self.assertIn(f"[[Home MOC|Home]] / [[Tech & AI]] / [[{title}]]", saved_content)
+        self.assertNotIn("Raw Note", saved_content)
+
+    def test_process_inbox_raw_notes_infers_title_from_h1(self):
+        """Asserts process_inbox_raw_notes replaces generic Raw Note title with explicit H1 title in body."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        os.makedirs(inbox_dir, exist_ok=True)
+        raw_file = os.path.join(inbox_dir, "Raw Note 2026-08-31 00-07.md")
+        
+        raw_content = """---
+ready: true
+title: "Raw Note 2026-08-31 00-07"
+date: '2026-08-31'
+tags: [tech/raw]
+area: ""
+---
+[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[Raw Note 2026-08-31 00-07]]
+
+# Architettura a Microservizi
+
+## Appunti Grezzi
+Appunti sul pattern a microservizi e service discovery.
+"""
+        with open(raw_file, "w", encoding="utf-8") as f:
+            f.write(raw_content)
+
+        processed = brain_ingest.process_inbox_raw_notes(self.test_dir)
+        self.assertEqual(len(processed), 1)
+        self.assertEqual(processed[0], "Architettura a Microservizi")
+
+        draft_file = os.path.join(inbox_dir, "Draft", "Architettura a Microservizi.md")
+        self.assertTrue(os.path.exists(draft_file))
+
+        with open(draft_file, "r", encoding="utf-8") as f:
+            draft_text = f.read()
+        self.assertIn('title: "Architettura a Microservizi"', draft_text)
+        self.assertIn('target_path: "02 - Atlas/Tech & AI/Software Development/Architettura a Microservizi.md"', draft_text)
+
+    def test_concurrent_approval_preserves_in_progress_note(self):
+        """Asserts approving note A does not wipe note B (with status: in-progress) from Review Dashboard in-progress section."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        draft_dir = os.path.join(inbox_dir, "Draft")
+        os.makedirs(draft_dir, exist_ok=True)
+
+        # 1. Note B: In-progress draft
+        note_b_title = "Nota In Elaborazione"
+        brain_ingest.stage_note(
+            vault_root=self.test_dir,
+            title=note_b_title,
+            body="Bozza in lavorazione AI...",
+            metadata={"title": note_b_title, "status": "in-progress"},
+            target_dir="02 - Atlas/Tech & AI",
+            status="in-progress"
+        )
+
+        # 2. Note A: Ready for approval
+        note_a_title = "Nota Pronta Da Approvare"
+        brain_ingest.stage_note(
+            vault_root=self.test_dir,
+            title=note_a_title,
+            body="Bozza finita.",
+            metadata={"title": note_a_title, "status": "draft"},
+            target_dir="02 - Atlas/Tech & AI",
+            status="draft"
+        )
+
+        # 3. Simulate User Approving Note A in Review Dashboard
+        dash_path = os.path.join(inbox_dir, "Review Dashboard.md")
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+
+        clean_b = brain_ingest.brain_health.clean_title_str(note_b_title)
+        clean_a = brain_ingest.brain_health.clean_title_str(note_a_title)
+
+        self.assertIn(f"[[Draft/{clean_b}]]", dash_content)
+        self.assertIn(f"- [ ] Approva [[Draft/{clean_a}]]", dash_content)
+
+        # Mark [x] on Note A
+        dash_modified = dash_content.replace(f"- [ ] Approva [[Draft/{clean_a}]]", f"- [x] Approva [[Draft/{clean_a}]]")
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write(dash_modified)
+
+        # 4. Process approvals
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 1)
+
+        # 5. Verify Note B is STILL present under ## ⏳ In Elaborazione
+        with open(dash_path, "r", encoding="utf-8") as f:
+            updated_dash = f.read()
+
+        self.assertIn(f"[[Draft/{clean_b}]]", updated_dash)
+        self.assertNotIn("*Nessun processo attivo.*", updated_dash)
+        self.assertNotIn(f"Approva [[Draft/{clean_a}]]", updated_dash)
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ Replicata in modo deterministico sia da invocazione diretta (`/brain-ingest`, `b
 3. **Staging Protetto & Tri-State GTD Review:**
    - La proposta viene registrata in `03 - Inbox/Review Dashboard.md` come riga di revisione:
      `- [ ] Approva [[Draft/<Titolo>]] (fonte: [[Source/<Titolo>]])`
-   - **Approvazione Utente (`[x]`):** Promozione di `Draft/<Titolo>.md` a `status: permanent`, spostamento nel percorso definitivo specificato in `target_path` (o auto-classificato in `02 - Atlas/` o `05 - Blog/`), aggiornamento breadcrumbs e autolinking semantico.
+   - **Approvazione Utente (`[x]`):** Promozione di `Draft/<Titolo>.md` a `status: permanent`, spostamento nel percorso definitivo specificato in `target_path` (auto-classificato semanticamente nella sotto-cartella tematica appropriata di `02 - Atlas/...` come `Tech & AI/Agenti & Automazione`, `Finance/Fisco & Gestione Patrimoniale`, `Personal Growth & Health/Produttivita & Abitudini`, ecc., oppure `05 - Blog/`), aggiornamento breadcrumbs e autolinking semantico.
      - *Trascrizioni YouTube / Scraping Web:* Il file in `Source/` viene eliminato automaticamente per mantenere pulito il Vault.
      - *Appunti manuali dell'utente:* Il file in `Source/` viene archiviato permanentemente in `99 - Meta/Archive/<Titolo>.md`.
    - **Rifiuto Utente (`[-]`):** Cancellazione atomica e sicura sia di `Draft/<Titolo>.md` sia di `Source/<Titolo>.md`, con pulizia di eventuali screenshot associati in `99 - Meta/Clipboard/`.

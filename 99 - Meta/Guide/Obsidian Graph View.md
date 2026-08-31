@@ -1,17 +1,3 @@
----
-status: permanent
-type: video
-area: meta
-related: []
-source: "https://www.youtube.com/watch?v=Z8WIALfgaA4"
-title: "Obsidian Graph View"
-date: '2025-01-24'
-updated: 2025-01-24T12:46
-tags: []
-summary: "The graph view in [Obsidian (software)](https://en.wikipedia.org/wiki/Obsidian(software)) is more than just a visual representation of notes and can be used in various ways [(00:00:09)](https://www..."
----
-[[Home MOC|Home]] / [[Guide]] / [[Obsidian Graph View]]
-
 # How I Use The Obsidian Graph View
 ![](https://i.ytimg.com/vi/Z8WIALfgaA4/maxresdefault.jpg)
 

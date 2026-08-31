@@ -11,7 +11,7 @@ updated: 2026-07-12T21:35
 tags: [meta/workflow, tech/notion, tech/notebooklm, tech/gemini, tech/perplexity, tech/produttività, tech/studio, tech/maturità]
 summary: "Perplexity non supporta l'allegato diretto di interi notebook come fonte di contesto."
 ---
-[[Home MOC|Home]] / [[Blog]] / [[Workflow Perplexity NotebookLM]]
+[[Home MOC|Home]] / [[Blog]] / [[Workflow Perplexity NotebookLM|Workflow Perplexity Notebooklm]]
 
 ## Il problema
 

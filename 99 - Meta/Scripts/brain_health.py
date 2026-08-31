@@ -793,6 +793,11 @@ class VaultHealthAuditor:
             if end_fm != -1:
                 body = content[end_fm + 3:]
 
+        # Strip fenced code blocks (```...``` or ~~~...~~~) and inline code (`...`)
+        body = re.sub(r'```[\s\S]*?```', '', body)
+        body = re.sub(r'~~~[\s\S]*?~~~', '', body)
+        body = re.sub(r'`[^`\n]*`', '', body)
+
         valid_links = []
         forward_links = []
         broken_links = []
@@ -896,7 +901,7 @@ summary: "Pannello di controllo statico del Second Brain: monitoraggio dello sta
 ---
 [[Home MOC|Home]] / [[Meta]] / [[Vault Health Dashboard]]
 
-# 📊 Vault Health Dashboard
+# Vault Health Dashboard
 
 Pannello di controllo in **puro Markdown statico** per monitorare la salute del Vault, le note in staging e l'integrità del grafo semantico.
 
@@ -904,7 +909,7 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 
 ---
 
-## 📈 Metriche Generali del Vault
+## Metriche Generali del Vault
 - **Note Totali:** {audit_stats.get('total_notes', 0)}
 - **Note in Staging (Inbox):** {len(staging_notes)}
 - **Bozze Blog:** {len(blog_seeds)}
@@ -914,22 +919,22 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 
 ---
 
-## 📥 Note in Staging (Inbox / Bozze)
+## Note in Staging (Inbox / Bozze)
 {staging_table}
 
 ---
 
-## 🌱 Semi del Blog (Bozze Quartz)
+## Semi del Blog (Bozze Quartz)
 {blog_table}
 
 ---
 
-## 🕒 Note Modificate di Recente
+## Note Modificate di Recente
 {recent_table}
 
 ---
 
-## 🛠️ Comandi di Governance
+## Comandi di Governance
 Per eseguire un audit interattivo o applicare correzioni automatiche:
 ```bash
 python3 "99 - Meta/Scripts/brain_health.py" --interactive

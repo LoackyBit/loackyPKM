@@ -4,21 +4,21 @@ type: concept
 area: tech
 related: []
 source: original
-title: "La Commoditizzazione Dell'intelligenza Artificiale e la Guerra Dell'hardware"
+title: "La Commoditizzazione Dell'Intelligenza Artificiale e la Guerra Dell'Hardware"
 date: '2026-08-17'
 updated: 2026-08-17T12:44
 tags: [tech/tech, tech/open-source, tech/ai-models, tech/hardware, tech/geopolitics]
 summary: "Video URL: https://youtu.be/3Elkmmon2vE"
 ---
-[[Home MOC|Home]] / [[Tech & AI MOC|Tech & AI]] / [[La Commoditizzazione dell'Intelligenza Artificiale e la Guerra dell'Hardware]]
+[[Home MOC|Home]] / [[Tech & AI]] / [[La Commoditizzazione Dell'Intelligenza Artificiale e la Guerra Dell'Hardware]]
 
 # La Commoditizzazione dell'Intelligenza Artificiale e la Guerra dell'Hardware
 
 - **Video URL**: https://youtu.be/3Elkmmon2vE
 - **Canale**: [[Simone Rizzo]]
-- **Data Ingestione**: 2026-08-17
 
 ---
+
 ## Sintesi Rapida
 
 L'industria dell'intelligenza artificiale sta affrontando una trasformazione radicale: mentre l'intelligenza dei modelli linguistici si avvia verso una rapida <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>commoditizzazione dell'intelligenza</b></font></mark>, il focus dell'intera industria si sposta inevitabilmente sulla <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>guerra dell'hardware</b></font></mark>. Il crollo verticale del costo delle API, guidato dal rilascio continuo di modelli open-source ad alte prestazioni da parte di laboratori cinesi, sta costringendo i colossi americani della tecnologia a ripensare i propri modelli di business. In questo scenario, la monetizzazione si sposta dalla vendita di token a consumo all'offerta di hardware integrato, cloud proprietario e architetture per l'inferenza locale, ridisegnando gli equilibri geopolitici e minacciando di far scoppiare la bolla degli investimenti software.
@@ -57,7 +57,7 @@ Sul fronte geopolitico, la Cina sta accelerando la transizione verso l'indipende
 
 ## Ottimizzazione Software: SSD Streaming e il Ruolo Fondamentale dell'Harness
 
-L'esecuzione locale di modelli di dimensioni colossali su macchine consumer con capacità di memoria limitata rappresenta una delle sfide ingegneristiche più complesse. Per superare questa limitazione fisica senza dover acquistare costosi server di memoria, la comunità open-source ha sviluppato motori di inferenza innovativi basati su codice in linguaggio C, come _Colibri_, _IRLM_ o il progetto _[[DS4]]_ del programmatore italiano [[Salvatore Sanfilippo]].
+L'esecuzione locale di modelli di dimensioni colossali su macchine consumer con capacità di memoria limitata rappresenta una delle sfide ingegneristiche più complesse. Per superare questa limitazione fisica senza dover acquistare costosi server di memoria, la comunità open-source ha sviluppato motori di inferenza innovativi basati su codice in linguaggio C, come _Colibri_, _IRLM_ o il progetto _[[Ds4]]_ del programmatore italiano [[Salvatore Sanfilippo]].
 
 La tecnologia chiave alla base di questi motori è lo <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>SSD streaming</b></font></mark>. Invece di caricare l'intera mole di parametri del modello all'interno della RAM, il software effettua uno streaming continuo e sequenziale dei singoli layer del modello direttamente dall'unità a stato solido (SSD) verso la RAM e la GPU solo nel momento esatto in cui sono richiesti per il calcolo. Anche se questa metodologia comporta una riduzione della velocità di elaborazione rispetto a un caricamento totale in RAM, essa rende possibile l'esecuzione di modelli da trilioni di parametri su hardware commerciale di fascia media.
 
@@ -105,5 +105,5 @@ In prospettiva futura, il mercato vedrà la proliferazione di modelli aperti e l
 ---
 ## Collegamenti
 
-- **Macro Area**: [[Tech & AI MOC]]
+- **Macro Area**: [[Tech & AI]]
 - **Note Correlate**: [[Evoluzione Dell'Agente AI]], [[La Gente Chiede Tutto Alle AI Perche Non Ha Scelta]]

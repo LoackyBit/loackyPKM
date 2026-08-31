@@ -10,13 +10,12 @@ updated: 2026-07-19T11:38
 tags: [mentality/youtube, tech/transcript, mentality/mindset, mentality/problem-solving, mentality/root-cause-analysis]
 summary: "Video URL: https://youtu.be/isAcbfMsHZs"
 ---
-[[Home MOC|Home]] / [[Personal Growth & Health MOC|Personal Growth & Health]] / [[Pseudo Problemi e la Tecnica dei 5 Perche]]
+[[Home MOC|Home]] / [[Personal Growth & Health]] / [[Pseudo Problemi e la Tecnica dei 5 Perche|Pseudo Problemi e la Tecnica dei 5 Perché]]
 
 # Pseudo Problemi e la Tecnica dei 5 Perché: Identificare e Risolvere le Cause Radice
 
 - **Video URL**: https://youtu.be/isAcbfMsHZs
 - **Canale**: [[Andrea Muzii]]
-- **Data Ingestione**: 2026-07-19
 
 ---
 
@@ -121,5 +120,5 @@ A causa dei meccanismi di autodifesa e della confusione emotiva, fare questa chi
 
 ## Collegamenti
 
-- **Macro Area**: [[Personal Growth & Health MOC]]
-- **Note Correlate**: [[Come Organizzare le Giornate]], [[Laser Focus]], [[Guida Al Dopamine Detox]], [[Home MOC]]
+- **Macro Area**: [[Personal Growth & Health]]
+- **Note Correlate**: [[Come Organizzare le Giornate]], [[Laser Focus]], [[Guida al Dopamine Detox]], [[Home]]

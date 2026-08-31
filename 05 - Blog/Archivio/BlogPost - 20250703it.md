@@ -5,13 +5,13 @@ type: article
 area: tech
 related: []
 source: original
-title: "Da Tradingview a Mt5: Automazione della Trendbars Strategy su Eur/usd"
+title: "Da Tradingview a Mt5 - Automazione della Trendbars Strategy su Eur - Usd"
 date: '2025-07-02'
 updated: 2026-07-12T21:34
 tags: [finance/trading]
 summary: "TradingView offre uno degli ambienti migliori per lo sviluppo e il test di strategie tramite Pine Script, ma ha dei limiti importanti:"
 ---
-[[Home MOC|Home]] / [[Blog]] / [[BlogPost - 20250703it|Da TradingView a Mt5: Automazione della TrendBars Strategy su Eur/usd]]
+[[Home MOC|Home]] / [[Blog]] / [[BlogPost - 20250703it|Da Tradingview a Mt5 - Automazione della Trendbars Strategy su Eur - Usd]]
 
 # Da TradingView a MT5: il contesto
 

@@ -10,7 +10,7 @@ updated: 2026-08-24T21:36
 tags: [mentality/mindset, mentality/psychology, mentality/sociology, calendar/review]
 summary: "La <mark style=\"background:rgba(255, 193, 69, 0.32)\"<font color=\"#cc8800\"<bsindrome del papavero alto</b</font</mark (nota internazionalmente come <mark style=\"background:rgba(181, 113, 255, 0.36)\"..."
 ---
-[[Home MOC|Home]] / [[Personal Growth & Health MOC|Personal Growth & Health]] / [[Sindrome del Papavero Alto]]
+[[Home MOC|Home]] / [[Personal Growth & Health]] / [[Sindrome del Papavero Alto]]
 
 # Sindrome del Papavero Alto
 

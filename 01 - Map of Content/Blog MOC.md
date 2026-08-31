@@ -12,18 +12,18 @@ summary: "Indice e mappa concettuale per Blog MOC."
 ---
 [[Home MOC|Home]] / [[Blog MOC]]
 
-## ✍️ Blog & Pubblicazioni Web (Quartz)
+## Blog & Pubblicazioni Web (Quartz)
 
 Mappa concettuale e hub di tracciamento degli articoli, delle bozze e degli studi destinati alla pubblicazione online sul blog personale basato su Quartz.
 
-### 🚀 Articoli Pubblicati / Finiti
+### Articoli Pubblicati / Finiti
 - [[Bitcoin Protocol]] — Approfondimento tecnico sul protocollo Bitcoin
 - [[Problema P Vs NP]] — Spiegazione del più grande enigma irrisolto dell'informatica teorica
 - [[Blog su Quartz]] — Architettura e setup del blog statico Quartz
 - [[Workflow Perplexity NotebookLM]] — Integrazione di strumenti IA per la ricerca e sintesi
 - [[Unfuck Your Brain]] — Articolo sulla riprogrammazione mentale e focus
 
-### 🌿 Bozze & Articoli in Stesura
+### Bozze & Articoli in Stesura
 - [[Avanguardie Artistiche]] — Analisi dei movimenti artistici storici
 - [[BlogPost - 20260303it]] — Articolo di aggiornamento del 03 Marzo 2026
 - [[Crono S]] — Appunti sulla gestione temporale e timeline storiche
@@ -31,5 +31,5 @@ Mappa concettuale e hub di tracciamento degli articoli, delle bozze e degli stud
 
 ---
 ## Collegamenti
-- [[Home MOC]]
+- [[Home]]
 - [[Telos]]

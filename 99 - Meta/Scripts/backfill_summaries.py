@@ -198,7 +198,7 @@ def generate_ai_summary(title: str, body_text: str, rel_path: str = "", agy_path
     
     try:
         proc = subprocess.run(
-            [agy_cmd, "--model", "gemini-3.7-flash-low", "--print", "--dangerously-skip-permissions", "--disable-slash-commands", prompt],
+            [agy_cmd, "--model", "gemini-3.8-flash-low", "--print", "--dangerously-skip-permissions", "--disable-slash-commands", prompt],
             capture_output=True,
             text=True,
             timeout=timeout,

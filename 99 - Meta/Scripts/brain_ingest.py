@@ -406,7 +406,7 @@ REGOLE CRITICHE DI CONTENUTO E STILE:
 
     try:
         proc = subprocess.run(
-            [agy_cmd, "--model", "gemini-3.7-flash-low", "--dangerously-skip-permissions", "--disable-slash-commands", f"--print={prompt}"],
+            [agy_cmd, "--model", "gemini-3.8-flash-low", "--dangerously-skip-permissions", "--disable-slash-commands", f"--print={prompt}"],
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -963,21 +963,35 @@ def process_tri_state_approvals(vault_root: str) -> int:
             status = m_err.group('status')
             if status == ' ':
                 updated_lines.append(line); continue
-            src_target = m_err.group('src').strip()
+            raw_target = m_err.group('src').strip()
+            if raw_target.startswith('[[') and raw_target.endswith(']]'):
+                raw_target = raw_target[2:-2]
+            src_target = raw_target.split('|')[0].strip()
+            if src_target.startswith("Draft/"): src_target = src_target[6:]
+            if src_target.startswith("Source/"): src_target = src_target[7:]
             if status in ('x', 'X'):
                 try:
-                    raw_file = os.path.join(vault_root, "03 - Inbox", src_target)
-                    if not os.path.exists(raw_file) and not src_target.endswith('.md'):
-                        raw_file = os.path.join(vault_root, "03 - Inbox", f"{src_target}.md")
                     matching_raw_file = None
-                    if os.path.exists(raw_file) and not os.path.isdir(raw_file):
-                        matching_raw_file = raw_file
-                    else:
-                        inbox_dir = os.path.join(vault_root, "03 - Inbox")
-                        if os.path.exists(inbox_dir):
-                            for ib_f in os.listdir(inbox_dir):
-                                if ib_f.endswith('.md') and not ib_f.startswith('.') and ib_f not in ("Review Dashboard.md", "Draft", "Source"):
-                                    ib_fp = os.path.join(inbox_dir, ib_f)
+                    candidate_paths = [
+                        os.path.join(vault_root, "03 - Inbox", src_target),
+                        os.path.join(vault_root, "03 - Inbox", f"{src_target}.md"),
+                        os.path.join(vault_root, "03 - Inbox", "Source", src_target),
+                        os.path.join(vault_root, "03 - Inbox", "Source", f"{src_target}.md"),
+                    ]
+                    for cp in candidate_paths:
+                        if os.path.isfile(cp):
+                            matching_raw_file = cp
+                            break
+
+                    if not matching_raw_file:
+                        for s_rel in ("03 - Inbox", os.path.join("03 - Inbox", "Source")):
+                            s_dir = os.path.join(vault_root, s_rel)
+                            if os.path.exists(s_dir):
+                                for ib_f in os.listdir(s_dir):
+                                    if not ib_f.endswith('.md') or ib_f.startswith('.') or ib_f in ("Review Dashboard.md", "Draft", "Source"):
+                                        continue
+                                    ib_fp = os.path.join(s_dir, ib_f)
+                                    if not os.path.isfile(ib_fp): continue
                                     try:
                                         with open(ib_fp, 'r', encoding='utf-8', errors='ignore') as rf: rfc = rf.read()
                                         _, rfm_t, _, _ = brain_health.split_markdown_note(rfc)
@@ -987,11 +1001,13 @@ def process_tri_state_approvals(vault_root: str) -> int:
                                             break
                                     except Exception:
                                         pass
+                                if matching_raw_file:
+                                    break
 
                     if matching_raw_file:
                         with open(matching_raw_file, 'r', encoding='utf-8', errors='ignore') as rf: rfc = rf.read()
                         _, rfm_t, _, rbdy = brain_health.split_markdown_note(rfc)
-                        rfm_fixed = re.sub(r'ready:\s*false', 'ready: true', rfm_t, flags=re.IGNORECASE)
+                        rfm_fixed = re.sub(r'ready:\s*(false|"false"|\'false\'|0)', 'ready: true', rfm_t, flags=re.IGNORECASE)
                         if 'ready:' not in rfm_fixed: rfm_fixed += "\nready: true"
                         with open(matching_raw_file, 'w', encoding='utf-8') as rf: rf.write(f"---\n{rfm_fixed.strip()}\n---\n\n{rbdy.strip()}\n")
                         process_inbox_raw_notes(vault_root)
@@ -1003,26 +1019,39 @@ def process_tri_state_approvals(vault_root: str) -> int:
                     pending_errors.append((src_target, str(e)))
                     append_inbox_history(vault_root, "RETRY_FAILED", src_target, str(e))
             elif status == '-':
-                raw_file = os.path.join(vault_root, "03 - Inbox", src_target)
-                if not os.path.exists(raw_file) and not src_target.endswith('.md'):
-                    raw_file = os.path.join(vault_root, "03 - Inbox", f"{src_target}.md")
-                if os.path.exists(raw_file) and not os.path.isdir(raw_file):
-                    try: os.remove(raw_file)
-                    except Exception: pass
-                else:
-                    inbox_dir = os.path.join(vault_root, "03 - Inbox")
-                    if os.path.exists(inbox_dir):
-                        for ib_f in os.listdir(inbox_dir):
-                            if ib_f.endswith('.md') and not ib_f.startswith('.') and ib_f not in ("Review Dashboard.md", "Draft", "Source"):
-                                ib_fp = os.path.join(inbox_dir, ib_f)
+                candidate_paths = [
+                    os.path.join(vault_root, "03 - Inbox", src_target),
+                    os.path.join(vault_root, "03 - Inbox", f"{src_target}.md"),
+                    os.path.join(vault_root, "03 - Inbox", "Source", src_target),
+                    os.path.join(vault_root, "03 - Inbox", "Source", f"{src_target}.md"),
+                ]
+                deleted = False
+                for cp in candidate_paths:
+                    if os.path.isfile(cp):
+                        try:
+                            os.remove(cp)
+                            deleted = True
+                        except Exception: pass
+                if not deleted:
+                    for s_rel in ("03 - Inbox", os.path.join("03 - Inbox", "Source")):
+                        s_dir = os.path.join(vault_root, s_rel)
+                        if os.path.exists(s_dir):
+                            for ib_f in os.listdir(s_dir):
+                                if not ib_f.endswith('.md') or ib_f.startswith('.') or ib_f in ("Review Dashboard.md", "Draft", "Source"):
+                                    continue
+                                ib_fp = os.path.join(s_dir, ib_f)
+                                if not os.path.isfile(ib_fp): continue
                                 try:
                                     with open(ib_fp, 'r', encoding='utf-8', errors='ignore') as rf: rfc = rf.read()
                                     _, rfm_t, _, _ = brain_health.split_markdown_note(rfc)
                                     rmeta = brain_health.safe_load_frontmatter(rfm_t, brain_health.build_yaml_engine())
                                     if rmeta.get('video_url') == src_target or rmeta.get('source') == src_target:
                                         os.remove(ib_fp)
-                                except Exception:
-                                    pass
+                                        deleted = True
+                                        break
+                                except Exception: pass
+                            if deleted:
+                                break
                 append_inbox_history(vault_root, "ERROR_DISMISSED", src_target, "DISMISSED")
                 processed_count += 1
             continue
@@ -1127,24 +1156,41 @@ def process_tri_state_approvals(vault_root: str) -> int:
 
 
 def process_inbox_raw_notes(vault_root: str) -> List[str]:
-    """Scans 03 - Inbox/ root for ready: true notes and stages their source into Source/, placing them under In Elaborazione."""
+    """Scans 03 - Inbox/ root and 03 - Inbox/Source/ for ready: true notes and stages their source into Source/, placing them under In Elaborazione."""
     inbox_dir = os.path.join(vault_root, "03 - Inbox")
     source_dir = os.path.join(inbox_dir, "Source")
     os.makedirs(source_dir, exist_ok=True)
     if not os.path.exists(inbox_dir): return []
     processed = []
 
+    candidates = []
+    # 1. 03 - Inbox/ root
     for file in sorted(os.listdir(inbox_dir)):
         if not file.endswith('.md') or file.startswith('.') or file in ("Review Dashboard.md", "Draft", "Source"): continue
         file_path = os.path.join(inbox_dir, file)
-        if os.path.isdir(file_path): continue
+        if os.path.isfile(file_path):
+            candidates.append((file_path, False))
+
+    # 2. 03 - Inbox/Source/ (for retried notes)
+    if os.path.exists(source_dir):
+        for file in sorted(os.listdir(source_dir)):
+            if not file.endswith('.md') or file.startswith('.'): continue
+            file_path = os.path.join(source_dir, file)
+            if os.path.isfile(file_path):
+                candidates.append((file_path, True))
+
+    for file_path, is_in_source in candidates:
+        if not os.path.exists(file_path): continue
+        clean_title = ""
+        src_url = None
         try:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f: content = f.read()
             has_fm, fm_text, _, body = brain_health.split_markdown_note(content)
             meta = brain_health.safe_load_frontmatter(fm_text, brain_health.build_yaml_engine()) if has_fm else {}
             if str(meta.get('ready')).lower() != 'true': continue
 
-            clean_title = brain_health.clean_title_str(meta.get('title') or file[:-3])
+            file_name = os.path.basename(file_path)
+            clean_title = brain_health.clean_title_str(meta.get('title') or file_name[:-3])
             if clean_title.lower().startswith("raw note") or clean_title.lower() in ("untitled", "draft", "bozza", "nuova nota", ""):
                 m_h1 = re.search(r'^\s*#\s+([^\n]+)', body, re.MULTILINE)
                 if m_h1:
@@ -1157,7 +1203,7 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
 
             dup = check_duplicate_resource(vault_root, src_url, check_title)
             if dup:
-                raw_fm = re.sub(r'ready:\s*(true|"true"|\'true\')', 'ready: false', fm_text, flags=re.IGNORECASE)
+                raw_fm = re.sub(r'ready:\s*(true|"true"|\'true\'|1)', 'ready: false', fm_text, flags=re.IGNORECASE)
                 if 'ready:' not in raw_fm: raw_fm += "\nready: false"
                 with open(file_path, 'w', encoding='utf-8') as f: f.write(f"---\n{raw_fm.strip()}\n---\n\n{body.strip()}\n")
                 record_ingest_error(vault_root, src_url or clean_title, f"Duplicato rilevato: {os.path.relpath(dup[0], vault_root)}")
@@ -1172,6 +1218,16 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
                 processed.append(src_url)
                 continue
 
+            # D-01: Spostamento atomico preventivo delle note grezze in 03 - Inbox/Source/ prima di Fase 1/3 e Fase 2/3 AI
+            if not is_in_source:
+                target_source_path = os.path.join(source_dir, file_name)
+                if os.path.exists(target_source_path) and os.path.abspath(file_path) != os.path.abspath(target_source_path):
+                    try: os.remove(target_source_path)
+                    except Exception: pass
+                shutil.move(file_path, target_source_path)
+                file_path = target_source_path
+                is_in_source = True
+
             # -------------------------------------------------------------
             # FASE 1/3: Estrazione Sorgente
             # -------------------------------------------------------------
@@ -1185,7 +1241,6 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
             meta['title'] = clean_title
             meta['target_path'] = f"{target_dir}/{clean_title}.md"
             stage_note(vault_root, clean_title, body, meta, target_dir=target_dir, source_content=content, status='in-progress')
-            if os.path.exists(file_path): os.remove(file_path)
 
             enriched_body, summary = enrich_draft_with_ai(vault_root, clean_title, content, depth="approfondimento", source_type="concept", source_url="original")
 
@@ -1194,16 +1249,22 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
                 if m_ai_h1:
                     cand_ai = brain_health.clean_title_str(m_ai_h1.group(1).strip())
                     if cand_ai and not cand_ai.lower().startswith("raw note") and cand_ai.lower() not in ("untitled", "draft", "bozza", "nuova nota", "appunti grezzi", "idee"):
-                        old_in_prog = os.path.join(vault_root, "03 - Inbox", "Draft", f"{clean_title}.md")
-                        old_source = os.path.join(vault_root, "03 - Inbox", "Source", f"{clean_title}.md")
+                        old_title = clean_title
                         clean_title = cand_ai
-                        target_dir = classify_target_directory(clean_title, meta.get('tags', []), enriched_body)
-                        if os.path.exists(old_in_prog) and clean_title != cand_ai:
+                        old_in_prog = os.path.join(vault_root, "03 - Inbox", "Draft", f"{old_title}.md")
+                        old_source = os.path.join(vault_root, "03 - Inbox", "Source", f"{old_title}.md")
+                        new_source = os.path.join(vault_root, "03 - Inbox", "Source", f"{clean_title}.md")
+                        if os.path.exists(old_in_prog):
                             try: os.remove(old_in_prog)
                             except Exception: pass
-                        if os.path.exists(old_source) and clean_title != cand_ai:
-                            try: os.remove(old_source)
+                        if os.path.exists(old_source) and old_title != clean_title:
+                            if os.path.exists(new_source) and os.path.abspath(old_source) != os.path.abspath(new_source):
+                                try: os.remove(new_source)
+                                except Exception: pass
+                            try: shutil.move(old_source, new_source)
                             except Exception: pass
+                        file_path = new_source
+                        target_dir = classify_target_directory(clean_title, meta.get('tags', []), enriched_body)
 
             meta['title'] = clean_title
             meta['target_path'] = f"{target_dir}/{clean_title}.md"
@@ -1220,13 +1281,14 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
 
         except Exception as e:
             try:
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f: c = f.read()
-                _, fm_t, _, bdy = brain_health.split_markdown_note(c)
-                rfm = re.sub(r'ready:\s*(true|"true"|\'true\')', 'ready: false', fm_t, flags=re.IGNORECASE)
-                if 'ready:' not in rfm: rfm += "\nready: false"
-                with open(file_path, 'w', encoding='utf-8') as f: f.write(f"---\n{rfm.strip()}\n---\n\n{bdy.strip()}\n")
+                if os.path.exists(file_path):
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f: c = f.read()
+                    _, fm_t, _, bdy = brain_health.split_markdown_note(c)
+                    rfm = re.sub(r'ready:\s*(true|"true"|\'true\'|1)', 'ready: false', fm_t, flags=re.IGNORECASE)
+                    if 'ready:' not in rfm: rfm += "\nready: false"
+                    with open(file_path, 'w', encoding='utf-8') as f: f.write(f"---\n{rfm.strip()}\n---\n\n{bdy.strip()}\n")
             except Exception: pass
-            err_target = src_url if (src_url and str(src_url).strip()) else file
+            err_target = src_url if (src_url and str(src_url).strip()) else (clean_title if clean_title else os.path.basename(file_path)[:-3])
             record_ingest_error(vault_root, err_target, str(e))
     return processed
 
@@ -1299,15 +1361,20 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                 if m_ai_h1:
                     cand_ai = brain_health.clean_title_str(m_ai_h1.group(1).strip())
                     if cand_ai and not cand_ai.lower().startswith("raw note") and cand_ai.lower() not in ("untitled", "draft", "bozza", "nuova nota", "appunti grezzi", "idee"):
-                        old_in_prog = os.path.join(root, "03 - Inbox", "Draft", f"{clean_title}.md")
-                        old_source = os.path.join(root, "03 - Inbox", "Source", f"{clean_title}.md")
+                        old_title = clean_title
                         clean_title = cand_ai
+                        old_in_prog = os.path.join(root, "03 - Inbox", "Draft", f"{old_title}.md")
+                        old_source = os.path.join(root, "03 - Inbox", "Source", f"{old_title}.md")
+                        new_source = os.path.join(root, "03 - Inbox", "Source", f"{clean_title}.md")
                         meta['title'] = clean_title
-                        if os.path.exists(old_in_prog) and clean_title != cand_ai:
+                        if os.path.exists(old_in_prog):
                             try: os.remove(old_in_prog)
                             except Exception: pass
-                        if os.path.exists(old_source) and clean_title != cand_ai:
-                            try: os.remove(old_source)
+                        if os.path.exists(old_source) and old_title != clean_title:
+                            if os.path.exists(new_source) and os.path.abspath(old_source) != os.path.abspath(new_source):
+                                try: os.remove(new_source)
+                                except Exception: pass
+                            try: shutil.move(old_source, new_source)
                             except Exception: pass
 
             dest_dir = target_dir or classify_target_directory(clean_title, meta.get('tags', []), enriched_body)

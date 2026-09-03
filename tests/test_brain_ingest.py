@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch, MagicMock
 import os
 import sys
 import tempfile
@@ -1809,6 +1810,175 @@ Appunti sul pattern a microservizi e service discovery.
         self.assertIn(f"[[Draft/{clean_b}]]", updated_dash)
         self.assertNotIn("*Nessun processo attivo.*", updated_dash)
         self.assertNotIn(f"Approva [[Draft/{clean_a}]]", updated_dash)
+
+    @patch("brain_ingest.enrich_draft_with_ai")
+    def test_inbox_raw_note_preventive_move_and_error_preservation(self, mock_enrich):
+        """Asserts raw note is preventively moved to Source/ before AI and preserved with ready: false on crash (INGEST-01, D-01, D-02)."""
+        mock_enrich.side_effect = RuntimeError("LLM API failure")
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        raw_note = os.path.join(inbox_dir, "Test Raw Crash.md")
+        with open(raw_note, "w", encoding="utf-8") as f:
+            f.write("""---
+ready: true
+type: concept
+area: tech
+title: "Test Raw Crash"
+---
+Contenuto importante che non deve andare perso su crash.
+""")
+
+        processed = brain_ingest.process_inbox_raw_notes(self.test_dir)
+        self.assertEqual(len(processed), 0)
+
+        # 1. Assert raw note no longer exists in Inbox root
+        self.assertFalse(os.path.exists(raw_note))
+
+        # 2. Assert raw note exists in Source/ with ready: false
+        source_note = os.path.join(inbox_dir, "Source", "Test Raw Crash.md")
+        self.assertTrue(os.path.exists(source_note))
+        with open(source_note, "r", encoding="utf-8") as f:
+            src_content = f.read()
+        self.assertIn("ready: false", src_content)
+
+        # 3. Assert error recorded in Review Dashboard.md
+        dash_path = os.path.join(inbox_dir, "Review Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        self.assertIn("Test Raw Crash", dash_content)
+        self.assertIn("LLM API failure", dash_content)
+
+    def test_retry_error_from_source_folder(self):
+        """Asserts retrying an error with [x] in Review Dashboard finds source in Source/, sets ready: true, and processes it."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        source_note = os.path.join(inbox_dir, "Source", "Nota Da Riprovare.md")
+        with open(source_note, "w", encoding="utf-8") as f:
+            f.write("""---
+ready: false
+type: concept
+area: tech
+title: "Nota Da Riprovare"
+---
+Contenuto da rielaborare al retry.
+""")
+
+        dash_path = os.path.join(inbox_dir, "Review Dashboard.md")
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: article
+area: meta
+---
+# Review Dashboard
+
+## ⚠️ Errori di Acquisizione & Azioni Richieste
+- [x] [!] Riprova: Nota Da Riprovare — Motivo: Timeout
+
+## 📥 Note in Attesa di Approvazione
+*Nessuna nota in attesa.*
+""")
+
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 1)
+
+        # Draft must be created
+        draft_note = os.path.join(inbox_dir, "Draft", "Nota Da Riprovare.md")
+        self.assertTrue(os.path.exists(draft_note))
+        with open(draft_note, "r", encoding="utf-8") as f:
+            draft_content = f.read()
+        self.assertIn("status: draft", draft_content)
+
+        # Error must be cleared from Review Dashboard
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        self.assertNotIn("Riprova: Nota Da Riprovare", dash_content)
+
+    def test_dismiss_error_removes_source_note(self):
+        """Asserts dismissing an error with [-] in Review Dashboard removes the failed source note from Source/."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        source_note = os.path.join(inbox_dir, "Source", "Nota Da Scartare.md")
+        with open(source_note, "w", encoding="utf-8") as f:
+            f.write("""---
+ready: false
+type: concept
+area: tech
+title: "Nota Da Scartare"
+---
+Contenuto fallito da eliminare.
+""")
+
+        dash_path = os.path.join(inbox_dir, "Review Dashboard.md")
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: article
+area: meta
+---
+# Review Dashboard
+
+## ⚠️ Errori di Acquisizione & Azioni Richieste
+- [-] [!] Riprova: Nota Da Scartare — Motivo: Errore
+
+## 📥 Note in Attesa di Approvazione
+*Nessuna nota in attesa.*
+""")
+
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 1)
+
+        # Source note must be removed
+        self.assertFalse(os.path.exists(source_note))
+
+        # Dashboard must not have the error
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        self.assertNotIn("Riprova: Nota Da Scartare", dash_content)
+
+    @patch("brain_ingest.enrich_draft_with_ai")
+    def test_post_ai_renaming_cleans_old_draft_and_renames_source(self, mock_enrich):
+        """Asserts post-AI title change removes old draft and renames Source/ note 1:1 without orphans (INGEST-02, D-03)."""
+        mock_enrich.return_value = (
+            "# Architettura Distribuita Scalabile\n\nTrattazione approfondita del sistema distribuito.",
+            "Sintesi esecutiva dell'architettura distribuita e scalabile per carichi elevati."
+        )
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        raw_note = os.path.join(inbox_dir, "Raw Note Prova.md")
+        with open(raw_note, "w", encoding="utf-8") as f:
+            f.write("""---
+ready: true
+type: concept
+area: tech
+title: "Raw Note Prova"
+---
+Appunti sparsi sui sistemi distribuiti.
+""")
+
+        processed = brain_ingest.process_inbox_raw_notes(self.test_dir)
+        self.assertEqual(len(processed), 1)
+
+        # Old draft and old source must not exist
+        old_draft = os.path.join(inbox_dir, "Draft", "Raw Note Prova.md")
+        old_source = os.path.join(inbox_dir, "Source", "Raw Note Prova.md")
+        self.assertFalse(os.path.exists(old_draft))
+        self.assertFalse(os.path.exists(old_source))
+
+        # New draft and new source must exist
+        new_draft = os.path.join(inbox_dir, "Draft", "Architettura Distribuita Scalabile.md")
+        new_source = os.path.join(inbox_dir, "Source", "Architettura Distribuita Scalabile.md")
+        self.assertTrue(os.path.exists(new_draft))
+        self.assertTrue(os.path.exists(new_source))
+
+    def test_model_version_gemini_3_8_configured(self):
+        """Asserts gemini-3.8-flash-low is configured across ingestion scripts and gemini-3.7-flash-low is absent (D-07)."""
+        ingest_script = os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts", "brain_ingest.py")
+        backfill_script = os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts", "backfill_summaries.py")
+        design_guide = os.path.join(PROJECT_ROOT, "99 - Meta", "Guide", "Ingest Automation Refactoring Design.md")
+
+        for fpath in (ingest_script, backfill_script, design_guide):
+            with open(fpath, "r", encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn("gemini-3.8-flash-low", content)
+            self.assertNotIn("gemini-3.7-flash-low", content)
 
 
 if __name__ == "__main__":

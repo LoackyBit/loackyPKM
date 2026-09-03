@@ -268,6 +268,19 @@ restart_daemon() {
     start_daemon
 }
 
+install_service() {
+    local TARGET_PLIST="$HOME/Library/LaunchAgents/com.loackypkm.watcher.plist"
+    local SOURCE_TEMPLATE="$SCRIPT_DIR/com.loackypkm.watcher.plist"
+    if [ ! -f "$SOURCE_TEMPLATE" ]; then
+        echo "Template plist not found at $SOURCE_TEMPLATE"
+        exit 1
+    fi
+    mkdir -p "$HOME/Library/LaunchAgents"
+    sed "s|__VAULT_PATH__|$VAULT_PATH|g" "$SOURCE_TEMPLATE" > "$TARGET_PLIST"
+    echo "LaunchAgent installed to $TARGET_PLIST with VAULT_PATH=$VAULT_PATH"
+    echo "To activate: launchctl load $TARGET_PLIST"
+}
+
 # CLI Argument routing
 case "${1:-run}" in
     start)
@@ -285,8 +298,11 @@ case "${1:-run}" in
     run)
         run_loop
         ;;
+    install-service)
+        install_service
+        ;;
     *)
-        echo "Usage: $0 {start|stop|status|restart|run}"
+        echo "Usage: $0 {start|stop|status|restart|run|install-service}"
         exit 1
         ;;
 esac

@@ -94,5 +94,27 @@ Corpo del testo della nota di test.
         self.assertLessEqual(len(fallback), 200)
         self.assertTrue(fallback.endswith("..."))
 
+    @patch("backfill_summaries.Path.home")
+    @patch("backfill_summaries.subprocess.run")
+    def test_generate_ai_summary_dynamic_path_and_env(self, mock_run, mock_home):
+        """Asserts generate_ai_summary dynamically builds agy path and PATH via Path.home()."""
+        mock_home.return_value = Path("/custom/test/home")
+        mock_proc = MagicMock()
+        mock_proc.returncode = 0
+        mock_proc.stdout = "Sintesi concettuale esecutiva generata da AI."
+        mock_run.return_value = mock_proc
+
+        with patch.dict(os.environ, {"PATH": "/usr/bin:/bin"}):
+            summary = backfill_summaries.generate_ai_summary(
+                "Test Title", "Corpo della nota sufficientemente lungo da richiedere AI.", agy_path=None
+            )
+            self.assertEqual(summary, "Sintesi concettuale esecutiva generata da AI.")
+            self.assertTrue(mock_run.called)
+            called_kwargs = mock_run.call_args[1]
+            env = called_kwargs.get("env", {})
+            path_val = env.get("PATH", "")
+            self.assertTrue(path_val.startswith("/custom/test/home/.local/bin:"))
+            self.assertNotIn("/Users/lorenzo", path_val)
+
 if __name__ == "__main__":
     unittest.main()

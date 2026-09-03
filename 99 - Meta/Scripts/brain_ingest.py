@@ -342,7 +342,7 @@ def format_structured_note(title: str, raw_content: str, depth: str = "approfond
 
 def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth: str = "approfondimento",
                          source_type: str = "text", source_url: str = "original",
-                         agy_path: str = "/Users/lorenzo/.local/bin/agy", timeout: int = 45) -> tuple[str, str]:
+                         agy_path: Optional[str] = None, timeout: int = 45) -> tuple[str, str]:
     """Generates enriched conceptual note body and executive summary via AI (agy CLI) with heuristic fallback.
     Returns (enriched_body, summary)."""
     c_title = brain_health.clean_title_str(title)
@@ -394,9 +394,14 @@ REGOLE CRITICHE DI CONTENUTO E STILE:
    - Alla fine assoluta della risposta, inserisci il marcatore esatto '---SUMMARY---' seguito da una singola frase densa di significato (120-180 caratteri, max 200) per il recupero sub-secondo.
 """
 
-    agy_cmd = agy_path if os.path.exists(agy_path) else "agy"
+    home_bin = str(Path.home() / ".local" / "bin" / "agy")
+    if agy_path and os.path.exists(agy_path):
+        agy_cmd = agy_path
+    else:
+        agy_cmd = shutil.which("agy") or (home_bin if os.path.exists(home_bin) else "agy")
     env = os.environ.copy()
-    env['PATH'] = f"/Users/lorenzo/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:{env.get('PATH', '')}"
+    home_dir = str(Path.home())
+    env['PATH'] = f"{home_dir}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:{env.get('PATH', '')}"
     env['PYTHONUNBUFFERED'] = '1'
 
     try:

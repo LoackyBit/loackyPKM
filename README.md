@@ -204,12 +204,12 @@ Registro completo delle decisioni di architettura e implementazione:
    ```
 
 6. **Mappa delle Risorse Chiave:**
-   - [GEMINI.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/GEMINI.md) — Memoria di sistema e regole permanenti del Vault.
-   - [AGENTS.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/AGENTS.md) — Architettura del Second Brain e runtime conventions.
-   - [Home MOC.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/01%20-%20Map%20of%20Content/Home%20MOC.md) — Indice centrale della knowledge base.
-   - [Review Dashboard.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/03%20-%20Inbox/Review%20Dashboard.md) — Dashboard di revisione e approvazione GTD.
-   - [Vault Health Dashboard.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/99%20-%20Meta/Vault%20Health%20Dashboard.md) — Report diagnostico statico del Vault.
-   - [Style Guide.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/99%20-%20Meta/Style%20Guide.md) — Guida di stile per evidenziazioni HTML, Mermaid e LaTeX.
+   - [GEMINI.md](GEMINI.md) — Memoria di sistema e regole permanenti del Vault.
+   - [AGENTS.md](AGENTS.md) — Architettura del Second Brain e runtime conventions.
+   - [Home MOC.md](01%20-%20Map%20of%20Content/Home%20MOC.md) — Indice centrale della knowledge base.
+   - [Review Dashboard.md](03%20-%20Inbox/Review%20Dashboard.md) — Dashboard di revisione e approvazione GTD.
+   - [Vault Health Dashboard.md](99%20-%20Meta/Vault%20Health%20Dashboard.md) — Report diagnostico statico del Vault.
+   - [Style Guide.md](99%20-%20Meta/Style%20Guide.md) — Guida di stile per evidenziazioni HTML, Mermaid e LaTeX.
 
 ---
 

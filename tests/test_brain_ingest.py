@@ -1576,6 +1576,29 @@ Sintesi esecutiva densa generata dall'intelligenza artificiale per il test del S
             self.assertIn("Fallback Titolo", body)
             self.assertTrue(len(summary) > 10)
 
+    def test_enrich_draft_with_ai_dynamic_path_and_env(self):
+        """Asserts enrich_draft_with_ai dynamically builds agy path and PATH via Path.home()."""
+        from unittest.mock import patch, MagicMock
+
+        os.environ.pop("BRAIN_INGEST_NO_AI", None)
+        mock_res = MagicMock()
+        mock_res.returncode = 0
+        mock_res.stdout = "# Titolo Dinamico\nTesto concettuale.\n---SUMMARY---\nSintesi esecutiva dinamica."
+
+        with patch.dict(os.environ, {"PATH": "/usr/bin:/bin"}), \
+             patch("brain_ingest.Path.home", return_value=Path("/custom/test/home")), \
+             patch("brain_ingest.subprocess.run", return_value=mock_res) as mock_run:
+            body, summary = brain_ingest.enrich_draft_with_ai(
+                self.test_dir, "Titolo Dinamico", "Testo sorgente", agy_path=None
+            )
+            self.assertEqual(summary, "Sintesi esecutiva dinamica.")
+            self.assertTrue(mock_run.called)
+            called_kwargs = mock_run.call_args[1]
+            env = called_kwargs.get("env", {})
+            path_val = env.get("PATH", "")
+            self.assertTrue(path_val.startswith("/custom/test/home/.local/bin:"))
+            self.assertNotIn("/Users/lorenzo", path_val)
+
     def test_ingest_source_completes_phase_5_to_approval(self):
         """Asserts ingest_source runs Phase 2/3 and transitions draft to status: draft in Note in Attesa di Approvazione."""
         from unittest.mock import patch, MagicMock

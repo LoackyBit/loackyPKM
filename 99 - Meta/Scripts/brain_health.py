@@ -129,10 +129,25 @@ def capitalize_word_with_apostrophe(word: str, is_first: bool) -> str:
     return "'".join(formatted_parts)
 
 
-def clean_filename(filename: str) -> str:
-    """Normalizes a filename to Title Case, stripping emojis, accents, and special characters."""
-    base = filename[:-3] if filename.endswith(".md") else filename
-    base = base.replace("’", "'")
+def normalize_title_or_filename(text: str) -> str:
+    """SSOT routine normalizing a title or filename string to intelligent Title Case in Unicode NFC.
+
+    Preserves Templater syntax, Italian accented characters (à, è, é, ì, ò, ù, À, È, É, Ì, Ò, Ù),
+    uppercase acronyms in PRESERVE_UPPER, and minor words in MINOR_WORDS.
+    Sanitizes /, \\, : into ' - ', strips emojis, normalizes typographical apostrophes,
+    and replaces forbidden special characters.
+    """
+    base = text.strip()
+    if '<%' in base:
+        return base
+    if base.endswith('.md'):
+        base = base[:-3]
+
+    base = unicodedata.normalize('NFC', base)
+    base = base.replace('’', "'").replace('‘', "'")
+
+    for forbidden in ['/', '\\', ':']:
+        base = base.replace(forbidden, ' - ')
 
     clean_chars = []
     for c in base:
@@ -144,13 +159,12 @@ def clean_filename(filename: str) -> str:
         clean_chars.append(c)
     base = "".join(clean_chars)
 
-    nfd_form = unicodedata.normalize('NFD', base)
-    base = "".join(c for c in nfd_form if unicodedata.category(c) != 'Mn')
-
-    for spec in ['+', '?', '!', '(', ')', '[', ']', '_']:
+    for spec in ['+', '?', '!', '(', ')', '[', ']', '_', '.', '|', '*', '"', '<', '>']:
         base = base.replace(spec, ' ')
 
-    base = " ".join(base.split())
+    base = re.sub(r'\s*-\s*', ' - ', base)
+    base = re.sub(r'(\s*-\s*)+', ' - ', base)
+    base = ' '.join(base.split()).strip(' -.')
 
     words = base.split()
     title_words = []
@@ -159,11 +173,10 @@ def clean_filename(filename: str) -> str:
         is_last = (i == len(words) - 1)
 
         if "'" in word:
-            formatted = capitalize_word_with_apostrophe(word, is_first)
-            title_words.append(formatted)
+            title_words.append(capitalize_word_with_apostrophe(word, is_first))
             continue
 
-        clean_word = "".join(c for c in word if c.isalnum())
+        clean_word = ''.join(c for c in word if c.isalnum())
         clean_upper = clean_word.upper()
         clean_lower = clean_word.lower()
 
@@ -179,51 +192,18 @@ def clean_filename(filename: str) -> str:
             else:
                 title_words.append(word.capitalize())
 
-    return " ".join(title_words)
+    res = ' '.join(title_words)
+    return unicodedata.normalize('NFC', res)
+
+
+def clean_filename(filename: str) -> str:
+    """Normalizes a filename to Title Case, stripping emojis and special characters while preserving NFC accents."""
+    return normalize_title_or_filename(filename)
 
 
 def clean_title_str(title: str) -> str:
-    """Formats string to intelligent Title Case preserving Templater syntax, minor words, and acronyms, strictly excluding / : \\."""
-    base = title.strip()
-    if '<%' in base:
-        return base
-    if base.endswith('.md'):
-        base = base[:-3]
-    base = base.replace('’', "'")
-    # Strictly disallow and sanitize / : \ into hyphen separators
-    for forbidden in ['/', '\\', ':']:
-        base = base.replace(forbidden, ' - ')
-    base = ''.join(c for c in base if ord(c) < 128 or c.isalnum() or c.isspace() or c in ("'", "-"))
-    for spec in ['+', '?', '!', '(', ')', '[', ']', '_', '.']:
-        base = base.replace(spec, ' ')
-    base = re.sub(r'\s*-\s*', ' - ', base)
-    base = re.sub(r'(\s*-\s*)+', ' - ', base)
-    base = ' '.join(base.split()).strip(' -.')
-
-    words = base.split()
-    title_words = []
-    for i, word in enumerate(words):
-        is_first = (i == 0)
-        is_last = (i == len(words) - 1)
-
-        if "'" in word:
-            title_words.append(capitalize_word_with_apostrophe(word, is_first))
-            continue
-
-        clean_word = ''.join(c for c in word if c.isalnum()).upper()
-        clean_lower = ''.join(c for c in word if c.isalnum()).lower()
-        if clean_word in PRESERVE_UPPER:
-            title_words.append(word.upper())
-        elif clean_lower in MINOR_WORDS and not is_first and not is_last:
-            title_words.append(word.lower())
-        else:
-            has_upper = any(c.isupper() for c in word)
-            has_lower = any(c.islower() for c in word)
-            if has_upper and has_lower:
-                title_words.append(word)
-            else:
-                title_words.append(word.capitalize())
-    return ' '.join(title_words)
+    """Formats string to intelligent Title Case preserving Templater syntax, minor words, and acronyms in NFC."""
+    return normalize_title_or_filename(title)
 
 
 def get_breadcrumbs(filepath: str, clean_title: str) -> str:
@@ -590,6 +570,14 @@ def format_canonical_frontmatter(metadata: Dict[str, Any], is_blog: bool = False
     return stream.getvalue().strip()
 
 
+def is_youtube_url(url: Optional[str]) -> bool:
+    """Returns True if string contains a standard YouTube video link."""
+    if not url:
+        return False
+    u = str(url).strip()
+    return bool(re.search(r'(https?://)?(www\.)?(youtube\.com/(watch\?|shorts/|live/|embed/|v/)|youtu\.be/)', u, re.IGNORECASE))
+
+
 def infer_metadata(rel_path: str, existing_meta: Dict[str, Any], body: str, filename: str,
                    force_type: Optional[str] = None, force_area: Optional[str] = None) -> Dict[str, Any]:
     """Infers metadata fields conforming to controlled vocabularies and vault rules."""
@@ -658,7 +646,7 @@ def infer_metadata(rel_path: str, existing_meta: Dict[str, Any], body: str, file
             typ = 'journal'
         elif is_blog:
             typ = 'article'
-        elif 'video_url' in meta or 'youtube' in path_lower or 'trascrizione' in path_lower or 'trascrizione' in body[:300].lower():
+        elif 'video_url' in meta or is_youtube_url(meta.get('source')) or 'youtube' in path_lower or 'trascrizione' in path_lower or 'trascrizione' in body[:300].lower():
             typ = 'video'
         elif 'lecture' in path_lower or 'cornell' in path_lower or 'sc ' in filename.lower() or 'lezione' in path_lower:
             typ = 'lecture'
@@ -670,14 +658,21 @@ def infer_metadata(rel_path: str, existing_meta: Dict[str, Any], body: str, file
             typ = 'concept'
     meta['type'] = typ
 
-    # 3. Source resolution
-    if 'source' in meta and meta['source']:
-        source = str(meta['source']).strip()
-    elif 'video_url' in meta and meta['video_url']:
-        source = str(meta['video_url']).strip()
-    else:
-        source = 'original'
-    meta['source'] = source
+    # 3. Source and Video resolution
+    source_val = str(meta.get('source') or '').strip()
+    video_val = str(meta.get('video_url') or '').strip()
+
+    if typ == 'video':
+        if not video_val and is_youtube_url(source_val):
+            video_val = source_val
+            meta['video_url'] = video_val
+        elif video_val and (not source_val or source_val in ('original', '')):
+            source_val = video_val
+            meta['source'] = source_val
+
+    if not source_val:
+        source_val = video_val if (typ == 'video' and video_val) else 'original'
+    meta['source'] = source_val
 
     # 4. Status / Stage resolution
     if is_blog:
@@ -700,7 +695,11 @@ def infer_metadata(rel_path: str, existing_meta: Dict[str, Any], body: str, file
     else:
         meta['title'] = clean_title_str(str(meta['title']))
 
-    for obsolete in ['macro_area', 'video_url', 'channel', 'last_modified', 'date created', 'ready', 'cssclasses', 'tags_string']:
+    obsolete_keys = ['macro_area', 'last_modified', 'date created', 'ready', 'cssclasses', 'tags_string']
+    if meta.get('type') != 'video':
+        obsolete_keys.extend(['video_url', 'channel'])
+
+    for obsolete in obsolete_keys:
         if obsolete in meta:
             del meta[obsolete]
 

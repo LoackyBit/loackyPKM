@@ -133,7 +133,7 @@ Altro testo.
         self.assertIn("solotag", extracted_tags)
 
     def test_legacy_key_migration(self):
-        """Asserts macro_area is migrated to area per D-02 and obsolete fields (video_url, channel) are removed per D-06."""
+        """Asserts macro_area is migrated to area and video fields (video_url, channel) are preserved for video type notes per D-07."""
         fixture_path = os.path.join(self.fixtures_dir, "sample_legacy_note.md")
         with open(fixture_path, "r", encoding="utf-8") as f:
             legacy_content = f.read()
@@ -147,12 +147,36 @@ Altro testo.
 
         self.assertIn("area: education", new_content)
         self.assertNotIn("macro_area:", new_content)
-        self.assertNotIn("video_url:", new_content)
-        self.assertNotIn("channel:", new_content)
+        self.assertIn('video_url: "https://youtube.com/watch?v=12345"', new_content)
+        self.assertIn('channel: "AI Explained"', new_content)
         self.assertNotIn("last_modified:", new_content)
         self.assertIn('source: "https://youtube.com/watch?v=12345"', new_content)
         self.assertIn("type: video", new_content)
         self.assertIn("updated: 2025-10-12T15:30", new_content)
+
+    def test_non_video_strips_video_metadata(self):
+        """Asserts that non-video notes strip video_url and channel fields per D-07."""
+        content = """---
+status: permanent
+type: concept
+area: tech
+title: "Nota Concettuale Senza Video"
+date: '2026-02-01'
+video_url: "https://youtube.com/watch?v=12345"
+channel: "Tech Channel"
+tags: [tech/ai]
+---
+# Nota Concettuale Senza Video
+Corpo della nota.
+"""
+        dest_file = os.path.join(self.test_dir, "Nota Concettuale Senza Video.md")
+        with open(dest_file, "w", encoding="utf-8") as f:
+            f.write(content)
+
+        changed, new_content = lint_yaml.lint_file(dest_file, vault_root=self.test_dir, execute=True)
+        self.assertTrue(changed)
+        self.assertNotIn("video_url:", new_content)
+        self.assertNotIn("channel:", new_content)
 
     def test_dry_run_does_not_modify_disk(self):
         """Asserts that running lint_file with execute=False does not write to disk."""

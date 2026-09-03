@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 import shutil
+import unicodedata
 from pathlib import Path
 from unittest.mock import patch
 
@@ -208,6 +209,64 @@ Here is inline code: `code[['x', 'y']]`.
 
         args_dash = parser.parse_args(["--dashboard-only"])
         self.assertTrue(args_dash.dashboard_only)
+
+    def test_accented_characters_filename_title_symmetry(self):
+        """Asserts symmetrical preservation of Italian accented vowels in Unicode NFC between clean_filename and clean_title_str per D-03."""
+        test_samples = [
+            ("identità del secondo brain", "Identità del Secondo Brain"),
+            ("perché l'ingegneria informatica è essenziale", "Perché l'Ingegneria Informatica È Essenziale"),
+            ("università e facoltà d'ingegneria", "Università e Facoltà d'Ingegneria"),
+            ("città, virtù e verità", "Città, Virtù e Verità"),
+        ]
+        for raw, expected in test_samples:
+            filename_res = brain_health.clean_filename(f"{raw}.md")
+            title_res = brain_health.clean_title_str(raw)
+            self.assertEqual(filename_res, expected)
+            self.assertEqual(title_res, expected)
+            self.assertEqual(filename_res, title_res)
+            self.assertEqual(unicodedata.normalize('NFC', filename_res), filename_res)
+            self.assertEqual(unicodedata.normalize('NFC', title_res), title_res)
+
+    def test_sanitization_forbidden_characters_symmetry(self):
+        """Asserts identical sanitization of forbidden characters (/, \\, :) between clean_filename and clean_title_str per D-04."""
+        cases = [
+            ("Lezione 12/03/2026: Algoritmi & Strutture Dati", "Lezione 12 - 03 - 2026 - Algoritmi & Strutture Dati"),
+            ("C:\\Windows\\System32\\Note", "C - Windows - System32 - Note"),
+        ]
+        for raw, expected in cases:
+            fn_res = brain_health.clean_filename(f"{raw}.md")
+            title_res = brain_health.clean_title_str(raw)
+            self.assertEqual(fn_res, expected)
+            self.assertEqual(title_res, expected)
+            self.assertEqual(fn_res, title_res)
+
+    def test_infer_metadata_video_preservation(self):
+        """Asserts infer_metadata preserves video_url and channel for notes with type: video per D-07."""
+        meta = {
+            "type": "video",
+            "source": "https://youtube.com/watch?v=123",
+            "video_url": "https://youtube.com/watch?v=123",
+            "channel": "AI Explained"
+        }
+        res = brain_health.infer_metadata("02 - Atlas/Tech/Video Note.md", meta, "body", "Video Note.md")
+        self.assertEqual(res["type"], "video")
+        self.assertEqual(res["video_url"], "https://youtube.com/watch?v=123")
+        self.assertEqual(res["channel"], "AI Explained")
+
+    def test_video_source_bidirectional_sync(self):
+        """Asserts bidirectional synchronization between source and video_url for YouTube links per D-08."""
+        # 1. source has YouTube URL, video_url missing
+        meta1 = {"type": "video", "source": "https://youtube.com/watch?v=123"}
+        res1 = brain_health.infer_metadata("02 - Atlas/Tech/Video Note 1.md", meta1, "body", "Video Note 1.md")
+        self.assertEqual(res1["video_url"], "https://youtube.com/watch?v=123")
+        self.assertEqual(res1["source"], "https://youtube.com/watch?v=123")
+
+        # 2. video_url has YouTube URL, source is 'original'
+        meta2 = {"type": "video", "source": "original", "video_url": "https://youtu.be/abc"}
+        res2 = brain_health.infer_metadata("02 - Atlas/Tech/Video Note 2.md", meta2, "body", "Video Note 2.md")
+        self.assertEqual(res2["source"], "https://youtu.be/abc")
+        self.assertEqual(res2["video_url"], "https://youtu.be/abc")
+
 
 if __name__ == "__main__":
     unittest.main()

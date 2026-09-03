@@ -1980,9 +1980,209 @@ Appunti sparsi sui sistemi distribuiti.
             self.assertIn("gemini-3.8-flash-low", content)
             self.assertNotIn("gemini-3.7-flash-low", content)
 
+    def test_purge_youtube_frames_on_rejection_via_video_id(self):
+        """Asserts rejecting a video draft [-] purges all matching {video_id}_*.jpg frames from Clipboard/ (INGEST-03, D-04)."""
+        draft_dir = os.path.join(self.test_dir, "03 - Inbox", "Draft")
+        clip_dir = os.path.join(self.test_dir, "99 - Meta", "Clipboard")
+        os.makedirs(draft_dir, exist_ok=True)
+        os.makedirs(clip_dir, exist_ok=True)
+
+        draft_file = os.path.join(draft_dir, "Video Rifiutato.md")
+        with open(draft_file, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: video
+area: tech
+video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+source: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+title: "Video Rifiutato"
+---
+# Video Rifiutato
+Testo del video.
+""")
+
+        # Create frames in Clipboard
+        frame1 = os.path.join(clip_dir, "dQw4w9WgXcQ_0_intro.jpg")
+        frame2 = os.path.join(clip_dir, "dQw4w9WgXcQ_1_details.jpg")
+        unrelated = os.path.join(clip_dir, "unrelated999_0_keep.jpg")
+        for fpath in (frame1, frame2, unrelated):
+            with open(fpath, "w", encoding="utf-8") as f:
+                f.write("fake image data")
+
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: article
+area: meta
+---
+# Review Dashboard
+
+## 📥 Note in Attesa di Approvazione
+- [-] Approva [[Draft/Video Rifiutato]]
+""")
+
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 1)
+
+        # video frames must be deleted
+        self.assertFalse(os.path.exists(frame1))
+        self.assertFalse(os.path.exists(frame2))
+        # unrelated frame must remain
+        self.assertTrue(os.path.exists(unrelated))
+        # draft must be deleted
+        self.assertFalse(os.path.exists(draft_file))
+
+    def test_purge_embedded_markdown_images_on_rejection(self):
+        """Asserts rejecting a draft [-] removes explicitly embedded markdown images from Clipboard/."""
+        draft_dir = os.path.join(self.test_dir, "03 - Inbox", "Draft")
+        clip_dir = os.path.join(self.test_dir, "99 - Meta", "Clipboard")
+        os.makedirs(draft_dir, exist_ok=True)
+        os.makedirs(clip_dir, exist_ok=True)
+
+        draft_file = os.path.join(draft_dir, "Nota Immagini.md")
+        with open(draft_file, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: concept
+area: tech
+title: "Nota Immagini"
+---
+# Nota Immagini
+Corpo con immagine wiki: ![[clip_img_123.jpg]]
+E immagine markdown standard: ![Grafico](clip_img_456.png)
+""")
+
+        img1 = os.path.join(clip_dir, "clip_img_123.jpg")
+        img2 = os.path.join(clip_dir, "clip_img_456.png")
+        for fpath in (img1, img2):
+            with open(fpath, "w", encoding="utf-8") as f:
+                f.write("fake img")
+
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: article
+area: meta
+---
+# Review Dashboard
+
+## 📥 Note in Attesa di Approvazione
+- [-] Approva [[Draft/Nota Immagini]]
+""")
+
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 1)
+
+        self.assertFalse(os.path.exists(img1))
+        self.assertFalse(os.path.exists(img2))
+        self.assertFalse(os.path.exists(draft_file))
+
+    def test_pipe_alias_support_in_approval_line(self):
+        """Asserts wiki-links with pipe aliases in Review Dashboard approval lines are resolved cleanly (INGEST-04, D-05)."""
+        draft_dir = os.path.join(self.test_dir, "03 - Inbox", "Draft")
+        source_dir = os.path.join(self.test_dir, "03 - Inbox", "Source")
+        os.makedirs(draft_dir, exist_ok=True)
+        os.makedirs(source_dir, exist_ok=True)
+
+        draft_file = os.path.join(draft_dir, "Nota Con Pipe.md")
+        source_file = os.path.join(source_dir, "Nota Con Pipe.md")
+        with open(draft_file, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: concept
+area: tech
+title: "Nota Con Pipe"
+target_path: "02 - Atlas/Tech/Nota Con Pipe.md"
+---
+# Nota Con Pipe
+Contenuto della nota.
+""")
+        with open(source_file, "w", encoding="utf-8") as f:
+            f.write("Sorgente originale.")
+
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: article
+area: meta
+---
+# Review Dashboard
+
+## 📥 Note in Attesa di Approvazione
+- [x] Approva [[Draft/Nota Con Pipe|Visualizza Titolo Bello]] (fonte: [[Source/Nota Con Pipe|Fonte Originale]])
+""")
+
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 1)
+
+        dest_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Nota Con Pipe.md")
+        self.assertTrue(os.path.exists(dest_file))
+        self.assertFalse(os.path.exists(draft_file))
+
+    def test_pipe_alias_in_rejection_line(self):
+        """Asserts wiki-links with pipe aliases in rejection lines are purged cleanly."""
+        draft_dir = os.path.join(self.test_dir, "03 - Inbox", "Draft")
+        os.makedirs(draft_dir, exist_ok=True)
+
+        draft_file = os.path.join(draft_dir, "Nota Rifiuto Pipe.md")
+        with open(draft_file, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: concept
+area: tech
+title: "Nota Rifiuto Pipe"
+---
+# Nota Rifiuto Pipe
+Contenuto da scartare.
+""")
+
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: article
+area: meta
+---
+# Review Dashboard
+
+## 📥 Note in Attesa di Approvazione
+- [-] Approva [[Draft/Nota Rifiuto Pipe|Mio Alias]]
+""")
+
+        processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+        self.assertEqual(processed, 1)
+        self.assertFalse(os.path.exists(draft_file))
+
+    def test_classify_target_directory_ai_fallback_and_no_ai(self):
+        """Asserts classify_target_directory falls back safely without AI and queries agy when available (INGEST-04, D-06)."""
+        # 1. With BRAIN_INGEST_NO_AI=1 -> safe fallback
+        os.environ["BRAIN_INGEST_NO_AI"] = "1"
+        res_no_ai = brain_ingest.classify_target_directory("Oggetto Astratto", tags=[], content="Nessun match")
+        self.assertEqual(res_no_ai, "02 - Atlas/Tech & AI/AI")
+
+        # 2. With AI enabled and mocked subprocess returning valid allowed directory
+        os.environ.pop("BRAIN_INGEST_NO_AI", None)
+        with patch("subprocess.run") as mock_run, patch("shutil.which", return_value="/usr/local/bin/agy"):
+            mock_proc = MagicMock()
+            mock_proc.returncode = 0
+            mock_proc.stdout = "02 - Atlas/Personal Growth & Health/Mentality\n"
+            mock_run.return_value = mock_proc
+
+            res_ai = brain_ingest.classify_target_directory("Oggetto Astratto", tags=[], content="Nessun match")
+            self.assertEqual(res_ai, "02 - Atlas/Personal Growth & Health/Mentality")
+
+            # 3. Subprocess failure / timeout -> safe fallback
+            mock_run.side_effect = subprocess.TimeoutExpired(cmd="agy", timeout=10)
+            res_fail = brain_ingest.classify_target_directory("Oggetto Astratto", tags=[], content="Nessun match")
+            self.assertEqual(res_fail, "02 - Atlas/Tech & AI/AI")
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
 
 

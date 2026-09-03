@@ -248,9 +248,64 @@ def classify_target_directory(title: str, tags: List[str], content: str = "", va
        _has_keyword(c, ["intelligenza artificiale", "ai", "llm", "large language model", "machine learning", "deep learning", "transformer", "neural network", "rag", "embeddings", "vision model", "nlp", "hugging face", "gpt", "claude", "gemini", "fine-tuning", "modelli linguistici", "notebooklm", "prompt engineering", "system prompt", "context window", "hardware ai"]):
         return "02 - Atlas/Tech & AI/AI"
 
-    return "02 - Atlas/Tech & AI/AI"
+    # 7. AI Assisted Classification Fallback (D-06)
+    allowed_dirs = [
+        "02 - Atlas/Finance/Crypto",
+        "02 - Atlas/Finance/Holdings & Tax",
+        "02 - Atlas/Finance/Investments",
+        "02 - Atlas/Finance/Economy",
+        "02 - Atlas/Personal Growth & Health/Gym & Health",
+        "02 - Atlas/Personal Growth & Health/Mentality",
+        "02 - Atlas/Education & Learning/Learning",
+        "02 - Atlas/Education & Learning/University",
+        "02 - Atlas/Education & Learning/Courses",
+        "02 - Atlas/Projects/Active",
+        "02 - Atlas/Projects/Archive",
+        "02 - Atlas/Projects/Ideas & Sandbox",
+        "02 - Atlas/Tech & AI/Agents & Automation",
+        "02 - Atlas/Tech & AI/Security",
+        "02 - Atlas/Tech & AI/Software Development",
+        "02 - Atlas/Tech & AI/System & OS",
+        "02 - Atlas/Tech & AI/Programming",
+        "02 - Atlas/Tech & AI/AI",
+        "05 - Blog",
+    ]
+    if os.environ.get("BRAIN_INGEST_NO_AI") == "1":
+        return "02 - Atlas/Tech & AI/AI"
 
-    return "02 - Atlas/Tech & AI"
+    home_bin = os.path.expanduser("~/.local/bin/agy")
+    agy_cmd = shutil.which("agy") or (home_bin if (os.path.isfile(home_bin) and os.access(home_bin, os.X_OK)) else None)
+    if not agy_cmd:
+        return "02 - Atlas/Tech & AI/AI"
+
+    dirs_list_str = "\n".join(f"- {d}" for d in allowed_dirs)
+    prompt = f"""Classifica la seguente nota personale nella cartella di destinazione più appropriata.
+
+TITOLO: {title}
+CONTENUTO:
+{content[:1000]}
+
+CARTELLE AMMISSIBILI:
+{dirs_list_str}
+
+Rispondi UNICAMENTE con il percorso esatto di una delle cartelle sopra elencate, senza commenti, markdown o spiegazioni aggiuntive."""
+
+    try:
+        proc = subprocess.run(
+            [agy_cmd, "--model", "gemini-3.8-flash-low", "--print", prompt],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        if proc.returncode == 0:
+            ans = proc.stdout.strip().strip('"').strip("'").strip('`')
+            for d in allowed_dirs:
+                if ans == d or ans.endswith(d):
+                    return d
+    except Exception:
+        pass
+
+    return "02 - Atlas/Tech & AI/AI"
 
 def check_duplicate_resource(vault_root: str, source_url: Optional[str], title: str) -> Optional[Tuple[str, str]]:
     """Checks 02 - Atlas notes frontmatter for existing source URL, video ID, or clean non-generic title."""
@@ -811,7 +866,7 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
     for l in pend_lines:
         m = RE_APPROVAL_LINE.match(l)
         if m:
-            n = brain_health.clean_title_str(m.group('name'))
+            n = brain_health.clean_title_str(m.group('name').split('|')[0].strip())
             existing_pend_map[n.lower()] = l
 
     reconciled_pend_lines = []
@@ -1059,13 +1114,18 @@ def process_tri_state_approvals(vault_root: str) -> int:
         m = RE_APPROVAL_LINE.match(line)
         if not m or m.group('status') == ' ':
             updated_lines.append(line); continue
-        status, raw_name = m.group('status'), m.group('name')
+        status = m.group('status')
+        raw_name = m.group('name').split('|')[0].strip()
         name = brain_health.clean_title_str(raw_name)
+        raw_src = m.group('src').split('|')[0].strip() if m.group('src') else None
+        src_name = brain_health.clean_title_str(raw_src) if raw_src else name
+
         draft_path = os.path.join(vault_root, "03 - Inbox", "Draft", f"{name}.md")
         if not os.path.exists(draft_path): draft_path = os.path.join(vault_root, "03 - Inbox", "Draft", f"{raw_name}.md")
         if not os.path.exists(draft_path): draft_path = os.path.join(vault_root, "03 - Inbox", f"{name}.md")
         if not os.path.exists(draft_path): draft_path = os.path.join(vault_root, "03 - Inbox", f"{raw_name}.md")
-        source_path = os.path.join(vault_root, "03 - Inbox", "Source", f"{name}.md")
+        source_path = os.path.join(vault_root, "03 - Inbox", "Source", f"{src_name}.md")
+        if not os.path.exists(source_path): source_path = os.path.join(vault_root, "03 - Inbox", "Source", f"{name}.md")
         if not os.path.exists(source_path): source_path = os.path.join(vault_root, "03 - Inbox", "Source", f"{raw_name}.md")
 
         if status in ('x', 'X'):
@@ -1134,14 +1194,65 @@ def process_tri_state_approvals(vault_root: str) -> int:
             processed_count += 1
 
         elif status == '-':
-            if os.path.exists(draft_path): os.remove(draft_path)
-            if os.path.exists(source_path): os.remove(source_path)
+            # D-04: Read note content BEFORE removing draft or source to extract video_id and images
+            note_content = ""
+            if os.path.exists(draft_path):
+                try:
+                    with open(draft_path, "r", encoding="utf-8", errors="ignore") as f:
+                        note_content = f.read()
+                except Exception: pass
+            elif os.path.exists(source_path):
+                try:
+                    with open(source_path, "r", encoding="utf-8", errors="ignore") as f:
+                        note_content = f.read()
+                except Exception: pass
+
+            meta = {}
+            body = ""
+            if note_content:
+                has_fm, fm_t, _, bdy = brain_health.split_markdown_note(note_content)
+                if has_fm:
+                    meta = brain_health.safe_load_frontmatter(fm_t, brain_health.build_yaml_engine())
+                body = bdy
+
+            # Extract video_url / source and video_id
+            vid_url = meta.get('video_url') or meta.get('source')
+            video_id = youtube_helper.get_video_id(str(vid_url)) if vid_url else None
+
             clip_dir = os.path.join(vault_root, "99 - Meta", "Clipboard")
             if os.path.exists(clip_dir):
+                # 1. Purge based on video_id
+                if video_id:
+                    for img in os.listdir(clip_dir):
+                        if img.startswith(f"{video_id}_") and (img.endswith('.jpg') or img.endswith('.png')):
+                            try: os.remove(os.path.join(clip_dir, img))
+                            except Exception: pass
+
+                # 2. Purge based on explicit markdown image embeddings
+                img_refs = re.findall(r'!\[\[(.*?)\]\]', body) + re.findall(r'!\[.*?\]\((.*?)\)', body)
+                for ref in img_refs:
+                    base_img = os.path.basename(ref.split('|')[0].strip())
+                    img_path = os.path.join(clip_dir, base_img)
+                    if os.path.isfile(img_path):
+                        try: os.remove(img_path)
+                        except Exception: pass
+
+                # 3. Fallback: prefix-based purge
+                prefix = name[:10]
+                slug = name.lower().replace(' ', '_')[:10]
                 for img in os.listdir(clip_dir):
-                    if img.startswith(name[:10]) or name.lower().replace(' ', '_')[:10] in img:
+                    if (img.startswith(prefix) or slug in img) and (img.endswith('.jpg') or img.endswith('.png')):
                         try: os.remove(os.path.join(clip_dir, img))
                         except Exception: pass
+
+            # Physical removal of draft and source
+            if os.path.exists(draft_path):
+                try: os.remove(draft_path)
+                except Exception: pass
+            if os.path.exists(source_path):
+                try: os.remove(source_path)
+                except Exception: pass
+
             append_inbox_history(vault_root, "REJECTED", name, "PURGED")
             processed_count += 1
 

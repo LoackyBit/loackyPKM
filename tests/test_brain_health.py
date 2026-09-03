@@ -267,6 +267,79 @@ Here is inline code: `code[['x', 'y']]`.
         self.assertEqual(res2["source"], "https://youtu.be/abc")
         self.assertEqual(res2["video_url"], "https://youtu.be/abc")
 
+    def test_scan_vault_duplicate_collision_tracking(self):
+        """Asserts VaultHealthAuditor.scan_vault prevents destructive overwrite of all_notes and tracks collisions in duplicate_notes per D-05, D-06."""
+        atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech")
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        os.makedirs(atlas_dir, exist_ok=True)
+        os.makedirs(inbox_dir, exist_ok=True)
+
+        atlas_file = os.path.join(atlas_dir, "Concept Node.md")
+        inbox_file = os.path.join(inbox_dir, "Concept Node.md")
+        with open(atlas_file, "w", encoding="utf-8") as f:
+            f.write("# Atlas Concept Node\nContent.")
+        with open(inbox_file, "w", encoding="utf-8") as f:
+            f.write("# Inbox Concept Node\nStaging draft.")
+
+        auditor = brain_health.VaultHealthAuditor(self.test_dir)
+        self.assertIn("Concept Node", auditor.all_notes)
+        self.assertIn("Concept Node", auditor.duplicate_notes)
+        self.assertEqual(len(auditor.duplicate_notes["Concept Node"]), 2)
+        # 02 - Atlas is scanned first alphabetically before 03 - Inbox
+        self.assertEqual(auditor.all_notes["Concept Node"], os.path.normpath("02 - Atlas/Tech/Concept Node.md"))
+
+    def test_audit_stats_reports_duplicate_count(self):
+        """Asserts run_governance_engine exposes duplicate_count and duplicate_notes in audit_stats per HLTH-04."""
+        atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech")
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        os.makedirs(atlas_dir, exist_ok=True)
+        os.makedirs(inbox_dir, exist_ok=True)
+
+        with open(os.path.join(atlas_dir, "Duplicate Note.md"), "w", encoding="utf-8") as f:
+            f.write("# Duplicate 1")
+        with open(os.path.join(inbox_dir, "Duplicate Note.md"), "w", encoding="utf-8") as f:
+            f.write("# Duplicate 2")
+
+        stats = brain_health.run_governance_engine(self.test_dir, dry_run=True)
+        self.assertEqual(stats["duplicate_count"], 1)
+        self.assertIn("Duplicate Note", stats["duplicate_notes"])
+
+    def test_lint_only_diagnostic_mode(self):
+        """Asserts --lint-only runs a non-destructive read-only audit of YAML violations without modifying disk per D-01, HLTH-01."""
+        atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech")
+        os.makedirs(atlas_dir, exist_ok=True)
+        note_path = os.path.join(atlas_dir, "Incomplete Note.md")
+        original_content = """---
+title: "Incomplete Note"
+date: '2026-09-03'
+---
+# Incomplete Note
+Body without status, type, area, tags.
+"""
+        with open(note_path, "w", encoding="utf-8") as f:
+            f.write(original_content)
+
+        stats = brain_health.run_governance_engine(self.test_dir, lint_only=True)
+        self.assertEqual(stats["total_notes"], 1)
+        self.assertEqual(stats["misaligned_notes"], 1)
+        self.assertEqual(stats["compliant_notes"], 0)
+        self.assertEqual(len(stats["issues"]), 1)
+
+        # Assert no modification to file on disk
+        with open(note_path, "r", encoding="utf-8") as f:
+            self.assertEqual(f.read(), original_content)
+
+        # Assert no dashboard or report was created
+        dashboard_path = os.path.join(self.test_dir, "99 - Meta", "Vault Health Dashboard.md")
+        self.assertFalse(os.path.exists(dashboard_path))
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        self.assertFalse(os.path.exists(inbox_dir))
+
+    def test_lint_only_rejects_auto_fix_conflict(self):
+        """Asserts run_governance_engine rejects concurrent --lint-only and --auto-fix per D-02."""
+        res = brain_health.run_governance_engine(self.test_dir, lint_only=True, auto_fix=True)
+        self.assertEqual(res.get("error"), "lint_only_read_only_conflict")
+
 
 if __name__ == "__main__":
     unittest.main()

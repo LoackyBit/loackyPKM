@@ -766,19 +766,27 @@ class VaultHealthAuditor:
         self.vault_root = os.path.abspath(vault_root)
         self.all_notes: Dict[str, str] = {}
         self.incoming_links: Dict[str, Set[str]] = {}
+        self.duplicate_notes: Dict[str, List[str]] = {}
         self.scan_vault()
 
     def scan_vault(self):
         self.all_notes.clear()
         self.incoming_links.clear()
+        self.duplicate_notes.clear()
         for root, dirs, files in os.walk(self.vault_root):
-            dirs[:] = [d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')]
-            for file in files:
+            dirs[:] = sorted([d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')])
+            for file in sorted(files):
                 if file.endswith('.md') and not file.startswith('.') and file not in IGNORE_FILES:
                     rel = os.path.relpath(os.path.join(root, file), self.vault_root)
                     if not any(rel.startswith(vd) for vd in VAULT_DIRECTORIES) and root == self.vault_root:
                         continue
                     clean_name = file[:-3]
+                    if clean_name in self.all_notes:
+                        if clean_name not in self.duplicate_notes:
+                            self.duplicate_notes[clean_name] = [self.all_notes[clean_name], rel]
+                        else:
+                            self.duplicate_notes[clean_name].append(rel)
+                        continue
                     self.all_notes[clean_name] = rel
                     self.incoming_links[clean_name] = set()
 
@@ -886,6 +894,10 @@ def generate_health_dashboard(vault_root: str, notes_data: List[Dict[str, Any]],
         area_str = meta.get('area', meta.get('macro_area', 'N/D'))
         recent_table += f"| [[{n['name']}]] | {mtime_str} | {area_str} |\n"
 
+    duplicate_line = ""
+    if audit_stats.get('duplicate_count', 0) > 0:
+        duplicate_line = f"\n- **Collisioni Omonime (Note Duplicate):** {audit_stats.get('duplicate_count', 0)}"
+
     return f"""---
 status: permanent
 type: moc
@@ -914,7 +926,7 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 - **Bozze Blog:** {len(blog_seeds)}
 - **Note Orfane:** {audit_stats.get('orphan_count', 0)}
 - **Link Interrotti:** {audit_stats.get('broken_link_count', 0)}
-- **Forward-Links Pianificati:** {audit_stats.get('forward_link_count', 0)}
+- **Forward-Links Pianificati:** {audit_stats.get('forward_link_count', 0)}{duplicate_line}
 
 ---
 
@@ -1091,6 +1103,86 @@ def safe_rename(root_dir: str, old_rel: str, new_rel: str, is_tracked: bool, dry
         print(f"Rename error {old_rel} -> {new_rel}: {e}", file=sys.stderr)
 
 
+def diagnose_yaml_violations(filepath: str, vault_root: str = '.') -> List[str]:
+    """Diagnoses YAML frontmatter violations for a single markdown file in read-only mode."""
+    issues = []
+    try:
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+    except Exception as e:
+        return [f"Impossibile leggere il file: {e}"]
+
+    has_fm, fm_text, breadcrumb, body = split_markdown_note(content)
+    if not has_fm:
+        return ["Frontmatter YAML mancante (nessun blocco --- iniziale)"]
+
+    yaml_engine = build_yaml_engine()
+    existing_meta = safe_load_frontmatter(fm_text, yaml_engine)
+    if existing_meta is None or not isinstance(existing_meta, dict):
+        return ["Errore sintassi o parsing YAML nel frontmatter"]
+
+    rel_path = os.path.relpath(filepath, vault_root)
+    is_blog = rel_path.startswith('05 - Blog') or '/05 - blog' in rel_path.lower()
+
+    # Check required fields
+    if is_blog:
+        required_fields = ['stage', 'draft', 'type', 'area', 'title', 'date', 'tags']
+        canonical_seq = [
+            'stage', 'draft', 'type', 'area', 'related', 'aliases', 'source', 'title',
+            'date', 'updated', 'tags', 'summary', 'target_path', 'video_url', 'channel',
+            'subject', 'professor'
+        ]
+    else:
+        required_fields = ['status', 'type', 'area', 'title', 'date', 'tags']
+        canonical_seq = [
+            'status', 'type', 'area', 'related', 'aliases', 'source', 'title',
+            'date', 'updated', 'tags', 'summary', 'target_path', 'video_url', 'channel',
+            'subject', 'professor'
+        ]
+
+    for req in required_fields:
+        if req not in existing_meta or existing_meta[req] is None or existing_meta[req] == '':
+            issues.append(f"Campo obbligatorio mancante: {req}")
+
+    # Check canonical sequence
+    keys_present = [k for k in existing_meta.keys() if k in canonical_seq]
+    expected_order = sorted(keys_present, key=lambda k: canonical_seq.index(k))
+    if keys_present != expected_order:
+        issues.append("Ordinamento non canonico delle chiavi")
+
+    # Check deprecated fields
+    deprecated_fields = ['macro_area', 'last_modified', 'date created', 'ready', 'cssclasses', 'tags_string']
+    for dep in deprecated_fields:
+        if dep in existing_meta:
+            issues.append(f"Campo deprecato presente: {dep}")
+
+    # Check video fields for non-video types
+    if existing_meta.get('type') != 'video':
+        for vf in ['video_url', 'channel']:
+            if vf in existing_meta:
+                issues.append(f"Campo video non consentito per type non-video: {vf}")
+
+    # Check tags format and hierarchy
+    tags_raw = existing_meta.get('tags')
+    if tags_raw is not None:
+        if not isinstance(tags_raw, list):
+            issues.append("Formato tags non valido (deve essere un array)")
+        else:
+            area_val = existing_meta.get('area', '')
+            for t in tags_raw:
+                t_str = str(t).strip().lstrip('#')
+                norm_t = normalize_tag(t_str, area_val)
+                if norm_t != t_str and t_str not in TAG_HIERARCHY_MAP.values():
+                    issues.append(f"Tag non canonico o gerarchico: #{t_str} (suggerito: {norm_t})")
+
+    # Check formatting alignment with lint_file preview
+    changed, _ = lint_file(filepath, vault_root=vault_root, execute=False)
+    if changed and not issues:
+        issues.append("Formattazione frontmatter o breadcrumb disallineata rispetto allo standard canonico")
+
+    return issues
+
+
 def collect_vault_data(vault_root: str) -> Tuple[List[Dict[str, Any]], VaultHealthAuditor]:
     """Scans all notes and metadata across the vault."""
     auditor = VaultHealthAuditor(vault_root)
@@ -1124,6 +1216,56 @@ def run_governance_engine(vault_root: str, dry_run: bool = False, auto_fix: bool
                           interactive: bool = False, dashboard_only: bool = False,
                           audit_only: bool = False, lint_only: bool = False) -> Dict[str, Any]:
     """Executes the governance scan and applies fixes according to CLI modes."""
+    if lint_only and auto_fix:
+        print("\n❌ ERRORE: La modalità --lint-only è un audit diagnostico strettamente in SOLA LETTURA.", file=sys.stderr)
+        print("   Per applicare le correzioni al vault, eseguire il comando con --auto-fix senza --lint-only.\n", file=sys.stderr)
+        return {'error': 'lint_only_read_only_conflict'}
+
+    if lint_only:
+        print("=" * 60)
+        print("🔍 Second Brain YAML Frontmatter Linter (Read-Only Audit)")
+        print("=" * 60)
+        total_notes_scanned = 0
+        misaligned_notes: List[Tuple[str, List[str]]] = []
+
+        for root, dirs, files in os.walk(vault_root):
+            dirs[:] = sorted([d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')])
+            for file in sorted(files):
+                if file.endswith('.md') and not file.startswith('.') and file not in IGNORE_FILES:
+                    rel = os.path.relpath(os.path.join(root, file), vault_root)
+                    if not any(rel.startswith(vd) for vd in VAULT_DIRECTORIES) and root == vault_root:
+                        continue
+                    total_notes_scanned += 1
+                    abs_p = os.path.join(root, file)
+                    issues = diagnose_yaml_violations(abs_p, vault_root=vault_root)
+                    if issues:
+                        misaligned_notes.append((rel, issues))
+
+        compliant_count = total_notes_scanned - len(misaligned_notes)
+        print(f"Note Totali Scansionate: {total_notes_scanned}")
+        print(f"Note Conformi allo Standard: {compliant_count}")
+        print(f"Note con Disallineamenti YAML: {len(misaligned_notes)}")
+        print("=" * 60)
+
+        if misaligned_notes:
+            print("\n📋 Dettaglio Disallineamenti:")
+            for rel, issues in misaligned_notes:
+                print(f"  • [[{Path(rel).stem}]] (`{rel}`):")
+                for iss in issues:
+                    print(f"      - {iss}")
+        else:
+            print("\n✨ Tutte le note sono pienamente conformi allo standard YAML canonico!")
+
+        print("\n💡 Nota: Nessuna modifica è stata apportata su disco (modalità sola lettura).")
+        print("   Per applicare le normalizzazioni eseguire: python3 \"99 - Meta/Scripts/brain_health.py\" --auto-fix\n")
+
+        return {
+            'total_notes': total_notes_scanned,
+            'compliant_notes': compliant_count,
+            'misaligned_notes': len(misaligned_notes),
+            'issues': misaligned_notes
+        }
+
     notes_data, auditor = collect_vault_data(vault_root)
 
     broken_links_map: Dict[str, List[str]] = {}
@@ -1144,8 +1286,15 @@ def run_governance_engine(vault_root: str, dry_run: bool = False, auto_fix: bool
         'total_notes': len(notes_data),
         'orphan_count': len(orphan_notes),
         'broken_link_count': sum(len(v) for v in broken_links_map.values()),
-        'forward_link_count': sum(len(v) for v in forward_links_map.values())
+        'forward_link_count': sum(len(v) for v in forward_links_map.values()),
+        'duplicate_count': len(auditor.duplicate_notes),
+        'duplicate_notes': auditor.duplicate_notes
     }
+
+    if auditor.duplicate_notes:
+        print(f"\n⚠️  ATTENZIONE: Rilevate {len(auditor.duplicate_notes)} note omonime duplicate tra cartelle differenti:")
+        for stem, paths in auditor.duplicate_notes.items():
+            print(f"   • [[{stem}]]: {', '.join(paths)}")
 
     if dashboard_only:
         out_dash = write_health_dashboard(vault_root, notes_data, audit_stats)
@@ -1289,7 +1438,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     group.add_argument('--interactive', action='store_true', default=False, help="Interactive step-by-step confirmation mode (default).")
     group.add_argument('--dashboard-only', action='store_true', help="Regenerate 99 - Meta/Vault Health Dashboard.md only.")
     group.add_argument('--audit-only', action='store_true', help="Generate diagnostic report in 03 - Inbox/.")
-    group.add_argument('--lint-only', action='store_true', help="Validate and fix YAML frontmatter only.")
+    group.add_argument('--lint-only', action='store_true', help="Validate YAML frontmatter without modifying disk (read-only audit).")
     parser.add_argument('--vault-root', type=str, default=None, help="Custom vault root directory.")
     return parser
 

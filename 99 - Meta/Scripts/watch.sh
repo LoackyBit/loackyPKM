@@ -15,7 +15,7 @@ if [ -n "$PID_FILE" ]; then
 fi
 # Vault-specific PID file to prevent cross-vault collisions
 VAULT_HASH=$(echo -n "$VAULT_PATH" | shasum 2>/dev/null | cut -c1-8 || echo "default")
-PID_FILE="${PID_FILE:-/tmp/brain_watcher_${VAULT_HASH}.pid}"
+export PID_FILE="${PID_FILE:-/tmp/brain_watcher_${VAULT_HASH}.pid}"
 OPENED_FLAG="/tmp/obsidian_dashboard_opened_${VAULT_HASH}"
 
 mkdir -p "$LOG_DIR"

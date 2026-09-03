@@ -1232,13 +1232,53 @@ title: "Review Dashboard"
         with open(hist_path, "r", encoding="utf-8") as f:
             self.assertIn("[PANIC_ABORT]", f.read())
 
+    def test_get_watcher_pid_file_resolution_order(self):
+        """Asserts get_watcher_pid_file resolves PID_FILE env, vault hash paths, and legacy path per D-01."""
+        import hashlib
+        from unittest.mock import patch
+        vault_root = self.test_dir
+        shasum_hash = hashlib.sha1(vault_root.encode('utf-8')).hexdigest()[:8]
+        hash_pid_file = f"/tmp/brain_watcher_{shasum_hash}.pid"
+        legacy_pid_file = "/tmp/brain_watcher.pid"
+        custom_env_file = "/tmp/custom_watcher_test.pid"
+
+        # 1. Environment variable PID_FILE has highest precedence
+        with patch.dict(os.environ, {"PID_FILE": custom_env_file}):
+            self.assertEqual(brain_ingest.get_watcher_pid_file(vault_root), custom_env_file)
+
+        # Clean any preexisting files
+        for p in (hash_pid_file, legacy_pid_file):
+            if os.path.exists(p):
+                try: os.remove(p)
+                except Exception: pass
+
+        # 2. Vault shasum hash file
+        with open(hash_pid_file, "w") as f: f.write("12345")
+        try:
+            self.assertEqual(brain_ingest.get_watcher_pid_file(vault_root), hash_pid_file)
+        finally:
+            if os.path.exists(hash_pid_file): os.remove(hash_pid_file)
+
+        # 3. Legacy file
+        with open(legacy_pid_file, "w") as f: f.write("54321")
+        try:
+            self.assertEqual(brain_ingest.get_watcher_pid_file(vault_root), legacy_pid_file)
+        finally:
+            if os.path.exists(legacy_pid_file): os.remove(legacy_pid_file)
+
+        # 4. Default when no file exists
+        self.assertEqual(brain_ingest.get_watcher_pid_file(vault_root), hash_pid_file)
+
     def test_trigger_panic_abort_preserves_watcher(self):
-        """Asserts trigger_panic_abort excludes the watcher daemon PID from termination."""
+        """Asserts trigger_panic_abort excludes the watcher daemon PID from termination via hash path and pid_file param."""
+        import hashlib
         from unittest.mock import patch
 
         watcher_pid = 12345
-        pid_file = "/tmp/brain_watcher.pid"
-        with open(pid_file, "w", encoding="utf-8") as f:
+        vault_root = self.test_dir
+        shasum_hash = hashlib.sha1(vault_root.encode('utf-8')).hexdigest()[:8]
+        hash_pid_file = f"/tmp/brain_watcher_{shasum_hash}.pid"
+        with open(hash_pid_file, "w", encoding="utf-8") as f:
             f.write(str(watcher_pid))
 
         try:
@@ -1248,19 +1288,33 @@ title: "Review Dashboard"
                 with open(lock1, "w") as f: f.write(f"pid: {watcher_pid}\n")
                 with open(lock2, "w") as f: f.write("pid: 67890\n")
 
+                # Test resolution via vault hash path
                 brain_ingest.trigger_panic_abort(self.test_dir)
 
                 killed_pids = [call.args[0] for call in mock_kill.call_args_list]
                 self.assertNotIn(watcher_pid, killed_pids)
                 self.assertIn(67890, killed_pids)
+
+            # Test explicit pid_file override (D-04)
+            custom_pid_file = os.path.join(self.test_dir, "custom_watcher.pid")
+            with open(custom_pid_file, "w", encoding="utf-8") as f:
+                f.write("99991")
+            with patch("os.kill") as mock_kill2, patch("brain_ingest.is_pid_alive", return_value=True):
+                with open(lock2, "w") as f: f.write("pid: 77772\n")
+                brain_ingest.trigger_panic_abort(self.test_dir, pid_file=custom_pid_file)
+                killed_pids2 = [call.args[0] for call in mock_kill2.call_args_list]
+                self.assertNotIn(99991, killed_pids2)
+                self.assertIn(77772, killed_pids2)
         finally:
-            if os.path.exists(pid_file):
-                os.remove(pid_file)
+            if os.path.exists(hash_pid_file):
+                try: os.remove(hash_pid_file)
+                except Exception: pass
 
     def test_trigger_panic_abort_clears_in_progress_draft_notes(self):
-        """Asserts trigger_panic_abort clears in-progress draft notes from Draft/ and In Elaborazione."""
+        """Asserts trigger_panic_abort clears in-progress and partial draft notes from Draft/ and In Elaborazione."""
         inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
         draft_file = os.path.join(inbox_dir, "Draft", "Nota In Rielaborazione Panic.md")
+        partial_draft = os.path.join(inbox_dir, "Draft", "Bozza Parziale Interrotta.md")
         source_file = os.path.join(inbox_dir, "Source", "Nota In Rielaborazione Panic.md")
         with open(draft_file, "w", encoding="utf-8") as f:
             f.write("""---
@@ -1270,6 +1324,15 @@ title: "Nota In Rielaborazione Panic"
 source: "https://youtu.be/panic_test_123"
 ---
 # Nota In Rielaborazione Panic
+""")
+        with open(partial_draft, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: article
+title: "Bozza Parziale Interrotta"
+source: "https://example.com/interrotta"
+---
+# Bozza Parziale Interrotta
 """)
         with open(source_file, "w", encoding="utf-8") as f:
             f.write("Trascrizione raw.")
@@ -1282,8 +1345,9 @@ source: "https://youtu.be/panic_test_123"
         # Trigger panic
         brain_ingest.trigger_panic_abort(self.test_dir)
 
-        # Assert in-progress draft was cleared and dashboard shows *Nessun processo attivo.*
+        # Assert all drafts in Draft/ were purged per D-03
         self.assertFalse(os.path.exists(draft_file))
+        self.assertFalse(os.path.exists(partial_draft))
         with open(dash_path, "r", encoding="utf-8") as f:
             content = f.read()
         self.assertIn("*Nessun processo attivo.*", content)
@@ -2178,6 +2242,90 @@ area: meta
             mock_run.side_effect = subprocess.TimeoutExpired(cmd="agy", timeout=10)
             res_fail = brain_ingest.classify_target_directory("Oggetto Astratto", tags=[], content="Nessun match")
             self.assertEqual(res_fail, "02 - Atlas/Tech & AI/AI")
+
+    def test_dashboard_lock_acquire_and_release(self):
+        """Asserts DashboardLock creates /tmp/brain_dashboard_{vault_hash}.lock and removes it upon exit (D-05)."""
+        import hashlib
+        vault_root = self.test_dir
+        vault_hash = hashlib.sha1(vault_root.encode('utf-8')).hexdigest()[:8]
+        expected_lock_file = f"/tmp/brain_dashboard_{vault_hash}.lock"
+
+        # Ensure lock file is not present initially
+        if os.path.exists(expected_lock_file):
+            try: os.remove(expected_lock_file)
+            except Exception: pass
+
+        with brain_ingest.DashboardLock(vault_root, timeout=2.0) as lock:
+            self.assertTrue(lock.acquired)
+            self.assertTrue(os.path.exists(expected_lock_file))
+            with open(expected_lock_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn(f"pid: {os.getpid()}", content)
+
+        # After exiting with block, lock file should be removed
+        self.assertFalse(os.path.exists(expected_lock_file))
+
+    def test_dashboard_lock_stale_auto_healing(self):
+        """Asserts DashboardLock auto-heals stale lock files when owner PID is dead or TTL expired (D-05)."""
+        import hashlib, time
+        vault_root = self.test_dir
+        vault_hash = hashlib.sha1(vault_root.encode('utf-8')).hexdigest()[:8]
+        expected_lock_file = f"/tmp/brain_dashboard_{vault_hash}.lock"
+
+        # 1. Stale lock with dead PID (e.g. 9999999)
+        with open(expected_lock_file, "w", encoding="utf-8") as f:
+            f.write("pid: 9999999\ntime: 2026-08-01T00:00:00\n")
+
+        with brain_ingest.DashboardLock(vault_root, timeout=1.0) as lock:
+            self.assertTrue(lock.acquired)
+            with open(expected_lock_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn(f"pid: {os.getpid()}", content)
+        self.assertFalse(os.path.exists(expected_lock_file))
+
+        # 2. Stale lock with expired TTL
+        with open(expected_lock_file, "w", encoding="utf-8") as f:
+            f.write(f"pid: {os.getpid()}\ntime: 2026-08-01T00:00:00\n")
+        # Set mtime back by 200 seconds
+        old_time = time.time() - 200
+        os.utime(expected_lock_file, (old_time, old_time))
+
+        with brain_ingest.DashboardLock(vault_root, timeout=1.0, ttl_seconds=60) as lock2:
+            self.assertTrue(lock2.acquired)
+        self.assertFalse(os.path.exists(expected_lock_file))
+
+    def test_dashboard_lock_concurrency_timeout_and_graceful_skip(self):
+        """Asserts non-blocking graceful skip in update_review_dashboard when DashboardLock is contested beyond timeout (D-08)."""
+        import hashlib
+        from unittest.mock import patch
+        vault_root = self.test_dir
+        vault_hash = hashlib.sha1(vault_root.encode('utf-8')).hexdigest()[:8]
+        expected_lock_file = f"/tmp/brain_dashboard_{vault_hash}.lock"
+
+        # Create lock owned by a mock-alive other PID
+        other_pid = 88888
+        with open(expected_lock_file, "w", encoding="utf-8") as f:
+            f.write(f"pid: {other_pid}\ntime: 2026-09-03T12:00:00\n")
+
+        try:
+            with patch("brain_ingest.is_pid_alive", return_value=True):
+                # 1. Direct DashboardLock with blocking=True should raise TimeoutError
+                lock = brain_ingest.DashboardLock(vault_root, timeout=0.3, retry_interval=0.05, blocking=True)
+                with self.assertRaises(TimeoutError):
+                    lock.acquire()
+
+                # 2. Direct DashboardLock with blocking=False should return False immediately
+                lock_nb = brain_ingest.DashboardLock(vault_root, timeout=0.3, retry_interval=0.05, blocking=False)
+                self.assertFalse(lock_nb.acquire())
+
+                # 3. update_review_dashboard should catch TimeoutError, log warning, and skip gracefully without crashing
+                with patch("logging.warning") as mock_warn:
+                    brain_ingest.update_review_dashboard(vault_root)
+                    mock_warn.assert_called()
+        finally:
+            if os.path.exists(expected_lock_file):
+                try: os.remove(expected_lock_file)
+                except Exception: pass
 
 
 if __name__ == "__main__":

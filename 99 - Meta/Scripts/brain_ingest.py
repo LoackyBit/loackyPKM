@@ -10,7 +10,7 @@ Features:
 - Preventative duplicate and missing transcript guards
 """
 
-import os, sys, re, datetime, hashlib, argparse, shutil, glob, time, subprocess, urllib.parse
+import os, sys, re, datetime, hashlib, argparse, shutil, glob, time, subprocess, urllib.parse, logging
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Any, Set
 
@@ -68,6 +68,92 @@ class NoteLock:
         if self.acquired and os.path.exists(self.lock_file):
             try: os.remove(self.lock_file)
             except Exception: pass
+
+
+class DashboardLock:
+    """Mutex lock for 03 - Inbox/Review Dashboard.md with PID tracking, ISO timestamp, TTL auto-healing, and re-entrancy."""
+    _process_locks: Dict[str, int] = {}
+
+    def __init__(self, vault_root: str, timeout: float = 10.0, retry_interval: float = 0.2, ttl_seconds: int = 60, blocking: bool = True):
+        vault_hash = hashlib.sha1(vault_root.encode('utf-8')).hexdigest()[:8]
+        self.lock_file = f"/tmp/brain_dashboard_{vault_hash}.lock"
+        self.vault_root = vault_root
+        self.timeout = float(timeout)
+        self.retry_interval = float(retry_interval)
+        self.ttl_seconds = int(ttl_seconds)
+        self.blocking = bool(blocking)
+        self.acquired = False
+
+    def _clean_stale_lock(self):
+        if not os.path.exists(self.lock_file):
+            return
+        try:
+            mtime = os.path.getmtime(self.lock_file)
+            is_stale = (time.time() - mtime) > self.ttl_seconds
+            if not is_stale:
+                with open(self.lock_file, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                m = re.search(r'pid:\s*(\d+)', content)
+                if m and not is_pid_alive(int(m.group(1))):
+                    is_stale = True
+            if is_stale:
+                os.remove(self.lock_file)
+        except Exception:
+            pass
+
+    def acquire(self, timeout: Optional[float] = None, retry_interval: Optional[float] = None, blocking: Optional[bool] = None) -> bool:
+        t_out = self.timeout if timeout is None else float(timeout)
+        r_int = self.retry_interval if retry_interval is None else float(retry_interval)
+        blk = self.blocking if blocking is None else bool(blocking)
+
+        # Re-entrancy within same process
+        if self.lock_file in DashboardLock._process_locks and DashboardLock._process_locks[self.lock_file] > 0:
+            DashboardLock._process_locks[self.lock_file] += 1
+            self.acquired = True
+            return True
+
+        deadline = time.time() + t_out
+        while True:
+            try:
+                fd = os.open(self.lock_file, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.write(fd, f"pid: {os.getpid()}\ntime: {datetime.datetime.now().isoformat()}\n".encode('utf-8'))
+                os.close(fd)
+                DashboardLock._process_locks[self.lock_file] = 1
+                self.acquired = True
+                return True
+            except FileExistsError:
+                self._clean_stale_lock()
+                if not blk:
+                    return False
+                if time.time() >= deadline:
+                    break
+                time.sleep(min(r_int, max(0.01, deadline - time.time())))
+
+        if blk:
+            raise TimeoutError(f"Impossibile acquisire DashboardLock entro {t_out}s ({self.lock_file})")
+        return False
+
+    def release(self):
+        if self.acquired:
+            depth = DashboardLock._process_locks.get(self.lock_file, 1) - 1
+            if depth <= 0:
+                DashboardLock._process_locks.pop(self.lock_file, None)
+                if os.path.exists(self.lock_file):
+                    try:
+                        os.remove(self.lock_file)
+                    except Exception:
+                        pass
+            else:
+                DashboardLock._process_locks[self.lock_file] = depth
+            self.acquired = False
+
+    def __enter__(self):
+        self.acquire()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.release()
+
 
 def get_source_lock_file(source: str) -> str:
     """Returns the deterministic lock file path for a source identifier."""
@@ -515,17 +601,39 @@ def record_ingest_error(vault_root: str, source_or_url: str, reason: str):
     update_review_dashboard(vault_root, add_error=(source_or_url, reason))
 
 
-def trigger_panic_abort(vault_root: str) -> int:
+def get_watcher_pid_file(vault_root: str) -> str:
+    """Dynamically resolves watcher daemon PID file following precedence chain: $PID_FILE -> vault hash -> legacy."""
+    env_pid = os.environ.get('PID_FILE')
+    if env_pid and env_pid.strip():
+        return env_pid.strip()
+
+    shasum_hash = hashlib.sha1(vault_root.encode('utf-8')).hexdigest()[:8]
+    md5_hash = hashlib.md5(vault_root.encode('utf-8')).hexdigest()[:8]
+    full_md5 = hashlib.md5(vault_root.encode('utf-8')).hexdigest()
+
+    candidates = [
+        f"/tmp/brain_watcher_{shasum_hash}.pid",
+        f"/tmp/brain_watcher_{md5_hash}.pid",
+        f"/tmp/brain_watcher_{full_md5}.pid",
+        "/tmp/brain_watcher.pid"
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+    return candidates[0]
+
+
+def trigger_panic_abort(vault_root: str, pid_file: Optional[str] = None) -> int:
     """Terminates all running ingestion processes, cleans locks, resets ready notes, and clears In Elaborazione."""
     aborted_pids = set()
     my_pid = os.getpid()
 
-    # 1. Identify watcher PID if running to ensure it is NEVER killed
+    # 1. Identify watcher PID if running to ensure it is NEVER killed (D-01, D-02, D-04)
     watcher_pid = None
-    pid_file = "/tmp/brain_watcher.pid"
-    if os.path.exists(pid_file):
+    target_pid_file = pid_file or get_watcher_pid_file(vault_root)
+    if target_pid_file and os.path.exists(target_pid_file):
         try:
-            with open(pid_file, "r", encoding="utf-8") as f:
+            with open(target_pid_file, "r", encoding="utf-8") as f:
                 content = f.read().strip()
                 if content.isdigit():
                     watcher_pid = int(content)
@@ -612,42 +720,44 @@ def trigger_panic_abort(vault_root: str) -> int:
                     except Exception:
                         pass
 
-    # 7. Clean up aborted in-progress drafts in 03 - Inbox/Draft/
+    # 7. Clean up all interrupted drafts and partial files in 03 - Inbox/Draft/ (D-03)
     if os.path.exists(draft_dir):
         for f in os.listdir(draft_dir):
             if f.endswith(".md") and not f.startswith("."):
                 dfp = os.path.join(draft_dir, f)
                 try:
-                    with open(dfp, "r", encoding="utf-8", errors="ignore") as df:
-                        content = df.read()
-                    has_fm, fm_t, _, bdy = brain_health.split_markdown_note(content)
-                    if has_fm:
-                        meta = brain_health.safe_load_frontmatter(fm_t, brain_health.build_yaml_engine())
-                        if str(meta.get('status', '')).lower() == 'in-progress':
-                            sfp = os.path.join(source_dir, f)
-                            src_val = meta.get('source', 'original')
-                            if os.path.exists(sfp):
-                                try:
-                                    with open(sfp, "r", encoding="utf-8", errors="ignore") as sf:
-                                        s_content = sf.read()
-                                    if src_val == "original" or "ready:" in s_content:
-                                        # Restore manual source note to Inbox root with ready: false
-                                        rfm = re.sub(r'ready:\s*(true|"true"|\'true\'|1)', 'ready: false', s_content, flags=re.IGNORECASE)
-                                        if "ready:" not in rfm:
-                                            rfm = f"---\nready: false\n---\n\n{s_content}"
-                                        with open(os.path.join(inbox_dir, f), "w", encoding="utf-8") as wf:
-                                            wf.write(rfm)
-                                    os.remove(sfp)
-                                except Exception:
-                                    pass
-                            # Clean up clipboard frames
-                            name_stem = f[:-3]
-                            if os.path.exists(clip_dir):
-                                for img in os.listdir(clip_dir):
-                                    if img.startswith(name_stem[:10]) or name_stem.lower().replace(' ', '_')[:10] in img:
-                                        try: os.remove(os.path.join(clip_dir, img))
-                                        except Exception: pass
-                            os.remove(dfp)
+                    meta = {}
+                    if os.path.exists(dfp):
+                        with open(dfp, "r", encoding="utf-8", errors="ignore") as df:
+                            content = df.read()
+                        has_fm, fm_t, _, bdy = brain_health.split_markdown_note(content)
+                        if has_fm:
+                            meta = brain_health.safe_load_frontmatter(fm_t, brain_health.build_yaml_engine()) or {}
+                    sfp = os.path.join(source_dir, f)
+                    src_val = meta.get('source', 'original')
+                    if os.path.exists(sfp):
+                        try:
+                            with open(sfp, "r", encoding="utf-8", errors="ignore") as sf:
+                                s_content = sf.read()
+                            if src_val == "original" or "ready:" in s_content:
+                                # Restore manual source note to Inbox root with ready: false
+                                rfm = re.sub(r'ready:\s*(true|"true"|\'true\'|1)', 'ready: false', s_content, flags=re.IGNORECASE)
+                                if "ready:" not in rfm:
+                                    rfm = f"---\nready: false\n---\n\n{s_content}"
+                                with open(os.path.join(inbox_dir, f), "w", encoding="utf-8") as wf:
+                                    wf.write(rfm)
+                            os.remove(sfp)
+                        except Exception:
+                            pass
+                    # Clean up clipboard frames
+                    name_stem = f[:-3]
+                    if os.path.exists(clip_dir):
+                        for img in os.listdir(clip_dir):
+                            if img.startswith(name_stem[:10]) or name_stem.lower().replace(' ', '_')[:10] in img:
+                                try: os.remove(os.path.join(clip_dir, img))
+                                except Exception: pass
+                    if os.path.exists(dfp):
+                        os.remove(dfp)
                 except Exception:
                     pass
 
@@ -693,11 +803,11 @@ def mark_draft_ready(vault_root: str, title_or_path: str) -> bool:
     return True
 
 
-def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
-                            phase: Optional[str] = None,
-                            add_error: Optional[Tuple[str, str]] = None,
-                            finish_in_progress: Optional[str] = None,
-                            replace_in_progress: Optional[str] = None):
+def _update_review_dashboard_unlocked(vault_root: str, in_progress: Optional[str] = None,
+                                      phase: Optional[str] = None,
+                                      add_error: Optional[Tuple[str, str]] = None,
+                                      finish_in_progress: Optional[str] = None,
+                                      replace_in_progress: Optional[str] = None):
     """Synchronizes 03 - Inbox/Review Dashboard.md in static Markdown across 4 sections with progressive phase feedback."""
     inbox_dir = os.path.join(vault_root, "03 - Inbox")
     draft_dir, source_dir = os.path.join(inbox_dir, "Draft"), os.path.join(inbox_dir, "Source")
@@ -907,6 +1017,24 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
     with open(dash_path, "w", encoding="utf-8") as f: f.write("\n".join(dash) + "\n")
 
 
+def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
+                            phase: Optional[str] = None,
+                            add_error: Optional[Tuple[str, str]] = None,
+                            finish_in_progress: Optional[str] = None,
+                            replace_in_progress: Optional[str] = None):
+    """Synchronizes 03 - Inbox/Review Dashboard.md in static Markdown across 4 sections under DashboardLock (D-07, D-08)."""
+    try:
+        with DashboardLock(vault_root, timeout=10.0, retry_interval=0.2):
+            return _update_review_dashboard_unlocked(
+                vault_root, in_progress=in_progress, phase=phase,
+                add_error=add_error, finish_in_progress=finish_in_progress,
+                replace_in_progress=replace_in_progress
+            )
+    except TimeoutError as e:
+        logging.warning("Impossibile acquisire DashboardLock entro il timeout. Operazione saltata: %s", e)
+        return
+
+
 
 def format_note_header_block(title: str, metadata: Dict[str, Any]) -> str:
     """Generates canonical header metadata list for video and web notes right below # Title."""
@@ -998,7 +1126,7 @@ def stage_note(vault_root: str, title: str, body: str, metadata: Optional[Dict[s
     return draft_path
 
 
-def process_tri_state_approvals(vault_root: str) -> int:
+def _process_tri_state_approvals_unlocked(vault_root: str) -> int:
     """Processes [x] (Promote), [-] (Purge), panic button, and error retry/dismiss lines in Review Dashboard.md."""
     dash_path = os.path.join(vault_root, "03 - Inbox", "Review Dashboard.md")
     if not os.path.exists(dash_path): return 0
@@ -1264,6 +1392,16 @@ def process_tri_state_approvals(vault_root: str) -> int:
         update_review_dashboard(vault_root)
         for err_src, err_rsn in pending_errors: update_review_dashboard(vault_root, add_error=(err_src, err_rsn))
     return processed_count
+
+
+def process_tri_state_approvals(vault_root: str) -> int:
+    """Processes [x] (Promote), [-] (Purge), panic button, and error retry/dismiss lines in Review Dashboard.md under DashboardLock (D-07)."""
+    try:
+        with DashboardLock(vault_root, timeout=10.0, retry_interval=0.2):
+            return _process_tri_state_approvals_unlocked(vault_root)
+    except TimeoutError as e:
+        logging.warning("Impossibile acquisire DashboardLock per process_tri_state_approvals: %s", e)
+        return 0
 
 
 def process_inbox_raw_notes(vault_root: str) -> List[str]:

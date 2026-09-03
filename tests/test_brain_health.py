@@ -340,6 +340,47 @@ Body without status, type, area, tags.
         res = brain_health.run_governance_engine(self.test_dir, lint_only=True, auto_fix=True)
         self.assertEqual(res.get("error"), "lint_only_read_only_conflict")
 
+    def test_diagnostic_report_and_dashboard_headings_no_emoji(self):
+        """Asserts diagnostic report and dashboard have zero emoji in H1-H6 headings and no Collegamenti section (D-14, D-16, PERF-04)."""
+        import re
+        audit_stats = {
+            "orphan_notes": ["02 - Atlas/Tech/Orphan Note.md"],
+            "broken_links": {"02 - Atlas/Tech/Source Note.md": ["Broken Target"]},
+            "forward_links": {"02 - Atlas/Tech/Source Note.md": ["Future Note"]},
+            "lint_issues": [("02 - Atlas/Tech/Lint Note.md", ["Missing status"])],
+            "title_case_renames": [],
+            "total_notes": 10,
+            "compliant_notes": 9,
+            "misaligned_notes": 1,
+            "recent_notes": []
+        }
+
+        # 1. Health Dashboard Markdown
+        dashboard_md = brain_health.generate_health_dashboard(self.test_dir, [], audit_stats)
+        self.assertNotIn("## Collegamenti", dashboard_md)
+
+        dash_headings = [line.strip() for line in dashboard_md.splitlines() if line.strip().startswith("#")]
+        emoji_pattern = re.compile(r'[\U00010000-\U0010ffff\u2600-\u27bf\u2300-\u23ff\u2b50]')
+        for h in dash_headings:
+            self.assertIsNone(emoji_pattern.search(h), f"Dashboard heading contains emoji: {h}")
+
+        # 2. Audit Report Markdown
+        report_path = brain_health.write_audit_report(
+            self.test_dir,
+            all_notes_count=10,
+            orphan_notes=audit_stats["orphan_notes"],
+            broken_links=audit_stats["broken_links"],
+            forward_links=audit_stats["forward_links"],
+            lint_issues=audit_stats["lint_issues"]
+        )
+        with open(report_path, "r", encoding="utf-8") as f:
+            report_md = f.read()
+
+        self.assertNotIn("## Collegamenti", report_md)
+        report_headings = [line.strip() for line in report_md.splitlines() if line.strip().startswith("#")]
+        for h in report_headings:
+            self.assertIsNone(emoji_pattern.search(h), f"Audit report heading contains emoji: {h}")
+
 
 if __name__ == "__main__":
     unittest.main()

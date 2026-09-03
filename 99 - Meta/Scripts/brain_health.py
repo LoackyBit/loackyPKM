@@ -950,11 +950,6 @@ Per eseguire un audit interattivo o applicare correzioni automatiche:
 ```bash
 python3 "99 - Meta/Scripts/brain_health.py" --interactive
 ```
-
----
-## Collegamenti
-- [[Home MOC]]
-- [[Review Dashboard]]
 """
 
 
@@ -996,11 +991,11 @@ summary: "Report diagnostico della salute del Vault: note orfane, collegamenti i
 ---
 [[Home MOC|Home]] / [[Meta]] / [[{report_filename[:-3]}]]
 
-# 📊 Report di Audit della Salute del Vault — {today_str}
+# Report di Audit della Salute del Vault — {today_str}
 
 Diagnostica automatica dello stato di coerenza e integrità semantica del Second Brain.
 
-## 📈 Riepilogo Diagnostico
+## Riepilogo Diagnostico
 
 - **Note totali scansionate:** {all_notes_count}
 - **Note orfane rilevate:** {len(orphan_notes)}
@@ -1010,12 +1005,12 @@ Diagnostica automatica dello stato di coerenza e integrità semantica del Second
 
 ---
 
-## 🔴 Criticità Elevate
+## Criticità Elevate
 
 """]
 
     if broken_links:
-        report.append("### 🔗 Link Interrotti (Broken Links)\n")
+        report.append("### Link Interrotti (Broken Links)\n")
         for source, targets in sorted(broken_links.items()):
             report.append(f"- [[{Path(source).stem}]] (in `{source}`):\n")
             for t in targets:
@@ -1025,15 +1020,15 @@ Diagnostica automatica dello stato di coerenza e integrità semantica del Second
         report.append("✅ **Nessun link interrotto rilevato!**\n\n")
 
     if lint_issues:
-        report.append("### 📝 Anomalie Frontmatter YAML\n")
+        report.append("### Anomalie Frontmatter YAML\n")
         for f, issues in lint_issues:
             report.append(f"- [[{Path(f).stem}]] (`{f}`): {', '.join(issues)}\n")
         report.append("\n")
 
-    report.append("---\n\n## 🟡 Note Orfane & Forward Links\n\n")
+    report.append("---\n\n## Note Orfane & Forward Links\n\n")
 
     if orphan_notes:
-        report.append("### 🕸️ Note Orfane (0 Inbound Links)\n")
+        report.append("### Note Orfane (0 Inbound Links)\n")
         for f in orphan_notes:
             report.append(f"- [[{Path(f).stem}]] (`{f}`)\n")
         report.append("\n")
@@ -1041,16 +1036,10 @@ Diagnostica automatica dello stato di coerenza e integrità semantica del Second
         report.append("✅ **Nessuna nota orfana in Atlas!**\n\n")
 
     if forward_links:
-        report.append("### 📌 Forward Links Pianificati (Da Creare)\n")
+        report.append("### Forward Links Pianificati (Da Creare)\n")
         for src, fwd_list in sorted(forward_links.items()):
             report.append(f"- In [[{Path(src).stem}]]: {', '.join([f'[[{target}]]' for target in fwd_list])}\n")
         report.append("\n")
-
-    report.append("""---
-## Collegamenti
-- [[Home MOC]]
-- [[Vault Health Dashboard]]
-""")
 
     with open(report_abs_path, 'w', encoding='utf-8') as f:
         f.write("".join(report))

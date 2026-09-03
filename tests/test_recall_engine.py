@@ -148,7 +148,9 @@ Nuovi concetti sui trasformatori moderni.
 
         cache3 = recall_engine.load_or_rebuild_cache(self.test_dir)
         self.assertEqual(cache3["files"][note_rel_path]["title"], "Neural Network Note V2")
-        self.assertIn("trasformatori", cache3["files"][note_rel_path]["tokens"])
+        self.assertIn("trasformatori", cache3["files"][note_rel_path]["term_freq"])
+        self.assertGreater(cache3["files"][note_rel_path]["doc_len"], 0)
+        self.assertNotIn("tokens", cache3["files"][note_rel_path])
 
         # Delete note -> should be pruned from cache
         os.remove(note_abs_path)
@@ -178,6 +180,83 @@ Dimostrazione di Andrew Wiles.
         cache_rebuild = recall_engine.load_or_rebuild_cache(self.test_dir, force_reindex=True)
         self.assertIn(note_rel_path, cache_rebuild["files"])
         self.assertEqual(cache_rebuild["files"][note_rel_path]["title"], "Fermat Theorem")
+
+    def test_cache_compact_serialization_and_size(self):
+        """Asserts .recall_cache.json is serialized with separators=(',', ':') without expanded indentation (D-09, PERF-03)."""
+        note_rel_path = "02 - Atlas/Tech/Quantum Computing.md"
+        note_abs_path = os.path.join(self.test_dir, note_rel_path)
+        with open(note_abs_path, 'w', encoding='utf-8') as f:
+            f.write("---\ntitle: \"Quantum Computing\"\narea: tech\ntags: [tech/quantum]\n---\nAlgoritmo di Shor e qubit.")
+
+        recall_engine.load_or_rebuild_cache(self.test_dir, force_reindex=True)
+        cache_file = os.path.join(self.test_dir, "99 - Meta", "Scripts", ".recall_cache.json")
+        self.assertTrue(os.path.exists(cache_file))
+
+        with open(cache_file, "r", encoding="utf-8") as f:
+            raw_text = f.read()
+
+        # Should NOT contain expanded indentation newlines like "\n  \""
+        self.assertNotIn('\n  "', raw_text)
+        self.assertIn('{"version":1,"files":{', raw_text)
+
+    def test_cache_structure_no_tokens_list(self):
+        """Asserts cached_files entries store doc_len and term_freq, removing the redundant tokens list (D-10, PERF-03)."""
+        note_rel_path = "02 - Atlas/Tech/Deep Learning Note.md"
+        note_abs_path = os.path.join(self.test_dir, note_rel_path)
+        with open(note_abs_path, 'w', encoding='utf-8') as f:
+            f.write("---\ntitle: \"Deep Learning Note\"\narea: tech\ntags: [tech/ai]\n---\nReti neurali convoluzionali e visione artificiale.")
+
+        cache = recall_engine.load_or_rebuild_cache(self.test_dir, force_reindex=True)
+        entry = cache["files"][note_rel_path]
+
+        self.assertIn("doc_len", entry)
+        self.assertIsInstance(entry["doc_len"], int)
+        self.assertGreater(entry["doc_len"], 0)
+
+        self.assertIn("term_freq", entry)
+        self.assertIsInstance(entry["term_freq"], dict)
+        self.assertIn("convoluzionali", entry["term_freq"])
+
+        self.assertNotIn("tokens", entry)
+
+    def test_inbox_folder_ignored_in_recall(self):
+        """Asserts '03 - Inbox' is ignored by recall_engine to avoid indexing transient notes (D-12, PERF-03)."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        os.makedirs(inbox_dir, exist_ok=True)
+        inbox_note = os.path.join(inbox_dir, "Bozza Grezza Inbox.md")
+        with open(inbox_note, 'w', encoding='utf-8') as f:
+            f.write("---\ntitle: \"Bozza Grezza Inbox\"\narea: tech\n---\nTesto grezzo non verificato.")
+
+        cache = recall_engine.load_or_rebuild_cache(self.test_dir, force_reindex=True)
+        self.assertNotIn("03 - Inbox/Bozza Grezza Inbox.md", cache["files"])
+
+    def test_bm25_build_from_term_freqs_equivalence(self):
+        """Asserts build_from_term_freqs yields identical scores to build_from_corpus (D-10)."""
+        corpus = {
+            "doc1": ["intelligenza", "artificiale", "modello", "linguaggio", "modello"],
+            "doc2": ["algoritmo", "struttura", "dati", "linguaggio", "programmazione"],
+            "doc3": ["intelligenza", "biologica", "evoluzione", "modello"]
+        }
+
+        # Index 1: built from corpus
+        bm25_1 = recall_engine.BM25Index(k1=1.5, b=0.75)
+        bm25_1.build_from_corpus(corpus)
+
+        # Index 2: built from term_freqs and doc_lengths
+        from collections import Counter
+        doc_lengths = {d: len(toks) for d, toks in corpus.items()}
+        term_freqs = {d: dict(Counter(toks)) for d, toks in corpus.items()}
+
+        bm25_2 = recall_engine.BM25Index(k1=1.5, b=0.75)
+        bm25_2.build_from_term_freqs(doc_lengths, term_freqs)
+
+        query = ["intelligenza", "modello"]
+        scores_1 = dict(bm25_1.score(query))
+        scores_2 = dict(bm25_2.score(query))
+
+        self.assertEqual(scores_1.keys(), scores_2.keys())
+        for doc_id in scores_1:
+            self.assertAlmostEqual(scores_1[doc_id], scores_2[doc_id], places=5)
 
 
 class TestRecallEngineTask2(unittest.TestCase):
@@ -581,11 +660,14 @@ Lezione di laboratorio sul calcolo quantistico.
         self.assertIn("04:15", pretty_out)
         self.assertIn("Suggerimenti Drill-down", pretty_out)
 
-        # 3. Markdown Format (NotebookLM Schema)
+        # 3. Markdown Format (2-section Contract without emoji per D-13)
         md_out = recall_engine.format_output(results, "alpha", output_format="markdown", drilldown_suggestions=drilldowns)
-        self.assertIn("### 🎯 Sintesi Esecutiva", md_out)
-        self.assertIn("### 📚 Fonti & Citazioni", md_out)
-        self.assertIn("### 🔗 Connessioni Correlate", md_out)
+        self.assertIn("### Sintesi Esecutiva", md_out)
+        self.assertIn("### Fonti & Citazioni", md_out)
+        self.assertNotIn("### 🎯", md_out)
+        self.assertNotIn("### 📚", md_out)
+        self.assertNotIn("### 🔗", md_out)
+        self.assertNotIn("Connessioni Correlate", md_out)
         self.assertIn("[[Sample Note Alpha]]", md_out)
         self.assertIn("(sezione: *Sezione Chiave*)", md_out)
         self.assertIn("(timestamp: `[04:15]`)", md_out)
@@ -622,8 +704,8 @@ class TestRecallEngineTask2_0402(unittest.TestCase):
         self.assertEqual(data["results"], [])
         self.assertIn("Nessuna corrispondenza trovata nel Vault", data["message"])
 
-    def test_notebooklm_3section_markdown_synthesis(self):
-        """Asserts 3-section Markdown output formats executive synthesis, verified citations, and graph connections cleanly per D-08."""
+    def test_notebooklm_2section_markdown_synthesis(self):
+        """Asserts 2-section Markdown output formats executive synthesis and verified citations without emoji per D-13, PERF-04."""
         results = [
             {
                 "title": "Reti Neurali Ricorrenti",
@@ -642,15 +724,46 @@ class TestRecallEngineTask2_0402(unittest.TestCase):
         ]
 
         md_out = recall_engine.format_output(results, "RNN", output_format="markdown")
-        self.assertIn("### 🎯 Sintesi Esecutiva", md_out)
+        self.assertIn("### Sintesi Esecutiva", md_out)
         self.assertIn("- **[[Reti Neurali Ricorrenti]]**: Struttura delle reti ricorrenti e limiti del gradiente.", md_out)
 
-        self.assertIn("### 📚 Fonti & Citazioni", md_out)
+        self.assertIn("### Fonti & Citazioni", md_out)
         self.assertIn("- [[Reti Neurali Ricorrenti]] (sezione: *Problema del Vanishing Gradient*)", md_out)
 
-        self.assertIn("### 🔗 Connessioni Correlate", md_out)
-        self.assertIn("[[LSTM Networks]]", md_out)
-        self.assertIn("[[Transformers MOC]]", md_out)
+        self.assertNotIn("### 🎯", md_out)
+        self.assertNotIn("### 📚", md_out)
+        self.assertNotIn("### 🔗", md_out)
+        self.assertNotIn("Connessioni Correlate", md_out)
+
+    def test_recall_format_output_two_sections_no_emoji(self):
+        """Asserts format_output generates exactly 2 sections and zero emoji in all headings (D-13, D-16, PERF-04)."""
+        results = [
+            {
+                "title": "Nota Test Heading",
+                "path": "02 - Atlas/Tech/Nota Test Heading.md",
+                "area": "tech",
+                "type": "concept",
+                "tags": ["tech/ai"],
+                "summary": "Sintesi pulita.",
+                "score": 0.05,
+                "snippets": [{"heading": "Introduzione", "text": "Snippet di prova."}],
+                "video_timestamps": [],
+                "related": ["[[Correlata 1]]"]
+            }
+        ]
+        md_out = recall_engine.format_output(results, "Test", output_format="markdown")
+        heading_lines = [line.strip() for line in md_out.splitlines() if line.strip().startswith("#")]
+
+        # Must have exactly 2 headings: ### Sintesi Esecutiva and ### Fonti & Citazioni
+        self.assertEqual(len(heading_lines), 2)
+        self.assertEqual(heading_lines[0], "### Sintesi Esecutiva")
+        self.assertEqual(heading_lines[1], "### Fonti & Citazioni")
+
+        # Zero emoji across all headings
+        import re
+        emoji_pattern = re.compile(r'[\U00010000-\U0010ffff\u2600-\u27bf\u2300-\u23ff\u2b50]')
+        for h in heading_lines:
+            self.assertIsNone(emoji_pattern.search(h), f"Heading contains forbidden emoji: {h}")
 
     def test_gitignore_contains_recall_cache(self):
         """Asserts .gitignore contains .recall_cache.json rules to prevent tracking local indexes per D-01."""

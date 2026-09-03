@@ -31,7 +31,7 @@ CONTROLLED_AREAS = {'tech', 'education', 'mentality', 'finance', 'projects', 'me
 IGNORE_FOLDERS = {
     '.git', '.obsidian', '.agents', '.gemini', '.trash', '.vscode',
     '.space', '.makemd', '.smart-env', '.antigravitycli', '.codacy',
-    'node_modules', 'tests', '.planning', '99 - Meta', 'Template'
+    'node_modules', 'tests', '.planning', '99 - Meta', 'Template', '03 - Inbox'
 }
 
 STOPWORDS = {
@@ -92,25 +92,22 @@ class BM25Index:
         self.total_docs: int = 0
         self.avg_doc_len: float = 0.0
 
-    def build_from_corpus(self, corpus: Dict[str, List[str]]):
-        """Builds inverted index and term frequencies from tokenized document corpus."""
-        self.total_docs = len(corpus)
-        self.doc_lengths.clear()
-        self.term_freqs.clear()
-        self.doc_freqs.clear()
-        if self.total_docs == 0:
-            self.avg_doc_len = 0.0
-            return
-        total_len = 0
-        for doc_id, tokens in corpus.items():
-            doc_len = len(tokens)
-            self.doc_lengths[doc_id] = doc_len
-            total_len += doc_len
-            tf = Counter(tokens)
-            self.term_freqs[doc_id] = dict(tf)
+    def build_from_term_freqs(self, doc_lengths: Dict[str, int], term_freqs: Dict[str, Dict[str, int]]):
+        """Builds inverted index and frequencies directly from document lengths and term frequencies (D-10)."""
+        self.total_docs = len(doc_lengths)
+        self.doc_lengths = dict(doc_lengths)
+        self.term_freqs = dict(term_freqs)
+        self.doc_freqs = Counter()
+        for tf in self.term_freqs.values():
             for term in tf.keys():
                 self.doc_freqs[term] += 1
-        self.avg_doc_len = total_len / self.total_docs if self.total_docs > 0 else 0.0
+        self.avg_doc_len = sum(self.doc_lengths.values()) / self.total_docs if self.total_docs > 0 else 0.0
+
+    def build_from_corpus(self, corpus: Dict[str, List[str]]):
+        """Builds inverted index and term frequencies from tokenized document corpus."""
+        doc_lengths = {doc_id: len(tokens) for doc_id, tokens in corpus.items()}
+        term_freqs = {doc_id: dict(Counter(tokens)) for doc_id, tokens in corpus.items()}
+        self.build_from_term_freqs(doc_lengths, term_freqs)
 
     def score(self, query_tokens: List[str]) -> List[Tuple[str, float]]:
         """Calculates Okapi BM25 scores for query tokens against all documents."""
@@ -426,6 +423,15 @@ def load_or_rebuild_cache(vault_root: str, force_reindex: bool = False) -> Dict[
 
     cached_files = cache_data.get("files", {})
     updated = False
+    for entry in cached_files.values():
+        if "tokens" in entry:
+            if "doc_len" not in entry:
+                entry["doc_len"] = len(entry["tokens"])
+            if "term_freq" not in entry:
+                entry["term_freq"] = dict(Counter(entry["tokens"]))
+            entry.pop("tokens", None)
+            updated = True
+
     current_files = set()
 
     # Load Smart Connections vector references
@@ -474,7 +480,7 @@ def load_or_rebuild_cache(vault_root: str, force_reindex: bool = False) -> Dict[
                     "summary": str(meta.get('summary') or ''),
                     "related": meta.get('related') if isinstance(meta.get('related'), list) else ([str(meta.get('related'))] if meta.get('related') else []),
                     "aliases": meta.get('aliases') if isinstance(meta.get('aliases'), list) else ([str(meta.get('aliases'))] if meta.get('aliases') else []),
-                    "tokens": tokens,
+                    "doc_len": len(tokens),
                     "term_freq": dict(Counter(tokens)),
                     "vector_file": v_file,
                     "vector_i": v_i
@@ -490,10 +496,10 @@ def load_or_rebuild_cache(vault_root: str, force_reindex: bool = False) -> Dict[
 
     cache_data["files"] = cached_files
     if updated or not os.path.exists(cache_path) or force_reindex:
-        # Atomic write via temporary file
+        # Atomic write via temporary file with compact JSON serialization (D-09)
         tmp_path = cache_path + ".tmp"
         with open(tmp_path, 'w', encoding='utf-8') as f:
-            json.dump(cache_data, f, ensure_ascii=False, indent=2)
+            json.dump(cache_data, f, ensure_ascii=False, separators=(',', ':'))
         os.replace(tmp_path, cache_path)
 
     return cache_data
@@ -616,10 +622,11 @@ def execute_query(
         yaml_scores.sort(key=lambda x: x[1], reverse=True)
         yaml_ranks = [rel_path for rel_path, _ in yaml_scores]
 
-        # 2. BM25 Lexical Ranking
-        corpus = {rel_path: entry.get("tokens", []) for rel_path, entry in files.items()}
+        # 2. BM25 Lexical Ranking (D-10)
+        doc_lengths = {rel_path: entry.get("doc_len", 0) for rel_path, entry in files.items()}
+        term_freqs = {rel_path: entry.get("term_freq", {}) for rel_path, entry in files.items()}
         bm25_index = BM25Index(k1=1.5, b=0.75)
-        bm25_index.build_from_corpus(corpus)
+        bm25_index.build_from_term_freqs(doc_lengths, term_freqs)
         bm25_scores = bm25_index.score(query_tokens)
         bm25_ranks = [rel_path for rel_path, _ in bm25_scores]
 
@@ -748,7 +755,7 @@ def format_output(
         return json.dumps(payload, ensure_ascii=False, indent=2)
 
     elif output_format == 'markdown':
-        # Section 1: Executive Summary synthesis
+        # Section 1: Executive Summary synthesis without emoji (D-13, PERF-04)
         summary_bullets = []
         for r in results:
             if r.get('summary'):
@@ -756,7 +763,7 @@ def format_output(
 
         exec_text = "\n".join(summary_bullets) if summary_bullets else "- Sintesi dei concetti rilevanti estratti dal Vault."
 
-        # Section 2: Sources & Citations
+        # Section 2: Sources & Citations without emoji (D-13, PERF-04)
         sources = []
         for r in results:
             cit = f"- [[{r['title']}]]"
@@ -769,7 +776,7 @@ def format_output(
             sources.append(cit)
         sources_text = "\n".join(sources)
 
-        # Section 3: Related Connections
+        # Organic integration of related semantic notes and drill-down hints (D-13, D-16)
         related_set: Set[str] = set()
         result_titles = {r['title'].lower() for r in results}
         for r in results:
@@ -781,16 +788,13 @@ def format_output(
 
         suggested = sorted(list(related_set))[:2]
         if suggested:
-            related_text = "\n".join(f"- {s}: Approfondimento correlato nel grafo semantico." for s in suggested)
-        else:
-            related_text = "- [[Home MOC]]: Per la navigazione delle mappe concettuali generali."
+            sources_text += f"\n\n*Connessioni semantiche correlate:* {', '.join(suggested)}"
 
-        drill_text = ""
         if drilldown_suggestions:
             drill_hints = " ".join(d['hint'] for d in drilldown_suggestions)
-            drill_text = f"\n\n> 💡 **Suggerimento:** {drill_hints}"
+            sources_text += f"\n\n> 💡 **Suggerimento:** {drill_hints}"
 
-        return f"""### 🎯 Sintesi Esecutiva\n{exec_text}\n\n---\n\n### 📚 Fonti & Citazioni\n{sources_text}\n\n---\n\n### 🔗 Connessioni Correlate\n{related_text}{drill_text}"""
+        return f"""### Sintesi Esecutiva\n{exec_text}\n\n---\n\n### Fonti & Citazioni\n{sources_text}"""
 
     else:
         # Pretty interactive terminal output

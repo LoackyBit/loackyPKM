@@ -382,5 +382,156 @@ Body without status, type, area, tags.
             self.assertIsNone(emoji_pattern.search(h), f"Audit report heading contains emoji: {h}")
 
 
+class TestBrainHealthCLIBranches(unittest.TestCase):
+    """Test suite covering real CLI execution branches of brain_health.py (TEST-04)."""
+
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+        os.makedirs(os.path.join(self.test_dir, "02 - Atlas", "Tech"), exist_ok=True)
+        os.makedirs(os.path.join(self.test_dir, "99 - Meta"), exist_ok=True)
+        self.script_path = os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts", "brain_health.py")
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_cli_lint_only_execution_branch(self):
+        """Asserts --lint-only performs read-only audit, reports missing fields, and makes no disk changes (TEST-04)."""
+        import subprocess
+        note_path = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Incomplete Note.md")
+        original_content = """---
+title: "Incomplete Note"
+---
+# Incomplete Note
+Testo nota incompleta.
+"""
+        with open(note_path, "w", encoding="utf-8") as f:
+            f.write(original_content)
+
+        proc = subprocess.run(
+            [sys.executable, self.script_path, "--lint-only", "--vault-root", self.test_dir],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("YAML Frontmatter Linter (Read-Only Audit)", proc.stdout)
+        self.assertIn("Campo obbligatorio mancante", proc.stdout)
+
+        # Note on disk must NOT be altered
+        with open(note_path, "r", encoding="utf-8") as f:
+            self.assertEqual(f.read(), original_content)
+
+        # Dashboard must NOT be generated
+        dash_path = os.path.join(self.test_dir, "99 - Meta", "Vault Health Dashboard.md")
+        self.assertFalse(os.path.exists(dash_path))
+
+    def test_cli_dry_run_execution_branch(self):
+        """Asserts --dry-run previews planned renames and changes without modifying files on disk (TEST-04)."""
+        import subprocess
+        lowercase_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "nota minuscola.md")
+        original_content = """---
+status: permanent
+type: concept
+area: tech
+title: "nota minuscola"
+tags: [tech/ai]
+summary: "Sintesi nota minuscola per test dry run."
+---
+# nota minuscola
+Corpo nota.
+"""
+        with open(lowercase_file, "w", encoding="utf-8") as f:
+            f.write(original_content)
+
+        proc = subprocess.run(
+            [sys.executable, self.script_path, "--dry-run", "--vault-root", self.test_dir],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("[DRY-RUN] No changes were written to disk.", proc.stdout)
+        self.assertIn("Planned Renames:", proc.stdout)
+
+        # File must keep original lowercase name in directory listing
+        files = os.listdir(os.path.join(self.test_dir, "02 - Atlas", "Tech"))
+        self.assertIn("nota minuscola.md", files)
+        self.assertNotIn("Nota Minuscola.md", files)
+
+    def test_cli_auto_fix_execution_branch(self):
+        """Asserts --auto-fix applies Title Case renames, YAML canonical formatting, and updates dashboard (TEST-04)."""
+        import subprocess
+        lowercase_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "nota minuscola.md")
+        original_content = """---
+macro_area: tech
+title: "nota minuscola"
+---
+# nota minuscola
+Corpo della nota per auto fix.
+"""
+        with open(lowercase_file, "w", encoding="utf-8") as f:
+            f.write(original_content)
+
+        proc = subprocess.run(
+            [sys.executable, self.script_path, "--auto-fix", "--vault-root", self.test_dir],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        self.assertEqual(proc.returncode, 0)
+
+        # File must be renamed to Title Case in directory listing
+        files = os.listdir(os.path.join(self.test_dir, "02 - Atlas", "Tech"))
+        self.assertIn("Nota Minuscola.md", files)
+        self.assertNotIn("nota minuscola.md", files)
+
+        # Dashboard must exist on disk
+        dash_path = os.path.join(self.test_dir, "99 - Meta", "Vault Health Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+
+        # Check frontmatter of renamed file is normalized
+        renamed_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Nota Minuscola.md")
+        with open(renamed_file, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("area: tech", content)
+        self.assertNotIn("macro_area:", content)
+
+    def test_cli_dashboard_only_execution_branch(self):
+        """Asserts --dashboard-only regenerates Vault Health Dashboard.md without other modifications (TEST-04)."""
+        import subprocess
+        proc = subprocess.run(
+            [sys.executable, self.script_path, "--dashboard-only", "--vault-root", self.test_dir],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("Vault Health Dashboard regenerated", proc.stdout)
+
+        dash_path = os.path.join(self.test_dir, "99 - Meta", "Vault Health Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+
+    def test_cli_interactive_default_abort_on_eof(self):
+        """Asserts interactive mode defaults cleanly and handles EOF (DEVNULL) by aborting fixes safely (TEST-04)."""
+        import subprocess
+        lowercase_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "nota interattiva.md")
+        with open(lowercase_file, "w", encoding="utf-8") as f:
+            f.write("# nota interattiva\nTesto.")
+
+        proc = subprocess.run(
+            [sys.executable, self.script_path, "--vault-root", self.test_dir],
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        self.assertEqual(proc.returncode, 0)
+
+        # File must NOT be renamed when input is EOF (answers 'no' implicitly)
+        files = os.listdir(os.path.join(self.test_dir, "02 - Atlas", "Tech"))
+        self.assertIn("nota interattiva.md", files)
+        self.assertNotIn("Nota Interattiva.md", files)
+
+
 if __name__ == "__main__":
     unittest.main()

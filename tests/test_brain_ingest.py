@@ -1392,17 +1392,17 @@ title: "Review Dashboard"
         shasum_hash = hashlib.sha1(self.test_dir.encode('utf-8')).hexdigest()[:8]
         hash_pid_file = f"/tmp/brain_watcher_{shasum_hash}.pid"
         watcher_pid = 12345
-        with open(hash_pid_file, "w", encoding="utf-8") as f:
-            f.write(str(watcher_pid))
-
         worker_lock = "/tmp/brain_ingest_tri_panic_worker.lock"
         worker_pid = 77777
-        with open(worker_lock, "w", encoding="utf-8") as f:
-            f.write(f"pid: {worker_pid}\n")
 
         dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
-        with open(dash_path, "w", encoding="utf-8") as f:
-            f.write("""---
+        try:
+            with open(hash_pid_file, "w", encoding="utf-8") as f:
+                f.write(str(watcher_pid))
+            with open(worker_lock, "w", encoding="utf-8") as f:
+                f.write(f"pid: {worker_pid}\n")
+            with open(dash_path, "w", encoding="utf-8") as f:
+                f.write("""---
 status: draft
 type: moc
 title: "Review Dashboard"
@@ -1420,7 +1420,6 @@ title: "Review Dashboard"
 ## 📜 Storico Recente
 *Nessuna azione recente registrata.*
 """)
-        try:
             with patch("os.kill") as mock_kill, patch("brain_ingest.is_pid_alive", return_value=True):
                 processed = brain_ingest.process_tri_state_approvals(self.test_dir)
                 self.assertEqual(processed, 1)
@@ -1450,15 +1449,15 @@ title: "Review Dashboard"
         shasum_hash = hashlib.sha1(self.test_dir.encode('utf-8')).hexdigest()[:8]
         hash_pid_file = f"/tmp/brain_watcher_{shasum_hash}.pid"
         watcher_pid = 12345
-        with open(hash_pid_file, "w", encoding="utf-8") as f:
-            f.write(str(watcher_pid))
-
         dummy_lock = "/tmp/brain_ingest_clipanic.lock"
-        with open(dummy_lock, "w", encoding="utf-8") as f:
-            f.write("pid: 99999\n")
-
         script_path = os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts", "brain_ingest.py")
+
         try:
+            with open(hash_pid_file, "w", encoding="utf-8") as f:
+                f.write(str(watcher_pid))
+            with open(dummy_lock, "w", encoding="utf-8") as f:
+                f.write("pid: 99999\n")
+
             proc = subprocess.run(
                 [sys.executable, script_path, "--panic", "--vault-root", self.test_dir],
                 capture_output=True,

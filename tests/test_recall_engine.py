@@ -765,6 +765,78 @@ class TestRecallEngineTask2_0402(unittest.TestCase):
         for h in heading_lines:
             self.assertIsNone(emoji_pattern.search(h), f"Heading contains forbidden emoji: {h}")
 
+    def test_format_output_organic_connections_prose_absorption(self):
+        """Asserts format_output absorbs related connections into prose and contains zero heading emoji (TEST-03)."""
+        import re
+        results = [
+            {
+                "title": "Nota Principale",
+                "path": "02 - Atlas/Tech/Nota Principale.md",
+                "area": "tech",
+                "type": "concept",
+                "tags": ["tech/ai"],
+                "summary": "Sintesi esecutiva concisa.",
+                "score": 0.8,
+                "snippets": [{"heading": "Quadro Generale", "text": "Dettagli tecnici."}],
+                "video_timestamps": [],
+                "related": ["[[Nota Alfa]]", "[[Nota Beta]]"]
+            }
+        ]
+        md_out = recall_engine.format_output(results, "query", output_format="markdown")
+
+        # 1. Zero emoji in Markdown headings (H1-H6)
+        heading_lines = [line.strip() for line in md_out.splitlines() if line.strip().startswith("#")]
+        emoji_pattern = re.compile(r'[\U00010000-\U0010ffff\u2600-\u27bf\u2300-\u23ff\u2b50]')
+        for h in heading_lines:
+            self.assertIsNone(emoji_pattern.search(h), f"Heading contains forbidden emoji: {h}")
+
+        # 2. Zero standalone connections headings
+        self.assertNotIn("### 🔗", md_out)
+        self.assertNotIn("Connessioni Correlate", md_out)
+        self.assertNotIn("### Collegamenti", md_out)
+
+        # 3. Positive verification of organic prose absorption
+        self.assertIn("*Connessioni semantiche correlate:* [[Nota Alfa]], [[Nota Beta]]", md_out)
+
+    def test_format_output_empty_related_no_connections_line(self):
+        """Asserts that when related is empty, no connections line is generated in format_output (TEST-03)."""
+        results = [
+            {
+                "title": "Nota Senza Correlate",
+                "path": "02 - Atlas/Tech/Nota Senza Correlate.md",
+                "area": "tech",
+                "type": "concept",
+                "tags": ["tech/ai"],
+                "summary": "Sintesi priva di correlazioni.",
+                "score": 0.7,
+                "snippets": [{"heading": "Dettaglio", "text": "Testo."}],
+                "video_timestamps": [],
+                "related": []
+            }
+        ]
+        md_out = recall_engine.format_output(results, "query", output_format="markdown")
+        self.assertNotIn("*Connessioni semantiche correlate:*", md_out)
+
+    def test_format_output_filters_redundant_results_from_connections(self):
+        """Asserts format_output filters out notes already in primary results from connections line (TEST-03)."""
+        results = [
+            {
+                "title": "Nota Esistente",
+                "path": "02 - Atlas/Tech/Nota Esistente.md",
+                "area": "tech",
+                "type": "concept",
+                "tags": ["tech/ai"],
+                "summary": "Sintesi esistente.",
+                "score": 0.9,
+                "snippets": [{"heading": "Intro", "text": "Testo."}],
+                "video_timestamps": [],
+                "related": ["[[Nota Esistente]]", "[[Nota Nuova]]"]
+            }
+        ]
+        md_out = recall_engine.format_output(results, "query", output_format="markdown")
+        self.assertIn("*Connessioni semantiche correlate:* [[Nota Nuova]]", md_out)
+        self.assertNotIn("*Connessioni semantiche correlate:* [[Nota Esistente]], [[Nota Nuova]]", md_out)
+
     def test_gitignore_contains_recall_cache(self):
         """Asserts .gitignore contains .recall_cache.json rules to prevent tracking local indexes per D-01."""
         gitignore_path = os.path.join(PROJECT_ROOT, ".gitignore")

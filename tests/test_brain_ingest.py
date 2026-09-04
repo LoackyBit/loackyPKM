@@ -1384,6 +1384,106 @@ title: "Review Dashboard"
         self.assertIn("- [ ] 🛑 Interrompi elaborazioni attive (Panic Button)", content)
         self.assertIn("*Nessun processo attivo.*", content)
 
+    def test_process_tri_state_approvals_with_panic_preserves_watcher(self):
+        """Asserts checking Panic Button [x] in Review Dashboard preserves watcher PID resolved via vault hash (TEST-02)."""
+        import hashlib
+        from unittest.mock import patch
+
+        shasum_hash = hashlib.sha1(self.test_dir.encode('utf-8')).hexdigest()[:8]
+        hash_pid_file = f"/tmp/brain_watcher_{shasum_hash}.pid"
+        watcher_pid = 12345
+        with open(hash_pid_file, "w", encoding="utf-8") as f:
+            f.write(str(watcher_pid))
+
+        worker_lock = "/tmp/brain_ingest_tri_panic_worker.lock"
+        worker_pid = 77777
+        with open(worker_lock, "w", encoding="utf-8") as f:
+            f.write(f"pid: {worker_pid}\n")
+
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.write("""---
+status: draft
+type: moc
+title: "Review Dashboard"
+---
+## ⏳ In Elaborazione
+- [x] 🛑 Interrompi elaborazioni attive (Panic Button)
+- ⏳ [[Draft/Test Ingest]] (Fase 2/3: Rielaborazione Concettuale AI...)
+
+## 📥 Note in Attesa di Approvazione
+*Nessuna nota in attesa di approvazione.*
+
+## ⚠️ Errori di Acquisizione & Azioni Richieste
+*Nessun errore registrato.*
+
+## 📜 Storico Recente
+*Nessuna azione recente registrata.*
+""")
+        try:
+            with patch("os.kill") as mock_kill, patch("brain_ingest.is_pid_alive", return_value=True):
+                processed = brain_ingest.process_tri_state_approvals(self.test_dir)
+                self.assertEqual(processed, 1)
+
+                killed_pids = [call.args[0] for call in mock_kill.call_args_list]
+                self.assertNotIn(watcher_pid, killed_pids)
+                self.assertIn(worker_pid, killed_pids)
+
+            self.assertFalse(os.path.exists(worker_lock))
+            with open(dash_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn("- [ ] 🛑 Interrompi elaborazioni attive (Panic Button)", content)
+            self.assertIn("*Nessun processo attivo.*", content)
+        finally:
+            if os.path.exists(hash_pid_file):
+                try: os.remove(hash_pid_file)
+                except Exception: pass
+            if os.path.exists(worker_lock):
+                try: os.remove(worker_lock)
+                except Exception: pass
+
+    def test_panic_cli_flag_preserves_watcher_and_cleans_locks(self):
+        """Asserts CLI --panic cleans locks, preserves watcher via vault hash, and logs to inbox_history.md (TEST-02)."""
+        import hashlib
+        import subprocess
+
+        shasum_hash = hashlib.sha1(self.test_dir.encode('utf-8')).hexdigest()[:8]
+        hash_pid_file = f"/tmp/brain_watcher_{shasum_hash}.pid"
+        watcher_pid = 12345
+        with open(hash_pid_file, "w", encoding="utf-8") as f:
+            f.write(str(watcher_pid))
+
+        dummy_lock = "/tmp/brain_ingest_clipanic.lock"
+        with open(dummy_lock, "w", encoding="utf-8") as f:
+            f.write("pid: 99999\n")
+
+        script_path = os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts", "brain_ingest.py")
+        try:
+            proc = subprocess.run(
+                [sys.executable, script_path, "--panic", "--vault-root", self.test_dir],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            self.assertEqual(proc.returncode, 0)
+            self.assertIn("Panic abort executed", proc.stdout)
+            self.assertFalse(os.path.exists(dummy_lock))
+            self.assertTrue(os.path.exists(hash_pid_file))
+            with open(hash_pid_file, "r", encoding="utf-8") as f:
+                self.assertEqual(f.read().strip(), str(watcher_pid))
+
+            history_file = os.path.join(self.test_dir, "99 - Meta", "logs", "inbox_history.md")
+            self.assertTrue(os.path.exists(history_file))
+            with open(history_file, "r", encoding="utf-8") as f:
+                self.assertIn("[PANIC_ABORT]", f.read())
+        finally:
+            if os.path.exists(hash_pid_file):
+                try: os.remove(hash_pid_file)
+                except Exception: pass
+            if os.path.exists(dummy_lock):
+                try: os.remove(dummy_lock)
+                except Exception: pass
+
     def test_in_progress_automatic_transition_to_pending_on_status_draft(self):
         """Asserts that a note with status: in-progress appears under In Elaborazione,
         and when changed to status: draft it automatically transitions to Note in Attesa di Approvazione."""

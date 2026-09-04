@@ -12,6 +12,7 @@ import struct
 import tempfile
 import shutil
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 # Insert project scripts into sys.path
@@ -847,6 +848,88 @@ class TestRecallEngineTask2_0402(unittest.TestCase):
         self.assertIn(".recall_cache.json", content)
         self.assertIn("**/.recall_cache.json", content)
         self.assertIn("*.recall_cache.json.tmp", content)
+
+    def test_score_yaml_metadata_word_boundary_avoids_substring_false_positives(self):
+        """Asserts score_yaml_metadata uses word boundaries to prevent substring false positives on short tokens like 'ai' (CLEAN-02)."""
+        meta = {
+            "title": "Main Concept of Training",
+            "summary": "Spreading daily knowledge without issues.",
+            "area": "education",
+            "tags": ["education/study"]
+        }
+        # 'ai' is a substring of 'Main', 'Training', and 'daily', but NOT a separate word
+        score_false = recall_engine.score_yaml_metadata(meta, ["ai"])
+        self.assertEqual(score_false, 0.0)
+
+        # 'main' is a full word match in title -> 10.0
+        score_true = recall_engine.score_yaml_metadata(meta, ["main"])
+        self.assertEqual(score_true, 10.0)
+
+    def test_extract_relevant_snippet_ignores_code_comments_as_headings(self):
+        """Asserts extract_relevant_snippet_and_timestamps strips fenced code blocks so code comments are not parsed as markdown headings (CLEAN-02)."""
+        content = (
+            "---\nstatus: permanent\ntype: concept\narea: tech\ntitle: \"Python Snippet Note\"\n---\n\n"
+            "# Python Snippet Note\n\n"
+            "## Introduzione Reale\n"
+            "Questa è l'introduzione reale della nota.\n\n"
+            "```python\n"
+            "# Commento di prova che sembra un titolo H1\n"
+            "## Altro commento\n"
+            "def test_func():\n"
+            "    return True\n"
+            "```\n\n"
+            "## Meccanica Operativa\n"
+            "Spiegazione dettagliata della meccanica.\n"
+        )
+        note_rel = "02 - Atlas/Tech/Python Snippet Note.md"
+        note_abs = os.path.join(self.test_dir, note_rel)
+        os.makedirs(os.path.dirname(note_abs), exist_ok=True)
+        with open(note_abs, "w", encoding="utf-8") as f:
+            f.write(content)
+
+        snippets, _ = recall_engine.extract_relevant_snippet_and_timestamps(self.test_dir, note_rel, ["commento"])
+        if snippets:
+            for s in snippets:
+                self.assertNotIn("Commento di prova", s["heading"])
+                self.assertNotIn("Altro commento", s["heading"])
+
+    def test_execute_query_dense_track_with_freeform_query(self):
+        """Asserts execute_query activates dense semantic retrieval via pseudo-relevance feedback for freeform queries (CLEAN-02)."""
+        vec_file_path = os.path.join(self.test_dir, ".smart-env", "smart_sources", "mf_prf")
+        val = 1.0 / math.sqrt(384)
+        target_vec = [val] * 384
+        sim_vec = [val * 0.99 + (0.01 if i == 0 else 0.0) for i in range(384)]
+        norm = math.sqrt(sum(x*x for x in sim_vec))
+        sim_vec = [x / norm for x in sim_vec]
+
+        raw_bytes = struct.pack('<384f', *target_vec) + struct.pack('<384f', *sim_vec)
+        os.makedirs(os.path.dirname(vec_file_path), exist_ok=True)
+        with open(vec_file_path, 'wb') as f:
+            f.write(raw_bytes)
+
+        note_a_path = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Sistemi Operativi.md")
+        os.makedirs(os.path.dirname(note_a_path), exist_ok=True)
+        with open(note_a_path, "w", encoding="utf-8") as f:
+            f.write("---\nstatus: permanent\ntype: concept\narea: tech\ntitle: \"Sistemi Operativi\"\nsummary: \"Deadlock e gestione della memoria.\"\n---\n\n# Sistemi Operativi\nTrattazione su deadlock e concorrenza.\n")
+
+        note_b_path = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Processi e Thread.md")
+        with open(note_b_path, "w", encoding="utf-8") as f:
+            f.write("---\nstatus: permanent\ntype: concept\narea: tech\ntitle: \"Processi e Thread\"\nsummary: \"Primitive di sincronizzazione.\"\n---\n\n# Processi e Thread\nConcetti avanzati di sincronizzazione.\n")
+
+        # Mock vector metadata into cache
+        with patch("recall_engine.load_smart_connections_metadata") as mock_load:
+            mock_load.return_value = {
+                "02 - Atlas/Tech/Sistemi Operativi.md": ("mf_prf", 0),
+                "02 - Atlas/Tech/Processi e Thread.md": ("mf_prf", 1)
+            }
+            results, _ = recall_engine.execute_query(
+                self.test_dir,
+                query="deadlock e concorrenza nella memoria",
+                force_reindex=True
+            )
+            self.assertTrue(len(results) > 0)
+            paths = [r["path"] for r in results]
+            self.assertIn("02 - Atlas/Tech/Sistemi Operativi.md", paths)
 
 
 if __name__ == '__main__':

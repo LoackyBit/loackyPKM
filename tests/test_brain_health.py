@@ -532,6 +532,61 @@ Corpo della nota per auto fix.
         self.assertIn("nota interattiva.md", files)
         self.assertNotIn("Nota Interattiva.md", files)
 
+    def test_auto_fix_preserves_ignore_files_and_root_files(self):
+        """Asserts --auto-fix preserves IGNORE_FILES (GEMINI.md, AGENTS.md, README.md) and non-vault root files (CLEAN-01)."""
+        gemini_path = os.path.join(self.test_dir, "GEMINI.md")
+        gemini_content = "---\ncustom_key: special_value\ntitle: \"Gemini Custom\"\n---\n# System Prompt\nUnchanged text.\n"
+        with open(gemini_path, "w", encoding="utf-8") as f:
+            f.write(gemini_content)
+
+        root_extra_path = os.path.join(self.test_dir, "Scratchpad.md")
+        scratch_content = "# Scratchpad\nNon-vault file in root."
+        with open(root_extra_path, "w", encoding="utf-8") as f:
+            f.write(scratch_content)
+
+        # Create a valid note in 02 - Atlas to have something scanned
+        atlas_note = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Nota Valida.md")
+        with open(atlas_note, "w", encoding="utf-8") as f:
+            f.write("---\nstatus: permanent\ntype: concept\narea: tech\nrelated: []\nsource: original\ntitle: \"Nota Valida\"\ndate: '2026-09-05'\nupdated: 2026-09-05T01:00\ntags: [tech/ai]\nsummary: \"Sintesi valida di test per la nota.\"\n---\n\n[[Home MOC|Home]] / [[Tech]] / [[Nota Valida]]\n\n# Nota Valida\nContenuto.\n")
+
+        stats = brain_health.run_governance_engine(self.test_dir, auto_fix=True)
+
+        with open(gemini_path, "r", encoding="utf-8") as f:
+            self.assertEqual(f.read(), gemini_content)
+
+        with open(root_extra_path, "r", encoding="utf-8") as f:
+            self.assertEqual(f.read(), scratch_content)
+
+    def test_get_breadcrumbs_calendar_and_inbox(self):
+        """Asserts get_breadcrumbs maps 04 - Calendar to [[Calendar]] and 03 - Inbox to [[Inbox]] (CLEAN-01)."""
+        cal_bc = brain_health.get_breadcrumbs("04 - Calendar/DailyNote - 20260905.md", "DailyNote - 20260905")
+        self.assertEqual(cal_bc, "[[Home MOC|Home]] / [[Calendar]] / [[DailyNote - 20260905]]")
+
+        inbox_bc = brain_health.get_breadcrumbs("03 - Inbox/Bozza Rapida.md", "Bozza Rapida")
+        self.assertEqual(inbox_bc, "[[Home MOC|Home]] / [[Inbox]] / [[Bozza Rapida]]")
+
+    def test_minor_words_no_duplicates(self):
+        """Asserts MINOR_WORDS set contains expected minor words and correctly formats titles (CLEAN-01)."""
+        self.assertIn('in', brain_health.MINOR_WORDS)
+        self.assertIn('a', brain_health.MINOR_WORDS)
+        formatted = brain_health.clean_title_str("guida in un giorno")
+        self.assertEqual(formatted, "Guida in un Giorno")
+
+    def test_safe_rename_apfs_case_change_no_dangling_tmp(self):
+        """Asserts safe_rename on case-only renames leaves no dangling .tmp_rename files (CLEAN-01)."""
+        tech_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech")
+        old_rel = "02 - Atlas/Tech/case_test.md"
+        new_rel = "02 - Atlas/Tech/Case_Test.md"
+        old_abs = os.path.join(self.test_dir, old_rel)
+        with open(old_abs, "w", encoding="utf-8") as f:
+            f.write("# Case Test")
+
+        brain_health.safe_rename(self.test_dir, old_rel, new_rel, is_tracked=False)
+
+        tmp_abs = old_abs + ".tmp_rename"
+        self.assertFalse(os.path.exists(tmp_abs), "Dangling .tmp_rename must not exist")
+        self.assertTrue(os.path.exists(os.path.join(self.test_dir, new_rel)))
+
 
 if __name__ == "__main__":
     unittest.main()

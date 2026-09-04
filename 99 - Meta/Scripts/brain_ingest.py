@@ -1566,6 +1566,9 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                 except youtube_helper.TranscriptUnavailableError as e:
                     record_ingest_error(root, source, f"Trascrizione non disponibile: {e}")
                     raise
+                except youtube_helper.VideoMetadataError as e:
+                    record_ingest_error(root, source, f"Errore metadati video: {e}")
+                    raise
                 except Exception as e:
                     record_ingest_error(root, source, f"Errore estrazione YouTube: {e}")
                     raise

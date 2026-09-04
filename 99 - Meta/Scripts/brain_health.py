@@ -25,7 +25,7 @@ MINOR_WORDS = {
     'di', 'del', 'della', 'dello', 'dei', 'degli', 'delle', 'da', 'dal', 'dalla', 'in', 'su',
     'sul', 'sulla', 'per', 'con', 'a', 'al', 'alla', 'o', 'e', 'ed', 'la', 'il', 'lo', 'i',
     'gli', 'le', 'un', 'uno', 'una', 'to', 'the', 'and', 'of', 'on', 'at', 'for', 'with', 'by',
-    'in', 'an', 'a', 'd', 'l'
+    'an', 'd', 'l'
 }
 
 PRESERVE_UPPER = {
@@ -238,6 +238,10 @@ def get_breadcrumbs(filepath: str, clean_title: str) -> str:
         parent_area = "[[Home MOC|Home]]"
         self_link = f"[[{filename_base}|{clean_title}]]" if filename_base != clean_title else f"[[{filename_base}]]"
         return f"{parent_area} / {self_link}"
+    elif path_str.startswith("04 - Calendar"):
+        parent_area = "[[Calendar]]"
+    elif path_str.startswith("03 - Inbox"):
+        parent_area = "[[Inbox]]"
     else:
         parent_area = "[[Atlas]]"
 
@@ -1070,22 +1074,32 @@ def safe_rename(root_dir: str, old_rel: str, new_rel: str, is_tracked: bool, dry
     case_only = (old_abs.lower() == new_abs.lower())
 
     if is_tracked:
+        temp_rel = old_rel + ".tmp_rename"
+        temp_abs = os.path.join(root_dir, temp_rel)
         try:
             if case_only:
-                temp_rel = old_rel + ".tmp_rename"
                 subprocess.run(['git', 'mv', old_rel, temp_rel], cwd=root_dir, check=True, capture_output=True)
                 subprocess.run(['git', 'mv', temp_rel, new_rel], cwd=root_dir, check=True, capture_output=True)
             else:
                 subprocess.run(['git', 'mv', old_rel, new_rel], cwd=root_dir, check=True, capture_output=True)
             return
         except Exception:
-            pass
+            if case_only and os.path.exists(temp_abs) and not os.path.exists(old_abs):
+                try:
+                    subprocess.run(['git', 'mv', temp_rel, old_rel], cwd=root_dir, capture_output=True)
+                except Exception:
+                    pass
 
     try:
         if case_only:
             temp_abs = old_abs + ".tmp_rename"
             os.rename(old_abs, temp_abs)
-            os.rename(temp_abs, new_abs)
+            try:
+                os.rename(temp_abs, new_abs)
+            except Exception:
+                if os.path.exists(temp_abs) and not os.path.exists(old_abs):
+                    os.rename(temp_abs, old_abs)
+                raise
         else:
             os.rename(old_abs, new_abs)
     except Exception as e:
@@ -1369,9 +1383,12 @@ def run_governance_engine(vault_root: str, dry_run: bool = False, auto_fix: bool
         # 2. Update inbound wikilinks if renames occurred
         if rename_map:
             for root, dirs, files in os.walk(vault_root):
-                dirs[:] = [d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')]
-                for file in files:
-                    if file.endswith('.md') and not file.startswith('.'):
+                dirs[:] = sorted([d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')])
+                for file in sorted(files):
+                    if file.endswith('.md') and not file.startswith('.') and file not in IGNORE_FILES:
+                        rel = os.path.relpath(os.path.join(root, file), vault_root)
+                        if not any(rel.startswith(vd) for vd in VAULT_DIRECTORIES) and root == vault_root:
+                            continue
                         f_abs = os.path.join(root, file)
                         with open(f_abs, 'r', encoding='utf-8', errors='ignore') as f:
                             text = f.read()
@@ -1390,16 +1407,37 @@ def run_governance_engine(vault_root: str, dry_run: bool = False, auto_fix: bool
 
         # 3. Apply YAML linting
         for root, dirs, files in os.walk(vault_root):
-            dirs[:] = [d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')]
-            for file in files:
-                if file.endswith('.md') and not file.startswith('.'):
+            dirs[:] = sorted([d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')])
+            for file in sorted(files):
+                if file.endswith('.md') and not file.startswith('.') and file not in IGNORE_FILES:
+                    rel = os.path.relpath(os.path.join(root, file), vault_root)
+                    if not any(rel.startswith(vd) for vd in VAULT_DIRECTORIES) and root == vault_root:
+                        continue
                     f_abs = os.path.join(root, file)
                     lint_file(f_abs, vault_root=vault_root, execute=True)
 
         # 4. Refresh data and write dashboard
         fresh_data, fresh_auditor = collect_vault_data(vault_root)
-        write_health_dashboard(vault_root, fresh_data, audit_stats)
+        fresh_broken = {}
+        fresh_forward = {}
+        for note in fresh_data:
+            _, fwd, brk = fresh_auditor.audit_file_links(note['rel_path'], note['content'])
+            if fwd:
+                fresh_forward[note['rel_path']] = fwd
+            if brk:
+                fresh_broken[note['rel_path']] = brk
+        fresh_orphans = fresh_auditor.detect_orphans()
+        fresh_stats = {
+            'total_notes': len(fresh_data),
+            'orphan_count': len(fresh_orphans),
+            'broken_link_count': sum(len(v) for v in fresh_broken.values()),
+            'forward_link_count': sum(len(v) for v in fresh_forward.values()),
+            'duplicate_count': len(fresh_auditor.duplicate_notes),
+            'duplicate_notes': fresh_auditor.duplicate_notes
+        }
+        write_health_dashboard(vault_root, fresh_data, fresh_stats)
         print("Vault health governance fixes applied successfully and dashboard updated.")
+        return fresh_stats
 
     return audit_stats
 

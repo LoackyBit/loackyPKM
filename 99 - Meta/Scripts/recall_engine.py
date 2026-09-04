@@ -274,6 +274,13 @@ def cosine_similarity(vec_a: Tuple[float, ...], vec_b: Tuple[float, ...]) -> flo
     return sum(a * b for a, b in zip(vec_a, vec_b))
 
 
+def _token_match(tok: str, text: str) -> bool:
+    """Checks if token matches within text using word boundaries to prevent substring false positives."""
+    if not tok or not text:
+        return False
+    return bool(re.search(rf"\b{re.escape(tok)}\b", text, re.IGNORECASE))
+
+
 def score_yaml_metadata(metadata: Dict[str, Any], query_tokens: List[str]) -> float:
     """
     Computes weighted YAML metadata score:
@@ -297,13 +304,13 @@ def score_yaml_metadata(metadata: Dict[str, Any], query_tokens: List[str]) -> fl
 
     score = 0.0
     for tok in query_tokens:
-        if tok in title_text:
+        if _token_match(tok, title_text):
             score += 10.0
-        if tok in summary_text:
+        if _token_match(tok, summary_text):
             score += 6.0
-        if tok in area_text or tok in tags_text:
+        if _token_match(tok, area_text) or _token_match(tok, tags_text):
             score += 4.0
-        if tok in related_text or tok in aliases_text:
+        if _token_match(tok, related_text) or _token_match(tok, aliases_text):
             score += 2.0
 
     return score
@@ -531,12 +538,16 @@ def extract_relevant_snippet_and_timestamps(
     # Extract video timestamps like [12:34] or [01:23:45]
     timestamps = re.findall(r'\[([0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?)\]', body)
 
+    # Strip fenced code blocks before heading extraction so code comments (# ...) are not parsed as markdown headings
+    body_no_code = re.sub(r'```[\s\S]*?```', '', body)
+    body_no_code = re.sub(r'~~~[\s\S]*?~~~', '', body_no_code)
+
     # Extract headings and paragraphs
     sections: List[Tuple[str, str]] = []
     current_heading = "Introduzione"
     current_lines: List[str] = []
 
-    for line in body.splitlines():
+    for line in body_no_code.splitlines():
         if line.startswith(('## ', '### ', '# ')):
             if current_lines:
                 sec_content = "\n".join(current_lines).strip()
@@ -630,7 +641,7 @@ def execute_query(
         bm25_scores = bm25_index.score(query_tokens)
         bm25_ranks = [rel_path for rel_path, _ in bm25_scores]
 
-        # 3. Dense Semantic Track (if query matches a note title)
+        # 3. Dense Semantic Track (direct match or pseudo-relevance feedback for freeform queries)
         dense_ranks: List[str] = []
         cleaned_query = query.strip('[]"\'').lower()
         matching_target = None
@@ -640,6 +651,16 @@ def execute_query(
             if stem == cleaned_query or title == cleaned_query:
                 matching_target = rel_path
                 break
+
+        if not matching_target:
+            # Pseudo-relevance feedback: use top lexical candidate (BM25 or YAML) as semantic anchor
+            top_candidates = bm25_ranks if bm25_ranks else yaml_ranks
+            for cand in top_candidates:
+                cand_entry = files.get(cand, {})
+                if cand_entry.get("vector_file") and cand_entry.get("vector_i") is not None:
+                    matching_target = cand
+                    break
+
         if matching_target:
             sim_notes = find_similar_notes(vault_root, matching_target, cache_data, limit=len(files))
             dense_ranks = [rel_path for rel_path, _ in sim_notes]

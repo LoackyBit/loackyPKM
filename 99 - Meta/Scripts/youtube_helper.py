@@ -72,13 +72,7 @@ def get_video_id(url: str) -> Optional[str]:
 def fetch_metadata_with_retry(url: str, timeout: int = 15, max_retries: int = 1, backoff: float = 2.0) -> Dict[str, Any]:
     """Fetches video metadata via yt_dlp with timeout and exponential backoff retry per D-19."""
     if yt_dlp is None:
-        return {
-            'title': 'Video YouTube',
-            'uploader': 'Canale YouTube',
-            'duration': 0,
-            'chapters': [],
-            'url': None
-        }
+        raise VideoMetadataError("yt-dlp is not installed or available.")
 
     ydl_opts = {
         'quiet': True,
@@ -110,14 +104,7 @@ def fetch_metadata_with_retry(url: str, timeout: int = 15, max_retries: int = 1,
             if attempt < max_retries:
                 time.sleep(backoff * (attempt + 1))
 
-    print(f"Warning: yt-dlp metadata extraction failed for {url}: {last_exc}", file=sys.stderr)
-    return {
-        'title': 'Video YouTube',
-        'uploader': 'Canale YouTube',
-        'duration': 0,
-        'chapters': [],
-        'url': None
-    }
+    raise VideoMetadataError(f"yt-dlp metadata extraction failed for {url}: {last_exc}")
 
 
 def fetch_transcript_with_retry(video_id: str, timeout: int = 15, max_retries: int = 1, backoff: float = 2.0) -> List[Dict[str, Any]]:

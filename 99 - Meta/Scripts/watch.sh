@@ -5,6 +5,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VAULT_PATH="$(cd "$SCRIPT_DIR/../.." && pwd)"
+VAULT_NAME="$(basename "$VAULT_PATH")"
 INBOX_PATH="$VAULT_PATH/03 - Inbox"
 DASHBOARD_FILE="$INBOX_PATH/Review Dashboard.md"
 LOG_DIR="$VAULT_PATH/99 - Meta/logs"
@@ -187,9 +188,9 @@ run_loop() {
             if [ -f "$DASHBOARD_FILE" ] && grep -q "\- \[ \]" "$DASHBOARD_FILE" && [ ! -f "$OPENED_FLAG" ]; then
                 log_msg "Obsidian running with pending reviews. Opening Review Dashboard..."
                 if command -v open >/dev/null 2>&1; then
-                    open "obsidian://open?vault=loackyPKM&file=03%20-%20Inbox%2FReview%20Dashboard" 2>/dev/null || true
+                    open "obsidian://open?vault=${VAULT_NAME}&file=03%20-%20Inbox%2FReview%20Dashboard" 2>/dev/null || true
                 elif command -v xdg-open >/dev/null 2>&1; then
-                    xdg-open "obsidian://open?vault=loackyPKM&file=03%20-%20Inbox%2FReview%20Dashboard" 2>/dev/null || true
+                    xdg-open "obsidian://open?vault=${VAULT_NAME}&file=03%20-%20Inbox%2FReview%20Dashboard" 2>/dev/null || true
                 fi
                 touch "$OPENED_FLAG"
             fi

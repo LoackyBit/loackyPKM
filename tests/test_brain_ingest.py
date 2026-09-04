@@ -473,9 +473,11 @@ Ed anche `<font color="#8a5cf6"><b>secondario</b></font>` con backticks.
         import youtube_helper
         from unittest.mock import patch
 
+        mock_meta = {'title': 'Rick Astley', 'uploader': 'RickAstleyVEVO', 'duration': 212, 'chapters': [], 'url': None}
         with patch.object(youtube_helper, "YouTubeTranscriptApi", None):
-            with self.assertRaises(youtube_helper.TranscriptUnavailableError):
-                brain_ingest.ingest_source("https://www.youtube.com/watch?v=dQw4w9WgXcQ", vault_root=self.test_dir, force=True)
+            with patch.object(youtube_helper, "fetch_metadata_with_retry", return_value=mock_meta):
+                with self.assertRaises(youtube_helper.TranscriptUnavailableError):
+                    brain_ingest.ingest_source("https://www.youtube.com/watch?v=dQw4w9WgXcQ", vault_root=self.test_dir, force=True)
 
         dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
         self.assertTrue(os.path.exists(dash_path))
@@ -483,6 +485,26 @@ Ed anche `<font color="#8a5cf6"><b>secondario</b></font>` con backticks.
             dash_content = f.read()
         self.assertIn("## ⚠️ Errori di Acquisizione & Azioni Richieste", dash_content)
         self.assertIn("dQw4w9WgXcQ", dash_content)
+
+    def test_youtube_metadata_failure_raises_error_and_does_not_create_bogus_note(self):
+        """Asserts fetch_metadata_with_retry failure raises VideoMetadataError and creates no bogus 'Video YouTube.md' note (CLEAN-03)."""
+        import youtube_helper
+        from unittest.mock import patch
+
+        with patch.object(youtube_helper, "fetch_metadata_with_retry", side_effect=youtube_helper.VideoMetadataError("yt-dlp extraction failed")):
+            with self.assertRaises(youtube_helper.VideoMetadataError):
+                brain_ingest.ingest_source("https://www.youtube.com/watch?v=FAIL1234567", vault_root=self.test_dir, force=True)
+
+        # Check no Video YouTube.md was created anywhere in vault
+        for root, _, files in os.walk(self.test_dir):
+            for f in files:
+                self.assertNotIn("Video YouTube", f)
+
+        dash_path = os.path.join(self.test_dir, "03 - Inbox", "Review Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+        with open(dash_path, "r", encoding="utf-8") as f:
+            dash_content = f.read()
+        self.assertIn("FAIL1234567", dash_content)
 
     def test_is_visual_content_detection(self):
         """Asserts is_visual_content detects visual keywords in Italian and English per D-09."""

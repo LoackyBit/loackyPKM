@@ -2448,6 +2448,66 @@ area: meta
                 try: os.remove(expected_lock_file)
                 except Exception: pass
 
+    def test_detect_input_type_non_existent_file_returns_text(self):
+        """Asserts detect_input_type returns 'text' for non-existent .md files and 'file' for existing files (CLEAN-03)."""
+        self.assertEqual(brain_ingest.detect_input_type("non_existent_file.md"), "text")
+        self.assertEqual(brain_ingest.detect_input_type("Another Note.md"), "text")
+
+        real_file = os.path.join(self.test_dir, "real_note.md")
+        with open(real_file, "w", encoding="utf-8") as f:
+            f.write("content")
+        self.assertEqual(brain_ingest.detect_input_type(real_file), "file")
+
+    def test_autolink_content_preserves_markdown_links_and_urls(self):
+        """Asserts autolink_content preserves markdown links [text](url) and URLs without breaking dotted domains (CLEAN-03)."""
+        # Create a real note in Atlas named Python
+        py_note = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Python.md")
+        os.makedirs(os.path.dirname(py_note), exist_ok=True)
+        with open(py_note, "w", encoding="utf-8") as f:
+            f.write("# Python")
+
+        body = (
+            "Ecco la documentazione: [Guida Python](https://docs.python.org/3/library/os.path.html) "
+            "e visita il sito https://python.org per scaricare Python."
+        )
+        linked, inserted = brain_ingest.autolink_content(self.test_dir, body, "Altra Nota")
+        self.assertIn("[Guida Python](https://docs.python.org/3/library/os.path.html)", linked)
+        self.assertIn("https://python.org", linked)
+        self.assertIn("[[Python]]", linked)
+        self.assertEqual(inserted, ["[[Python]]"])
+
+    def test_classify_target_directory_rule_based(self):
+        """Asserts classify_target_directory routes correctly via declarative DIRECTORY_ROUTING_RULES (CLEAN-04)."""
+        self.assertEqual(brain_ingest.classify_target_directory("Mio Post", ["blog"]), "05 - Blog")
+        self.assertEqual(brain_ingest.classify_target_directory("Bitcoin Analysis", ["finance/crypto"]), "02 - Atlas/Finance/Crypto")
+        self.assertEqual(brain_ingest.classify_target_directory("Regime Forfettario", ["finance/tax"]), "02 - Atlas/Finance/Holdings & Tax")
+        self.assertEqual(brain_ingest.classify_target_directory("ETF World", ["finance/stocks"]), "02 - Atlas/Finance/Investments")
+        self.assertEqual(brain_ingest.classify_target_directory("Scheda Ipertrofia", ["health/gym"]), "02 - Atlas/Personal Growth & Health/Gym & Health")
+        self.assertEqual(brain_ingest.classify_target_directory("Abitudini Atomiche", ["mentality/habits"]), "02 - Atlas/Personal Growth & Health/Mentality")
+        self.assertEqual(brain_ingest.classify_target_directory("Metodo Feynman", ["education/method"]), "02 - Atlas/Education & Learning/Learning")
+        self.assertEqual(brain_ingest.classify_target_directory("Transformer Attention", ["tech/llm"]), "02 - Atlas/Tech & AI/AI")
+        self.assertEqual(brain_ingest.classify_target_directory("Clean Code Guide", ["tech/dev"]), "02 - Atlas/Tech & AI/Software Development")
+
+    def test_custom_ai_model_env_override(self):
+        """Asserts BRAIN_AI_MODEL env var or parameter overrides default AI model in enrich_draft_with_ai (CLEAN-04)."""
+        from unittest.mock import patch
+        import subprocess
+
+        mock_proc = subprocess.CompletedProcess(args=[], returncode=0, stdout="# Note\n\nContenuto\n\n---SUMMARY---\nSintesi densa.")
+        with patch.dict(os.environ, {"BRAIN_AI_MODEL": "custom-model-test", "BRAIN_INGEST_NO_AI": "0"}):
+            with patch.object(brain_ingest.shutil, "which", return_value="/bin/agy"):
+                with patch("subprocess.run", return_value=mock_proc) as mock_run:
+                    body, summary = brain_ingest.enrich_draft_with_ai(
+                        vault_root=self.test_dir,
+                        title="Nota Test",
+                        source_content="Contenuto sorgente da analizzare",
+                    )
+                    self.assertTrue(mock_run.called)
+                    called_cmd = mock_run.call_args[0][0]
+                    self.assertIn("--model", called_cmd)
+                    model_idx = called_cmd.index("--model")
+                    self.assertEqual(called_cmd[model_idx + 1], "custom-model-test")
+
 
 if __name__ == "__main__":
     unittest.main()

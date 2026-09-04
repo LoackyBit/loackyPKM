@@ -24,6 +24,7 @@ if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 
 import ruamel.yaml
+import brain_health
 
 CONTROLLED_TYPES = {'concept', 'video', 'article', 'lecture', 'book', 'project', 'moc', 'journal'}
 CONTROLLED_AREAS = {'tech', 'education', 'mentality', 'finance', 'projects', 'meta', 'calendar'}
@@ -61,12 +62,8 @@ CACHE_FILENAME = ".recall_cache.json"
 VEC_DIM = 384
 VEC_BYTES = VEC_DIM * 4  # 1536 bytes for 384 float32 values
 
-
-def get_vault_root(start_path: Optional[str] = None) -> str:
-    """Dynamically resolves the root path of the Second Brain vault."""
-    if start_path:
-        return os.path.abspath(start_path)
-    return os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
+# DRY consolidation (CLEAN-04)
+get_vault_root = brain_health.get_vault_root
 
 
 def tokenize(text: str) -> List[str]:
@@ -133,43 +130,8 @@ class BM25Index:
         return scores
 
 
-def split_markdown_note(content: str) -> Tuple[bool, str, Optional[str], str]:
-    """Splits markdown into frontmatter text, breadcrumb line, and body."""
-    lines = content.splitlines()
-    has_frontmatter = False
-    frontmatter_lines = []
-    rest_lines = []
-
-    if len(lines) > 0 and lines[0].strip() == '---':
-        closing_idx = -1
-        for idx in range(1, len(lines)):
-            if lines[idx].strip() == '---':
-                closing_idx = idx
-                break
-        if closing_idx != -1:
-            has_frontmatter = True
-            frontmatter_lines = lines[1:closing_idx]
-            rest_lines = lines[closing_idx + 1:]
-        else:
-            rest_lines = lines
-    else:
-        rest_lines = lines
-
-    breadcrumb = None
-    body_start_idx = 0
-    while body_start_idx < len(rest_lines) and not rest_lines[body_start_idx].strip():
-        body_start_idx += 1
-
-    if body_start_idx < len(rest_lines):
-        candidate = rest_lines[body_start_idx].strip()
-        if candidate.startswith('[[Home MOC') or (candidate.startswith('[[') and ' / ' in candidate):
-            breadcrumb = candidate
-            body_start_idx += 1
-
-    body_lines = rest_lines[body_start_idx:]
-    body_str = '\n'.join(body_lines).lstrip('\n')
-
-    return has_frontmatter, '\n'.join(frontmatter_lines), breadcrumb, body_str
+# DRY consolidation (CLEAN-04)
+split_markdown_note = brain_health.split_markdown_note
 
 
 def safe_parse_frontmatter(fm_text: str) -> Dict[str, Any]:

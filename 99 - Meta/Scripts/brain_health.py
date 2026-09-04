@@ -103,6 +103,13 @@ TAG_HIERARCHY_MAP = {
 def get_vault_root(start_path: Optional[str] = None) -> str:
     """Dynamically resolves the root path of the Second Brain vault."""
     if start_path:
+        current = os.path.abspath(start_path)
+        while current != os.path.dirname(current):
+            if os.path.isdir(os.path.join(current, ".obsidian")) or (
+                os.path.isdir(os.path.join(current, "02 - Atlas")) and os.path.isdir(os.path.join(current, "99 - Meta"))
+            ):
+                return current
+            current = os.path.dirname(current)
         return os.path.abspath(start_path)
     script_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.abspath(os.path.join(script_dir, "..", ".."))

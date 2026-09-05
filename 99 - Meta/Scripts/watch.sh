@@ -5,6 +5,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VAULT_PATH="$(cd "$SCRIPT_DIR/../.." && pwd)"
+VAULT_NAME="$(basename "$VAULT_PATH")"
 INBOX_PATH="$VAULT_PATH/03 - Inbox"
 DASHBOARD_FILE="$INBOX_PATH/Review Dashboard.md"
 LOG_DIR="$VAULT_PATH/99 - Meta/logs"
@@ -15,7 +16,7 @@ if [ -n "$PID_FILE" ]; then
 fi
 # Vault-specific PID file to prevent cross-vault collisions
 VAULT_HASH=$(echo -n "$VAULT_PATH" | shasum 2>/dev/null | cut -c1-8 || echo "default")
-PID_FILE="${PID_FILE:-/tmp/brain_watcher_${VAULT_HASH}.pid}"
+export PID_FILE="${PID_FILE:-/tmp/brain_watcher_${VAULT_HASH}.pid}"
 OPENED_FLAG="/tmp/obsidian_dashboard_opened_${VAULT_HASH}"
 
 mkdir -p "$LOG_DIR"
@@ -187,9 +188,9 @@ run_loop() {
             if [ -f "$DASHBOARD_FILE" ] && grep -q "\- \[ \]" "$DASHBOARD_FILE" && [ ! -f "$OPENED_FLAG" ]; then
                 log_msg "Obsidian running with pending reviews. Opening Review Dashboard..."
                 if command -v open >/dev/null 2>&1; then
-                    open "obsidian://open?vault=loackyPKM&file=03%20-%20Inbox%2FReview%20Dashboard" 2>/dev/null || true
+                    open "obsidian://open?vault=${VAULT_NAME}&file=03%20-%20Inbox%2FReview%20Dashboard" 2>/dev/null || true
                 elif command -v xdg-open >/dev/null 2>&1; then
-                    xdg-open "obsidian://open?vault=loackyPKM&file=03%20-%20Inbox%2FReview%20Dashboard" 2>/dev/null || true
+                    xdg-open "obsidian://open?vault=${VAULT_NAME}&file=03%20-%20Inbox%2FReview%20Dashboard" 2>/dev/null || true
                 fi
                 touch "$OPENED_FLAG"
             fi
@@ -268,6 +269,19 @@ restart_daemon() {
     start_daemon
 }
 
+install_service() {
+    local TARGET_PLIST="$HOME/Library/LaunchAgents/com.loackypkm.watcher.plist"
+    local SOURCE_TEMPLATE="$SCRIPT_DIR/com.loackypkm.watcher.plist"
+    if [ ! -f "$SOURCE_TEMPLATE" ]; then
+        echo "Template plist not found at $SOURCE_TEMPLATE"
+        exit 1
+    fi
+    mkdir -p "$HOME/Library/LaunchAgents"
+    sed "s|__VAULT_PATH__|$VAULT_PATH|g" "$SOURCE_TEMPLATE" > "$TARGET_PLIST"
+    echo "LaunchAgent installed to $TARGET_PLIST with VAULT_PATH=$VAULT_PATH"
+    echo "To activate: launchctl load $TARGET_PLIST"
+}
+
 # CLI Argument routing
 case "${1:-run}" in
     start)
@@ -285,8 +299,11 @@ case "${1:-run}" in
     run)
         run_loop
         ;;
+    install-service)
+        install_service
+        ;;
     *)
-        echo "Usage: $0 {start|stop|status|restart|run}"
+        echo "Usage: $0 {start|stop|status|restart|run|install-service}"
         exit 1
         ;;
 esac

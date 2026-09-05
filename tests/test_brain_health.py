@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 import shutil
+import unicodedata
 from pathlib import Path
 from unittest.mock import patch
 
@@ -208,6 +209,384 @@ Here is inline code: `code[['x', 'y']]`.
 
         args_dash = parser.parse_args(["--dashboard-only"])
         self.assertTrue(args_dash.dashboard_only)
+
+    def test_accented_characters_filename_title_symmetry(self):
+        """Asserts symmetrical preservation of Italian accented vowels in Unicode NFC between clean_filename and clean_title_str per D-03."""
+        test_samples = [
+            ("identità del secondo brain", "Identità del Secondo Brain"),
+            ("perché l'ingegneria informatica è essenziale", "Perché l'Ingegneria Informatica È Essenziale"),
+            ("università e facoltà d'ingegneria", "Università e Facoltà d'Ingegneria"),
+            ("città, virtù e verità", "Città, Virtù e Verità"),
+        ]
+        for raw, expected in test_samples:
+            filename_res = brain_health.clean_filename(f"{raw}.md")
+            title_res = brain_health.clean_title_str(raw)
+            self.assertEqual(filename_res, expected)
+            self.assertEqual(title_res, expected)
+            self.assertEqual(filename_res, title_res)
+            self.assertEqual(unicodedata.normalize('NFC', filename_res), filename_res)
+            self.assertEqual(unicodedata.normalize('NFC', title_res), title_res)
+
+    def test_sanitization_forbidden_characters_symmetry(self):
+        """Asserts identical sanitization of forbidden characters (/, \\, :) between clean_filename and clean_title_str per D-04."""
+        cases = [
+            ("Lezione 12/03/2026: Algoritmi & Strutture Dati", "Lezione 12 - 03 - 2026 - Algoritmi & Strutture Dati"),
+            ("C:\\Windows\\System32\\Note", "C - Windows - System32 - Note"),
+        ]
+        for raw, expected in cases:
+            fn_res = brain_health.clean_filename(f"{raw}.md")
+            title_res = brain_health.clean_title_str(raw)
+            self.assertEqual(fn_res, expected)
+            self.assertEqual(title_res, expected)
+            self.assertEqual(fn_res, title_res)
+
+    def test_infer_metadata_video_preservation(self):
+        """Asserts infer_metadata preserves video_url and channel for notes with type: video per D-07."""
+        meta = {
+            "type": "video",
+            "source": "https://youtube.com/watch?v=123",
+            "video_url": "https://youtube.com/watch?v=123",
+            "channel": "AI Explained"
+        }
+        res = brain_health.infer_metadata("02 - Atlas/Tech/Video Note.md", meta, "body", "Video Note.md")
+        self.assertEqual(res["type"], "video")
+        self.assertEqual(res["video_url"], "https://youtube.com/watch?v=123")
+        self.assertEqual(res["channel"], "AI Explained")
+
+    def test_video_source_bidirectional_sync(self):
+        """Asserts bidirectional synchronization between source and video_url for YouTube links per D-08."""
+        # 1. source has YouTube URL, video_url missing
+        meta1 = {"type": "video", "source": "https://youtube.com/watch?v=123"}
+        res1 = brain_health.infer_metadata("02 - Atlas/Tech/Video Note 1.md", meta1, "body", "Video Note 1.md")
+        self.assertEqual(res1["video_url"], "https://youtube.com/watch?v=123")
+        self.assertEqual(res1["source"], "https://youtube.com/watch?v=123")
+
+        # 2. video_url has YouTube URL, source is 'original'
+        meta2 = {"type": "video", "source": "original", "video_url": "https://youtu.be/abc"}
+        res2 = brain_health.infer_metadata("02 - Atlas/Tech/Video Note 2.md", meta2, "body", "Video Note 2.md")
+        self.assertEqual(res2["source"], "https://youtu.be/abc")
+        self.assertEqual(res2["video_url"], "https://youtu.be/abc")
+
+    def test_scan_vault_duplicate_collision_tracking(self):
+        """Asserts VaultHealthAuditor.scan_vault prevents destructive overwrite of all_notes and tracks collisions in duplicate_notes per D-05, D-06."""
+        atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech")
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        os.makedirs(atlas_dir, exist_ok=True)
+        os.makedirs(inbox_dir, exist_ok=True)
+
+        atlas_file = os.path.join(atlas_dir, "Concept Node.md")
+        inbox_file = os.path.join(inbox_dir, "Concept Node.md")
+        with open(atlas_file, "w", encoding="utf-8") as f:
+            f.write("# Atlas Concept Node\nContent.")
+        with open(inbox_file, "w", encoding="utf-8") as f:
+            f.write("# Inbox Concept Node\nStaging draft.")
+
+        auditor = brain_health.VaultHealthAuditor(self.test_dir)
+        self.assertIn("Concept Node", auditor.all_notes)
+        self.assertIn("Concept Node", auditor.duplicate_notes)
+        self.assertEqual(len(auditor.duplicate_notes["Concept Node"]), 2)
+        # 02 - Atlas is scanned first alphabetically before 03 - Inbox
+        self.assertEqual(auditor.all_notes["Concept Node"], os.path.normpath("02 - Atlas/Tech/Concept Node.md"))
+
+    def test_audit_stats_reports_duplicate_count(self):
+        """Asserts run_governance_engine exposes duplicate_count and duplicate_notes in audit_stats per HLTH-04."""
+        atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech")
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        os.makedirs(atlas_dir, exist_ok=True)
+        os.makedirs(inbox_dir, exist_ok=True)
+
+        with open(os.path.join(atlas_dir, "Duplicate Note.md"), "w", encoding="utf-8") as f:
+            f.write("# Duplicate 1")
+        with open(os.path.join(inbox_dir, "Duplicate Note.md"), "w", encoding="utf-8") as f:
+            f.write("# Duplicate 2")
+
+        stats = brain_health.run_governance_engine(self.test_dir, dry_run=True)
+        self.assertEqual(stats["duplicate_count"], 1)
+        self.assertIn("Duplicate Note", stats["duplicate_notes"])
+
+    def test_lint_only_diagnostic_mode(self):
+        """Asserts --lint-only runs a non-destructive read-only audit of YAML violations without modifying disk per D-01, HLTH-01."""
+        atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech")
+        os.makedirs(atlas_dir, exist_ok=True)
+        note_path = os.path.join(atlas_dir, "Incomplete Note.md")
+        original_content = """---
+title: "Incomplete Note"
+date: '2026-09-03'
+---
+# Incomplete Note
+Body without status, type, area, tags.
+"""
+        with open(note_path, "w", encoding="utf-8") as f:
+            f.write(original_content)
+
+        stats = brain_health.run_governance_engine(self.test_dir, lint_only=True)
+        self.assertEqual(stats["total_notes"], 1)
+        self.assertEqual(stats["misaligned_notes"], 1)
+        self.assertEqual(stats["compliant_notes"], 0)
+        self.assertEqual(len(stats["issues"]), 1)
+
+        # Assert no modification to file on disk
+        with open(note_path, "r", encoding="utf-8") as f:
+            self.assertEqual(f.read(), original_content)
+
+        # Assert no dashboard or report was created
+        dashboard_path = os.path.join(self.test_dir, "99 - Meta", "Vault Health Dashboard.md")
+        self.assertFalse(os.path.exists(dashboard_path))
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        self.assertFalse(os.path.exists(inbox_dir))
+
+    def test_lint_only_rejects_auto_fix_conflict(self):
+        """Asserts run_governance_engine rejects concurrent --lint-only and --auto-fix per D-02."""
+        res = brain_health.run_governance_engine(self.test_dir, lint_only=True, auto_fix=True)
+        self.assertEqual(res.get("error"), "lint_only_read_only_conflict")
+
+    def test_diagnostic_report_and_dashboard_headings_no_emoji(self):
+        """Asserts diagnostic report and dashboard have zero emoji in H1-H6 headings and no Collegamenti section (D-14, D-16, PERF-04)."""
+        import re
+        audit_stats = {
+            "orphan_notes": ["02 - Atlas/Tech/Orphan Note.md"],
+            "broken_links": {"02 - Atlas/Tech/Source Note.md": ["Broken Target"]},
+            "forward_links": {"02 - Atlas/Tech/Source Note.md": ["Future Note"]},
+            "lint_issues": [("02 - Atlas/Tech/Lint Note.md", ["Missing status"])],
+            "title_case_renames": [],
+            "total_notes": 10,
+            "compliant_notes": 9,
+            "misaligned_notes": 1,
+            "recent_notes": []
+        }
+
+        # 1. Health Dashboard Markdown
+        dashboard_md = brain_health.generate_health_dashboard(self.test_dir, [], audit_stats)
+        self.assertNotIn("## Collegamenti", dashboard_md)
+
+        dash_headings = [line.strip() for line in dashboard_md.splitlines() if line.strip().startswith("#")]
+        emoji_pattern = re.compile(r'[\U00010000-\U0010ffff\u2600-\u27bf\u2300-\u23ff\u2b50]')
+        for h in dash_headings:
+            self.assertIsNone(emoji_pattern.search(h), f"Dashboard heading contains emoji: {h}")
+
+        # 2. Audit Report Markdown
+        report_path = brain_health.write_audit_report(
+            self.test_dir,
+            all_notes_count=10,
+            orphan_notes=audit_stats["orphan_notes"],
+            broken_links=audit_stats["broken_links"],
+            forward_links=audit_stats["forward_links"],
+            lint_issues=audit_stats["lint_issues"]
+        )
+        with open(report_path, "r", encoding="utf-8") as f:
+            report_md = f.read()
+
+        self.assertNotIn("## Collegamenti", report_md)
+        report_headings = [line.strip() for line in report_md.splitlines() if line.strip().startswith("#")]
+        for h in report_headings:
+            self.assertIsNone(emoji_pattern.search(h), f"Audit report heading contains emoji: {h}")
+
+
+class TestBrainHealthCLIBranches(unittest.TestCase):
+    """Test suite covering real CLI execution branches of brain_health.py (TEST-04)."""
+
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+        os.makedirs(os.path.join(self.test_dir, "02 - Atlas", "Tech"), exist_ok=True)
+        os.makedirs(os.path.join(self.test_dir, "99 - Meta"), exist_ok=True)
+        self.script_path = os.path.join(PROJECT_ROOT, "99 - Meta", "Scripts", "brain_health.py")
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_cli_lint_only_execution_branch(self):
+        """Asserts --lint-only performs read-only audit, reports missing fields, and makes no disk changes (TEST-04)."""
+        import subprocess
+        note_path = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Incomplete Note.md")
+        original_content = """---
+title: "Incomplete Note"
+---
+# Incomplete Note
+Testo nota incompleta.
+"""
+        with open(note_path, "w", encoding="utf-8") as f:
+            f.write(original_content)
+
+        proc = subprocess.run(
+            [sys.executable, self.script_path, "--lint-only", "--vault-root", self.test_dir],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("YAML Frontmatter Linter (Read-Only Audit)", proc.stdout)
+        self.assertIn("Campo obbligatorio mancante", proc.stdout)
+
+        # Note on disk must NOT be altered
+        with open(note_path, "r", encoding="utf-8") as f:
+            self.assertEqual(f.read(), original_content)
+
+        # Dashboard must NOT be generated
+        dash_path = os.path.join(self.test_dir, "99 - Meta", "Vault Health Dashboard.md")
+        self.assertFalse(os.path.exists(dash_path))
+
+    def test_cli_dry_run_execution_branch(self):
+        """Asserts --dry-run previews planned renames and changes without modifying files on disk (TEST-04)."""
+        import subprocess
+        lowercase_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "nota minuscola.md")
+        original_content = """---
+status: permanent
+type: concept
+area: tech
+title: "nota minuscola"
+tags: [tech/ai]
+summary: "Sintesi nota minuscola per test dry run."
+---
+# nota minuscola
+Corpo nota.
+"""
+        with open(lowercase_file, "w", encoding="utf-8") as f:
+            f.write(original_content)
+
+        proc = subprocess.run(
+            [sys.executable, self.script_path, "--dry-run", "--vault-root", self.test_dir],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("[DRY-RUN] No changes were written to disk.", proc.stdout)
+        self.assertIn("Planned Renames:", proc.stdout)
+
+        # File must keep original lowercase name in directory listing
+        files = os.listdir(os.path.join(self.test_dir, "02 - Atlas", "Tech"))
+        self.assertIn("nota minuscola.md", files)
+        self.assertNotIn("Nota Minuscola.md", files)
+
+    def test_cli_auto_fix_execution_branch(self):
+        """Asserts --auto-fix applies Title Case renames, YAML canonical formatting, and updates dashboard (TEST-04)."""
+        import subprocess
+        lowercase_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "nota minuscola.md")
+        original_content = """---
+macro_area: tech
+title: "nota minuscola"
+---
+# nota minuscola
+Corpo della nota per auto fix.
+"""
+        with open(lowercase_file, "w", encoding="utf-8") as f:
+            f.write(original_content)
+
+        proc = subprocess.run(
+            [sys.executable, self.script_path, "--auto-fix", "--vault-root", self.test_dir],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        self.assertEqual(proc.returncode, 0)
+
+        # File must be renamed to Title Case in directory listing
+        files = os.listdir(os.path.join(self.test_dir, "02 - Atlas", "Tech"))
+        self.assertIn("Nota Minuscola.md", files)
+        self.assertNotIn("nota minuscola.md", files)
+
+        # Dashboard must exist on disk
+        dash_path = os.path.join(self.test_dir, "99 - Meta", "Vault Health Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+
+        # Check frontmatter of renamed file is normalized
+        renamed_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Nota Minuscola.md")
+        with open(renamed_file, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("area: tech", content)
+        self.assertNotIn("macro_area:", content)
+
+    def test_cli_dashboard_only_execution_branch(self):
+        """Asserts --dashboard-only regenerates Vault Health Dashboard.md without other modifications (TEST-04)."""
+        import subprocess
+        proc = subprocess.run(
+            [sys.executable, self.script_path, "--dashboard-only", "--vault-root", self.test_dir],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("Vault Health Dashboard regenerated", proc.stdout)
+
+        dash_path = os.path.join(self.test_dir, "99 - Meta", "Vault Health Dashboard.md")
+        self.assertTrue(os.path.exists(dash_path))
+
+    def test_cli_interactive_default_abort_on_eof(self):
+        """Asserts interactive mode defaults cleanly and handles EOF (DEVNULL) by aborting fixes safely (TEST-04)."""
+        import subprocess
+        lowercase_file = os.path.join(self.test_dir, "02 - Atlas", "Tech", "nota interattiva.md")
+        with open(lowercase_file, "w", encoding="utf-8") as f:
+            f.write("# nota interattiva\nTesto.")
+
+        proc = subprocess.run(
+            [sys.executable, self.script_path, "--vault-root", self.test_dir],
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        self.assertEqual(proc.returncode, 0)
+
+        # File must NOT be renamed when input is EOF (answers 'no' implicitly)
+        files = os.listdir(os.path.join(self.test_dir, "02 - Atlas", "Tech"))
+        self.assertIn("nota interattiva.md", files)
+        self.assertNotIn("Nota Interattiva.md", files)
+
+    def test_auto_fix_preserves_ignore_files_and_root_files(self):
+        """Asserts --auto-fix preserves IGNORE_FILES (GEMINI.md, AGENTS.md, README.md) and non-vault root files (CLEAN-01)."""
+        gemini_path = os.path.join(self.test_dir, "GEMINI.md")
+        gemini_content = "---\ncustom_key: special_value\ntitle: \"Gemini Custom\"\n---\n# System Prompt\nUnchanged text.\n"
+        with open(gemini_path, "w", encoding="utf-8") as f:
+            f.write(gemini_content)
+
+        root_extra_path = os.path.join(self.test_dir, "Scratchpad.md")
+        scratch_content = "# Scratchpad\nNon-vault file in root."
+        with open(root_extra_path, "w", encoding="utf-8") as f:
+            f.write(scratch_content)
+
+        # Create a valid note in 02 - Atlas to have something scanned
+        atlas_note = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Nota Valida.md")
+        with open(atlas_note, "w", encoding="utf-8") as f:
+            f.write("---\nstatus: permanent\ntype: concept\narea: tech\nrelated: []\nsource: original\ntitle: \"Nota Valida\"\ndate: '2026-09-05'\nupdated: 2026-09-05T01:00\ntags: [tech/ai]\nsummary: \"Sintesi valida di test per la nota.\"\n---\n\n[[Home MOC|Home]] / [[Tech]] / [[Nota Valida]]\n\n# Nota Valida\nContenuto.\n")
+
+        stats = brain_health.run_governance_engine(self.test_dir, auto_fix=True)
+
+        with open(gemini_path, "r", encoding="utf-8") as f:
+            self.assertEqual(f.read(), gemini_content)
+
+        with open(root_extra_path, "r", encoding="utf-8") as f:
+            self.assertEqual(f.read(), scratch_content)
+
+    def test_get_breadcrumbs_calendar_and_inbox(self):
+        """Asserts get_breadcrumbs maps 04 - Calendar to [[Calendar]] and 03 - Inbox to [[Inbox]] (CLEAN-01)."""
+        cal_bc = brain_health.get_breadcrumbs("04 - Calendar/DailyNote - 20260905.md", "DailyNote - 20260905")
+        self.assertEqual(cal_bc, "[[Home MOC|Home]] / [[Calendar]] / [[DailyNote - 20260905]]")
+
+        inbox_bc = brain_health.get_breadcrumbs("03 - Inbox/Bozza Rapida.md", "Bozza Rapida")
+        self.assertEqual(inbox_bc, "[[Home MOC|Home]] / [[Inbox]] / [[Bozza Rapida]]")
+
+    def test_minor_words_no_duplicates(self):
+        """Asserts MINOR_WORDS set contains expected minor words and correctly formats titles (CLEAN-01)."""
+        self.assertIn('in', brain_health.MINOR_WORDS)
+        self.assertIn('a', brain_health.MINOR_WORDS)
+        formatted = brain_health.clean_title_str("guida in un giorno")
+        self.assertEqual(formatted, "Guida in un Giorno")
+
+    def test_safe_rename_apfs_case_change_no_dangling_tmp(self):
+        """Asserts safe_rename on case-only renames leaves no dangling .tmp_rename files (CLEAN-01)."""
+        tech_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech")
+        old_rel = "02 - Atlas/Tech/case_test.md"
+        new_rel = "02 - Atlas/Tech/Case_Test.md"
+        old_abs = os.path.join(self.test_dir, old_rel)
+        with open(old_abs, "w", encoding="utf-8") as f:
+            f.write("# Case Test")
+
+        brain_health.safe_rename(self.test_dir, old_rel, new_rel, is_tracked=False)
+
+        tmp_abs = old_abs + ".tmp_rename"
+        self.assertFalse(os.path.exists(tmp_abs), "Dangling .tmp_rename must not exist")
+        self.assertTrue(os.path.exists(os.path.join(self.test_dir, new_rel)))
+
 
 if __name__ == "__main__":
     unittest.main()

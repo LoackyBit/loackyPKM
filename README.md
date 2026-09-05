@@ -1,55 +1,109 @@
-# Milestone v1.0.0-alpha — Project Summary
+# Milestone v1.0.1-alpha — Project Summary
 
-**Generated:** 2026-08-31
-**Purpose:** Team onboarding and project review
-**Milestone:** `v1.0.0-alpha` (AI Second Brain — Obsidian PKM & Digital Garden)
+**Generated:** 2026-09-05  
+**Purpose:** Team onboarding and project review  
+**Milestone:** `v1.0.1-alpha` (Code Review & Bug Fixing)  
 
 ---
 
 ## 1. Project Overview
 
-- **What This Is:** Un Second Brain e Personal Knowledge Management (PKM) su base Obsidian, trasformato in un digital garden intelligente e integrato con Antigravity CLI per operare come un "NotebookLM locale". Permette di raccogliere note, appunti universitari (*Ingegneria Informatica*), articoli e video YouTube, organizzarli con una tassonomia semantica aperta (ACE Topography) e interrogarli via chat per recuperare memorie, sintesi e connessioni interdisciplinari con citazioni dirette alle fonti.
+- **What This Is:** Un Second Brain e Personal Knowledge Management (PKM) su base Obsidian, trasformato in un digital garden intelligente e integrato con Antigravity CLI per operare come un "NotebookLM locale". Permette di raccogliere note, appunti universitari (*Ingegneria Informatica*), articoli e video YouTube, organizzarli con una tassonomia semantica aperta (ACE Topography a 6 macro-cartelle) e interrogarli via chat per recuperare memorie, sintesi e connessioni interdisciplinari con citazioni dirette alle fonti.
 - **Core Value Proposition:** Rendere l'acquisizione, la manutenzione e l'interrogazione della conoscenza personale fluidi, immediati e a zero attrito, eliminando la frammentazione degli strumenti con fondamenta strutturali solide, standardizzazione AST dei metadati e governance a puro Markdown statico.
 - **Target Users & Context:** Studenti universitari, ricercatori e sviluppatori che necessitano di una base di conoscenza ad alta densità informativa, sincronizzata localmente, esportabile staticamente via Quartz Digital Garden, senza dipendenze da server vettoriali proprietari o plugin dinamici bloccanti (No Dataview).
-- **Status:** Tutte le 8 fasi pianificate e inserite (16 piani su 16) sono state eseguite, testate (101/101 test unitari green) e verificate con successo.
+- **Milestone Scope:** Risoluzione integrale delle criticità di sicurezza, dei bug logici di staging/ingestion, delle race condition di concorrenza, delle discrepanze diacritiche/APFS e del debito tecnico emersi dal Clean Code Audit Report del 2026-09-03.
+- **Status:** Tutte le 6 fasi (Phases 07-12) e tutti i 12 piani pianificati sono stati eseguiti, verificati con esito `passed` e collaudati con 163/163 test unitari/integrazione passati con successo (100% green).
 
 ---
 
 ## 2. Architecture & Technical Decisions
 
-Principali scelte architetturali e ingegneristiche effettuate durante la milestone:
+Elenco ragionato delle decisioni ingegneristiche e architetturali introdotte in v1.0.1-alpha:
 
-- **Topografia [ACE](https://blog.linkingyourthinking.com/notes/a-deeper-dive-into-how-ace-works) rivisitata a 6 cartelle radice** (`01 - Map of Content`, `02 - Atlas`, `03 - Inbox`, `04 - Calendar`, `05 - Blog`, `99 - Meta`):
-  - **Motivazione:** Previene la proliferazione di micro-silos caotici, garantisce portabilità cross-platform su Quartz ed elimina percorsi annidati fragili.
-  - **Fase:** Phase 01 (Fondamenta & Riorganizzazione Strutturale)
+- **Decommissioning Modulo School & Bonifica Credenziali (Phase 07 - SEC-01, SEC-02):**
+  - **Decisione:** Eliminazione totale da Git (`git rm -f`) di `config.json`, `fetch-registro.py` e `List.md` legati a ClasseViva; aggiornamento `.gitignore`; preservazione attiva di `Style Guide.md`.
+  - **Motivazione:** Elimina alla radice il rischio di credential leak per un modulo dismesso senza aggiungere overhead di configurazione inutile.
+  - **Fase:** Phase 07 (Sicurezza Credenziali & Configurazione Dinamica)
 
-- **Schema YAML frontmatter canonico a 10 campi con `ruamel.yaml` AST RoundTrip:**
-  - **Motivazione:** Standardizza i metadati orientati al retrieval (`summary`, `source`, `type`, `area`, `related`, `tags`, `title`, `date`, `updated`, `status`/`stage`+`draft`) con array flow-style compatti senza corrompere il Markdown, LaTeX o commenti.
-  - **Fase:** Phase 02 (Standardizzazione YAML & Frontmatter Funzionale)
+- **Risoluzione Dinamica Portabile degli Eseguibili e PATH (Phase 07 - SEC-03):**
+  - **Decisione:** Sostituzione dei percorsi assoluti hardcoded `/Users/lorenzo/...` con `shutil.which("agy")` e `Path.home()`, parametrizzazione del template LaunchAgent con `__VAULT_PATH__` e comando `watch.sh install-service`.
+  - **Motivazione:** Rende l'intera suite di script e demoni portabile su qualsiasi macchina macOS o container senza vincoli utente.
+  - **Fase:** Phase 07 (Sicurezza Credenziali & Configurazione Dinamica)
 
-- **Consolidamento a 3 sole macro-skills ufficiali (`brain-health`, `brain-ingest`, `brain-recall`):**
-  - **Motivazione:** Elimina l'attrito cognitivo e la frammentazione di 8 micro-skills legacy in `.agents/skills/`, offrendo workflow chiari, robusti e autodocumentati.
-  - **Fase:** Phase 03 (Consolidamento Flussi AI & Riduzione Frammentazione)
+- **Spostamento Atomico Preventivo in `Source/` e Salvaguardia Note Grezze (Phase 08 - INGEST-01):**
+  - **Decisione:** Le note contrassegnate con `ready: true` in `03 - Inbox/` vengono spostate atomicamente in `03 - Inbox/Source/` prima di invocare le fasi AI, eliminando la cancellazione prematura su `file_path`.
+  - **Motivazione:** Previene la perdita irrevocabile delle note manoscritte dell'utente in caso di crash o eccezioni del modello AI.
+  - **Fase:** Phase 08 (Integrità Ingestion & Salvaguardia Staging)
 
-- **Motore ibrido di retrieval a 3 vie (YAML Scorer + Okapi BM25 puro + Smart Connections Dense Vectors) con Reciprocal Rank Fusion (RRF $k=60$):**
-  - **Motivazione:** Raggiunge latenza sub-secondo (<15ms sull'intero corpus di oltre 700 note) con graceful degradation quando gli embeddings mancano, e Zero-Hallucination Guard rigorosa.
-  - **Fase:** Phase 04 (Esperienza NotebookLM & Retrieval Conversazionale)
+- **Pulizia Sincronizzata 1:1 delle Bozze Post-AI con `old_title` (Phase 08 - INGEST-02):**
+  - **Decisione:** Tracciamento preliminare di `old_title` prima della riassegnazione del titolo concettuale AI (`clean_title = cand_ai`), con rimozione fisica di `Draft/{old_title}.md` e ridenominazione atomica `Source/{old_title}.md` in `Source/{clean_title}.md`.
+  - **Motivazione:** Elimina la condizione auto-annullante `clean_title != cand_ai` ed evita l'accumulo di bozze o sorgenti orfane in Inbox.
+  - **Fase:** Phase 08 (Integrità Ingestion & Salvaguardia Staging)
 
-- **Demone watcher asincrono (`watch.sh`) con PID tracking, auto-healing e log rotation a 5MB:**
-  - **Motivazione:** Permette l'acquisizione in background di video YouTube (trascrizioni + keyframe JPEG a 720p `-q:v 2` in `99 - Meta/Clipboard/`) e file Inbox senza bloccare il flusso utente.
-  - **Fase:** Phase 05 (Pipeline Ingestion Background & Multimedia Watcher)
+- **Purge Frame YouTube su `video_id` e Immagini Markdown (Phase 08 - INGEST-03):**
+  - **Decisione:** Al rifiuto `[-]` di una nota, lettura preventiva del documento per ricavare il `video_id` (11 caratteri) e cancellazione mirata di tutti i frame `{video_id}_*.jpg` e `{video_id}_*.png` in `99 - Meta/Clipboard/`, unita alla cancellazione di immagini incorporate nel corpo.
+  - **Motivazione:** Azzeramento dei file orfani di screenshot indipendentemente da cambi di titolo post-inferenza.
+  - **Fase:** Phase 08 (Integrità Ingestion & Salvaguardia Staging)
 
-- **Riscrittura da zero di `brain_ingest.py` (<450 righe) con staging `Draft/` / `Source/` e `NoteLock` SHA-256:**
-  - **Motivazione:** Elimina il codice legacy monolitico (1528 righe) e i prefissi mutabili dei file (`seen-`, `proposed-`, `raw-`), garantendo concorrenza fine-grained e sicurezza transazionale.
-  - **Fase:** Phase 06.1 (Riprogettare da Zero brain-ingest)
+- **Supporto Pipe Alias nei Link Wiki della Dashboard & AI Fallback Directory (Phase 08 - INGEST-04):**
+  - **Decisione:** Parsing difensivo dei wiki-link della dashboard isolando il basename prima della pipe `|` (`name.split('|')[0]`); rimozione dead code (doppio return); fallback AI leggero con `gemini-3.8-flash-low` e lista controllata di 19 cartelle.
+  - **Motivazione:** Evita crash da `FileNotFoundError` su note con alias e classifica le note prive di keyword euristiche in modo intelligente.
+  - **Fase:** Phase 08 (Integrità Ingestion & Salvaguardia Staging)
 
-- **Anatomia note flessibile, pulita e organica (0 emoji nei titoli H1-H3, assorbimento organico dei link nel testo e frontmatter `related: [...]`, evidenziazioni Style Guide `<mark>`, Mermaid quotati, LaTeX):**
-  - **Motivazione:** Rimuove il blocco rigido `## Collegamenti` e purifica le note da sponsor, convenevoli ed AI slop, garantendo trattazioni dense e professionali.
-  - **Fase:** Phase 06.2 (Ristrutturazione sezioni note e fasi brain-ingest)
+- **Audit YAML Non Distruttivo con Flag `--lint-only` (Phase 09 - HLTH-01):**
+  - **Decisione:** Implementazione della routine Single-Source-of-Truth `diagnose_yaml_violations` con stampa a terminale ricca in modalità read-only e rigetto programmatico dei conflitti con `--auto-fix`.
+  - **Motivazione:** Consente ispezioni diagnostiche continue senza rischio di mutazioni accidentali sul filesystem.
+  - **Fase:** Phase 09 (Governance Vault & Integrità YAML Linter)
 
-- **Razionalizzazione a 2 soli template universali (`Nota Vault.md` e `Articolo Blog.md`):**
-  - **Motivazione:** Purge di 9 template legacy e `Folder Templates/`, standardizzando la generazione dinamica su Templater `<%* ... %>`.
-  - **Fase:** Phase 06.2 (Ristrutturazione sezioni note e fasi brain-ingest)
+- **Preservazione Condizionale Metadati Video & Sincronizzazione Bidirezionale (Phase 09 - HLTH-02):**
+  - **Decisione:** `infer_metadata` preserva `video_url` e `channel` per le note di `type: video` (rimuovendoli per le altre tipologie) e sincronizza bidirezionalmente `source` con `video_url` su link YouTube validi.
+  - **Motivazione:** Mantiene intatta la tracciabilità delle fonti video durante i cicli di normalizzazione e linting canonico.
+  - **Fase:** Phase 09 (Governance Vault & Integrità YAML Linter)
+
+- **Simmetria Diacritica Unicode NFC tra Filename e YAML Title (Phase 09 - HLTH-03):**
+  - **Decisione:** Riscritte `clean_filename` e `clean_title_str` per delegare alla funzione SSOT `normalize_title_or_filename`, eliminando la scomposizione distruttiva NFD e preservando le vocali accentate italiane in NFC.
+  - **Motivazione:** Ristabilisce la corrispondenza 1:1 tra il nome file e il frontmatter `title`, prevenendo discrepanze di normalizzazione.
+  - **Fase:** Phase 09 (Governance Vault & Integrità YAML Linter)
+
+- **Protezione da Collisioni Omonime in `scan_vault` (Phase 09 - HLTH-04):**
+  - **Decisione:** `VaultHealthAuditor.scan_vault` traccia i duplicati accidentali nella struttura `duplicate_notes` ed espone le anomalie nella diagnostica, senza sovrascrivere `all_notes` o azzerare `incoming_links`.
+  - **Motivazione:** Rispetta l'assunzione fondamentale del Vault (nessuna omonimia) proteggendo l'integrità del grafo concettuale.
+  - **Fase:** Phase 09 (Governance Vault & Integrità YAML Linter)
+
+- **Sincronizzazione Dinamica Watcher PID & Panic Abort con Epuration Totale (Phase 10 - PERF-01):**
+  - **Decisione:** Risoluzione del file PID tramite `$PID_FILE` -> `/tmp/brain_watcher_{vault_hash}.pid`; `trigger_panic_abort` termina i worker figli salvaguardando il PID del demone `watch.sh` ed eliminando lockfile, bozze parziali in `Draft/` e cancellando lo stato `In Elaborazione`.
+  - **Motivazione:** Permette un arresto d'emergenza pulito senza abbattere il demone di sorveglianza e senza lasciare artefatti orfani sul disco.
+  - **Fase:** Phase 10 (Retrieval, Concorrenza & Ottimizzazione Performance)
+
+- **Mutex Lock Dedicato `DashboardLock` per `Review Dashboard.md` (Phase 10 - PERF-02):**
+  - **Decisione:** Incapsulamento del ciclo read-modify-write di scansione e approvazione in `DashboardLock` con file `/tmp/brain_dashboard_{vault_hash}.lock`, auto-healing (TTL 60s), rientranza di processo e graceful skip per job in background.
+  - **Motivazione:** Elimina le race condition e le sovrascritture di checkbox dovute ad accessi concorrenti tra watcher e utente.
+  - **Fase:** Phase 10 (Retrieval, Concorrenza & Ottimizzazione Performance)
+
+- **Compressione Cache `.recall_cache.json` a 728KB (<2.5MB) e Pruning Automatico (Phase 10 - PERF-03):**
+  - **Decisione:** Sostituzione dell'array `tokens` con `doc_len` e `term_freq`; serializzazione JSON compatta con `separators=(',', ':')`; esclusione della cartella `03 - Inbox` da `IGNORE_FOLDERS`; pruning deterministico delle note eliminate e flag `--reindex`.
+  - **Motivazione:** Riduce la dimensione della cache del 96.7% (da 22MB a 728KB), azzerando l'I/O overhead e mantenendo il tempo di lookup sub-millisecondo.
+  - **Fase:** Phase 10 (Retrieval, Concorrenza & Ottimizzazione Performance)
+
+- **Conformità Headings Style Guide (Zero Emoji nei Titoli H1-H3 & Rimozione `## Collegamenti`) (Phase 10 - PERF-04):**
+  - **Decisione:** Ristrutturazione di `format_output` in 2 sole sezioni pulite (`### Sintesi Esecutiva`, `### Fonti & Citazioni`); eliminazione totale delle emoji da `recall_engine.py` e dai report di `brain_health.py`; eliminazione delle sezioni finali isolate `## Collegamenti`.
+  - **Motivazione:** Piena aderenza alle convenzioni formali del Vault e integrazione organica dei collegamenti nella prosa.
+  - **Fase:** Phase 10 (Retrieval, Concorrenza & Ottimizzazione Performance)
+
+- **Governance Hardening, Protezione `IGNORE_FILES` & Ricalcolo Metriche (Phase 12 - CLEAN-01):**
+  - **Decisione:** Protezione incondizionata di `GEMINI.md`, `AGENTS.md`, `README.md` durante `--auto-fix`; ricalcolo da zero delle metriche di audit prima di rigenerare il dashboard; deduplica `MINOR_WORDS`; breadcrumbs corretti per Calendar e Inbox; atomicità in `safe_rename` contro collisioni case-only su APFS.
+  - **Motivazione:** Previene sovrascritture di file critici di configurazione e garantisce la veridicità delle statistiche del Vault.
+  - **Fase:** Phase 12 (Clean Code Refactoring & Audit Fixes)
+
+- **Precisione Semantica, Word Boundaries & Ricerca Densa su Query Libere (Phase 12 - CLEAN-02):**
+  - **Decisione:** Token matching con word boundaries (`\b`) nello scoring YAML; esclusione dei blocchi di codice fenced prima dell'estrazione di snippet e titoli in recall; fallback a similarità densa vettoriale via pseudo-relevance feedback per query discorsive.
+  - **Motivazione:** Elimina falsi positivi su acronimi brevi (`ai` dentro `main`), evita di interpretare commenti `#` come intestazioni ed estende il retrieval vettoriale anche a domande a linguaggio naturale.
+  - **Fase:** Phase 12 (Clean Code Refactoring & Audit Fixes)
+
+- **Resilienza Ingestion, Autolinking Protetto & Clean Architecture (Phase 12 - CLEAN-03, CLEAN-04):**
+  - **Decisione:** Controllo fisico `os.path.isfile` in `detect_input_type`; protezione anticipata di link markdown `[text](url)` e domini web in `autolink_content`; eccezione tipizzata `VideoMetadataError`; routing directory tabellare `DIRECTORY_ROUTING_RULES` (OCP/SRP); modello AI parametrizzabile `DEFAULT_AI_MODEL`; decomposizione di `_process_tri_state_approvals_unlocked` in 4 sub-handler; consolidamento DRY di `split_markdown_note` e `get_vault_root`.
+  - **Motivazione:** Rende l'ingestion immune a link corrotti o input errati, modularizza il codice eliminando catene `if/elif` monolitiche e garantisce riuso senza duplicazioni.
+  - **Fase:** Phase 12 (Clean Code Refactoring & Audit Fixes)
 
 ---
 
@@ -57,167 +111,193 @@ Principali scelte architetturali e ingegneristiche effettuate durante la milesto
 
 | Phase | Name | Status | Key Accomplishments & Deliverables |
 |---|---|---|---|
-| **01** | Fondamenta & Riorganizzazione Strutturale | Complete | Riorganizzazione fisica di `02 - Atlas/` nelle 5 macro-aree (`Tech & AI`, `Education & Learning`, `Personal Growth & Health`, `Finance`, `Projects`), rilocazione archivio scolastico da `03 - Inbox/School/` a `02 - Atlas/Education & Learning/Archivio Scuola/` (583 file spostati con `migrate_structure.py`), e rete Map of Content a 0 link rotti e 1 sola nota orfana. |
-| **02** | Standardizzazione YAML & Frontmatter Funzionale | Complete | Formalizzazione dello schema YAML canonico a 10 campi (`ruamel.yaml` AST parser), batch normalization di 669 note, e backfilling AI di summary esecutivi (120-180 car) con checkpointing atomico (`.backfill_checkpoint.json`). |
-| **03** | Consolidamento Flussi AI & Riduzione Frammentazione | Complete | Accorpamento di 8 micro-skills legacy nelle 3 macro-skills unificate (`brain-health`, `brain-ingest`, `brain-recall`), eliminazione definitiva di 8 script obsoleti in `99 - Meta/Scripts/`, e sync globale della governance. |
-| **04** | Esperienza NotebookLM & Retrieval Conversazionale | Complete | Motore di ricerca ibrido a 3 vie (`recall_engine.py` con Okapi BM25, vettori float32 Smart Connections, scoring YAML, RRF $k=60$, cache $mtime$ <5ms), filtri strutturati, formattazione a 3 sezioni (🎯, 📚, 🔗), e Zero-Hallucination Guard. |
-| **05** | Pipeline Ingestion Background & Multimedia Watcher | Complete | Demone asincrono `watch.sh` con comandi CLI (`start/stop/status/restart`), tracciamento PID, rotazione log a 5MB, estrazione trascrizioni/frame YouTube a 720p `-q:v 2` in `Clipboard/`, duplicate detection globale e Review Dashboard tri-state. |
-| **06** | Verifica Generale & Collaudo Milestone | Complete | Standardizzazione dei template con script dinamici Templater `<%* ... %>`, hardening dell'ingestione note con `ready: true`, audit salute globale con `brain_health.py` (0 fix pendenti) e stesura del protocollo di collaudo pratico `06-UAT.md`. |
-| **06.1** | Riprogettare da Zero brain-ingest (INSERTED) | Complete | Riscrittura integrale di `brain_ingest.py` (<450 righe), staging dedicato in `Draft/` e `Source/`, `NoteLock` SHA-256 atomico con auto-healing, autolinking deterministico rigoroso su note reali con code masking, e GTD tri-state con archiviazione selettiva in `99 - Meta/Archive/`. |
-| **06.2** | Ristrutturazione sezioni note e fasi brain-ingest (INSERTED) | Complete | Riforma dell'anatomia delle note (0 emoji nei titoli, no `## Collegamenti`, link organici nella prosa e frontmatter `related: [...]`, evidenziazioni Style Guide), ciclo a 3 macro-fasi snelle (`1/3 Estrazione` -> `2/3 Rielaborazione AI` -> `3/3 Autolinking & Staging`), `--depth approfondimento` di default, 2 soli template universali e 101/101 test unitari green. |
+| **07** | Sicurezza Credenziali & Configurazione Dinamica | Complete | Decommissioning e rimozione da Git di `99 - Meta/School/config.json`, `fetch-registro.py` e `List.md`; `.gitignore` rafforzato per file `config.json`; risoluzione dinamica di `agy` e `PATH` via `shutil.which` e `Path.home()`; parametrizzazione LaunchAgent macOS `com.loackypkm.watcher.plist` con token `__VAULT_PATH__` e comando CLI `watch.sh install-service`; 110/110 test green. |
+| **08** | Integrità Ingestion & Salvaguardia Staging | Complete | Spostamento atomico preventivo in `03 - Inbox/Source/` per note con `ready: true`; gestione errori con retry `[x]` e dismissione `[-]`; tracciamento `old_title` post-AI ed eliminazione della condizione `clean_title != cand_ai`; purge frame YouTube in `99 - Meta/Clipboard/` su `video_id` (11 caratteri) e immagini markdown; supporto pipe alias (`[[Draft/Titolo\|Alias]]`); pulizia dead code e fallback AI per target directory; upgrade a `gemini-3.8-flash-low`; 120/120 test green. |
+| **09** | Governance Vault & Integrità YAML Linter | Complete | Implementazione della modalità diagnostica non distruttiva `--lint-only` con `diagnose_yaml_violations` e mutua esclusione con `--auto-fix`; conservazione condizionale di `video_url` e `channel` per `type: video` con sync bidirezionale YouTube; unificazione della pipeline di normalizzazione stringhe in `normalize_title_or_filename` con simmetria Unicode NFC per vocali accentate; protezione da omonimie e collisioni in `VaultHealthAuditor.scan_vault`; 129/129 test green. |
+| **10** | Retrieval, Concorrenza & Ottimizzazione Performance | Complete | Risoluzione dinamica del percorso PID watcher (`get_watcher_pid_file`) ed esportazione in `watch.sh`; Panic Abort con salvaguardia del demone watcher ed epurazione completa di lock e bozze parziali in `Draft/`; introduzione del mutex lock `DashboardLock` con TTL 60s per accessi atomici a `Review Dashboard.md`; compressione della cache `.recall_cache.json` a 728KB (eliminazione `tokens` a favore di `doc_len`/`term_freq`, `separators=(',', ':')`, esclusione `03 - Inbox` e flag `--reindex`); sanificazione headings H1-H3 senza emoji e rimozione sezioni `## Collegamenti` in `recall_engine.py` e `brain_health.py`; 139/139 test green. |
+| **11** | Riallineamento Test Suite & Copertura CLI | Complete | Eliminazione delle asserzioni contraddittorie sui metadati video in `tests/test_lint_yaml.py`; mock PID dinamico su hash vault nei test del Panic Button in `tests/test_brain_ingest.py`; asserzioni di conformità Style Guide senza emoji e link organici in `tests/test_recall_engine.py`; copertura completa dei rami CLI di governance (`--lint-only`, `--dry-run`, `--auto-fix`, `--dashboard-only`, interactive EOF) in `tests/test_brain_health.py`; 151/151 test green. |
+| **12** | Clean Code Refactoring & Audit Fixes | Complete | Implementazione di tutti i 13 punti del Clean Code Audit: protezione `IGNORE_FILES` root (`GEMINI.md`, `AGENTS.md`, `README.md`) in `--auto-fix`; ricalcolo metriche post-fix prima della generazione dashboard; deduplica `MINOR_WORDS`; breadcrumbs corretti Calendar/Inbox; atomicità `safe_rename` su filesystem APFS case-insensitive; token matching con word boundary (`\b`) nello scoring YAML; esclusione blocchi di codice fenced in recall; fallback semantico denso su query libere; gestione `VideoMetadataError` in `youtube_helper.py`; nome vault dinamico in `watch.sh`; gestione percorsi inesistenti in `detect_input_type`; protezione link markdown e domini in `autolink_content`; disaccoppiamento OCP/SRP con `DIRECTORY_ROUTING_RULES`; modello AI parametrizzabile `DEFAULT_AI_MODEL`; decomposizione `_handle_*` per approvazioni; consolidamento DRY di `split_markdown_note` e `get_vault_root`; 163/163 test green. |
 
 ---
 
 ## 4. Requirements Coverage
 
-| Requirement ID | Category | Status | Verification Evidence |
-|---|---|---|---|
-| **STRUC-01** | Struttura & Tassonomia | ✅ Met | Consolidamento di `02 - Atlas/` nelle 5 macro-cartelle tematiche (`Tech & AI`, `Education & Learning`, `Personal Growth & Health`, `Finance`, `Projects`). |
-| **STRUC-02** | Struttura & Tassonomia | ✅ Met | Bonifica totale di `03 - Inbox/` con rilocazione dell'archivio scolastico in `02 - Atlas/Education & Learning/Archivio Scuola/` e refactoring atomico di 582 breadcrumbs e wiki-links. |
-| **STRUC-03** | Struttura & Tassonomia | ✅ Met | Rete MOC allineata in `01 - Map of Content/` (`Home MOC.md` + 5 Macro-MOC + Sub-MOC tematiche) con 100% dei link interni verificati e note orfane ridotte da 311 a 1. |
-| **YAML-01** | Frontmatter YAML Funzionale | ✅ Met | Definizione formale dello schema YAML canonico a 10 campi con vocabolario controllato per `type` e `area`, `source`, `related` inline flow-style e parser `ruamel.yaml` AST RoundTrip. |
-| **YAML-02** | Frontmatter YAML Funzionale | ✅ Met | Normalizzazione batch del 100% delle note del Vault (669 note) con rimozione hashtag isolati dal corpo e aggiornamento template di sistema. |
-| **YAML-03** | Frontmatter YAML Funzionale | ✅ Met | Pipeline di generazione batch dei `summary` esecutivi (120-180 caratteri, max 200) con checkpointing atomico in `99 - Meta/.backfill_checkpoint.json`. |
-| **SKILL-01** | Flussi AI Unificati | ✅ Met | Implementazione della macro-skill unificata `brain-ingest` (`.agents/skills/brain-ingest/SKILL.md` + `brain_ingest.py`) per l'acquisizione polimorfica di video YouTube, web, note grezze e file locali. |
-| **SKILL-02** | Flussi AI Unificati | ✅ Met | Scaffolding e integrazione della macro-skill unificata `brain-recall` (`.agents/skills/brain-recall/SKILL.md`) per l'interrogazione conversazionale tipo NotebookLM con schema di risposta in 3 sezioni e Zero-Hallucination Guard. |
-| **SKILL-03** | Flussi AI Unificati | ✅ Met | Implementazione della macro-skill unificata `brain-health` (`.agents/skills/brain-health/SKILL.md` + `brain_health.py`) che unifica audit link, classificazione forward-links, Title Case linting e rigenerazione statica di `Vault Health Dashboard.md`. |
-| **RECALL-01** | Esperienza NotebookLM | ✅ Met | Motore ibrido di retrieval a 3 vie (`99 - Meta/Scripts/recall_engine.py`) con Okapi BM25 puro, decodifica vettoriale float32 Smart Connections, scoring YAML e RRF $k=60$ con cache $mtime$ sub-millisecondo (<5ms). |
-| **RECALL-02** | Esperienza NotebookLM | ✅ Met | Risposte sintetiche strutturate per il recupero memorie con schema a 3 sezioni (🎯 Sintesi Esecutiva, 📚 Fonti & Citazioni con timestamp `[MM:SS]`, 🔗 Connessioni Correlate) e guardia anti-allucinazione. |
-| **RECALL-03** | Esperienza NotebookLM | ✅ Met | Supporto completo a query strutturate e filtri avanzati via CLI (`--area`, `--type`, `--tag` gerarchico, `--limit`, `--similar-to`, `--format json\|pretty\|markdown\|auto`). |
-| **INGEST-01** | Pipeline Ingestion Background | ✅ Met | Daemon watcher asincrono `99 - Meta/Scripts/watch.sh` con comandi CLI (`start`, `stop`, `status`, `restart`), gestione PID (`/tmp/brain_watcher.pid`), auto-healing `kill -0`, e log rotation a 5MB (`watch.log.1..3`). |
-| **INGEST-02** | Pipeline Ingestion Background | ✅ Met | Estrazione affidabile di trascrizioni, suddivisione in capitoli e screenshot compressi JPEG a 720p `-q:v 2` in `99 - Meta/Clipboard/` via `yt-dlp` e `ffmpeg` con guardie per trascrizioni mancanti (`TranscriptUnavailableError`). |
-| **INGEST-03** | Pipeline Ingestion Background | ✅ Met | Workflow di revisione GTD tri-state in `03 - Inbox/Review Dashboard.md` con approvazione `[x]`, scarto `[-]`, archiviazione selettiva in `99 - Meta/Archive/`, duplicate detection globale e registro storico persistente in `inbox_history.md`. |
+Tutti i 23 requisiti specificati per la milestone v1.0.1-alpha sono stati completati, convalidati e certificati nel Milestone Audit Report (`v1.0.1-alpha-MILESTONE-AUDIT.md`):
 
-**Coverage Summary:** 15 / 15 requisiti v1 soddisfatti e verificati (100%).
+| Req ID | Category | Status | Verification Evidence |
+|---|---|---|---|
+| **SEC-01** | Security & Config | ✅ Met | Decommissioning `config.json` da Git (`git rm --cached`), inserimento in `.gitignore` e pulizia riferimenti obsoleti. |
+| **SEC-02** | Security & Config | ✅ Met | Rimozione completa di `fetch-registro.py` ed epurazione credenziali in chiaro e API key scolastica. |
+| **SEC-03** | Security & Config | ✅ Met | Risoluzione dinamica `shutil.which("agy")` e `Path.home()`, parametrizzazione LaunchAgent con `__VAULT_PATH__` e `watch.sh install-service`. |
+| **INGEST-01** | Ingestion & Staging | ✅ Met | Spostamento preventivo atomico in `03 - Inbox/Source/` e rimozione della cancellazione anticipata di note grezze su eccezione. |
+| **INGEST-02** | Ingestion & Staging | ✅ Met | Tracciamento di `old_title` post-AI, rimozione di `Draft/{old_title}.md` e rename di `Source/{old_title}.md`, eliminazione condizione `clean_title != cand_ai`. |
+| **INGEST-03** | Ingestion & Staging | ✅ Met | Purge frame YouTube in `Clipboard/` tramite matching sul `video_id` (11 caratteri) e pulizia immagini incorporate nel markdown al rifiuto `[-]`. |
+| **INGEST-04** | Ingestion & Staging | ✅ Met | Supporto trasparente caratteri pipe `|` negli alias wiki-link della dashboard, eliminazione dead code (doppio return) e fallback AI per target directory. |
+| **HLTH-01** | Health & YAML | ✅ Met | Flag CLI `--lint-only` attivo in `brain_health.py` per audit diagnostico non distruttivo e mutua esclusione verificata con `--auto-fix`. |
+| **HLTH-02** | Health & YAML | ✅ Met | Conservazione condizionale di `video_url` e `channel` per `type: video` in `infer_metadata` e sync bidirezionale con `source`. |
+| **HLTH-03** | Health & YAML | ✅ Met | Normalizzazione unificata in `normalize_title_or_filename` con simmetria Unicode NFC per caratteri accentati italiani tra filename e title. |
+| **HLTH-04** | Health & YAML | ✅ Met | Gestione omonimie accidentali in `VaultHealthAuditor.scan_vault` senza sovrascrittura di nodi o azzeramento link, con tracciamento in `duplicate_notes`. |
+| **PERF-01** | Retrieval & Concurrency | ✅ Met | Sincronizzazione dinamica PID tra `watch.sh` e `brain_ingest.py` per Panic Button, salvaguardia del demone ed epurazione totale delle bozze interrotte. |
+| **PERF-02** | Retrieval & Concurrency | ✅ Met | Mutex `DashboardLock` dedicato su `/tmp/brain_dashboard_{vault_hash}.lock` per accessi concorrenti atomici su `Review Dashboard.md`. |
+| **PERF-03** | Retrieval & Concurrency | ✅ Met | Compressione `.recall_cache.json` a 728KB (<2.5MB), rimozione lista `tokens` per `doc_len`/`term_freq`, esclusione `03 - Inbox` e flag `--reindex`. |
+| **PERF-04** | Retrieval & Concurrency | ✅ Met | Eliminazione completa delle emoji nelle intestazioni H1-H3 e rimozione delle sezioni finali `## Collegamenti` in `recall_engine.py` e `brain_health.py`. |
+| **TEST-01** | Test Realignment | ✅ Met | Risoluzione asserzioni contraddittorie in `tests/test_lint_yaml.py` e verifica coerenza metadati video tra `lint_file` e serializzazione canonica. |
+| **TEST-02** | Test Realignment | ✅ Met | Correzione mock PID watcher basato sull'hash del vault in `tests/test_brain_ingest.py` per Panic Button. |
+| **TEST-03** | Test Realignment | ✅ Met | Asserzioni aggiornate in `tests/test_recall_engine.py` per validare l'assenza di emoji nei titoli e l'assorbimento organico dei link nella prosa. |
+| **TEST-04** | Test Realignment | ✅ Met | Copertura dei rami di esecuzione CLI in `tests/test_brain_health.py` (`--lint-only`, `--dry-run`, `--auto-fix`, `--dashboard-only`, interactive EOF). |
+| **CLEAN-01** | Clean Code & Audit | ✅ Met | Salvaguardia `IGNORE_FILES` (`GEMINI.md`, `AGENTS.md`, `README.md`), ricalcolo metriche post-fix, deduplica `MINOR_WORDS`, fix breadcrumbs Calendar/Inbox e atomicità APFS `safe_rename`. |
+| **CLEAN-02** | Clean Code & Audit | ✅ Met | Fallback semantico denso su query libere via pseudo-relevance feedback, word boundaries (`\b`) nello scoring YAML ed esclusione blocchi di codice fenced in recall. |
+| **CLEAN-03** | Clean Code & Audit | ✅ Met | `detect_input_type` con verifica fisica `os.path.isfile`, autolink protetto per link markdown e domini web, eccezione `VideoMetadataError`, nome vault dinamico in `watch.sh`. |
+| **CLEAN-04** | Clean Code & Audit | ✅ Met | Routing dichiarativo `DIRECTORY_ROUTING_RULES`, modello AI configurabile con `DEFAULT_AI_MODEL` e env var, decomposizione `_handle_*` approvazioni, consolidamento DRY `split_markdown_note`/`get_vault_root`. |
+
+**Audit Verdict:** **PASSED (23/23 Requirements Satisfied, 0 Gaps, 0 Orphaned, 163/163 Tests Green)**.
 
 ---
 
 ## 5. Key Decisions Log
 
-Registro completo delle decisioni di architettura e implementazione:
+Registro cronologico delle decisioni prese nel corso di v1.0.1-alpha:
 
 | ID | Fase | Decisione | Motivazione & Impatto |
 |---|---|---|---|
-| **D-01 (P1)** | Phase 01 | Riorganizzazione di `02 - Atlas/` in 5 macro-aree (`Tech & AI`, `Education & Learning`, `Personal Growth & Health`, `Finance`, `Projects`) | Elimina micro-silos caotici e struttura un modello tematico scalabile. |
-| **D-02 (P1)** | Phase 01 | Rilocazione archivio liceale da `03 - Inbox/School/` a `02 - Atlas/Education & Learning/Archivio Scuola/` | Libera `03 - Inbox/` destinandola esclusivamente all'acquisizione attiva. |
-| **D-03 (P1)** | Phase 01 | Script di migrazione atomico `migrate_structure.py` con refactoring wiki-links e breadcrumbs | Spostamento sicuro di 583 file preservando la navigabilità a 0 broken links. |
-| **D-04 (P1)** | Phase 01 | Rete MOC ibrida in `01 - Map of Content/` (`Home MOC.md` + 5 Macro-MOC + Sub-MOC dense) | Punto di accesso gerarchico e semantico per tutte le note permanenti. |
-| **D-01 (P2)** | Phase 02 | Vocabolario controllato per `type`: `concept`, `video`, `article`, `lecture`, `book`, `project`, `moc`, `journal` | Permette filtri di ricerca precisi e omogenei nel motore di retrieval. |
-| **D-02 (P2)** | Phase 02 | Normalizzazione chiave `area`: `tech`, `education`, `mentality`, `finance`, `projects`, `meta`, `calendar` | Elimina la vecchia chiave `macro_area` rendendo i codici compatti e coerenti. |
-| **D-10 (P2)** | Phase 02 | Formato summary: 1-2 frasi dense ed esecutive (120-180 car, max 200) | Condensa i key takeaways essenziali per scansioni sub-secondo da parte dell'AI. |
-| **D-14 (P2)** | Phase 02 | Engine di parsing e serializzazione basato su `ruamel.yaml` AST RoundTrip | Garantisce l'integrità del corpo Markdown e dei commenti senza corruzioni. |
-| **D-15 (P2)** | Phase 02 | Flow-style compatto a riga singola per tutti gli array (`tags: [...]`, `related: [...]`, `aliases: [...]`) | Mantiene il frontmatter compatto entro 10-12 righe per massima leggibilità. |
-| **D-20 (P2)** | Phase 02 | Checkpoint atomico JSON per processi batch (`99 - Meta/.backfill_checkpoint.json`) | Ripresa istantanea senza perdita di dati in caso di interruzioni o rate limits. |
-| **D-04 (P3)** | Phase 03 | Script backend unificato `brain_health.py` (audit link, linter AST, dashboard statica) | Elimina la frammentazione di 4 script separati in un unico modulo centrale. |
-| **D-14 (P3)** | Phase 03 | Purge completo di tutte le 7 micro-skills legacy in `.agents/skills/` | Accorpa l'esperienza nelle sole 3 macro-skills ufficiali (`brain-health`, `brain-ingest`, `brain-recall`). |
-| **D-01 (P4)** | Phase 04 | Cache JSON incrementale con convalida `mtime` del filesystem (`.recall_cache.json`) | Garantisce warm boot in <5ms e sincronizzazione automatica su modifiche alle note. |
-| **D-03 (P4)** | Phase 04 | 3-Way Hybrid Retrieval (Okapi BM25 + Smart Connections Dense Vectors + YAML Scorer) con RRF $k=60$ | Massimizza la precisione combinando corrispondenza lessicale, semantica vettoriale e gerarchica. |
-| **D-09 (P4)** | Phase 04 | Strict Zero-Hallucination Guard | Se un concetto non esiste nel Vault, restituisce un avviso esplicito senza allucinare fatti esterni. |
-| **D-01 (P5)** | Phase 05 | Watcher daemon Unix CLI (`start`, `stop`, `status`, `restart`) con PID tracking in `/tmp/brain_watcher.pid` | Fornisce controllo trasparente e affidabile del processo di background. |
-| **D-03 (P5)** | Phase 05 | Log rotation a 5MB con preservazione di 3 file di archivio (`watch.log.1..3`) | Previene la crescita incontrollata dei log su disco. |
-| **D-06 (P5)** | Phase 05 | Keyframe YouTube compressi JPEG a 720p `-q:v 2` salvati in `99 - Meta/Clipboard/` | Garantisce immagini nitide ma leggere (~100-150KB per frame) accessibili da tutto il Vault. |
-| **D-11 (P5)** | Phase 05 | Duplicate detection globale su tutto il Vault (scansione URL e titoli in Atlas/Blog) | Blocca double-ingestion accidentali prima di creare file di staging. |
-| **D-01 (P6)** | Phase 06 | Standardizzazione di tutti i template con script dinamici Templater `<%* ... %>` | Costruzione dinamica del frontmatter YAML e prompt puliti al momento della creazione nota. |
-| **D-04 (P6.1)** | Phase 06.1 | Riscrittura completa di `brain_ingest.py` in <450 righe modulari | Elimina il codice legacy monolitico (1528 righe), `ProcessTerminator` e prefissi mutabili dei file. |
-| **D-05 (P6.1)** | Phase 06.1 | Sotto-cartelle di staging dedicate `03 - Inbox/Draft/` e `03 - Inbox/Source/` | Semplifica il ciclo di vita separando chiaramente sorgente grezza e bozza rielaborata. |
-| **D-07 (P6.1)** | Phase 06.1 | Archiviazione selettiva delle sorgenti manuali in `99 - Meta/Archive/` ed eliminazione automatica di video/web | Preserva le idee originali scritte a mano eliminando i duplicati transitori di web/YouTube. |
-| **D-02 (P6.2)** | Phase 06.2 | Divieto assoluto di emoji nei titoli H1, H2, H3 e nelle intestazioni di sezione | Garantisce un layout sobrio, accademico e compatibile con Quartz. |
-| **D-03 (P6.2)** | Phase 06.2 | Assorbimento organico dei wiki-link nella prosa con sincronizzazione YAML `related: [...]` | Elimina la sezione finale rigida `## Collegamenti` intessendo la rete direttamente nel discorso. |
-| **D-05 (P6.2)** | Phase 06.2 | Ciclo di vita a 3 sole macro-fasi (`1/3 Estrazione`, `2/3 Rielaborazione AI`, `3/3 Autolinking & Staging`) | Flusso lineare, trasparente, con monitoraggio reattivo in `Review Dashboard.md`. |
-| **D-07 (P6.2)** | Phase 06.2 | Filtro aggressivo anti-slop e anti-sponsor con estrazione principi primi | Purifica le trascrizioni da promozioni e convenevoli, estraendo conoscenza densa. |
-| **D-10 (P6.2)** | Phase 06.2 | Modalità `--depth approfondimento` di default (con `--depth sintesi` opzionale) | Assicura trattazioni ricche ed esaustive per ogni nota permanente del Second Brain. |
-| **D-12 (P6.2)** | Phase 06.2 | Razionalizzazione a 2 soli template universali (`Nota Vault.md` e `Articolo Blog.md`) | Purge di 9 template legacy e `Folder Templates/` per un'architettura essenziale. |
+| **D-01 (P7)** | Phase 07 | Decommissioning completo modulo School (`config.json`, `fetch-registro.py`, `List.md`) | Elimina alla radice il rischio di credential leak per integrazione dismessa. |
+| **D-02 (P7)** | Phase 07 | Preservazione attiva di `99 - Meta/School/Style Guide.md` | Mantiene intatta la guida di stile cromatica per le evidenziazioni HTML `<mark>`. |
+| **D-04 (P7)** | Phase 07 | Risoluzione dinamica `shutil.which("agy")` e `Path.home()` in `brain_ingest.py` e `backfill_summaries.py` | Rende gli script portabili ed elimina i path assoluti legati all'utente locale. |
+| **D-05 (P7)** | Phase 07 | Parametrizzazione LaunchAgent macOS con placeholder `__VAULT_PATH__` e `watch.sh install-service` | Consente l'installazione automatica del servizio demone in `~/Library/LaunchAgents/`. |
+| **D-01 (P8)** | Phase 08 | Spostamento atomico preventivo delle note grezze in `03 - Inbox/Source/` | Protegge le note manoscritte dell'utente contro crash improvvisi o eccezioni AI. |
+| **D-03 (P8)** | Phase 08 | Pulizia sincronizzata 1:1 delle bozze post-AI tramite memorizzazione di `old_title` | Elimina la condizione auto-annullante `clean_title != cand_ai` ed evita file orfani. |
+| **D-04 (P8)** | Phase 08 | Purge selettivo dei frame YouTube in `Clipboard/` basato su `video_id` (11 caratteri) | Garantisce la pulizia completa dei file immagine al rifiuto `[-]` indipendentemente dal titolo. |
+| **D-05 (P8)** | Phase 08 | Isolamento del nome effettivo prima della pipe `|` nei wiki-link della dashboard | Evita errori `FileNotFoundError` su note con alias di visualizzazione. |
+| **D-06 (P8)** | Phase 08 | Eliminazione codice morto e fallback AI mirato per la target directory in `classify_target_directory` | Rimuove doppio return e classifica intelligentemente con `gemini-3.8-flash-low`. |
+| **D-07 (P8)** | Phase 08 | Upgrade globale del modello di inferenza a `gemini-3.8-flash-low` | Adotta il modello più recente e prestante per tutte le pipeline di elaborazione. |
+| **D-01 (P9)** | Phase 09 | Modalità diagnostica read-only `--lint-only` con prospetto CLI ricco | Consente verifiche di conformità YAML sicure e non distruttive a terminale. |
+| **D-02 (P9)** | Phase 09 | Rigetto difensivo dell'invocazione combinata `--lint-only` + `--auto-fix` | Protegge la semantica di sola lettura evitando mutazioni contrastanti. |
+| **D-03 (P9)** | Phase 09 | Preservazione simmetrica dei caratteri accentati italiani in forma Unicode NFC | Elimina la rimozione dei diacritici e garantisce parità 1:1 tra filename e frontmatter `title`. |
+| **D-06 (P9)** | Phase 09 | Tracciamento collisioni omonime in `duplicate_notes` senza sovrascrivere `all_notes` | Preserva la coerenza del grafo e segnala le anomalie di unicità nel dashboard. |
+| **D-07 (P9)** | Phase 09 | Conservazione condizionale di `video_url` e `channel` per `type: video` e sync con `source` | Protegge i metadati multimediali specifici durante i cicli di normalizzazione. |
+| **D-01 (P10)** | Phase 10 | Risoluzione dinamica del percorso PID watcher tramite hash vault (`/tmp/brain_watcher_{hash}.pid`) | Sincronizza `watch.sh` e `brain_ingest.py` per l'arresto d'emergenza affidabile. |
+| **D-02 (P10)** | Phase 10 | Preservazione del demone watcher ed eliminazione totale bozze parziali su Panic Abort | Arresta i worker e ripulisce le bozze corrotte lasciando vigile il servizio di monitoraggio. |
+| **D-05 (P10)** | Phase 10 | Mutex lock dedicato `DashboardLock` per `03 - Inbox/Review Dashboard.md` | Previene collisioni concorrenti e perdita di checkbox tra scanner e approvazioni. |
+| **D-09 (P10)** | Phase 10 | Serializzazione compatta JSON `separators=(',', ':')` per `.recall_cache.json` | Riduce il peso su disco della cache del 96.7% (da 22MB a 728KB) azzerando l'I/O. |
+| **D-10 (P10)** | Phase 10 | Eliminazione dell'array ridondante `tokens` a favore di `doc_len` e `term_freq` | Ottimizza memoria e disco mantenendo inalterato lo scoring Okapi BM25. |
+| **D-12 (P10)** | Phase 10 | Esclusione della cartella `03 - Inbox` dal perimetro di indicizzazione di recall | Previene falsi positivi ed elimina rumore da bozze temporanee o note grezze. |
+| **D-13 (P10)** | Phase 10 | Ristrutturazione di `recall_engine.py` in 2 sezioni senza emoji con assorbimento organico dei link | Allinea l'output alla Style Guide del Vault integrando le connessioni nella prosa. |
+| **D-14 (P10)** | Phase 10 | Rimozione emoji da tutte le intestazioni H1-H3 nei report di `brain_health.py` | Standardizza tutti i report Markdown su layout pulito e sobrio. |
+| **CLEAN-01** | Phase 12 | Salvaguardia `IGNORE_FILES` root, ricalcolo metriche post-fix, atomicità APFS `safe_rename` | Protegge i file di configurazione di sistema e risolve conflitti case-only su macOS. |
+| **CLEAN-02** | Phase 12 | Word boundaries (`\b`) nello scoring YAML, esclusione codice fenced e fallback semantico denso | Elimina falsi positivi lessicali su acronimi ed estende la ricerca vettoriale alle query libere. |
+| **CLEAN-03** | Phase 12 | Verifica `os.path.isfile` per tipo input, autolink protetto per URL/markdown, `VideoMetadataError` | Previene errori di parsing su file inesistenti e blocca la creazione di note video fittizie. |
+| **CLEAN-04** | Phase 12 | Routing dichiarativo tabellare OCP/SRP, modello AI configurabile, decomposizione handler | Snellisce le funzioni monolitiche e consolida le funzioni duplicate DRY nel codebase. |
 
 ---
 
 ## 6. Tech Debt & Deferred Items
 
-### Debito Tecnico Risolto:
-- **Purge script legacy:** Rimossi 8 script monolitici/frammentati in `99 - Meta/Scripts/` (`ingest.sh.bak`, `migrate_structure.py`, `audit_vault.py`, `lint_yaml.py`, `update_dashboard.py`, `tidy_vault.py`, `auto_sort_inbox.py`, `ingest_manager.py`).
-- **Purge micro-skills:** Eliminate 7 directory micro-skills ridondanti in `.agents/skills/` (`audit`, `meta`, `tidy`, `link`, `process-inbox`, `nota`, `dream`).
-- **Purge template obsoleti:** Eliminati 9 template frammentati e la cartella `99 - Meta/Template/Folder Templates/`.
-- **Eliminazione Dataview:** Rimosso ogni blocco dinamico `dataview` a favore di tabelle e dashboard Markdown statiche.
-- **Normalizzazione Frontmatter:** Corretti 669 frontmatter YAML eterogenei e convertite tutte le intestazioni a Title Case.
+### Debito Tecnico Risolto in v1.0.1-alpha:
+- **Vulnerabilità di Sicurezza:** Epurate definitivamente credenziali ClasseViva e API key hardcoded; rimossi file tracciati da Git; percorsi assoluti utente dinamizzati.
+- **Data-Loss Hazards:** Eliminato il rischio di cancellazione prematura delle note grezze dell'Inbox grazie allo staging preventivo in `Source/`.
+- **Ghost Drafts & Orphan Frames:** Risolti i bug di ridenominazione post-AI e implementato il purge dei frame YouTube mirato su `video_id`.
+- **Race Conditions:** Serializzate le operazioni su `Review Dashboard.md` tramite `DashboardLock` con timeout e gestione non bloccante.
+- **Cache Bloat:** Compressa la cache di retrieval vettoriale/BM25 da 22MB a 728KB, con pruning deterministico delle note rimosse.
+- **Discrepanze Diacritiche e Conflitti APFS:** Standardizzata la normalizzazione Unicode NFC simmetrica tra filename e YAML title; gestita la ridenominazione case-only su filesystem macOS APFS.
+- **Test Inconsistencies:** Risolte le asserzioni contraddittorie sui metadati video e mockati i test di rete YouTube; copertura estesa a 163 test green.
+- **Codice Monolitico e Duplicazioni DRY:** Decomposte le funzioni monolitiche di approvazione e classificazione; centralizzate le utility duplicate `split_markdown_note` e `get_vault_root`.
 
 ### Elementi Differiti alle Future Versioni (Roadmap v2):
-- **EXT-01 (v2):** Sincronizzazione automatica bidirezionale con Kindle / Readwise per highlight di libri.
-- **EXT-02 (v2):** Voice-to-text capture su dispositivi mobili con trascrizione Whisper automatica in Inbox.
-- **GRAPH-01 (v2):** Algoritmo di clustering semantico per suggerire proattivamente nuove MOC quando un cluster tematico supera le 20 note correlate.
+- **EXT-01 (v2):** Sincronizzazione automatica bidirezionale con Kindle / Readwise per highlight da ebook e articoli.
+- **EXT-02 (v2):** Voice-to-text capture mobile con trascrizione Whisper automatica e staging in Inbox.
+- **GRAPH-01 (v2):** Algoritmo di clustering concettuale basato sui vettori del Vault per suggerire la creazione proattiva di Sub-MOC.
 
 ---
 
 ## 7. Getting Started
 
-### Guida Rapida per Contributori e Nuovi Utenti:
+Guida rapida operativa aggiornata con le nuove funzionalità di v1.0.1-alpha:
 
-1. **Gestione del Demone Watcher (Acquisizione in Background):**
-   ```bash
-   # Avvia il demone watcher in background
-   ./"99 - Meta/Scripts/watch.sh" start
+### 1. Gestione del Demone Watcher & Installazione Servizio macOS:
+```bash
+# Avvia il watcher in background
+./"99 - Meta/Scripts/watch.sh" start
 
-   # Verifica lo stato e il PID
-   ./"99 - Meta/Scripts/watch.sh" status
+# Verifica lo stato e il PID sincronizzato con hash vault
+./"99 - Meta/Scripts/watch.sh" status
 
-   # Arresta il demone
-   ./"99 - Meta/Scripts/watch.sh" stop
-   ```
+# Arresta il demone
+./"99 - Meta/Scripts/watch.sh" stop
 
-2. **Ingestione Manuale e Interattiva (`brain-ingest`):**
-   ```bash
-   # Ingestione video YouTube o articolo web (approfondito di default)
-   python3 "99 - Meta/Scripts/brain_ingest.py" "https://www.youtube.com/watch?v=..."
+# Riavvia il demone
+./"99 - Meta/Scripts/watch.sh" restart
 
-   # Ingestione con estrazione screenshot frame
-   python3 "99 - Meta/Scripts/brain_ingest.py" "https://www.youtube.com/watch?v=..." --extract-frames
+# Installa il demone permanente come LaunchAgent utente macOS
+./"99 - Meta/Scripts/watch.sh" install-service
+```
 
-   # Ingestione in modalità sintesi rapida
-   python3 "99 - Meta/Scripts/brain_ingest.py" "https://..." --depth sintesi
+### 2. Ingestione Universale & Gestione Staging (`brain-ingest`):
+```bash
+# Ingestione standard (approfondimento) con modello gemini-3.8-flash-low
+python3 "99 - Meta/Scripts/brain_ingest.py" "https://www.youtube.com/watch?v=..."
 
-   # Elaborazione approvazioni dalla Review Dashboard
-   python3 "99 - Meta/Scripts/brain_ingest.py" --process-approvals
-   ```
+# Ingestione sintetica compatta
+python3 "99 - Meta/Scripts/brain_ingest.py" "https://..." --depth sintesi
 
-3. **Consultazione e Retrieval NotebookLM (`brain-recall`):**
-   ```bash
-   # Ricerca semantica nel vault
-   python3 "99 - Meta/Scripts/recall_engine.py" "Architettura Transformer e Attention"
+# Elaborazione approvazioni interattive dalla Review Dashboard (con mutex DashboardLock)
+python3 "99 - Meta/Scripts/brain_ingest.py" --process-approvals
 
-   # Ricerca con filtri di area tematica e tipo di risorsa
-   python3 "99 - Meta/Scripts/recall_engine.py" "Algoritmi di ordinamento" --area education --type concept
+# Arresto di emergenza / Panic Button via CLI
+python3 "99 - Meta/Scripts/brain_ingest.py" --panic
+```
 
-   # Output in formato Markdown a 3 sezioni per chat
-   python3 "99 - Meta/Scripts/recall_engine.py" "RAG Knowledge Base" --format markdown
-   ```
+### 3. Consultazione e Retrieval Ibrido (`brain-recall`):
+```bash
+# Ricerca ibrida (BM25 + Vettori + YAML con fallback semantico denso)
+python3 "99 - Meta/Scripts/recall_engine.py" "Come funziona l'algoritmo di attenzione nei Transformer?"
 
-4. **Governance e Manutenzione Vault (`brain-health`):**
-   ```bash
-   # Scansione interattiva con conferma modifiche
-   python3 "99 - Meta/Scripts/brain_health.py" --interactive
+# Ricerca strutturata con filtri controllati
+python3 "99 - Meta/Scripts/recall_engine.py" "Reti Neurali" --area tech --type concept
 
-   # Rigenerazione rapida della dashboard statica
-   python3 "99 - Meta/Scripts/brain_health.py" --dashboard-only
-   ```
+# Formato Markdown conforme alla Style Guide (2 sezioni pulite, 0 emoji, link organici)
+python3 "99 - Meta/Scripts/recall_engine.py" "Gestione della memoria" --format markdown
 
-5. **Esecuzione Suite di Test:**
-   ```bash
-   python3 -m unittest discover -s tests -v
-   ```
+# Ricostruzione forzata della cache compressa (<750KB)
+python3 "99 - Meta/Scripts/recall_engine.py" --reindex
+```
 
-6. **Mappa delle Risorse Chiave:**
-   - [GEMINI.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/GEMINI.md) — Memoria di sistema e regole permanenti del Vault.
-   - [AGENTS.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/AGENTS.md) — Architettura del Second Brain e runtime conventions.
-   - [Home MOC.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/01%20-%20Map%20of%20Content/Home%20MOC.md) — Indice centrale della knowledge base.
-   - [Review Dashboard.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/03%20-%20Inbox/Review%20Dashboard.md) — Dashboard di revisione e approvazione GTD.
-   - [Vault Health Dashboard.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/99%20-%20Meta/Vault%20Health%20Dashboard.md) — Report diagnostico statico del Vault.
-   - [Style Guide.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/99%20-%20Meta/Style%20Guide.md) — Guida di stile per evidenziazioni HTML, Mermaid e LaTeX.
+### 4. Governance, Linting & Salute del Vault (`brain-health`):
+```bash
+# Ispezione diagnostica in SOLA LETTURA (nessuna modifica su disco)
+python3 "99 - Meta/Scripts/brain_health.py" --lint-only
+
+# Anteprima delle modifiche e ridenominazioni Title Case
+python3 "99 - Meta/Scripts/brain_health.py" --dry-run
+
+# Applicazione correzioni automatiche (normalizzazione YAML, Title Case, breadcrumbs, IGNORE_FILES protetti)
+python3 "99 - Meta/Scripts/brain_health.py" --auto-fix
+
+# Rigenerazione rapida della dashboard statica Markdown
+python3 "99 - Meta/Scripts/brain_health.py" --dashboard-only
+```
+
+### 5. Esecuzione Suite di Test:
+```bash
+# Esecuzione completa dei 163 unit e integration tests
+python3 -m unittest discover tests -v
+```
+
+### 6. Mappa delle Risorse di Riferimento:
+- [GEMINI.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/GEMINI.md) — Memoria di sistema e convenzioni permanenti del Vault.
+- [AGENTS.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/AGENTS.md) — Architettura del Second Brain e runtime conventions.
+- [Review Dashboard.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/03%20-%20Inbox/Review%20Dashboard.md) — Interfaccia GTD di revisione e approvazione note.
+- [Vault Health Dashboard.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/99%20-%20Meta/Vault%20Health%20Dashboard.md) — Report diagnostico statico del Vault.
+- [Style Guide.md](file:///Users/lorenzo/Documents/GitHub/loackyPKM/99%20-%20Meta/School/Style%20Guide.md) — Guida di stile per evidenziazioni cromatiche `<mark>`, diagrammi Mermaid e formule LaTeX.
 
 ---
 
 ## Stats
 
-- **Timeline:** 2026-08-24 → 2026-08-29 (5 giorni di sviluppo attivo)
-- **Phases:** 8 / 8 Completate (16 piani eseguiti al 100%)
-- **Commits:** 42 commit
-- **Files changed:** 840 file (+103034 / -147)
-- **Automated Tests:** 101 unit/integration tests (100% green pass rate)
+- **Timeline:** 2026-09-01 → 2026-09-05 (4 giorni di sviluppo attivo)
+- **Phases:** 6 / 6 Completate (Phases 07-12, 12 piani eseguiti al 100%)
+- **Tasks Executed:** 29 task implementativi e di collaudo
+- **Commits:** 38 commit
+- **Files changed:** 77 file (+10,509 / -6,812)
+- **Automated Tests:** 163 unit/integration tests (100% green pass rate)
+- **Cache Footprint:** Ridotta da 22MB a 728KB (-96.7%)
 - **Contributors:** Loacky <lorenzoadacher@gmail.com>

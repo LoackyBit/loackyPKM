@@ -5,8 +5,8 @@ area: meta
 related: ["[[Home MOC]]", "[[Review Dashboard]]"]
 source: original
 title: "Vault Health Dashboard"
-date: '2026-08-31'
-updated: 2026-08-31T23:52
+date: '2026-09-05'
+updated: 2026-09-05T01:27
 tags: [meta/dashboard, meta/health]
 summary: "Pannello di controllo statico del Second Brain: monitoraggio dello stato di salute, note in staging, bozze del blog e diagnostica del grafo."
 ---
@@ -16,25 +16,26 @@ summary: "Pannello di controllo statico del Second Brain: monitoraggio dello sta
 
 Pannello di controllo in **puro Markdown statico** per monitorare la salute del Vault, le note in staging e l'integrità del grafo semantico.
 
-*Ultimo aggiornamento:* `2026-08-31 23:52`
+*Ultimo aggiornamento:* `2026-09-05 01:27`
 
 ---
 
 ## Metriche Generali del Vault
-- **Note Totali:** 143
+- **Note Totali:** 145
 - **Note in Staging (Inbox):** 2
 - **Bozze Blog:** 3
-- **Note Orfane:** 2
-- **Link Interrotti:** 9
-- **Forward-Links Pianificati:** 2613
+- **Note Orfane:** 4
+- **Link Interrotti:** 8
+- **Forward-Links Pianificati:** 2612
+- **Collisioni Omonime (Note Duplicate):** 1
 
 ---
 
 ## Note in Staging (Inbox / Bozze)
 | Nota | Creazione | Area | Stato |
 |---|---|---|---|
+| [[Clean Code Audit Report - 2026-09-03]] | 2026-09-03 | meta | `draft` |
 | [[Review Dashboard]] | 2026-08-31 | meta | `draft` |
-| [[HTTPS - Github Com - ZyphrZero - Termy]] | 2026-08-31 | tech | `draft` |
 
 
 ---
@@ -52,16 +53,16 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 ## Note Modificate di Recente
 | Nota | Ultima Modifica | Area |
 |---|---|---|
-| [[Semantic Versioning]] | 2026-08-31 23:52 | tech |
-| [[1 - Search]] | 2026-08-31 23:52 | tech |
-| [[Learning to Learn ENG]] | 2026-08-31 23:52 | mentality |
-| [[Learning to Learn ITA]] | 2026-08-31 23:52 | mentality |
-| [[Come Tornare a Leggere Libri]] | 2026-08-31 23:52 | tech |
-| [[Review Dashboard]] | 2026-08-31 23:42 | meta |
-| [[Corsi]] | 2026-08-31 23:42 | tech |
-| [[1 Introduzione e Linguaggio Naturale]] | 2026-08-31 23:42 | education |
-| [[Audit Report - 2026-08-30]] | 2026-08-31 23:42 | meta |
-| [[HTTPS - Github Com - ZyphrZero - Termy]] | 2026-08-31 23:35 | tech |
+| [[Senza nome]] | 2026-09-03 22:40 | N/D |
+| [[test]] | 2026-09-03 22:40 | N/D |
+| [[Review Dashboard]] | 2026-09-03 22:31 | meta |
+| [[Clean Code Audit Report - 2026-09-03]] | 2026-09-03 13:10 | meta |
+| [[Workflow Perplexity NotebookLM]] | 2026-09-01 00:21 | tech |
+| [[Unfuck Your Brain]] | 2026-09-01 00:21 | tech |
+| [[TIL l'Inganno Dell'Applauso Quintiliano]] | 2026-09-01 00:21 | tech |
+| [[Problema P Vs NP]] | 2026-09-01 00:21 | tech |
+| [[Index]] | 2026-09-01 00:21 | tech |
+| [[Crono S]] | 2026-09-01 00:21 | tech |
 
 
 ---
@@ -71,8 +72,3 @@ Per eseguire un audit interattivo o applicare correzioni automatiche:
 ```bash
 python3 "99 - Meta/Scripts/brain_health.py" --interactive
 ```
-
----
-## Collegamenti
-- [[Home MOC]]
-- [[Review Dashboard]]

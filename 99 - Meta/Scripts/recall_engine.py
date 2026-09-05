@@ -24,6 +24,7 @@ if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 
 import ruamel.yaml
+import brain_health
 
 CONTROLLED_TYPES = {'concept', 'video', 'article', 'lecture', 'book', 'project', 'moc', 'journal'}
 CONTROLLED_AREAS = {'tech', 'education', 'mentality', 'finance', 'projects', 'meta', 'calendar'}
@@ -31,7 +32,7 @@ CONTROLLED_AREAS = {'tech', 'education', 'mentality', 'finance', 'projects', 'me
 IGNORE_FOLDERS = {
     '.git', '.obsidian', '.agents', '.gemini', '.trash', '.vscode',
     '.space', '.makemd', '.smart-env', '.antigravitycli', '.codacy',
-    'node_modules', 'tests', '.planning', '99 - Meta', 'Template'
+    'node_modules', 'tests', '.planning', '99 - Meta', 'Template', '03 - Inbox'
 }
 
 STOPWORDS = {
@@ -61,12 +62,8 @@ CACHE_FILENAME = ".recall_cache.json"
 VEC_DIM = 384
 VEC_BYTES = VEC_DIM * 4  # 1536 bytes for 384 float32 values
 
-
-def get_vault_root(start_path: Optional[str] = None) -> str:
-    """Dynamically resolves the root path of the Second Brain vault."""
-    if start_path:
-        return os.path.abspath(start_path)
-    return os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
+# DRY consolidation (CLEAN-04)
+get_vault_root = brain_health.get_vault_root
 
 
 def tokenize(text: str) -> List[str]:
@@ -92,25 +89,22 @@ class BM25Index:
         self.total_docs: int = 0
         self.avg_doc_len: float = 0.0
 
-    def build_from_corpus(self, corpus: Dict[str, List[str]]):
-        """Builds inverted index and term frequencies from tokenized document corpus."""
-        self.total_docs = len(corpus)
-        self.doc_lengths.clear()
-        self.term_freqs.clear()
-        self.doc_freqs.clear()
-        if self.total_docs == 0:
-            self.avg_doc_len = 0.0
-            return
-        total_len = 0
-        for doc_id, tokens in corpus.items():
-            doc_len = len(tokens)
-            self.doc_lengths[doc_id] = doc_len
-            total_len += doc_len
-            tf = Counter(tokens)
-            self.term_freqs[doc_id] = dict(tf)
+    def build_from_term_freqs(self, doc_lengths: Dict[str, int], term_freqs: Dict[str, Dict[str, int]]):
+        """Builds inverted index and frequencies directly from document lengths and term frequencies (D-10)."""
+        self.total_docs = len(doc_lengths)
+        self.doc_lengths = dict(doc_lengths)
+        self.term_freqs = dict(term_freqs)
+        self.doc_freqs = Counter()
+        for tf in self.term_freqs.values():
             for term in tf.keys():
                 self.doc_freqs[term] += 1
-        self.avg_doc_len = total_len / self.total_docs if self.total_docs > 0 else 0.0
+        self.avg_doc_len = sum(self.doc_lengths.values()) / self.total_docs if self.total_docs > 0 else 0.0
+
+    def build_from_corpus(self, corpus: Dict[str, List[str]]):
+        """Builds inverted index and term frequencies from tokenized document corpus."""
+        doc_lengths = {doc_id: len(tokens) for doc_id, tokens in corpus.items()}
+        term_freqs = {doc_id: dict(Counter(tokens)) for doc_id, tokens in corpus.items()}
+        self.build_from_term_freqs(doc_lengths, term_freqs)
 
     def score(self, query_tokens: List[str]) -> List[Tuple[str, float]]:
         """Calculates Okapi BM25 scores for query tokens against all documents."""
@@ -136,43 +130,8 @@ class BM25Index:
         return scores
 
 
-def split_markdown_note(content: str) -> Tuple[bool, str, Optional[str], str]:
-    """Splits markdown into frontmatter text, breadcrumb line, and body."""
-    lines = content.splitlines()
-    has_frontmatter = False
-    frontmatter_lines = []
-    rest_lines = []
-
-    if len(lines) > 0 and lines[0].strip() == '---':
-        closing_idx = -1
-        for idx in range(1, len(lines)):
-            if lines[idx].strip() == '---':
-                closing_idx = idx
-                break
-        if closing_idx != -1:
-            has_frontmatter = True
-            frontmatter_lines = lines[1:closing_idx]
-            rest_lines = lines[closing_idx + 1:]
-        else:
-            rest_lines = lines
-    else:
-        rest_lines = lines
-
-    breadcrumb = None
-    body_start_idx = 0
-    while body_start_idx < len(rest_lines) and not rest_lines[body_start_idx].strip():
-        body_start_idx += 1
-
-    if body_start_idx < len(rest_lines):
-        candidate = rest_lines[body_start_idx].strip()
-        if candidate.startswith('[[Home MOC') or (candidate.startswith('[[') and ' / ' in candidate):
-            breadcrumb = candidate
-            body_start_idx += 1
-
-    body_lines = rest_lines[body_start_idx:]
-    body_str = '\n'.join(body_lines).lstrip('\n')
-
-    return has_frontmatter, '\n'.join(frontmatter_lines), breadcrumb, body_str
+# DRY consolidation (CLEAN-04)
+split_markdown_note = brain_health.split_markdown_note
 
 
 def safe_parse_frontmatter(fm_text: str) -> Dict[str, Any]:
@@ -277,6 +236,13 @@ def cosine_similarity(vec_a: Tuple[float, ...], vec_b: Tuple[float, ...]) -> flo
     return sum(a * b for a, b in zip(vec_a, vec_b))
 
 
+def _token_match(tok: str, text: str) -> bool:
+    """Checks if token matches within text using word boundaries to prevent substring false positives."""
+    if not tok or not text:
+        return False
+    return bool(re.search(rf"\b{re.escape(tok)}\b", text, re.IGNORECASE))
+
+
 def score_yaml_metadata(metadata: Dict[str, Any], query_tokens: List[str]) -> float:
     """
     Computes weighted YAML metadata score:
@@ -300,13 +266,13 @@ def score_yaml_metadata(metadata: Dict[str, Any], query_tokens: List[str]) -> fl
 
     score = 0.0
     for tok in query_tokens:
-        if tok in title_text:
+        if _token_match(tok, title_text):
             score += 10.0
-        if tok in summary_text:
+        if _token_match(tok, summary_text):
             score += 6.0
-        if tok in area_text or tok in tags_text:
+        if _token_match(tok, area_text) or _token_match(tok, tags_text):
             score += 4.0
-        if tok in related_text or tok in aliases_text:
+        if _token_match(tok, related_text) or _token_match(tok, aliases_text):
             score += 2.0
 
     return score
@@ -426,6 +392,15 @@ def load_or_rebuild_cache(vault_root: str, force_reindex: bool = False) -> Dict[
 
     cached_files = cache_data.get("files", {})
     updated = False
+    for entry in cached_files.values():
+        if "tokens" in entry:
+            if "doc_len" not in entry:
+                entry["doc_len"] = len(entry["tokens"])
+            if "term_freq" not in entry:
+                entry["term_freq"] = dict(Counter(entry["tokens"]))
+            entry.pop("tokens", None)
+            updated = True
+
     current_files = set()
 
     # Load Smart Connections vector references
@@ -474,7 +449,7 @@ def load_or_rebuild_cache(vault_root: str, force_reindex: bool = False) -> Dict[
                     "summary": str(meta.get('summary') or ''),
                     "related": meta.get('related') if isinstance(meta.get('related'), list) else ([str(meta.get('related'))] if meta.get('related') else []),
                     "aliases": meta.get('aliases') if isinstance(meta.get('aliases'), list) else ([str(meta.get('aliases'))] if meta.get('aliases') else []),
-                    "tokens": tokens,
+                    "doc_len": len(tokens),
                     "term_freq": dict(Counter(tokens)),
                     "vector_file": v_file,
                     "vector_i": v_i
@@ -490,10 +465,10 @@ def load_or_rebuild_cache(vault_root: str, force_reindex: bool = False) -> Dict[
 
     cache_data["files"] = cached_files
     if updated or not os.path.exists(cache_path) or force_reindex:
-        # Atomic write via temporary file
+        # Atomic write via temporary file with compact JSON serialization (D-09)
         tmp_path = cache_path + ".tmp"
         with open(tmp_path, 'w', encoding='utf-8') as f:
-            json.dump(cache_data, f, ensure_ascii=False, indent=2)
+            json.dump(cache_data, f, ensure_ascii=False, separators=(',', ':'))
         os.replace(tmp_path, cache_path)
 
     return cache_data
@@ -525,12 +500,16 @@ def extract_relevant_snippet_and_timestamps(
     # Extract video timestamps like [12:34] or [01:23:45]
     timestamps = re.findall(r'\[([0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?)\]', body)
 
+    # Strip fenced code blocks before heading extraction so code comments (# ...) are not parsed as markdown headings
+    body_no_code = re.sub(r'```[\s\S]*?```', '', body)
+    body_no_code = re.sub(r'~~~[\s\S]*?~~~', '', body_no_code)
+
     # Extract headings and paragraphs
     sections: List[Tuple[str, str]] = []
     current_heading = "Introduzione"
     current_lines: List[str] = []
 
-    for line in body.splitlines():
+    for line in body_no_code.splitlines():
         if line.startswith(('## ', '### ', '# ')):
             if current_lines:
                 sec_content = "\n".join(current_lines).strip()
@@ -616,14 +595,15 @@ def execute_query(
         yaml_scores.sort(key=lambda x: x[1], reverse=True)
         yaml_ranks = [rel_path for rel_path, _ in yaml_scores]
 
-        # 2. BM25 Lexical Ranking
-        corpus = {rel_path: entry.get("tokens", []) for rel_path, entry in files.items()}
+        # 2. BM25 Lexical Ranking (D-10)
+        doc_lengths = {rel_path: entry.get("doc_len", 0) for rel_path, entry in files.items()}
+        term_freqs = {rel_path: entry.get("term_freq", {}) for rel_path, entry in files.items()}
         bm25_index = BM25Index(k1=1.5, b=0.75)
-        bm25_index.build_from_corpus(corpus)
+        bm25_index.build_from_term_freqs(doc_lengths, term_freqs)
         bm25_scores = bm25_index.score(query_tokens)
         bm25_ranks = [rel_path for rel_path, _ in bm25_scores]
 
-        # 3. Dense Semantic Track (if query matches a note title)
+        # 3. Dense Semantic Track (direct match or pseudo-relevance feedback for freeform queries)
         dense_ranks: List[str] = []
         cleaned_query = query.strip('[]"\'').lower()
         matching_target = None
@@ -633,6 +613,16 @@ def execute_query(
             if stem == cleaned_query or title == cleaned_query:
                 matching_target = rel_path
                 break
+
+        if not matching_target:
+            # Pseudo-relevance feedback: use top lexical candidate (BM25 or YAML) as semantic anchor
+            top_candidates = bm25_ranks if bm25_ranks else yaml_ranks
+            for cand in top_candidates:
+                cand_entry = files.get(cand, {})
+                if cand_entry.get("vector_file") and cand_entry.get("vector_i") is not None:
+                    matching_target = cand
+                    break
+
         if matching_target:
             sim_notes = find_similar_notes(vault_root, matching_target, cache_data, limit=len(files))
             dense_ranks = [rel_path for rel_path, _ in sim_notes]
@@ -748,7 +738,7 @@ def format_output(
         return json.dumps(payload, ensure_ascii=False, indent=2)
 
     elif output_format == 'markdown':
-        # Section 1: Executive Summary synthesis
+        # Section 1: Executive Summary synthesis without emoji (D-13, PERF-04)
         summary_bullets = []
         for r in results:
             if r.get('summary'):
@@ -756,7 +746,7 @@ def format_output(
 
         exec_text = "\n".join(summary_bullets) if summary_bullets else "- Sintesi dei concetti rilevanti estratti dal Vault."
 
-        # Section 2: Sources & Citations
+        # Section 2: Sources & Citations without emoji (D-13, PERF-04)
         sources = []
         for r in results:
             cit = f"- [[{r['title']}]]"
@@ -769,7 +759,7 @@ def format_output(
             sources.append(cit)
         sources_text = "\n".join(sources)
 
-        # Section 3: Related Connections
+        # Organic integration of related semantic notes and drill-down hints (D-13, D-16)
         related_set: Set[str] = set()
         result_titles = {r['title'].lower() for r in results}
         for r in results:
@@ -781,16 +771,13 @@ def format_output(
 
         suggested = sorted(list(related_set))[:2]
         if suggested:
-            related_text = "\n".join(f"- {s}: Approfondimento correlato nel grafo semantico." for s in suggested)
-        else:
-            related_text = "- [[Home MOC]]: Per la navigazione delle mappe concettuali generali."
+            sources_text += f"\n\n*Connessioni semantiche correlate:* {', '.join(suggested)}"
 
-        drill_text = ""
         if drilldown_suggestions:
             drill_hints = " ".join(d['hint'] for d in drilldown_suggestions)
-            drill_text = f"\n\n> 💡 **Suggerimento:** {drill_hints}"
+            sources_text += f"\n\n> 💡 **Suggerimento:** {drill_hints}"
 
-        return f"""### 🎯 Sintesi Esecutiva\n{exec_text}\n\n---\n\n### 📚 Fonti & Citazioni\n{sources_text}\n\n---\n\n### 🔗 Connessioni Correlate\n{related_text}{drill_text}"""
+        return f"""### Sintesi Esecutiva\n{exec_text}\n\n---\n\n### Fonti & Citazioni\n{sources_text}"""
 
     else:
         # Pretty interactive terminal output

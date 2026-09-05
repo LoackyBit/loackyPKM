@@ -25,7 +25,7 @@ MINOR_WORDS = {
     'di', 'del', 'della', 'dello', 'dei', 'degli', 'delle', 'da', 'dal', 'dalla', 'in', 'su',
     'sul', 'sulla', 'per', 'con', 'a', 'al', 'alla', 'o', 'e', 'ed', 'la', 'il', 'lo', 'i',
     'gli', 'le', 'un', 'uno', 'una', 'to', 'the', 'and', 'of', 'on', 'at', 'for', 'with', 'by',
-    'in', 'an', 'a', 'd', 'l'
+    'an', 'd', 'l'
 }
 
 PRESERVE_UPPER = {
@@ -103,6 +103,13 @@ TAG_HIERARCHY_MAP = {
 def get_vault_root(start_path: Optional[str] = None) -> str:
     """Dynamically resolves the root path of the Second Brain vault."""
     if start_path:
+        current = os.path.abspath(start_path)
+        while current != os.path.dirname(current):
+            if os.path.isdir(os.path.join(current, ".obsidian")) or (
+                os.path.isdir(os.path.join(current, "02 - Atlas")) and os.path.isdir(os.path.join(current, "99 - Meta"))
+            ):
+                return current
+            current = os.path.dirname(current)
         return os.path.abspath(start_path)
     script_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.abspath(os.path.join(script_dir, "..", ".."))
@@ -129,10 +136,25 @@ def capitalize_word_with_apostrophe(word: str, is_first: bool) -> str:
     return "'".join(formatted_parts)
 
 
-def clean_filename(filename: str) -> str:
-    """Normalizes a filename to Title Case, stripping emojis, accents, and special characters."""
-    base = filename[:-3] if filename.endswith(".md") else filename
-    base = base.replace("’", "'")
+def normalize_title_or_filename(text: str) -> str:
+    """SSOT routine normalizing a title or filename string to intelligent Title Case in Unicode NFC.
+
+    Preserves Templater syntax, Italian accented characters (à, è, é, ì, ò, ù, À, È, É, Ì, Ò, Ù),
+    uppercase acronyms in PRESERVE_UPPER, and minor words in MINOR_WORDS.
+    Sanitizes /, \\, : into ' - ', strips emojis, normalizes typographical apostrophes,
+    and replaces forbidden special characters.
+    """
+    base = text.strip()
+    if '<%' in base:
+        return base
+    if base.endswith('.md'):
+        base = base[:-3]
+
+    base = unicodedata.normalize('NFC', base)
+    base = base.replace('’', "'").replace('‘', "'")
+
+    for forbidden in ['/', '\\', ':']:
+        base = base.replace(forbidden, ' - ')
 
     clean_chars = []
     for c in base:
@@ -144,13 +166,12 @@ def clean_filename(filename: str) -> str:
         clean_chars.append(c)
     base = "".join(clean_chars)
 
-    nfd_form = unicodedata.normalize('NFD', base)
-    base = "".join(c for c in nfd_form if unicodedata.category(c) != 'Mn')
-
-    for spec in ['+', '?', '!', '(', ')', '[', ']', '_']:
+    for spec in ['+', '?', '!', '(', ')', '[', ']', '_', '.', '|', '*', '"', '<', '>']:
         base = base.replace(spec, ' ')
 
-    base = " ".join(base.split())
+    base = re.sub(r'\s*-\s*', ' - ', base)
+    base = re.sub(r'(\s*-\s*)+', ' - ', base)
+    base = ' '.join(base.split()).strip(' -.')
 
     words = base.split()
     title_words = []
@@ -159,11 +180,10 @@ def clean_filename(filename: str) -> str:
         is_last = (i == len(words) - 1)
 
         if "'" in word:
-            formatted = capitalize_word_with_apostrophe(word, is_first)
-            title_words.append(formatted)
+            title_words.append(capitalize_word_with_apostrophe(word, is_first))
             continue
 
-        clean_word = "".join(c for c in word if c.isalnum())
+        clean_word = ''.join(c for c in word if c.isalnum())
         clean_upper = clean_word.upper()
         clean_lower = clean_word.lower()
 
@@ -179,51 +199,18 @@ def clean_filename(filename: str) -> str:
             else:
                 title_words.append(word.capitalize())
 
-    return " ".join(title_words)
+    res = ' '.join(title_words)
+    return unicodedata.normalize('NFC', res)
+
+
+def clean_filename(filename: str) -> str:
+    """Normalizes a filename to Title Case, stripping emojis and special characters while preserving NFC accents."""
+    return normalize_title_or_filename(filename)
 
 
 def clean_title_str(title: str) -> str:
-    """Formats string to intelligent Title Case preserving Templater syntax, minor words, and acronyms, strictly excluding / : \\."""
-    base = title.strip()
-    if '<%' in base:
-        return base
-    if base.endswith('.md'):
-        base = base[:-3]
-    base = base.replace('’', "'")
-    # Strictly disallow and sanitize / : \ into hyphen separators
-    for forbidden in ['/', '\\', ':']:
-        base = base.replace(forbidden, ' - ')
-    base = ''.join(c for c in base if ord(c) < 128 or c.isalnum() or c.isspace() or c in ("'", "-"))
-    for spec in ['+', '?', '!', '(', ')', '[', ']', '_', '.']:
-        base = base.replace(spec, ' ')
-    base = re.sub(r'\s*-\s*', ' - ', base)
-    base = re.sub(r'(\s*-\s*)+', ' - ', base)
-    base = ' '.join(base.split()).strip(' -.')
-
-    words = base.split()
-    title_words = []
-    for i, word in enumerate(words):
-        is_first = (i == 0)
-        is_last = (i == len(words) - 1)
-
-        if "'" in word:
-            title_words.append(capitalize_word_with_apostrophe(word, is_first))
-            continue
-
-        clean_word = ''.join(c for c in word if c.isalnum()).upper()
-        clean_lower = ''.join(c for c in word if c.isalnum()).lower()
-        if clean_word in PRESERVE_UPPER:
-            title_words.append(word.upper())
-        elif clean_lower in MINOR_WORDS and not is_first and not is_last:
-            title_words.append(word.lower())
-        else:
-            has_upper = any(c.isupper() for c in word)
-            has_lower = any(c.islower() for c in word)
-            if has_upper and has_lower:
-                title_words.append(word)
-            else:
-                title_words.append(word.capitalize())
-    return ' '.join(title_words)
+    """Formats string to intelligent Title Case preserving Templater syntax, minor words, and acronyms in NFC."""
+    return normalize_title_or_filename(title)
 
 
 def get_breadcrumbs(filepath: str, clean_title: str) -> str:
@@ -258,6 +245,10 @@ def get_breadcrumbs(filepath: str, clean_title: str) -> str:
         parent_area = "[[Home MOC|Home]]"
         self_link = f"[[{filename_base}|{clean_title}]]" if filename_base != clean_title else f"[[{filename_base}]]"
         return f"{parent_area} / {self_link}"
+    elif path_str.startswith("04 - Calendar"):
+        parent_area = "[[Calendar]]"
+    elif path_str.startswith("03 - Inbox"):
+        parent_area = "[[Inbox]]"
     else:
         parent_area = "[[Atlas]]"
 
@@ -590,6 +581,14 @@ def format_canonical_frontmatter(metadata: Dict[str, Any], is_blog: bool = False
     return stream.getvalue().strip()
 
 
+def is_youtube_url(url: Optional[str]) -> bool:
+    """Returns True if string contains a standard YouTube video link."""
+    if not url:
+        return False
+    u = str(url).strip()
+    return bool(re.search(r'(https?://)?(www\.)?(youtube\.com/(watch\?|shorts/|live/|embed/|v/)|youtu\.be/)', u, re.IGNORECASE))
+
+
 def infer_metadata(rel_path: str, existing_meta: Dict[str, Any], body: str, filename: str,
                    force_type: Optional[str] = None, force_area: Optional[str] = None) -> Dict[str, Any]:
     """Infers metadata fields conforming to controlled vocabularies and vault rules."""
@@ -658,7 +657,7 @@ def infer_metadata(rel_path: str, existing_meta: Dict[str, Any], body: str, file
             typ = 'journal'
         elif is_blog:
             typ = 'article'
-        elif 'video_url' in meta or 'youtube' in path_lower or 'trascrizione' in path_lower or 'trascrizione' in body[:300].lower():
+        elif 'video_url' in meta or is_youtube_url(meta.get('source')) or 'youtube' in path_lower or 'trascrizione' in path_lower or 'trascrizione' in body[:300].lower():
             typ = 'video'
         elif 'lecture' in path_lower or 'cornell' in path_lower or 'sc ' in filename.lower() or 'lezione' in path_lower:
             typ = 'lecture'
@@ -670,14 +669,21 @@ def infer_metadata(rel_path: str, existing_meta: Dict[str, Any], body: str, file
             typ = 'concept'
     meta['type'] = typ
 
-    # 3. Source resolution
-    if 'source' in meta and meta['source']:
-        source = str(meta['source']).strip()
-    elif 'video_url' in meta and meta['video_url']:
-        source = str(meta['video_url']).strip()
-    else:
-        source = 'original'
-    meta['source'] = source
+    # 3. Source and Video resolution
+    source_val = str(meta.get('source') or '').strip()
+    video_val = str(meta.get('video_url') or '').strip()
+
+    if typ == 'video':
+        if not video_val and is_youtube_url(source_val):
+            video_val = source_val
+            meta['video_url'] = video_val
+        elif video_val and (not source_val or source_val in ('original', '')):
+            source_val = video_val
+            meta['source'] = source_val
+
+    if not source_val:
+        source_val = video_val if (typ == 'video' and video_val) else 'original'
+    meta['source'] = source_val
 
     # 4. Status / Stage resolution
     if is_blog:
@@ -700,7 +706,11 @@ def infer_metadata(rel_path: str, existing_meta: Dict[str, Any], body: str, file
     else:
         meta['title'] = clean_title_str(str(meta['title']))
 
-    for obsolete in ['macro_area', 'video_url', 'channel', 'last_modified', 'date created', 'ready', 'cssclasses', 'tags_string']:
+    obsolete_keys = ['macro_area', 'last_modified', 'date created', 'ready', 'cssclasses', 'tags_string']
+    if meta.get('type') != 'video':
+        obsolete_keys.extend(['video_url', 'channel'])
+
+    for obsolete in obsolete_keys:
         if obsolete in meta:
             del meta[obsolete]
 
@@ -767,19 +777,27 @@ class VaultHealthAuditor:
         self.vault_root = os.path.abspath(vault_root)
         self.all_notes: Dict[str, str] = {}
         self.incoming_links: Dict[str, Set[str]] = {}
+        self.duplicate_notes: Dict[str, List[str]] = {}
         self.scan_vault()
 
     def scan_vault(self):
         self.all_notes.clear()
         self.incoming_links.clear()
+        self.duplicate_notes.clear()
         for root, dirs, files in os.walk(self.vault_root):
-            dirs[:] = [d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')]
-            for file in files:
+            dirs[:] = sorted([d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')])
+            for file in sorted(files):
                 if file.endswith('.md') and not file.startswith('.') and file not in IGNORE_FILES:
                     rel = os.path.relpath(os.path.join(root, file), self.vault_root)
                     if not any(rel.startswith(vd) for vd in VAULT_DIRECTORIES) and root == self.vault_root:
                         continue
                     clean_name = file[:-3]
+                    if clean_name in self.all_notes:
+                        if clean_name not in self.duplicate_notes:
+                            self.duplicate_notes[clean_name] = [self.all_notes[clean_name], rel]
+                        else:
+                            self.duplicate_notes[clean_name].append(rel)
+                        continue
                     self.all_notes[clean_name] = rel
                     self.incoming_links[clean_name] = set()
 
@@ -887,6 +905,10 @@ def generate_health_dashboard(vault_root: str, notes_data: List[Dict[str, Any]],
         area_str = meta.get('area', meta.get('macro_area', 'N/D'))
         recent_table += f"| [[{n['name']}]] | {mtime_str} | {area_str} |\n"
 
+    duplicate_line = ""
+    if audit_stats.get('duplicate_count', 0) > 0:
+        duplicate_line = f"\n- **Collisioni Omonime (Note Duplicate):** {audit_stats.get('duplicate_count', 0)}"
+
     return f"""---
 status: permanent
 type: moc
@@ -915,7 +937,7 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 - **Bozze Blog:** {len(blog_seeds)}
 - **Note Orfane:** {audit_stats.get('orphan_count', 0)}
 - **Link Interrotti:** {audit_stats.get('broken_link_count', 0)}
-- **Forward-Links Pianificati:** {audit_stats.get('forward_link_count', 0)}
+- **Forward-Links Pianificati:** {audit_stats.get('forward_link_count', 0)}{duplicate_line}
 
 ---
 
@@ -939,11 +961,6 @@ Per eseguire un audit interattivo o applicare correzioni automatiche:
 ```bash
 python3 "99 - Meta/Scripts/brain_health.py" --interactive
 ```
-
----
-## Collegamenti
-- [[Home MOC]]
-- [[Review Dashboard]]
 """
 
 
@@ -985,11 +1002,11 @@ summary: "Report diagnostico della salute del Vault: note orfane, collegamenti i
 ---
 [[Home MOC|Home]] / [[Meta]] / [[{report_filename[:-3]}]]
 
-# 📊 Report di Audit della Salute del Vault — {today_str}
+# Report di Audit della Salute del Vault — {today_str}
 
 Diagnostica automatica dello stato di coerenza e integrità semantica del Second Brain.
 
-## 📈 Riepilogo Diagnostico
+## Riepilogo Diagnostico
 
 - **Note totali scansionate:** {all_notes_count}
 - **Note orfane rilevate:** {len(orphan_notes)}
@@ -999,12 +1016,12 @@ Diagnostica automatica dello stato di coerenza e integrità semantica del Second
 
 ---
 
-## 🔴 Criticità Elevate
+## Criticità Elevate
 
 """]
 
     if broken_links:
-        report.append("### 🔗 Link Interrotti (Broken Links)\n")
+        report.append("### Link Interrotti (Broken Links)\n")
         for source, targets in sorted(broken_links.items()):
             report.append(f"- [[{Path(source).stem}]] (in `{source}`):\n")
             for t in targets:
@@ -1014,15 +1031,15 @@ Diagnostica automatica dello stato di coerenza e integrità semantica del Second
         report.append("✅ **Nessun link interrotto rilevato!**\n\n")
 
     if lint_issues:
-        report.append("### 📝 Anomalie Frontmatter YAML\n")
+        report.append("### Anomalie Frontmatter YAML\n")
         for f, issues in lint_issues:
             report.append(f"- [[{Path(f).stem}]] (`{f}`): {', '.join(issues)}\n")
         report.append("\n")
 
-    report.append("---\n\n## 🟡 Note Orfane & Forward Links\n\n")
+    report.append("---\n\n## Note Orfane & Forward Links\n\n")
 
     if orphan_notes:
-        report.append("### 🕸️ Note Orfane (0 Inbound Links)\n")
+        report.append("### Note Orfane (0 Inbound Links)\n")
         for f in orphan_notes:
             report.append(f"- [[{Path(f).stem}]] (`{f}`)\n")
         report.append("\n")
@@ -1030,16 +1047,10 @@ Diagnostica automatica dello stato di coerenza e integrità semantica del Second
         report.append("✅ **Nessuna nota orfana in Atlas!**\n\n")
 
     if forward_links:
-        report.append("### 📌 Forward Links Pianificati (Da Creare)\n")
+        report.append("### Forward Links Pianificati (Da Creare)\n")
         for src, fwd_list in sorted(forward_links.items()):
             report.append(f"- In [[{Path(src).stem}]]: {', '.join([f'[[{target}]]' for target in fwd_list])}\n")
         report.append("\n")
-
-    report.append("""---
-## Collegamenti
-- [[Home MOC]]
-- [[Vault Health Dashboard]]
-""")
 
     with open(report_abs_path, 'w', encoding='utf-8') as f:
         f.write("".join(report))
@@ -1070,26 +1081,116 @@ def safe_rename(root_dir: str, old_rel: str, new_rel: str, is_tracked: bool, dry
     case_only = (old_abs.lower() == new_abs.lower())
 
     if is_tracked:
+        temp_rel = old_rel + ".tmp_rename"
+        temp_abs = os.path.join(root_dir, temp_rel)
         try:
             if case_only:
-                temp_rel = old_rel + ".tmp_rename"
                 subprocess.run(['git', 'mv', old_rel, temp_rel], cwd=root_dir, check=True, capture_output=True)
                 subprocess.run(['git', 'mv', temp_rel, new_rel], cwd=root_dir, check=True, capture_output=True)
             else:
                 subprocess.run(['git', 'mv', old_rel, new_rel], cwd=root_dir, check=True, capture_output=True)
             return
         except Exception:
-            pass
+            if case_only and os.path.exists(temp_abs) and not os.path.exists(old_abs):
+                try:
+                    subprocess.run(['git', 'mv', temp_rel, old_rel], cwd=root_dir, capture_output=True)
+                except Exception:
+                    pass
 
     try:
         if case_only:
             temp_abs = old_abs + ".tmp_rename"
             os.rename(old_abs, temp_abs)
-            os.rename(temp_abs, new_abs)
+            try:
+                os.rename(temp_abs, new_abs)
+            except Exception:
+                if os.path.exists(temp_abs) and not os.path.exists(old_abs):
+                    os.rename(temp_abs, old_abs)
+                raise
         else:
             os.rename(old_abs, new_abs)
     except Exception as e:
         print(f"Rename error {old_rel} -> {new_rel}: {e}", file=sys.stderr)
+
+
+def diagnose_yaml_violations(filepath: str, vault_root: str = '.') -> List[str]:
+    """Diagnoses YAML frontmatter violations for a single markdown file in read-only mode."""
+    issues = []
+    try:
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+    except Exception as e:
+        return [f"Impossibile leggere il file: {e}"]
+
+    has_fm, fm_text, breadcrumb, body = split_markdown_note(content)
+    if not has_fm:
+        return ["Frontmatter YAML mancante (nessun blocco --- iniziale)"]
+
+    yaml_engine = build_yaml_engine()
+    existing_meta = safe_load_frontmatter(fm_text, yaml_engine)
+    if existing_meta is None or not isinstance(existing_meta, dict):
+        return ["Errore sintassi o parsing YAML nel frontmatter"]
+
+    rel_path = os.path.relpath(filepath, vault_root)
+    is_blog = rel_path.startswith('05 - Blog') or '/05 - blog' in rel_path.lower()
+
+    # Check required fields
+    if is_blog:
+        required_fields = ['stage', 'draft', 'type', 'area', 'title', 'date', 'tags']
+        canonical_seq = [
+            'stage', 'draft', 'type', 'area', 'related', 'aliases', 'source', 'title',
+            'date', 'updated', 'tags', 'summary', 'target_path', 'video_url', 'channel',
+            'subject', 'professor'
+        ]
+    else:
+        required_fields = ['status', 'type', 'area', 'title', 'date', 'tags']
+        canonical_seq = [
+            'status', 'type', 'area', 'related', 'aliases', 'source', 'title',
+            'date', 'updated', 'tags', 'summary', 'target_path', 'video_url', 'channel',
+            'subject', 'professor'
+        ]
+
+    for req in required_fields:
+        if req not in existing_meta or existing_meta[req] is None or existing_meta[req] == '':
+            issues.append(f"Campo obbligatorio mancante: {req}")
+
+    # Check canonical sequence
+    keys_present = [k for k in existing_meta.keys() if k in canonical_seq]
+    expected_order = sorted(keys_present, key=lambda k: canonical_seq.index(k))
+    if keys_present != expected_order:
+        issues.append("Ordinamento non canonico delle chiavi")
+
+    # Check deprecated fields
+    deprecated_fields = ['macro_area', 'last_modified', 'date created', 'ready', 'cssclasses', 'tags_string']
+    for dep in deprecated_fields:
+        if dep in existing_meta:
+            issues.append(f"Campo deprecato presente: {dep}")
+
+    # Check video fields for non-video types
+    if existing_meta.get('type') != 'video':
+        for vf in ['video_url', 'channel']:
+            if vf in existing_meta:
+                issues.append(f"Campo video non consentito per type non-video: {vf}")
+
+    # Check tags format and hierarchy
+    tags_raw = existing_meta.get('tags')
+    if tags_raw is not None:
+        if not isinstance(tags_raw, list):
+            issues.append("Formato tags non valido (deve essere un array)")
+        else:
+            area_val = existing_meta.get('area', '')
+            for t in tags_raw:
+                t_str = str(t).strip().lstrip('#')
+                norm_t = normalize_tag(t_str, area_val)
+                if norm_t != t_str and t_str not in TAG_HIERARCHY_MAP.values():
+                    issues.append(f"Tag non canonico o gerarchico: #{t_str} (suggerito: {norm_t})")
+
+    # Check formatting alignment with lint_file preview
+    changed, _ = lint_file(filepath, vault_root=vault_root, execute=False)
+    if changed and not issues:
+        issues.append("Formattazione frontmatter o breadcrumb disallineata rispetto allo standard canonico")
+
+    return issues
 
 
 def collect_vault_data(vault_root: str) -> Tuple[List[Dict[str, Any]], VaultHealthAuditor]:
@@ -1125,6 +1226,56 @@ def run_governance_engine(vault_root: str, dry_run: bool = False, auto_fix: bool
                           interactive: bool = False, dashboard_only: bool = False,
                           audit_only: bool = False, lint_only: bool = False) -> Dict[str, Any]:
     """Executes the governance scan and applies fixes according to CLI modes."""
+    if lint_only and auto_fix:
+        print("\n❌ ERRORE: La modalità --lint-only è un audit diagnostico strettamente in SOLA LETTURA.", file=sys.stderr)
+        print("   Per applicare le correzioni al vault, eseguire il comando con --auto-fix senza --lint-only.\n", file=sys.stderr)
+        return {'error': 'lint_only_read_only_conflict'}
+
+    if lint_only:
+        print("=" * 60)
+        print("🔍 Second Brain YAML Frontmatter Linter (Read-Only Audit)")
+        print("=" * 60)
+        total_notes_scanned = 0
+        misaligned_notes: List[Tuple[str, List[str]]] = []
+
+        for root, dirs, files in os.walk(vault_root):
+            dirs[:] = sorted([d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')])
+            for file in sorted(files):
+                if file.endswith('.md') and not file.startswith('.') and file not in IGNORE_FILES:
+                    rel = os.path.relpath(os.path.join(root, file), vault_root)
+                    if not any(rel.startswith(vd) for vd in VAULT_DIRECTORIES) and root == vault_root:
+                        continue
+                    total_notes_scanned += 1
+                    abs_p = os.path.join(root, file)
+                    issues = diagnose_yaml_violations(abs_p, vault_root=vault_root)
+                    if issues:
+                        misaligned_notes.append((rel, issues))
+
+        compliant_count = total_notes_scanned - len(misaligned_notes)
+        print(f"Note Totali Scansionate: {total_notes_scanned}")
+        print(f"Note Conformi allo Standard: {compliant_count}")
+        print(f"Note con Disallineamenti YAML: {len(misaligned_notes)}")
+        print("=" * 60)
+
+        if misaligned_notes:
+            print("\n📋 Dettaglio Disallineamenti:")
+            for rel, issues in misaligned_notes:
+                print(f"  • [[{Path(rel).stem}]] (`{rel}`):")
+                for iss in issues:
+                    print(f"      - {iss}")
+        else:
+            print("\n✨ Tutte le note sono pienamente conformi allo standard YAML canonico!")
+
+        print("\n💡 Nota: Nessuna modifica è stata apportata su disco (modalità sola lettura).")
+        print("   Per applicare le normalizzazioni eseguire: python3 \"99 - Meta/Scripts/brain_health.py\" --auto-fix\n")
+
+        return {
+            'total_notes': total_notes_scanned,
+            'compliant_notes': compliant_count,
+            'misaligned_notes': len(misaligned_notes),
+            'issues': misaligned_notes
+        }
+
     notes_data, auditor = collect_vault_data(vault_root)
 
     broken_links_map: Dict[str, List[str]] = {}
@@ -1145,8 +1296,15 @@ def run_governance_engine(vault_root: str, dry_run: bool = False, auto_fix: bool
         'total_notes': len(notes_data),
         'orphan_count': len(orphan_notes),
         'broken_link_count': sum(len(v) for v in broken_links_map.values()),
-        'forward_link_count': sum(len(v) for v in forward_links_map.values())
+        'forward_link_count': sum(len(v) for v in forward_links_map.values()),
+        'duplicate_count': len(auditor.duplicate_notes),
+        'duplicate_notes': auditor.duplicate_notes
     }
+
+    if auditor.duplicate_notes:
+        print(f"\n⚠️  ATTENZIONE: Rilevate {len(auditor.duplicate_notes)} note omonime duplicate tra cartelle differenti:")
+        for stem, paths in auditor.duplicate_notes.items():
+            print(f"   • [[{stem}]]: {', '.join(paths)}")
 
     if dashboard_only:
         out_dash = write_health_dashboard(vault_root, notes_data, audit_stats)
@@ -1232,9 +1390,12 @@ def run_governance_engine(vault_root: str, dry_run: bool = False, auto_fix: bool
         # 2. Update inbound wikilinks if renames occurred
         if rename_map:
             for root, dirs, files in os.walk(vault_root):
-                dirs[:] = [d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')]
-                for file in files:
-                    if file.endswith('.md') and not file.startswith('.'):
+                dirs[:] = sorted([d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')])
+                for file in sorted(files):
+                    if file.endswith('.md') and not file.startswith('.') and file not in IGNORE_FILES:
+                        rel = os.path.relpath(os.path.join(root, file), vault_root)
+                        if not any(rel.startswith(vd) for vd in VAULT_DIRECTORIES) and root == vault_root:
+                            continue
                         f_abs = os.path.join(root, file)
                         with open(f_abs, 'r', encoding='utf-8', errors='ignore') as f:
                             text = f.read()
@@ -1253,16 +1414,37 @@ def run_governance_engine(vault_root: str, dry_run: bool = False, auto_fix: bool
 
         # 3. Apply YAML linting
         for root, dirs, files in os.walk(vault_root):
-            dirs[:] = [d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')]
-            for file in files:
-                if file.endswith('.md') and not file.startswith('.'):
+            dirs[:] = sorted([d for d in dirs if d not in IGNORE_FOLDERS and not d.startswith('.')])
+            for file in sorted(files):
+                if file.endswith('.md') and not file.startswith('.') and file not in IGNORE_FILES:
+                    rel = os.path.relpath(os.path.join(root, file), vault_root)
+                    if not any(rel.startswith(vd) for vd in VAULT_DIRECTORIES) and root == vault_root:
+                        continue
                     f_abs = os.path.join(root, file)
                     lint_file(f_abs, vault_root=vault_root, execute=True)
 
         # 4. Refresh data and write dashboard
         fresh_data, fresh_auditor = collect_vault_data(vault_root)
-        write_health_dashboard(vault_root, fresh_data, audit_stats)
+        fresh_broken = {}
+        fresh_forward = {}
+        for note in fresh_data:
+            _, fwd, brk = fresh_auditor.audit_file_links(note['rel_path'], note['content'])
+            if fwd:
+                fresh_forward[note['rel_path']] = fwd
+            if brk:
+                fresh_broken[note['rel_path']] = brk
+        fresh_orphans = fresh_auditor.detect_orphans()
+        fresh_stats = {
+            'total_notes': len(fresh_data),
+            'orphan_count': len(fresh_orphans),
+            'broken_link_count': sum(len(v) for v in fresh_broken.values()),
+            'forward_link_count': sum(len(v) for v in fresh_forward.values()),
+            'duplicate_count': len(fresh_auditor.duplicate_notes),
+            'duplicate_notes': fresh_auditor.duplicate_notes
+        }
+        write_health_dashboard(vault_root, fresh_data, fresh_stats)
         print("Vault health governance fixes applied successfully and dashboard updated.")
+        return fresh_stats
 
     return audit_stats
 
@@ -1290,7 +1472,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     group.add_argument('--interactive', action='store_true', default=False, help="Interactive step-by-step confirmation mode (default).")
     group.add_argument('--dashboard-only', action='store_true', help="Regenerate 99 - Meta/Vault Health Dashboard.md only.")
     group.add_argument('--audit-only', action='store_true', help="Generate diagnostic report in 03 - Inbox/.")
-    group.add_argument('--lint-only', action='store_true', help="Validate and fix YAML frontmatter only.")
+    group.add_argument('--lint-only', action='store_true', help="Validate YAML frontmatter without modifying disk (read-only audit).")
     parser.add_argument('--vault-root', type=str, default=None, help="Custom vault root directory.")
     return parser
 

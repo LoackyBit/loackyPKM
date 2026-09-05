@@ -47,7 +47,7 @@ Un Second Brain e Personal Knowledge Management (PKM) su base Obsidian, trasform
 - Python 3.13 Runtime (`/opt/homebrew/bin/python3`, `/usr/bin/python3`)
 - Node.js Runtime (for `gsd-tools.cjs`, Quartz blog generator, and Obsidian plugin tooling)
 - Obsidian Desktop (Electron) & Obsidian iOS Mobile App (iCloud synchronized)
-- Antigravity / Gemini CLI Runtime (`/Users/lorenzo/.local/bin/agy`, `antigravity-cli`)
+- Antigravity / Gemini CLI Runtime (`~/.local/bin/agy`, `antigravity-cli`)
 - pip (Python package manager for script dependencies)
 - Homebrew (`brew` for system utilities like `ffmpeg`, `git`, `python3`)
 - Lockfile: None committed for Python scripts (scripts use standard library or widely available packages)
@@ -64,7 +64,6 @@ Un Second Brain e Personal Knowledge Management (PKM) su base Obsidian, trasform
 ## Key Dependencies
 
 - `ruamel.yaml` (Python RoundTrip YAML parser) - Lossless AST YAML parsing and formatting in `99 - Meta/Scripts/brain_health.py`.
-- `requests` (Python HTTP library) - Communicates with ClasseViva API in `99 - Meta/School/fetch-registro.py`.
 - `youtube-transcript-api` (Python) - Extracts subtitles and transcripts in `99 - Meta/Scripts/youtube_helper.py`.
 - `yt-dlp` (Python CLI / library) - Retrieves video metadata and media stream URLs in `99 - Meta/Scripts/youtube_helper.py`.
 - `ffmpeg` (System binary) - Extracts keyframe screenshots from YouTube streams in `99 - Meta/Scripts/youtube_helper.py`.
@@ -95,12 +94,11 @@ Un Second Brain e Personal Knowledge Management (PKM) su base Obsidian, trasform
 
 ## Configuration
 
-- PATH requirements: `/Users/lorenzo/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin` (configured in `99 - Meta/Scripts/watch.sh`).
+- PATH requirements: `~/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin` (configured in `99 - Meta/Scripts/watch.sh`).
 - Agent Memory: `.agents/MEMORY.md` and `.agents/memory/*.md` for user context, project status, and strict rules.
 - System Prompt: `GEMINI.md` at repo root defining vault topology, 3 macro-skills, and constraints.
 - `.gitignore`: Configured to ignore `.gemini/`, `.obsidian/*`, `.trash/`, `.DS_Store`, `.vscode/`, `.antigravitycli/`, `.makemd/`, `.smart-env/`, `.space/`.
 - Obsidian Settings: `.obsidian/app.json`, `.obsidian/community-plugins.json`, `.obsidian/core-plugins.json`, `.obsidian/appearance.json`.
-- ClasseViva Config: `99 - Meta/School/config.json`.
 
 ## Platform Requirements
 

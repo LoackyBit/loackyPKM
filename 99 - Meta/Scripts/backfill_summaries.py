@@ -13,7 +13,9 @@ import datetime
 import argparse
 import tempfile
 import subprocess
+import shutil
 from pathlib import Path
+from typing import Optional
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if SCRIPT_DIR not in sys.path:
@@ -173,7 +175,7 @@ def generate_heuristic_fallback(title: str, body_text: str) -> str:
         
     return f"Appunti concettuali e sintesi di studio per {title}." 
 
-def generate_ai_summary(title: str, body_text: str, rel_path: str = "", agy_path: str = "/Users/lorenzo/.local/bin/agy", timeout: int = 30) -> str:
+def generate_ai_summary(title: str, body_text: str, rel_path: str = "", agy_path: Optional[str] = None, timeout: int = 30) -> str:
     """Generates an executive summary via agy CLI or heuristic fallback."""
     special = get_special_summary(rel_path, title, body_text)
     if special:
@@ -182,16 +184,21 @@ def generate_ai_summary(title: str, body_text: str, rel_path: str = "", agy_path
     lang = detect_language(body_text)
     prompt = build_summary_prompt(title, body_text, lang)
     
-    # Check if agy binary is available
-    agy_cmd = agy_path if os.path.exists(agy_path) else "agy"
+    # Check if agy binary is available dynamically
+    home_bin = str(Path.home() / ".local" / "bin" / "agy")
+    if agy_path and os.path.exists(agy_path):
+        agy_cmd = agy_path
+    else:
+        agy_cmd = shutil.which("agy") or (home_bin if os.path.exists(home_bin) else "agy")
     
     env = os.environ.copy()
-    env['PATH'] = f"/Users/lorenzo/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:{env.get('PATH', '')}"
+    home_dir = str(Path.home())
+    env['PATH'] = f"{home_dir}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:{env.get('PATH', '')}"
     env['PYTHONUNBUFFERED'] = '1'
     
     try:
         proc = subprocess.run(
-            [agy_cmd, "--model", "gemini-3.7-flash-low", "--print", "--dangerously-skip-permissions", "--disable-slash-commands", prompt],
+            [agy_cmd, "--model", "gemini-3.8-flash-low", "--print", "--dangerously-skip-permissions", "--disable-slash-commands", prompt],
             capture_output=True,
             text=True,
             timeout=timeout,

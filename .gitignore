@@ -23,3 +23,9 @@ __pycache__/
 .recall_cache.json
 **/.recall_cache.json
 *.recall_cache.json.tmp
+
+# School credentials & sensitive configs
+99 - Meta/School/config.json
+99 - Meta/**/config.json
+**/config.json
+

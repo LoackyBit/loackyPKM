@@ -10,7 +10,7 @@ Features:
 - Preventative duplicate and missing transcript guards
 """
 
-import os, sys, re, datetime, hashlib, argparse, shutil, glob, time, subprocess, urllib.parse
+import os, sys, re, datetime, hashlib, argparse, shutil, glob, time, subprocess, urllib.parse, logging
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Any, Set
 
@@ -25,6 +25,7 @@ RE_APPROVAL_LINE = re.compile(r'^\s*-\s+\[(?P<status>[ xX\-])\]\s+Approva\s+\[\[
 RE_ERROR_LINE = re.compile(r'^\s*-\s+\[(?P<status>[ xX\-])\]\s+\[!\]\s+Riprova:\s+(?P<src>.*?)(?:\s+—\s+Motivo:\s*(?P<reason>.*))?$')
 RE_PANIC_LINE = re.compile(r'^\s*-\s+\[(?P<status>[ xX\-])\]\s+.*(?:🛑|Interrompi|Panic\s+Button).*', re.IGNORECASE)
 PANIC_BUTTON_LINE = "- [ ] 🛑 Interrompi elaborazioni attive (Panic Button)"
+DEFAULT_AI_MODEL = os.environ.get("BRAIN_AI_MODEL", "gemini-3.8-flash-low")
 
 def is_pid_alive(pid: int) -> bool:
     """Checks if a process with given PID is currently active."""
@@ -69,6 +70,92 @@ class NoteLock:
             try: os.remove(self.lock_file)
             except Exception: pass
 
+
+class DashboardLock:
+    """Mutex lock for 03 - Inbox/Review Dashboard.md with PID tracking, ISO timestamp, TTL auto-healing, and re-entrancy."""
+    _process_locks: Dict[str, int] = {}
+
+    def __init__(self, vault_root: str, timeout: float = 10.0, retry_interval: float = 0.2, ttl_seconds: int = 60, blocking: bool = True):
+        vault_hash = hashlib.sha1(vault_root.encode('utf-8')).hexdigest()[:8]
+        self.lock_file = f"/tmp/brain_dashboard_{vault_hash}.lock"
+        self.vault_root = vault_root
+        self.timeout = float(timeout)
+        self.retry_interval = float(retry_interval)
+        self.ttl_seconds = int(ttl_seconds)
+        self.blocking = bool(blocking)
+        self.acquired = False
+
+    def _clean_stale_lock(self):
+        if not os.path.exists(self.lock_file):
+            return
+        try:
+            mtime = os.path.getmtime(self.lock_file)
+            is_stale = (time.time() - mtime) > self.ttl_seconds
+            if not is_stale:
+                with open(self.lock_file, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                m = re.search(r'pid:\s*(\d+)', content)
+                if m and not is_pid_alive(int(m.group(1))):
+                    is_stale = True
+            if is_stale:
+                os.remove(self.lock_file)
+        except Exception:
+            pass
+
+    def acquire(self, timeout: Optional[float] = None, retry_interval: Optional[float] = None, blocking: Optional[bool] = None) -> bool:
+        t_out = self.timeout if timeout is None else float(timeout)
+        r_int = self.retry_interval if retry_interval is None else float(retry_interval)
+        blk = self.blocking if blocking is None else bool(blocking)
+
+        # Re-entrancy within same process
+        if self.lock_file in DashboardLock._process_locks and DashboardLock._process_locks[self.lock_file] > 0:
+            DashboardLock._process_locks[self.lock_file] += 1
+            self.acquired = True
+            return True
+
+        deadline = time.time() + t_out
+        while True:
+            try:
+                fd = os.open(self.lock_file, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.write(fd, f"pid: {os.getpid()}\ntime: {datetime.datetime.now().isoformat()}\n".encode('utf-8'))
+                os.close(fd)
+                DashboardLock._process_locks[self.lock_file] = 1
+                self.acquired = True
+                return True
+            except FileExistsError:
+                self._clean_stale_lock()
+                if not blk:
+                    return False
+                if time.time() >= deadline:
+                    break
+                time.sleep(min(r_int, max(0.01, deadline - time.time())))
+
+        if blk:
+            raise TimeoutError(f"Impossibile acquisire DashboardLock entro {t_out}s ({self.lock_file})")
+        return False
+
+    def release(self):
+        if self.acquired:
+            depth = DashboardLock._process_locks.get(self.lock_file, 1) - 1
+            if depth <= 0:
+                DashboardLock._process_locks.pop(self.lock_file, None)
+                if os.path.exists(self.lock_file):
+                    try:
+                        os.remove(self.lock_file)
+                    except Exception:
+                        pass
+            else:
+                DashboardLock._process_locks[self.lock_file] = depth
+            self.acquired = False
+
+    def __enter__(self):
+        self.acquire()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.release()
+
+
 def get_source_lock_file(source: str) -> str:
     """Returns the deterministic lock file path for a source identifier."""
     slug = hashlib.sha256(source.encode('utf-8')).hexdigest()[:12]
@@ -95,7 +182,7 @@ def detect_input_type(source: str) -> str:
     s = source.strip()
     if YT_URL_REGEX.search(s): return "youtube"
     if WEB_URL_REGEX.match(s): return "web"
-    if os.path.exists(s) or (s.endswith('.md') and '\n' not in s): return "file"
+    if os.path.isfile(s): return "file"
     return "text"
 
 def _has_tag(tags: List[str], target_tags: List[str]) -> bool:
@@ -124,133 +211,231 @@ def _has_keyword(text: str, keywords: List[str]) -> bool:
     return False
 
 
+DIRECTORY_ROUTING_RULES: List[Tuple[str, List[str], List[str]]] = [
+    # 1. Blog Studio
+    (
+        "05 - Blog",
+        ["blog"],
+        ["blog"],
+    ),
+    # 2. Finance Subdirectories
+    # 2.1 Crypto
+    (
+        "02 - Atlas/Finance/Crypto",
+        ["finance/crypto", "finance/blockchain", "tech/crypto", "tech/blockchain", "crypto", "blockchain", "bitcoin", "btc", "ethereum", "eth", "web3"],
+        ["crypto", "criptovalut", "bitcoin", "btc", "ethereum", "eth", "blockchain", "web3", "defi", "nft", "token", "wallet", "smart contract", "altcoin", "binance"],
+    ),
+    # 2.2 Holdings & Tax
+    (
+        "02 - Atlas/Finance/Holdings & Tax",
+        ["finance/tax", "finance/fisco", "finance/wealth", "finance/patrimonio", "finance/holdings", "tax", "fisco", "holdings"],
+        ["fisco", "fiscale", "tasse", "irpef", "partita iva", "p.iva", "srl", "holding", "evasione", "elusione", "deduzion", "detrazion", "patrimonio", "quadro rw", "commercialista", "regime forfettario", "residenza fiscale"],
+    ),
+    # 2.3 Investments
+    (
+        "02 - Atlas/Finance/Investments",
+        ["finance/investing", "finance/investments", "finance/stocks", "finance/etf", "finance/markets", "finance/trading", "investimenti", "etf", "trading"],
+        ["investimenti", "investire", "borsa", "azioni", "etf", "fondi indicizzati", "obbligazioni", "compound interest", "interesse composto", "trading", "value investing", "s&p 500", "nasdaq", "rendimento", "portafoglio", "dividendi"],
+    ),
+    # 2.4 Economy & Macro
+    (
+        "02 - Atlas/Finance/Economy",
+        ["finance/macro", "finance/economy", "finance/banks", "macroeconomia", "banche", "economia"],
+        ["macroeconomia", "banche", "banca centrale", "bce", "federal reserve", "fed", "inflazione", "tassi di interesse", "debito pubblico", "pil", "recessione", "dazi", "geopolitica", "politica monetaria", "creazione del denaro"],
+    ),
+    # 2.5 General Finance Fallback
+    (
+        "02 - Atlas/Finance/Investments",
+        ["finance"],
+        ["finanza", "finance", "soldi", "money", "business"],
+    ),
+    # 3. Personal Growth & Health Subdirectories
+    # 3.1 Gym & Health
+    (
+        "02 - Atlas/Personal Growth & Health/Gym & Health",
+        ["health/fitness", "health/gym", "health/workout", "health/palestra", "mentality/fitness", "health/nutrition", "health/sleep", "health/biohacking", "health/health", "health", "palestra", "fitness", "gym", "workout", "salute", "nutrizione"],
+        ["palestra", "workout", "allenamento", "ipertrofia", "bodybuilding", "calisthenics", "pesi", "squat", "panca piana", "stacco", "massa muscolare", "nutrizione", "dieta", "alimentazione", "salute", "sonno", "biohacking", "integratori", "fluoro", "dentifricio", "denti", "metabolismo", "calorie", "macronutrienti", "digiuno", "skincare"],
+    ),
+    # 3.2 Mentality & Mindset
+    (
+        "02 - Atlas/Personal Growth & Health/Mentality",
+        ["mentality/habits", "mentality/productivity", "mentality/discipline", "mentality/focus", "mentality/produttivita", "mentality/philosophy", "mentality/mental-models", "mentality/stoicism", "mentality/growth", "mentality/psychology", "mentality/mindset", "mentality", "mindset", "produttivita", "abitudini", "focus", "filosofia", "stoicismo"],
+        ["produttivita", "abitudini", "abitudine", "routine", "disciplina", "focus", "concentrazione", "time management", "gestione del tempo", "gtd", "second brain", "dopamina", "procrastinazione", "pomodoro", "back to focus", "distrazioni", "dipendenza neurocognitiva", "tempo di permanenza", "filosofia", "stoicismo", "modelli mentali", "modello mentale", "pensiero critico", "bias cognitivo", "decision making", "razionalita", "epistemologia", "socrate", "marco aurelio", "seneca", "fallacie", "mentalita", "mindset", "crescita personale", "resilienza", "autostima", "psicologia", "comunicazione", "public speaking", "relazioni", "persuasione", "parlare bene", "cancel culture"],
+    ),
+    # 3.3 General Personal Growth Fallback
+    (
+        "02 - Atlas/Personal Growth & Health/Mentality",
+        ["mentality"],
+        ["mentality", "crescita"],
+    ),
+    # 4. Education & Learning Subdirectories
+    # 4.1 Learning
+    (
+        "02 - Atlas/Education & Learning/Learning",
+        ["education/method", "education/learning", "education/study", "education/memory", "education/mnemonics", "education/school", "education/highschool", "apprendimento", "metodo-studio", "memoria", "scuola", "liceo"],
+        ["metodo di studio", "apprendimento", "imparare", "feynman", "active recall", "spaced repetition", "ripetizione spaziata", "lettura veloce", "memorizzazione", "pacrar", "memoria", "mnemotecniche", "palazzo della memoria", "tecniche di memoria", "ricordare cio che leggi", "memorizzare", "leggere libri", "scuola", "liceo", "registro elettronico", "classeviva", "maturita", "professori", "interrogazione", "compiti", "bravo a scuola", "learning to learn"],
+    ),
+    # 4.2 University Sub-branches
+    (
+        "02 - Atlas/Education & Learning/University/Architettura & Sistemi",
+        ["education/university/systems", "education/university/os"],
+        ["architettura dei calcolatori", "sistemi operativi", "calcolatori elettronici", "assembly", "reti di calcolatori"],
+    ),
+    (
+        "02 - Atlas/Education & Learning/University/Fondamenti di Informatica",
+        ["education/university/cs", "education/university/programming", "education/university/fondamenti"],
+        ["fondamenti di informatica", "programmazione c", "algoritmi e strutture dati"],
+    ),
+    (
+        "02 - Atlas/Education & Learning/University/Matematica & Fisica",
+        ["education/university/math", "education/university/physics", "education/math", "matematica", "fisica"],
+        ["analisi matematica", "algebra lineare", "geometria", "fisica 1", "probabilita", "statistica", "calcolo numerico", "analisi 1", "analisi 2", "derivate", "integrali"],
+    ),
+    (
+        "02 - Atlas/Education & Learning/University/Teoria dei Linguaggi",
+        ["education/university/languages", "education/university/automata"],
+        ["teoria dei linguaggi", "automi", "linguaggi formali", "compilatori", "grammatiche formali", "macchina di turing"],
+    ),
+    (
+        "02 - Atlas/Education & Learning/University",
+        ["education/university"],
+        ["universita", "ingegneria informatica", "esame", "esami universitari", "cfu", "laurea", "sessione d'esami", "scegliere l'universita"],
+    ),
+    # 4.3 Courses
+    (
+        "02 - Atlas/Education & Learning/Courses",
+        ["education/course", "education/courses", "education/cs50", "corso", "corsi"],
+        ["corso stem", "corso ai", "cs50", "progetto enea", "progetto pilota airo", "corso python"],
+    ),
+    # 4.4 General Education Fallback
+    (
+        "02 - Atlas/Education & Learning/Learning",
+        ["education"],
+        ["education", "studio", "scuola", "universita"],
+    ),
+    # 5. Projects Subdirectories
+    (
+        "02 - Atlas/Projects/Active",
+        ["projects/active", "project/active"],
+        [],
+    ),
+    (
+        "02 - Atlas/Projects/Archive",
+        ["projects/archive", "project/archive"],
+        [],
+    ),
+    (
+        "02 - Atlas/Projects/Ideas & Sandbox",
+        ["projects/ideas", "project/ideas", "projects/sandbox"],
+        [],
+    ),
+    # 6. Tech & AI Subdirectories
+    # 6.1 Agents & Automation
+    (
+        "02 - Atlas/Tech & AI/Agents & Automation",
+        ["tech/agents", "tech/agent", "tech/automation", "tech/agenti", "agenti", "automazione"],
+        ["agente ai", "agenti ai", "ai agent", "ai agents", "multi-agent", "crewai", "langchain", "autogen", "n8n", "automazione", "zapier", "workflow automat", "hermes agent"],
+    ),
+    # 6.2 Security
+    (
+        "02 - Atlas/Tech & AI/Security",
+        ["tech/security", "tech/cybersecurity", "tech/hacking", "security", "cybersecurity", "hacking"],
+        ["cybersecurity", "sicurezza informatica", "crittografia", "vulnerabilita", "malware", "exploit", "firewall", "pentesting", "penetration test", "oauth", "jwt", "xss", "csrf", "sql injection", "zero-day", "hacking", "ethical hacking", "reverse engineering", "buffer overflow", "ctf", "kali linux", "coinjoin"],
+    ),
+    # 6.3 Software Development
+    (
+        "02 - Atlas/Tech & AI/Software Development",
+        ["tech/git", "tech/github", "tech/dev", "tech/software-engineering", "tech/semver", "tech/architecture", "tech/vibe-coding", "tech/vibecoding", "git", "github", "vibe-coding"],
+        ["github", "git commit", "git push", "git rebase", "git branch", "pull request", "repository git", "gitflow", "vibe coding", "vibecoding", "sviluppo software", "software engineering", "semantic versioning", "semver", "versioning conventions", "design pattern", "clean code", "refactoring", "ci/cd", "continuous integration", "test unitari", "tdd", "agile", "scrum", "microservizi", "dependency hell", "major.minor.patch", "cursor", "submodule"],
+    ),
+    # 6.4 System & OS
+    (
+        "02 - Atlas/Tech & AI/System & OS",
+        ["tech/os", "tech/linux", "tech/sysadmin", "tech/networks", "linux", "devops"],
+        ["linux", "macos", "unix", "kernel", "terminale", "bash", "zsh", "file system", "tcp/ip", "dns", "server", "sysadmin", "ubuntu", "debian", "terminal setup", "situazione python"],
+    ),
+    # 6.5 Programming Generale & Coding con AI
+    (
+        "02 - Atlas/Tech & AI/Programming",
+        ["tech/programming", "tech/code", "tech/python", "tech/js", "tech/ts", "tech/rust", "tech/golang", "tech/backend", "tech/frontend", "tech/database", "tech/sql", "tech/programming/ai", "programming", "coding"],
+        ["python", "javascript", "typescript", "rust", "golang", "c++", "java", "database", "sql", "backend", "frontend", "api rest", "graphql", "docker", "kubernetes", "algoritmi", "strutture dati", "programmazione ai"],
+    ),
+    # 6.6 AI & Machine Learning
+    (
+        "02 - Atlas/Tech & AI/AI",
+        ["tech/ai", "tech/llm", "tech/rag", "tech/ml", "tech/nlp", "tech/prompt", "ai", "llm", "prompt"],
+        ["intelligenza artificiale", "ai", "llm", "large language model", "machine learning", "deep learning", "transformer", "neural network", "rag", "embeddings", "vision model", "nlp", "hugging face", "gpt", "claude", "gemini", "fine-tuning", "modelli linguistici", "notebooklm", "prompt engineering", "system prompt", "context window", "hardware ai"],
+    ),
+]
+
+
 def classify_target_directory(title: str, tags: List[str], content: str = "", vault_root: Optional[str] = None) -> str:
-    """Heuristically and semantically determines destination subfolder in Atlas or Blog based on tags, title, and content."""
+    """Heuristically and semantically determines destination subfolder in Atlas or Blog based on declarative routing rules."""
     tags_lower = [str(t).lower().strip().lstrip('#') for t in tags if t]
     c = (title + " " + " ".join(tags_lower) + " " + content[:2500]).lower()
 
-    # 1. Blog Studio
-    if _has_tag(tags_lower, ["blog"]) or _has_keyword(c, ["blog"]):
-        return "05 - Blog"
+    for target_dir, rule_tags, rule_kws in DIRECTORY_ROUTING_RULES:
+        if (rule_tags and _has_tag(tags_lower, rule_tags)) or (rule_kws and _has_keyword(c, rule_kws)):
+            return target_dir
 
-    # 2. Finance Subdirectories
-    # 2.1 Crypto
-    if _has_tag(tags_lower, ["finance/crypto", "finance/blockchain", "tech/crypto", "tech/blockchain", "crypto", "blockchain", "bitcoin", "btc", "ethereum", "eth", "web3"]) or \
-       _has_keyword(c, ["crypto", "criptovalut", "bitcoin", "btc", "ethereum", "eth", "blockchain", "web3", "defi", "nft", "token", "wallet", "smart contract", "altcoin", "binance"]):
-        return "02 - Atlas/Finance/Crypto"
-
-    # 2.2 Holdings & Tax
-    if _has_tag(tags_lower, ["finance/tax", "finance/fisco", "finance/wealth", "finance/patrimonio", "finance/holdings", "tax", "fisco", "holdings"]) or \
-       _has_keyword(c, ["fisco", "fiscale", "tasse", "irpef", "partita iva", "p.iva", "srl", "holding", "evasione", "elusione", "deduzion", "detrazion", "patrimonio", "quadro rw", "commercialista", "regime forfettario", "residenza fiscale"]):
-        return "02 - Atlas/Finance/Holdings & Tax"
-
-    # 2.3 Investments
-    if _has_tag(tags_lower, ["finance/investing", "finance/investments", "finance/stocks", "finance/etf", "finance/markets", "finance/trading", "investimenti", "etf", "trading"]) or \
-       _has_keyword(c, ["investimenti", "investire", "borsa", "azioni", "etf", "fondi indicizzati", "obbligazioni", "compound interest", "interesse composto", "trading", "value investing", "s&p 500", "nasdaq", "rendimento", "portafoglio", "dividendi"]):
-        return "02 - Atlas/Finance/Investments"
-
-    # 2.4 Economy & Macro
-    if _has_tag(tags_lower, ["finance/macro", "finance/economy", "finance/banks", "macroeconomia", "banche", "economia"]) or \
-       _has_keyword(c, ["macroeconomia", "banche", "banca centrale", "bce", "federal reserve", "fed", "inflazione", "tassi di interesse", "debito pubblico", "pil", "recessione", "dazi", "geopolitica", "politica monetaria", "creazione del denaro"]):
-        return "02 - Atlas/Finance/Economy"
-
-    # 2.5 General Finance Fallback
-    if _has_tag(tags_lower, ["finance"]) or _has_keyword(c, ["finanza", "finance", "soldi", "money", "business"]):
-        return "02 - Atlas/Finance/Investments"
-
-    # 3. Personal Growth & Health Subdirectories
-    # 3.1 Gym & Health
-    if _has_tag(tags_lower, ["health/fitness", "health/gym", "health/workout", "health/palestra", "mentality/fitness", "health/nutrition", "health/sleep", "health/biohacking", "health/health", "health", "palestra", "fitness", "gym", "workout", "salute", "nutrizione"]) or \
-       _has_keyword(c, ["palestra", "workout", "allenamento", "ipertrofia", "bodybuilding", "calisthenics", "pesi", "squat", "panca piana", "stacco", "massa muscolare", "nutrizione", "dieta", "alimentazione", "salute", "sonno", "biohacking", "integratori", "fluoro", "dentifricio", "denti", "metabolismo", "calorie", "macronutrienti", "digiuno", "skincare"]):
-        return "02 - Atlas/Personal Growth & Health/Gym & Health"
-
-    # 3.2 Mentality & Mindset
-    if _has_tag(tags_lower, ["mentality/habits", "mentality/productivity", "mentality/discipline", "mentality/focus", "mentality/produttivita", "mentality/philosophy", "mentality/mental-models", "mentality/stoicism", "mentality/growth", "mentality/psychology", "mentality/mindset", "mentality", "mindset", "produttivita", "abitudini", "focus", "filosofia", "stoicismo"]) or \
-       _has_keyword(c, ["produttivita", "abitudini", "abitudine", "routine", "disciplina", "focus", "concentrazione", "time management", "gestione del tempo", "gtd", "second brain", "dopamina", "procrastinazione", "pomodoro", "back to focus", "distrazioni", "dipendenza neurocognitiva", "tempo di permanenza", "filosofia", "stoicismo", "modelli mentali", "modello mentale", "pensiero critico", "bias cognitivo", "decision making", "razionalita", "epistemologia", "socrate", "marco aurelio", "seneca", "fallacie", "mentalita", "mindset", "crescita personale", "resilienza", "autostima", "psicologia", "comunicazione", "public speaking", "relazioni", "persuasione", "parlare bene", "cancel culture"]):
-        return "02 - Atlas/Personal Growth & Health/Mentality"
-
-    # 3.3 General Personal Growth Fallback
-    if _has_tag(tags_lower, ["mentality"]) or _has_keyword(c, ["mentality", "crescita"]):
-        return "02 - Atlas/Personal Growth & Health/Mentality"
-
-    # 4. Education & Learning Subdirectories
-    # 4.1 Learning (Metodo, Apprendimento, Lettura, Memory, School)
-    if _has_tag(tags_lower, ["education/method", "education/learning", "education/study", "education/memory", "education/mnemonics", "education/school", "education/highschool", "apprendimento", "metodo-studio", "memoria", "scuola", "liceo"]) or \
-       _has_keyword(c, ["metodo di studio", "apprendimento", "imparare", "feynman", "active recall", "spaced repetition", "ripetizione spaziata", "lettura veloce", "memorizzazione", "pacrar", "memoria", "mnemotecniche", "palazzo della memoria", "tecniche di memoria", "ricordare cio che leggi", "memorizzare", "leggere libri", "scuola", "liceo", "registro elettronico", "classeviva", "maturita", "professori", "interrogazione", "compiti", "bravo a scuola", "learning to learn"]):
-        return "02 - Atlas/Education & Learning/Learning"
-
-    # 4.2 University Sub-branches
-    if _has_tag(tags_lower, ["education/university/systems", "education/university/os"]) or \
-       _has_keyword(c, ["architettura dei calcolatori", "sistemi operativi", "calcolatori elettronici", "assembly", "reti di calcolatori"]):
-        return "02 - Atlas/Education & Learning/University/Architettura & Sistemi"
-
-    if _has_tag(tags_lower, ["education/university/cs", "education/university/programming", "education/university/fondamenti"]) or \
-       _has_keyword(c, ["fondamenti di informatica", "programmazione c", "algoritmi e strutture dati"]):
-        return "02 - Atlas/Education & Learning/University/Fondamenti di Informatica"
-
-    if _has_tag(tags_lower, ["education/university/math", "education/university/physics", "education/math", "matematica", "fisica"]) or \
-       _has_keyword(c, ["analisi matematica", "algebra lineare", "geometria", "fisica 1", "probabilita", "statistica", "calcolo numerico", "analisi 1", "analisi 2", "derivate", "integrali"]):
-        return "02 - Atlas/Education & Learning/University/Matematica & Fisica"
-
-    if _has_tag(tags_lower, ["education/university/languages", "education/university/automata"]) or \
-       _has_keyword(c, ["teoria dei linguaggi", "automi", "linguaggi formali", "compilatori", "grammatiche formali", "macchina di turing"]):
-        return "02 - Atlas/Education & Learning/University/Teoria dei Linguaggi"
-
-    if _has_tag(tags_lower, ["education/university"]) or \
-       _has_keyword(c, ["universita", "ingegneria informatica", "esame", "esami universitari", "cfu", "laurea", "sessione d'esami", "scegliere l'universita"]):
-        return "02 - Atlas/Education & Learning/University"
-
-    # 4.3 Courses
-    if _has_tag(tags_lower, ["education/course", "education/courses", "education/cs50", "corso", "corsi"]) or \
-       _has_keyword(c, ["corso stem", "corso ai", "cs50", "progetto enea", "progetto pilota airo", "corso python"]):
-        return "02 - Atlas/Education & Learning/Courses"
-
-    # 4.4 General Education Fallback
-    if _has_tag(tags_lower, ["education"]) or _has_keyword(c, ["education", "studio", "scuola", "universita"]):
-        return "02 - Atlas/Education & Learning/Learning"
-
-    # 5. Projects Subdirectories
-    if _has_tag(tags_lower, ["projects/active", "project/active"]):
-        return "02 - Atlas/Projects/Active"
-    if _has_tag(tags_lower, ["projects/archive", "project/archive"]):
-        return "02 - Atlas/Projects/Archive"
-    if _has_tag(tags_lower, ["projects/ideas", "project/ideas", "projects/sandbox"]):
-        return "02 - Atlas/Projects/Ideas & Sandbox"
-
-    # 6. Tech & AI Subdirectories
-    # 6.1 Agents & Automation
-    if _has_tag(tags_lower, ["tech/agents", "tech/agent", "tech/automation", "tech/agenti", "agenti", "automazione"]) or \
-       _has_keyword(c, ["agente ai", "agenti ai", "ai agent", "ai agents", "multi-agent", "crewai", "langchain", "autogen", "n8n", "automazione", "zapier", "workflow automat", "hermes agent"]):
-        return "02 - Atlas/Tech & AI/Agents & Automation"
-
-    # 6.2 Security
-    if _has_tag(tags_lower, ["tech/security", "tech/cybersecurity", "tech/hacking", "security", "cybersecurity", "hacking"]) or \
-       _has_keyword(c, ["cybersecurity", "sicurezza informatica", "crittografia", "vulnerabilita", "malware", "exploit", "firewall", "pentesting", "penetration test", "oauth", "jwt", "xss", "csrf", "sql injection", "zero-day", "hacking", "ethical hacking", "reverse engineering", "buffer overflow", "ctf", "kali linux", "coinjoin"]):
-        return "02 - Atlas/Tech & AI/Security"
-
-    # 6.3 Software Development (GitHub, SemVer, Vibe Coding, Architecture, Clean Code)
-    if _has_tag(tags_lower, ["tech/git", "tech/github", "tech/dev", "tech/software-engineering", "tech/semver", "tech/architecture", "tech/vibe-coding", "tech/vibecoding", "git", "github", "vibe-coding"]) or \
-       _has_keyword(c, ["github", "git commit", "git push", "git rebase", "git branch", "pull request", "repository git", "gitflow", "vibe coding", "vibecoding", "sviluppo software", "software engineering", "semantic versioning", "semver", "versioning conventions", "design pattern", "clean code", "refactoring", "ci/cd", "continuous integration", "test unitari", "tdd", "agile", "scrum", "microservizi", "dependency hell", "major.minor.patch", "cursor", "submodule"]):
-        return "02 - Atlas/Tech & AI/Software Development"
-
-    # 6.4 System & OS
-    if _has_tag(tags_lower, ["tech/os", "tech/linux", "tech/sysadmin", "tech/networks", "linux", "devops"]) or \
-       _has_keyword(c, ["linux", "macos", "unix", "kernel", "terminale", "bash", "zsh", "file system", "tcp/ip", "dns", "server", "sysadmin", "ubuntu", "debian", "terminal setup", "situazione python"]):
-        return "02 - Atlas/Tech & AI/System & OS"
-
-    # 6.5 Programming Generale & Coding con AI
-    if _has_tag(tags_lower, ["tech/programming", "tech/code", "tech/python", "tech/js", "tech/ts", "tech/rust", "tech/golang", "tech/backend", "tech/frontend", "tech/database", "tech/sql", "tech/programming/ai", "programming", "coding"]) or \
-       _has_keyword(c, ["python", "javascript", "typescript", "rust", "golang", "c++", "java", "database", "sql", "backend", "frontend", "api rest", "graphql", "docker", "kubernetes", "algoritmi", "strutture dati", "programmazione ai"]):
-        return "02 - Atlas/Tech & AI/Programming"
-
-    # 6.6 AI & Machine Learning
-    if _has_tag(tags_lower, ["tech/ai", "tech/llm", "tech/rag", "tech/ml", "tech/nlp", "tech/prompt", "ai", "llm", "prompt"]) or \
-       _has_keyword(c, ["intelligenza artificiale", "ai", "llm", "large language model", "machine learning", "deep learning", "transformer", "neural network", "rag", "embeddings", "vision model", "nlp", "hugging face", "gpt", "claude", "gemini", "fine-tuning", "modelli linguistici", "notebooklm", "prompt engineering", "system prompt", "context window", "hardware ai"]):
+    # AI Assisted Classification Fallback (D-06)
+    allowed_dirs = [
+        "02 - Atlas/Finance/Crypto",
+        "02 - Atlas/Finance/Holdings & Tax",
+        "02 - Atlas/Finance/Investments",
+        "02 - Atlas/Finance/Economy",
+        "02 - Atlas/Personal Growth & Health/Gym & Health",
+        "02 - Atlas/Personal Growth & Health/Mentality",
+        "02 - Atlas/Education & Learning/Learning",
+        "02 - Atlas/Education & Learning/University",
+        "02 - Atlas/Education & Learning/Courses",
+        "02 - Atlas/Projects/Active",
+        "02 - Atlas/Projects/Archive",
+        "02 - Atlas/Projects/Ideas & Sandbox",
+        "02 - Atlas/Tech & AI/Agents & Automation",
+        "02 - Atlas/Tech & AI/Security",
+        "02 - Atlas/Tech & AI/Software Development",
+        "02 - Atlas/Tech & AI/System & OS",
+        "02 - Atlas/Tech & AI/Programming",
+        "02 - Atlas/Tech & AI/AI",
+        "05 - Blog",
+    ]
+    if os.environ.get("BRAIN_INGEST_NO_AI") == "1":
         return "02 - Atlas/Tech & AI/AI"
 
-    return "02 - Atlas/Tech & AI/AI"
+    home_bin = os.path.expanduser("~/.local/bin/agy")
+    agy_cmd = shutil.which("agy") or (home_bin if (os.path.isfile(home_bin) and os.access(home_bin, os.X_OK)) else None)
+    if not agy_cmd:
+        return "02 - Atlas/Tech & AI/AI"
 
-    return "02 - Atlas/Tech & AI"
+    dirs_list_str = "\n".join(f"- {d}" for d in allowed_dirs)
+    prompt = f"""Classifica la seguente nota personale nella cartella di destinazione più appropriata.
+
+TITOLO: {title}
+CONTENUTO:
+{content[:1000]}
+
+CARTELLE AMMISSIBILI:
+{dirs_list_str}
+
+Rispondi UNICAMENTE con il percorso esatto di una delle cartelle sopra elencate, senza commenti, markdown o spiegazioni aggiuntive."""
+
+    try:
+        proc = subprocess.run(
+            [agy_cmd, "--model", os.environ.get("BRAIN_AI_MODEL", DEFAULT_AI_MODEL), "--print", prompt],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        if proc.returncode == 0:
+            ans = proc.stdout.strip().strip('"').strip("'").strip('`')
+            for d in allowed_dirs:
+                if ans == d or ans.endswith(d):
+                    return d
+    except Exception:
+        pass
+
+    return "02 - Atlas/Tech & AI/AI"
 
 def check_duplicate_resource(vault_root: str, source_url: Optional[str], title: str) -> Optional[Tuple[str, str]]:
     """Checks 02 - Atlas notes frontmatter for existing source URL, video ID, or clean non-generic title."""
@@ -288,29 +473,43 @@ def check_duplicate_resource(vault_root: str, source_url: Optional[str], title: 
     return None
 
 def autolink_content(vault_root: str, body_text: str, current_title: str) -> Tuple[str, List[str]]:
-    """Links only real existing note titles (max 2 per target), safely preserving code blocks."""
+    """Links only real existing note titles (max 2 per target), safely preserving code blocks, links, and URLs."""
     auditor = brain_health.VaultHealthAuditor(vault_root)
     all_titles = sorted(auditor.all_notes.keys(), key=lambda x: len(x), reverse=True)
     stopwords = {'home', 'daily', 'note', 'studio', 'guida', 'guide', 'indice', 'index',
                  'atlas', 'moc', 'blog', 'meta', 'tech', 'inbox', 'school', 'appunti', 'review'}
-    code_blocks = []
-    def mask_code(m):
-        code_blocks.append(m.group(0))
-        return f"__CODE_BLOCK_{len(code_blocks)-1}__"
+    protected_blocks = []
+    def mask_block(m):
+        protected_blocks.append(m.group(0))
+        return f"__PROTECTED_BLOCK_{len(protected_blocks)-1}__"
 
-    masked = re.sub(r'```[\s\S]*?```', mask_code, body_text)
-    masked = re.sub(r'`[^`\n]+`', mask_code, masked)
+    # 1. Mask fenced code blocks and inline code
+    masked = re.sub(r'```[\s\S]*?```', mask_block, body_text)
+    masked = re.sub(r'~~~[\s\S]*?~~~', mask_block, masked)
+    masked = re.sub(r'`[^`\n]+`', mask_block, masked)
+
+    # 2. Mask existing wiki-links
+    masked = re.sub(r'\[\[[^\]]+\]\]', mask_block, masked)
+
+    # 3. Mask existing standard markdown links [text](url)
+    masked = re.sub(r'\[[^\]]+\]\([^\)]+\)', mask_block, masked)
+
+    # 4. Mask pure web URLs
+    masked = re.sub(r'https?://[^\s\)]+', mask_block, masked)
+
     linked, inserted, cur_clean = masked, set(), current_title.lower().strip()
 
     for title in all_titles:
         t_low = title.lower().strip()
-        if t_low == cur_clean or len(title) < 4 or t_low in stopwords: continue
-        pat = re.compile(r'(?<!\[\[)(?<!/)(?<![\w#])(' + re.escape(title) + r')(?![\w])(?![^\[]*\]\])(?![^\(]*\))', re.IGNORECASE)
+        if t_low == cur_clean or len(title) < 4 or t_low in stopwords:
+            continue
+        pat = re.compile(r'(?<![\w#])(' + re.escape(title) + r')(?![\w])', re.IGNORECASE)
         if pat.search(linked):
             linked = pat.sub(f"[[{title}]]", linked, count=2)
             inserted.add(f"[[{title}]]")
 
-    for idx, blk in enumerate(code_blocks): linked = linked.replace(f"__CODE_BLOCK_{idx}__", blk)
+    for idx in range(len(protected_blocks) - 1, -1, -1):
+        linked = linked.replace(f"__PROTECTED_BLOCK_{idx}__", protected_blocks[idx])
     return linked, sorted(list(inserted))
 
 def sanitize_style_highlights(text: str) -> str:
@@ -342,7 +541,8 @@ def format_structured_note(title: str, raw_content: str, depth: str = "approfond
 
 def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth: str = "approfondimento",
                          source_type: str = "text", source_url: str = "original",
-                         agy_path: str = "/Users/lorenzo/.local/bin/agy", timeout: int = 45) -> tuple[str, str]:
+                         agy_path: Optional[str] = None, timeout: int = 45,
+                         ai_model: Optional[str] = None) -> tuple[str, str]:
     """Generates enriched conceptual note body and executive summary via AI (agy CLI) with heuristic fallback.
     Returns (enriched_body, summary)."""
     c_title = brain_health.clean_title_str(title)
@@ -384,9 +584,9 @@ REGOLE CRITICHE DI CONTENUTO E STILE:
 3. EVIDENZIAZIONI E ARRICCHIMENTO VISIVO:
    - Evidenzia i concetti cardine/parole chiave assolute in GIALLO: <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>
    - Evidenzia i concetti secondari/nomi/luoghi in VIOLA: <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>
-   - MAI racchiudere i tag <mark> o <font> tra backtick markdown (solo HTML inline grezzo).
-   - Usa diagrammi Mermaid per processi/flussi logici complessi (tutti i nodi con apici: id["Etichetta"]).
-   - Usa LaTeX per formule matematiche/tecniche ($...$ o $$...$$).
+   - CRITICO: Non inserire MAI backtick markdown attorno ai tag HTML <mark>!
+   - Inserisci un diagramma Mermaid solo ed esclusivamente se aggiunge valore cognitivo (usa etichette tra doppi apici).
+   - Utilizza formule LaTeX inline $..$ o display $$..$$ per formalizzazioni matematiche/tecniche.
 
 4. LINGUA E SINTESI FINALE:
    - Scrivi rigorosamente in italiano accademico, chiaro e professionale.
@@ -394,14 +594,20 @@ REGOLE CRITICHE DI CONTENUTO E STILE:
    - Alla fine assoluta della risposta, inserisci il marcatore esatto '---SUMMARY---' seguito da una singola frase densa di significato (120-180 caratteri, max 200) per il recupero sub-secondo.
 """
 
-    agy_cmd = agy_path if os.path.exists(agy_path) else "agy"
+    home_bin = str(Path.home() / ".local" / "bin" / "agy")
+    if agy_path and os.path.exists(agy_path):
+        agy_cmd = agy_path
+    else:
+        agy_cmd = shutil.which("agy") or (home_bin if os.path.exists(home_bin) else "agy")
     env = os.environ.copy()
-    env['PATH'] = f"/Users/lorenzo/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:{env.get('PATH', '')}"
+    home_dir = str(Path.home())
+    env['PATH'] = f"{home_dir}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:{env.get('PATH', '')}"
     env['PYTHONUNBUFFERED'] = '1'
 
     try:
+        model_to_use = ai_model or os.environ.get("BRAIN_AI_MODEL", DEFAULT_AI_MODEL)
         proc = subprocess.run(
-            [agy_cmd, "--model", "gemini-3.7-flash-low", "--dangerously-skip-permissions", "--disable-slash-commands", f"--print={prompt}"],
+            [agy_cmd, "--model", model_to_use, "--dangerously-skip-permissions", "--disable-slash-commands", f"--print={prompt}"],
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -455,17 +661,39 @@ def record_ingest_error(vault_root: str, source_or_url: str, reason: str):
     update_review_dashboard(vault_root, add_error=(source_or_url, reason))
 
 
-def trigger_panic_abort(vault_root: str) -> int:
+def get_watcher_pid_file(vault_root: str) -> str:
+    """Dynamically resolves watcher daemon PID file following precedence chain: $PID_FILE -> vault hash -> legacy."""
+    env_pid = os.environ.get('PID_FILE')
+    if env_pid and env_pid.strip():
+        return env_pid.strip()
+
+    shasum_hash = hashlib.sha1(vault_root.encode('utf-8')).hexdigest()[:8]
+    md5_hash = hashlib.md5(vault_root.encode('utf-8')).hexdigest()[:8]
+    full_md5 = hashlib.md5(vault_root.encode('utf-8')).hexdigest()
+
+    candidates = [
+        f"/tmp/brain_watcher_{shasum_hash}.pid",
+        f"/tmp/brain_watcher_{md5_hash}.pid",
+        f"/tmp/brain_watcher_{full_md5}.pid",
+        "/tmp/brain_watcher.pid"
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+    return candidates[0]
+
+
+def trigger_panic_abort(vault_root: str, pid_file: Optional[str] = None) -> int:
     """Terminates all running ingestion processes, cleans locks, resets ready notes, and clears In Elaborazione."""
     aborted_pids = set()
     my_pid = os.getpid()
 
-    # 1. Identify watcher PID if running to ensure it is NEVER killed
+    # 1. Identify watcher PID if running to ensure it is NEVER killed (D-01, D-02, D-04)
     watcher_pid = None
-    pid_file = "/tmp/brain_watcher.pid"
-    if os.path.exists(pid_file):
+    target_pid_file = pid_file or get_watcher_pid_file(vault_root)
+    if target_pid_file and os.path.exists(target_pid_file):
         try:
-            with open(pid_file, "r", encoding="utf-8") as f:
+            with open(target_pid_file, "r", encoding="utf-8") as f:
                 content = f.read().strip()
                 if content.isdigit():
                     watcher_pid = int(content)
@@ -552,42 +780,44 @@ def trigger_panic_abort(vault_root: str) -> int:
                     except Exception:
                         pass
 
-    # 7. Clean up aborted in-progress drafts in 03 - Inbox/Draft/
+    # 7. Clean up all interrupted drafts and partial files in 03 - Inbox/Draft/ (D-03)
     if os.path.exists(draft_dir):
         for f in os.listdir(draft_dir):
             if f.endswith(".md") and not f.startswith("."):
                 dfp = os.path.join(draft_dir, f)
                 try:
-                    with open(dfp, "r", encoding="utf-8", errors="ignore") as df:
-                        content = df.read()
-                    has_fm, fm_t, _, bdy = brain_health.split_markdown_note(content)
-                    if has_fm:
-                        meta = brain_health.safe_load_frontmatter(fm_t, brain_health.build_yaml_engine())
-                        if str(meta.get('status', '')).lower() == 'in-progress':
-                            sfp = os.path.join(source_dir, f)
-                            src_val = meta.get('source', 'original')
-                            if os.path.exists(sfp):
-                                try:
-                                    with open(sfp, "r", encoding="utf-8", errors="ignore") as sf:
-                                        s_content = sf.read()
-                                    if src_val == "original" or "ready:" in s_content:
-                                        # Restore manual source note to Inbox root with ready: false
-                                        rfm = re.sub(r'ready:\s*(true|"true"|\'true\'|1)', 'ready: false', s_content, flags=re.IGNORECASE)
-                                        if "ready:" not in rfm:
-                                            rfm = f"---\nready: false\n---\n\n{s_content}"
-                                        with open(os.path.join(inbox_dir, f), "w", encoding="utf-8") as wf:
-                                            wf.write(rfm)
-                                    os.remove(sfp)
-                                except Exception:
-                                    pass
-                            # Clean up clipboard frames
-                            name_stem = f[:-3]
-                            if os.path.exists(clip_dir):
-                                for img in os.listdir(clip_dir):
-                                    if img.startswith(name_stem[:10]) or name_stem.lower().replace(' ', '_')[:10] in img:
-                                        try: os.remove(os.path.join(clip_dir, img))
-                                        except Exception: pass
-                            os.remove(dfp)
+                    meta = {}
+                    if os.path.exists(dfp):
+                        with open(dfp, "r", encoding="utf-8", errors="ignore") as df:
+                            content = df.read()
+                        has_fm, fm_t, _, bdy = brain_health.split_markdown_note(content)
+                        if has_fm:
+                            meta = brain_health.safe_load_frontmatter(fm_t, brain_health.build_yaml_engine()) or {}
+                    sfp = os.path.join(source_dir, f)
+                    src_val = meta.get('source', 'original')
+                    if os.path.exists(sfp):
+                        try:
+                            with open(sfp, "r", encoding="utf-8", errors="ignore") as sf:
+                                s_content = sf.read()
+                            if src_val == "original" or "ready:" in s_content:
+                                # Restore manual source note to Inbox root with ready: false
+                                rfm = re.sub(r'ready:\s*(true|"true"|\'true\'|1)', 'ready: false', s_content, flags=re.IGNORECASE)
+                                if "ready:" not in rfm:
+                                    rfm = f"---\nready: false\n---\n\n{s_content}"
+                                with open(os.path.join(inbox_dir, f), "w", encoding="utf-8") as wf:
+                                    wf.write(rfm)
+                            os.remove(sfp)
+                        except Exception:
+                            pass
+                    # Clean up clipboard frames
+                    name_stem = f[:-3]
+                    if os.path.exists(clip_dir):
+                        for img in os.listdir(clip_dir):
+                            if img.startswith(name_stem[:10]) or name_stem.lower().replace(' ', '_')[:10] in img:
+                                try: os.remove(os.path.join(clip_dir, img))
+                                except Exception: pass
+                    if os.path.exists(dfp):
+                        os.remove(dfp)
                 except Exception:
                     pass
 
@@ -633,11 +863,11 @@ def mark_draft_ready(vault_root: str, title_or_path: str) -> bool:
     return True
 
 
-def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
-                            phase: Optional[str] = None,
-                            add_error: Optional[Tuple[str, str]] = None,
-                            finish_in_progress: Optional[str] = None,
-                            replace_in_progress: Optional[str] = None):
+def _update_review_dashboard_unlocked(vault_root: str, in_progress: Optional[str] = None,
+                                      phase: Optional[str] = None,
+                                      add_error: Optional[Tuple[str, str]] = None,
+                                      finish_in_progress: Optional[str] = None,
+                                      replace_in_progress: Optional[str] = None):
     """Synchronizes 03 - Inbox/Review Dashboard.md in static Markdown across 4 sections with progressive phase feedback."""
     inbox_dir = os.path.join(vault_root, "03 - Inbox")
     draft_dir, source_dir = os.path.join(inbox_dir, "Draft"), os.path.join(inbox_dir, "Source")
@@ -806,7 +1036,7 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
     for l in pend_lines:
         m = RE_APPROVAL_LINE.match(l)
         if m:
-            n = brain_health.clean_title_str(m.group('name'))
+            n = brain_health.clean_title_str(m.group('name').split('|')[0].strip())
             existing_pend_map[n.lower()] = l
 
     reconciled_pend_lines = []
@@ -845,6 +1075,24 @@ def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
             "\n## 📜 Storico Recente"] + (hist_lines or ["*Nessuna azione recente registrata.*"])
 
     with open(dash_path, "w", encoding="utf-8") as f: f.write("\n".join(dash) + "\n")
+
+
+def update_review_dashboard(vault_root: str, in_progress: Optional[str] = None,
+                            phase: Optional[str] = None,
+                            add_error: Optional[Tuple[str, str]] = None,
+                            finish_in_progress: Optional[str] = None,
+                            replace_in_progress: Optional[str] = None):
+    """Synchronizes 03 - Inbox/Review Dashboard.md in static Markdown across 4 sections under DashboardLock (D-07, D-08)."""
+    try:
+        with DashboardLock(vault_root, timeout=10.0, retry_interval=0.2):
+            return _update_review_dashboard_unlocked(
+                vault_root, in_progress=in_progress, phase=phase,
+                add_error=add_error, finish_in_progress=finish_in_progress,
+                replace_in_progress=replace_in_progress
+            )
+    except TimeoutError as e:
+        logging.warning("Impossibile acquisire DashboardLock entro il timeout. Operazione saltata: %s", e)
+        return
 
 
 
@@ -938,11 +1186,268 @@ def stage_note(vault_root: str, title: str, body: str, metadata: Optional[Dict[s
     return draft_path
 
 
-def process_tri_state_approvals(vault_root: str) -> int:
+def _handle_panic_action(vault_root: str) -> bool:
+    """Executes emergency abort by unchecking all dashboard boxes and moving active items to Panic folder."""
+    trigger_panic_abort(vault_root)
+    return True
+
+
+def _handle_error_item(vault_root: str, src_target: str, status: str) -> Tuple[bool, Optional[str]]:
+    """Handles retrying or dismissing an error line from Review Dashboard."""
+    if status in ('x', 'X'):
+        try:
+            matching_raw_file = None
+            candidate_paths = [
+                os.path.join(vault_root, "03 - Inbox", src_target),
+                os.path.join(vault_root, "03 - Inbox", f"{src_target}.md"),
+                os.path.join(vault_root, "03 - Inbox", "Source", src_target),
+                os.path.join(vault_root, "03 - Inbox", "Source", f"{src_target}.md"),
+            ]
+            for cp in candidate_paths:
+                if os.path.isfile(cp):
+                    matching_raw_file = cp
+                    break
+
+            if not matching_raw_file:
+                for s_rel in ("03 - Inbox", os.path.join("03 - Inbox", "Source")):
+                    s_dir = os.path.join(vault_root, s_rel)
+                    if os.path.exists(s_dir):
+                        for ib_f in os.listdir(s_dir):
+                            if not ib_f.endswith('.md') or ib_f.startswith('.') or ib_f in ("Review Dashboard.md", "Draft", "Source"):
+                                continue
+                            ib_fp = os.path.join(s_dir, ib_f)
+                            if not os.path.isfile(ib_fp):
+                                continue
+                            try:
+                                with open(ib_fp, 'r', encoding='utf-8', errors='ignore') as rf:
+                                    rfc = rf.read()
+                                _, rfm_t, _, _ = brain_health.split_markdown_note(rfc)
+                                rmeta = brain_health.safe_load_frontmatter(rfm_t, brain_health.build_yaml_engine())
+                                if rmeta.get('video_url') == src_target or rmeta.get('source') == src_target:
+                                    matching_raw_file = ib_fp
+                                    break
+                            except Exception:
+                                pass
+                        if matching_raw_file:
+                            break
+
+            if matching_raw_file:
+                with open(matching_raw_file, 'r', encoding='utf-8', errors='ignore') as rf:
+                    rfc = rf.read()
+                _, rfm_t, _, rbdy = brain_health.split_markdown_note(rfc)
+                rfm_fixed = re.sub(r'ready:\s*(false|"false"|\'false\'|0)', 'ready: true', rfm_t, flags=re.IGNORECASE)
+                if 'ready:' not in rfm_fixed:
+                    rfm_fixed += "\nready: true"
+                with open(matching_raw_file, 'w', encoding='utf-8') as rf:
+                    rf.write(f"---\n{rfm_fixed.strip()}\n---\n\n{rbdy.strip()}\n")
+                process_inbox_raw_notes(vault_root)
+            else:
+                ingest_source(src_target, vault_root=vault_root, force=True)
+
+            append_inbox_history(vault_root, "RETRY_SUCCESS", src_target, "03 - Inbox/Draft")
+            return True, None
+        except Exception as e:
+            append_inbox_history(vault_root, "RETRY_FAILED", src_target, str(e))
+            return False, str(e)
+
+    elif status == '-':
+        candidate_paths = [
+            os.path.join(vault_root, "03 - Inbox", src_target),
+            os.path.join(vault_root, "03 - Inbox", f"{src_target}.md"),
+            os.path.join(vault_root, "03 - Inbox", "Source", src_target),
+            os.path.join(vault_root, "03 - Inbox", "Source", f"{src_target}.md"),
+        ]
+        deleted = False
+        for cp in candidate_paths:
+            if os.path.isfile(cp):
+                try:
+                    os.remove(cp)
+                    deleted = True
+                except Exception:
+                    pass
+        if not deleted:
+            for s_rel in ("03 - Inbox", os.path.join("03 - Inbox", "Source")):
+                s_dir = os.path.join(vault_root, s_rel)
+                if os.path.exists(s_dir):
+                    for ib_f in os.listdir(s_dir):
+                        if not ib_f.endswith('.md') or ib_f.startswith('.') or ib_f in ("Review Dashboard.md", "Draft", "Source"):
+                            continue
+                        ib_fp = os.path.join(s_dir, ib_f)
+                        if not os.path.isfile(ib_fp):
+                            continue
+                        try:
+                            with open(ib_fp, 'r', encoding='utf-8', errors='ignore') as rf:
+                                rfc = rf.read()
+                            _, rfm_t, _, _ = brain_health.split_markdown_note(rfc)
+                            rmeta = brain_health.safe_load_frontmatter(rfm_t, brain_health.build_yaml_engine())
+                            if rmeta.get('video_url') == src_target or rmeta.get('source') == src_target:
+                                os.remove(ib_fp)
+                                deleted = True
+                                break
+                        except Exception:
+                            pass
+                    if deleted:
+                        break
+        append_inbox_history(vault_root, "ERROR_DISMISSED", src_target, "DISMISSED")
+        return True, None
+
+    return False, None
+
+
+def _handle_promote_item(vault_root: str, draft_path: str, source_path: str, name: str, raw_name: str, src_name: str) -> Tuple[bool, Optional[str]]:
+    """Promotes an approved draft [x] to permanent Atlas/Blog storage."""
+    if not os.path.exists(draft_path):
+        return False, None
+    with open(draft_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    _, fm_text, _, body = brain_health.split_markdown_note(content)
+    meta = brain_health.safe_load_frontmatter(fm_text, brain_health.build_yaml_engine())
+
+    meta_title = brain_health.clean_title_str(str(meta.get('title') or ''))
+    if name.lower().startswith("raw note") or name.lower() in ("untitled", "draft", "bozza", "nuova nota", ""):
+        real_name = meta_title if (meta_title and not meta_title.lower().startswith("raw note") and meta_title.lower() not in ("untitled", "draft", "bozza", "nuova nota")) else name
+    else:
+        real_name = name
+
+    target_rel = meta.get('target_path')
+    if target_rel:
+        target_dir_part = os.path.dirname(target_rel)
+        old_file_stem = brain_health.clean_title_str(os.path.basename(target_rel)[:-3])
+        if old_file_stem.lower().startswith("raw note") or old_file_stem.lower() in ("untitled", "draft", "bozza", "nuova nota") or (not real_name.lower().startswith("raw note") and real_name != old_file_stem):
+            target_file_part = f"{real_name}.md"
+        else:
+            target_file_part = f"{old_file_stem}.md"
+        target_rel = os.path.join(target_dir_part, target_file_part) if target_dir_part else target_file_part
+    else:
+        target_rel = classify_target_directory(real_name, meta.get('tags', []), body) + f"/{real_name}.md"
+
+    dest_abs = os.path.abspath(os.path.join(vault_root, target_rel))
+    vault_abs = os.path.abspath(vault_root)
+
+    if not dest_abs.startswith(vault_abs + os.sep) and dest_abs != vault_abs:
+        return False, f"Path traversal bloccato: {target_rel}"
+    src_val = meta.get('source', 'original')
+    dup = check_duplicate_resource(vault_root, src_val, real_name)
+    if dup and os.path.abspath(dup[0]) != dest_abs:
+        return False, f"Duplicato sorgente rilevato in {os.path.relpath(dup[0], vault_root)}"
+    if os.path.exists(dest_abs):
+        with open(dest_abs, 'r', encoding='utf-8', errors='ignore') as f:
+            dest_text = f.read(1500)
+        if src_val != 'original' and src_val not in dest_text:
+            return False, f"Conflitto nome file con sorgente diversa in {target_rel}"
+
+    meta['status'] = 'permanent'
+    meta['title'] = real_name
+    meta['updated'] = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
+    if 'target_path' in meta:
+        del meta['target_path']
+    clean_body, _ = brain_health.strip_isolated_hashtag_lines(body)
+    fm_str = brain_health.format_canonical_frontmatter(meta, is_blog=target_rel.startswith("05 - Blog"))
+    final_note = brain_health.assemble_markdown_note(fm_str, brain_health.get_breadcrumbs(target_rel, real_name), sanitize_style_highlights(clean_body))
+
+    os.makedirs(os.path.dirname(dest_abs), exist_ok=True)
+    with open(dest_abs, "w", encoding="utf-8") as f:
+        f.write(final_note)
+    if os.path.exists(draft_path):
+        os.remove(draft_path)
+
+    if os.path.exists(source_path):
+        src_txt = ""
+        with open(source_path, 'r', encoding='utf-8', errors='ignore') as sf:
+            src_txt = sf.read(500)
+        if src_val == "original" or "ready:" in src_txt:
+            arc_dir = os.path.join(vault_root, "99 - Meta", "Archive")
+            os.makedirs(arc_dir, exist_ok=True)
+            shutil.move(source_path, os.path.join(arc_dir, f"{real_name}.md"))
+        else:
+            os.remove(source_path)
+
+    append_inbox_history(vault_root, "APPROVED", real_name, target_rel, src_val)
+    return True, None
+
+
+def _handle_purge_item(vault_root: str, draft_path: str, source_path: str, name: str) -> bool:
+    """Purges a rejected draft [-] and its associated clipboard assets."""
+    note_content = ""
+    if os.path.exists(draft_path):
+        try:
+            with open(draft_path, "r", encoding="utf-8", errors="ignore") as f:
+                note_content = f.read()
+        except Exception:
+            pass
+    elif os.path.exists(source_path):
+        try:
+            with open(source_path, "r", encoding="utf-8", errors="ignore") as f:
+                note_content = f.read()
+        except Exception:
+            pass
+
+    meta = {}
+    body = ""
+    if note_content:
+        has_fm, fm_t, _, bdy = brain_health.split_markdown_note(note_content)
+        if has_fm:
+            meta = brain_health.safe_load_frontmatter(fm_t, brain_health.build_yaml_engine())
+        body = bdy
+
+    vid_url = meta.get('video_url') or meta.get('source')
+    video_id = youtube_helper.get_video_id(str(vid_url)) if vid_url else None
+
+    clip_dir = os.path.join(vault_root, "99 - Meta", "Clipboard")
+    if os.path.exists(clip_dir):
+        # 1. Purge based on video_id
+        if video_id:
+            for img in os.listdir(clip_dir):
+                if img.startswith(f"{video_id}_") and (img.endswith('.jpg') or img.endswith('.png')):
+                    try:
+                        os.remove(os.path.join(clip_dir, img))
+                    except Exception:
+                        pass
+
+        # 2. Purge based on explicit markdown image embeddings
+        img_refs = re.findall(r'!\[\[(.*?)\]\]', body) + re.findall(r'!\[.*?\]\((.*?)\)', body)
+        for ref in img_refs:
+            base_img = os.path.basename(ref.split('|')[0].strip())
+            img_path = os.path.join(clip_dir, base_img)
+            if os.path.isfile(img_path):
+                try:
+                    os.remove(img_path)
+                except Exception:
+                    pass
+
+        # 3. Fallback: prefix-based purge
+        prefix = name[:10]
+        slug = name.lower().replace(' ', '_')[:10]
+        for img in os.listdir(clip_dir):
+            if (img.startswith(prefix) or slug in img) and (img.endswith('.jpg') or img.endswith('.png')):
+                try:
+                    os.remove(os.path.join(clip_dir, img))
+                except Exception:
+                    pass
+
+    # Physical removal of draft and source
+    if os.path.exists(draft_path):
+        try:
+            os.remove(draft_path)
+        except Exception:
+            pass
+    if os.path.exists(source_path):
+        try:
+            os.remove(source_path)
+        except Exception:
+            pass
+
+    append_inbox_history(vault_root, "REJECTED", name, "PURGED")
+    return True
+
+
+def _process_tri_state_approvals_unlocked(vault_root: str) -> int:
     """Processes [x] (Promote), [-] (Purge), panic button, and error retry/dismiss lines in Review Dashboard.md."""
     dash_path = os.path.join(vault_root, "03 - Inbox", "Review Dashboard.md")
-    if not os.path.exists(dash_path): return 0
-    with open(dash_path, "r", encoding="utf-8", errors="ignore") as f: lines = f.readlines()
+    if not os.path.exists(dash_path):
+        return 0
+    with open(dash_path, "r", encoding="utf-8", errors="ignore") as f:
+        lines = f.readlines()
     processed_count, updated_lines, pending_errors = 0, [], []
     panic_triggered = False
 
@@ -957,189 +1462,116 @@ def process_tri_state_approvals(vault_root: str) -> int:
         if m_err:
             status = m_err.group('status')
             if status == ' ':
-                updated_lines.append(line); continue
-            src_target = m_err.group('src').strip()
-            if status in ('x', 'X'):
-                try:
-                    raw_file = os.path.join(vault_root, "03 - Inbox", src_target)
-                    if not os.path.exists(raw_file) and not src_target.endswith('.md'):
-                        raw_file = os.path.join(vault_root, "03 - Inbox", f"{src_target}.md")
-                    matching_raw_file = None
-                    if os.path.exists(raw_file) and not os.path.isdir(raw_file):
-                        matching_raw_file = raw_file
-                    else:
-                        inbox_dir = os.path.join(vault_root, "03 - Inbox")
-                        if os.path.exists(inbox_dir):
-                            for ib_f in os.listdir(inbox_dir):
-                                if ib_f.endswith('.md') and not ib_f.startswith('.') and ib_f not in ("Review Dashboard.md", "Draft", "Source"):
-                                    ib_fp = os.path.join(inbox_dir, ib_f)
-                                    try:
-                                        with open(ib_fp, 'r', encoding='utf-8', errors='ignore') as rf: rfc = rf.read()
-                                        _, rfm_t, _, _ = brain_health.split_markdown_note(rfc)
-                                        rmeta = brain_health.safe_load_frontmatter(rfm_t, brain_health.build_yaml_engine())
-                                        if rmeta.get('video_url') == src_target or rmeta.get('source') == src_target:
-                                            matching_raw_file = ib_fp
-                                            break
-                                    except Exception:
-                                        pass
+                updated_lines.append(line)
+                continue
+            raw_target = m_err.group('src').strip()
+            if raw_target.startswith('[[') and raw_target.endswith(']]'):
+                raw_target = raw_target[2:-2]
+            src_target = raw_target.split('|')[0].strip()
+            if src_target.startswith("Draft/"):
+                src_target = src_target[6:]
+            if src_target.startswith("Source/"):
+                src_target = src_target[7:]
 
-                    if matching_raw_file:
-                        with open(matching_raw_file, 'r', encoding='utf-8', errors='ignore') as rf: rfc = rf.read()
-                        _, rfm_t, _, rbdy = brain_health.split_markdown_note(rfc)
-                        rfm_fixed = re.sub(r'ready:\s*false', 'ready: true', rfm_t, flags=re.IGNORECASE)
-                        if 'ready:' not in rfm_fixed: rfm_fixed += "\nready: true"
-                        with open(matching_raw_file, 'w', encoding='utf-8') as rf: rf.write(f"---\n{rfm_fixed.strip()}\n---\n\n{rbdy.strip()}\n")
-                        process_inbox_raw_notes(vault_root)
-                    else:
-                        ingest_source(src_target, vault_root=vault_root, force=True)
-                    append_inbox_history(vault_root, "RETRY_SUCCESS", src_target, "03 - Inbox/Draft")
-                    processed_count += 1
-                except Exception as e:
-                    pending_errors.append((src_target, str(e)))
-                    append_inbox_history(vault_root, "RETRY_FAILED", src_target, str(e))
-            elif status == '-':
-                raw_file = os.path.join(vault_root, "03 - Inbox", src_target)
-                if not os.path.exists(raw_file) and not src_target.endswith('.md'):
-                    raw_file = os.path.join(vault_root, "03 - Inbox", f"{src_target}.md")
-                if os.path.exists(raw_file) and not os.path.isdir(raw_file):
-                    try: os.remove(raw_file)
-                    except Exception: pass
-                else:
-                    inbox_dir = os.path.join(vault_root, "03 - Inbox")
-                    if os.path.exists(inbox_dir):
-                        for ib_f in os.listdir(inbox_dir):
-                            if ib_f.endswith('.md') and not ib_f.startswith('.') and ib_f not in ("Review Dashboard.md", "Draft", "Source"):
-                                ib_fp = os.path.join(inbox_dir, ib_f)
-                                try:
-                                    with open(ib_fp, 'r', encoding='utf-8', errors='ignore') as rf: rfc = rf.read()
-                                    _, rfm_t, _, _ = brain_health.split_markdown_note(rfc)
-                                    rmeta = brain_health.safe_load_frontmatter(rfm_t, brain_health.build_yaml_engine())
-                                    if rmeta.get('video_url') == src_target or rmeta.get('source') == src_target:
-                                        os.remove(ib_fp)
-                                except Exception:
-                                    pass
-                append_inbox_history(vault_root, "ERROR_DISMISSED", src_target, "DISMISSED")
+            success, err_msg = _handle_error_item(vault_root, src_target, status)
+            if success:
                 processed_count += 1
+            elif err_msg:
+                pending_errors.append((src_target, err_msg))
             continue
 
         m = RE_APPROVAL_LINE.match(line)
         if not m or m.group('status') == ' ':
-            updated_lines.append(line); continue
-        status, raw_name = m.group('status'), m.group('name')
+            updated_lines.append(line)
+            continue
+        status = m.group('status')
+        raw_name = m.group('name').split('|')[0].strip()
         name = brain_health.clean_title_str(raw_name)
+        raw_src = m.group('src').split('|')[0].strip() if m.group('src') else None
+        src_name = brain_health.clean_title_str(raw_src) if raw_src else name
+
         draft_path = os.path.join(vault_root, "03 - Inbox", "Draft", f"{name}.md")
-        if not os.path.exists(draft_path): draft_path = os.path.join(vault_root, "03 - Inbox", "Draft", f"{raw_name}.md")
-        if not os.path.exists(draft_path): draft_path = os.path.join(vault_root, "03 - Inbox", f"{name}.md")
-        if not os.path.exists(draft_path): draft_path = os.path.join(vault_root, "03 - Inbox", f"{raw_name}.md")
-        source_path = os.path.join(vault_root, "03 - Inbox", "Source", f"{name}.md")
-        if not os.path.exists(source_path): source_path = os.path.join(vault_root, "03 - Inbox", "Source", f"{raw_name}.md")
+        if not os.path.exists(draft_path):
+            draft_path = os.path.join(vault_root, "03 - Inbox", "Draft", f"{raw_name}.md")
+        if not os.path.exists(draft_path):
+            draft_path = os.path.join(vault_root, "03 - Inbox", f"{name}.md")
+        if not os.path.exists(draft_path):
+            draft_path = os.path.join(vault_root, "03 - Inbox", f"{raw_name}.md")
+        source_path = os.path.join(vault_root, "03 - Inbox", "Source", f"{src_name}.md")
+        if not os.path.exists(source_path):
+            source_path = os.path.join(vault_root, "03 - Inbox", "Source", f"{name}.md")
+        if not os.path.exists(source_path):
+            source_path = os.path.join(vault_root, "03 - Inbox", "Source", f"{raw_name}.md")
 
         if status in ('x', 'X'):
-            if not os.path.exists(draft_path): continue
-            with open(draft_path, "r", encoding="utf-8") as f: content = f.read()
-            _, fm_text, _, body = brain_health.split_markdown_note(content)
-            meta = brain_health.safe_load_frontmatter(fm_text, brain_health.build_yaml_engine())
-
-            meta_title = brain_health.clean_title_str(str(meta.get('title') or ''))
-            if name.lower().startswith("raw note") or name.lower() in ("untitled", "draft", "bozza", "nuova nota", ""):
-                real_name = meta_title if (meta_title and not meta_title.lower().startswith("raw note") and meta_title.lower() not in ("untitled", "draft", "bozza", "nuova nota")) else name
-            else:
-                real_name = name
-
-            target_rel = meta.get('target_path')
-            if target_rel:
-                target_dir_part = os.path.dirname(target_rel)
-                old_file_stem = brain_health.clean_title_str(os.path.basename(target_rel)[:-3])
-                if old_file_stem.lower().startswith("raw note") or old_file_stem.lower() in ("untitled", "draft", "bozza", "nuova nota") or (not real_name.lower().startswith("raw note") and real_name != old_file_stem):
-                    target_file_part = f"{real_name}.md"
-                else:
-                    target_file_part = f"{old_file_stem}.md"
-                target_rel = os.path.join(target_dir_part, target_file_part) if target_dir_part else target_file_part
-            else:
-                target_rel = classify_target_directory(real_name, meta.get('tags', []), body) + f"/{real_name}.md"
-
-            dest_abs, vault_abs = os.path.abspath(os.path.join(vault_root, target_rel)), os.path.abspath(vault_root)
-
-            if not dest_abs.startswith(vault_abs + os.sep) and dest_abs != vault_abs:
-                pending_errors.append((real_name, f"Path traversal bloccato: {target_rel}"))
-                updated_lines.append(line); continue
-            src_val = meta.get('source', 'original')
-            dup = check_duplicate_resource(vault_root, src_val, real_name)
-            if dup and os.path.abspath(dup[0]) != dest_abs:
-                pending_errors.append((real_name, f"Duplicato sorgente rilevato in {os.path.relpath(dup[0], vault_root)}"))
-                updated_lines.append(line); continue
-            if os.path.exists(dest_abs):
-                with open(dest_abs, 'r', encoding='utf-8', errors='ignore') as f: dest_text = f.read(1500)
-                if src_val != 'original' and src_val not in dest_text:
-                    pending_errors.append((real_name, f"Conflitto nome file con sorgente diversa in {target_rel}"))
-                    updated_lines.append(line); continue
-
-            meta['status'] = 'permanent'
-            meta['title'] = real_name
-            meta['updated'] = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
-            if 'target_path' in meta: del meta['target_path']
-            clean_body, _ = brain_health.strip_isolated_hashtag_lines(body)
-            fm_str = brain_health.format_canonical_frontmatter(meta, is_blog=target_rel.startswith("05 - Blog"))
-            final_note = brain_health.assemble_markdown_note(fm_str, brain_health.get_breadcrumbs(target_rel, real_name), sanitize_style_highlights(clean_body))
-
-            os.makedirs(os.path.dirname(dest_abs), exist_ok=True)
-            with open(dest_abs, "w", encoding="utf-8") as f: f.write(final_note)
-            if os.path.exists(draft_path): os.remove(draft_path)
-
-            if os.path.exists(source_path):
-                src_txt = ""
-                with open(source_path, 'r', encoding='utf-8', errors='ignore') as sf:
-                    src_txt = sf.read(500)
-                if src_val == "original" or "ready:" in src_txt:
-                    arc_dir = os.path.join(vault_root, "99 - Meta", "Archive")
-                    os.makedirs(arc_dir, exist_ok=True)
-                    shutil.move(source_path, os.path.join(arc_dir, f"{real_name}.md"))
-                else: os.remove(source_path)
-
-            append_inbox_history(vault_root, "APPROVED", real_name, target_rel, src_val)
-            processed_count += 1
-
+            success, err_msg = _handle_promote_item(vault_root, draft_path, source_path, name, raw_name, src_name)
+            if success:
+                processed_count += 1
+            elif err_msg:
+                pending_errors.append((name, err_msg))
+                updated_lines.append(line)
         elif status == '-':
-            if os.path.exists(draft_path): os.remove(draft_path)
-            if os.path.exists(source_path): os.remove(source_path)
-            clip_dir = os.path.join(vault_root, "99 - Meta", "Clipboard")
-            if os.path.exists(clip_dir):
-                for img in os.listdir(clip_dir):
-                    if img.startswith(name[:10]) or name.lower().replace(' ', '_')[:10] in img:
-                        try: os.remove(os.path.join(clip_dir, img))
-                        except Exception: pass
-            append_inbox_history(vault_root, "REJECTED", name, "PURGED")
-            processed_count += 1
+            if _handle_purge_item(vault_root, draft_path, source_path, name):
+                processed_count += 1
 
     if panic_triggered:
-        trigger_panic_abort(vault_root)
+        _handle_panic_action(vault_root)
         processed_count += 1
     else:
-        with open(dash_path, "w", encoding="utf-8") as f: f.writelines(updated_lines)
+        with open(dash_path, "w", encoding="utf-8") as f:
+            f.writelines(updated_lines)
         update_review_dashboard(vault_root)
-        for err_src, err_rsn in pending_errors: update_review_dashboard(vault_root, add_error=(err_src, err_rsn))
+        for err_src, err_rsn in pending_errors:
+            update_review_dashboard(vault_root, add_error=(err_src, err_rsn))
     return processed_count
 
 
+def process_tri_state_approvals(vault_root: str) -> int:
+    """Processes [x] (Promote), [-] (Purge), panic button, and error retry/dismiss lines in Review Dashboard.md under DashboardLock (D-07)."""
+    try:
+        with DashboardLock(vault_root, timeout=10.0, retry_interval=0.2):
+            return _process_tri_state_approvals_unlocked(vault_root)
+    except TimeoutError as e:
+        logging.warning("Impossibile acquisire DashboardLock per process_tri_state_approvals: %s", e)
+        return 0
+
+
 def process_inbox_raw_notes(vault_root: str) -> List[str]:
-    """Scans 03 - Inbox/ root for ready: true notes and stages their source into Source/, placing them under In Elaborazione."""
+    """Scans 03 - Inbox/ root and 03 - Inbox/Source/ for ready: true notes and stages their source into Source/, placing them under In Elaborazione."""
     inbox_dir = os.path.join(vault_root, "03 - Inbox")
     source_dir = os.path.join(inbox_dir, "Source")
     os.makedirs(source_dir, exist_ok=True)
     if not os.path.exists(inbox_dir): return []
     processed = []
 
+    candidates = []
+    # 1. 03 - Inbox/ root
     for file in sorted(os.listdir(inbox_dir)):
         if not file.endswith('.md') or file.startswith('.') or file in ("Review Dashboard.md", "Draft", "Source"): continue
         file_path = os.path.join(inbox_dir, file)
-        if os.path.isdir(file_path): continue
+        if os.path.isfile(file_path):
+            candidates.append((file_path, False))
+
+    # 2. 03 - Inbox/Source/ (for retried notes)
+    if os.path.exists(source_dir):
+        for file in sorted(os.listdir(source_dir)):
+            if not file.endswith('.md') or file.startswith('.'): continue
+            file_path = os.path.join(source_dir, file)
+            if os.path.isfile(file_path):
+                candidates.append((file_path, True))
+
+    for file_path, is_in_source in candidates:
+        if not os.path.exists(file_path): continue
+        clean_title = ""
+        src_url = None
         try:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f: content = f.read()
             has_fm, fm_text, _, body = brain_health.split_markdown_note(content)
             meta = brain_health.safe_load_frontmatter(fm_text, brain_health.build_yaml_engine()) if has_fm else {}
             if str(meta.get('ready')).lower() != 'true': continue
 
-            clean_title = brain_health.clean_title_str(meta.get('title') or file[:-3])
+            file_name = os.path.basename(file_path)
+            clean_title = brain_health.clean_title_str(meta.get('title') or file_name[:-3])
             if clean_title.lower().startswith("raw note") or clean_title.lower() in ("untitled", "draft", "bozza", "nuova nota", ""):
                 m_h1 = re.search(r'^\s*#\s+([^\n]+)', body, re.MULTILINE)
                 if m_h1:
@@ -1152,7 +1584,7 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
 
             dup = check_duplicate_resource(vault_root, src_url, check_title)
             if dup:
-                raw_fm = re.sub(r'ready:\s*(true|"true"|\'true\')', 'ready: false', fm_text, flags=re.IGNORECASE)
+                raw_fm = re.sub(r'ready:\s*(true|"true"|\'true\'|1)', 'ready: false', fm_text, flags=re.IGNORECASE)
                 if 'ready:' not in raw_fm: raw_fm += "\nready: false"
                 with open(file_path, 'w', encoding='utf-8') as f: f.write(f"---\n{raw_fm.strip()}\n---\n\n{body.strip()}\n")
                 record_ingest_error(vault_root, src_url or clean_title, f"Duplicato rilevato: {os.path.relpath(dup[0], vault_root)}")
@@ -1167,6 +1599,16 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
                 processed.append(src_url)
                 continue
 
+            # D-01: Spostamento atomico preventivo delle note grezze in 03 - Inbox/Source/ prima di Fase 1/3 e Fase 2/3 AI
+            if not is_in_source:
+                target_source_path = os.path.join(source_dir, file_name)
+                if os.path.exists(target_source_path) and os.path.abspath(file_path) != os.path.abspath(target_source_path):
+                    try: os.remove(target_source_path)
+                    except Exception: pass
+                shutil.move(file_path, target_source_path)
+                file_path = target_source_path
+                is_in_source = True
+
             # -------------------------------------------------------------
             # FASE 1/3: Estrazione Sorgente
             # -------------------------------------------------------------
@@ -1180,7 +1622,6 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
             meta['title'] = clean_title
             meta['target_path'] = f"{target_dir}/{clean_title}.md"
             stage_note(vault_root, clean_title, body, meta, target_dir=target_dir, source_content=content, status='in-progress')
-            if os.path.exists(file_path): os.remove(file_path)
 
             enriched_body, summary = enrich_draft_with_ai(vault_root, clean_title, content, depth="approfondimento", source_type="concept", source_url="original")
 
@@ -1189,16 +1630,22 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
                 if m_ai_h1:
                     cand_ai = brain_health.clean_title_str(m_ai_h1.group(1).strip())
                     if cand_ai and not cand_ai.lower().startswith("raw note") and cand_ai.lower() not in ("untitled", "draft", "bozza", "nuova nota", "appunti grezzi", "idee"):
-                        old_in_prog = os.path.join(vault_root, "03 - Inbox", "Draft", f"{clean_title}.md")
-                        old_source = os.path.join(vault_root, "03 - Inbox", "Source", f"{clean_title}.md")
+                        old_title = clean_title
                         clean_title = cand_ai
-                        target_dir = classify_target_directory(clean_title, meta.get('tags', []), enriched_body)
-                        if os.path.exists(old_in_prog) and clean_title != cand_ai:
+                        old_in_prog = os.path.join(vault_root, "03 - Inbox", "Draft", f"{old_title}.md")
+                        old_source = os.path.join(vault_root, "03 - Inbox", "Source", f"{old_title}.md")
+                        new_source = os.path.join(vault_root, "03 - Inbox", "Source", f"{clean_title}.md")
+                        if os.path.exists(old_in_prog):
                             try: os.remove(old_in_prog)
                             except Exception: pass
-                        if os.path.exists(old_source) and clean_title != cand_ai:
-                            try: os.remove(old_source)
+                        if os.path.exists(old_source) and old_title != clean_title:
+                            if os.path.exists(new_source) and os.path.abspath(old_source) != os.path.abspath(new_source):
+                                try: os.remove(new_source)
+                                except Exception: pass
+                            try: shutil.move(old_source, new_source)
                             except Exception: pass
+                        file_path = new_source
+                        target_dir = classify_target_directory(clean_title, meta.get('tags', []), enriched_body)
 
             meta['title'] = clean_title
             meta['target_path'] = f"{target_dir}/{clean_title}.md"
@@ -1215,13 +1662,14 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
 
         except Exception as e:
             try:
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f: c = f.read()
-                _, fm_t, _, bdy = brain_health.split_markdown_note(c)
-                rfm = re.sub(r'ready:\s*(true|"true"|\'true\')', 'ready: false', fm_t, flags=re.IGNORECASE)
-                if 'ready:' not in rfm: rfm += "\nready: false"
-                with open(file_path, 'w', encoding='utf-8') as f: f.write(f"---\n{rfm.strip()}\n---\n\n{bdy.strip()}\n")
+                if os.path.exists(file_path):
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f: c = f.read()
+                    _, fm_t, _, bdy = brain_health.split_markdown_note(c)
+                    rfm = re.sub(r'ready:\s*(true|"true"|\'true\'|1)', 'ready: false', fm_t, flags=re.IGNORECASE)
+                    if 'ready:' not in rfm: rfm += "\nready: false"
+                    with open(file_path, 'w', encoding='utf-8') as f: f.write(f"---\n{rfm.strip()}\n---\n\n{bdy.strip()}\n")
             except Exception: pass
-            err_target = src_url if (src_url and str(src_url).strip()) else file
+            err_target = src_url if (src_url and str(src_url).strip()) else (clean_title if clean_title else os.path.basename(file_path)[:-3])
             record_ingest_error(vault_root, err_target, str(e))
     return processed
 
@@ -1250,6 +1698,9 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                 except youtube_helper.TranscriptUnavailableError as e:
                     record_ingest_error(root, source, f"Trascrizione non disponibile: {e}")
                     raise
+                except youtube_helper.VideoMetadataError as e:
+                    record_ingest_error(root, source, f"Errore metadati video: {e}")
+                    raise
                 except Exception as e:
                     record_ingest_error(root, source, f"Errore estrazione YouTube: {e}")
                     raise
@@ -1260,11 +1711,20 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                 meta = {'title': clean_title, 'type': 'video', 'area': 'tech', 'source': source, 'video_url': source, 'channel': channel, 'tags': ['tech/ai', 'video']}
 
             elif in_type == "file":
-                with open(source, 'r', encoding='utf-8') as f: raw_text = f.read()
-                title = Path(source).stem
-                clean_title = brain_health.clean_title_str(title)
-                dest_dir = target_dir or classify_target_directory(clean_title, ['raw'], raw_text)
-                meta = {'title': clean_title, 'type': 'concept', 'area': 'tech', 'source': 'original', 'tags': ['raw']}
+                try:
+                    with open(source, 'r', encoding='utf-8', errors='ignore') as f:
+                        raw_text = f.read()
+                    title = Path(source).stem
+                    clean_title = brain_health.clean_title_str(title)
+                    dest_dir = target_dir or classify_target_directory(clean_title, ['raw'], raw_text)
+                    meta = {'title': clean_title, 'type': 'concept', 'area': 'tech', 'source': 'original', 'tags': ['raw']}
+                except (FileNotFoundError, OSError):
+                    lines = [l.strip() for l in source.strip().splitlines() if l.strip()]
+                    title = lines[0].lstrip('#').strip() if lines else "Nuova Nota"
+                    clean_title = brain_health.clean_title_str(title)
+                    raw_text = source
+                    dest_dir = target_dir or classify_target_directory(clean_title, ['tech'], source)
+                    meta = {'title': clean_title, 'type': 'concept', 'area': 'tech', 'source': 'original'}
 
             else:
                 lines = [l.strip() for l in source.strip().splitlines() if l.strip()]
@@ -1294,15 +1754,20 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                 if m_ai_h1:
                     cand_ai = brain_health.clean_title_str(m_ai_h1.group(1).strip())
                     if cand_ai and not cand_ai.lower().startswith("raw note") and cand_ai.lower() not in ("untitled", "draft", "bozza", "nuova nota", "appunti grezzi", "idee"):
-                        old_in_prog = os.path.join(root, "03 - Inbox", "Draft", f"{clean_title}.md")
-                        old_source = os.path.join(root, "03 - Inbox", "Source", f"{clean_title}.md")
+                        old_title = clean_title
                         clean_title = cand_ai
+                        old_in_prog = os.path.join(root, "03 - Inbox", "Draft", f"{old_title}.md")
+                        old_source = os.path.join(root, "03 - Inbox", "Source", f"{old_title}.md")
+                        new_source = os.path.join(root, "03 - Inbox", "Source", f"{clean_title}.md")
                         meta['title'] = clean_title
-                        if os.path.exists(old_in_prog) and clean_title != cand_ai:
+                        if os.path.exists(old_in_prog):
                             try: os.remove(old_in_prog)
                             except Exception: pass
-                        if os.path.exists(old_source) and clean_title != cand_ai:
-                            try: os.remove(old_source)
+                        if os.path.exists(old_source) and old_title != clean_title:
+                            if os.path.exists(new_source) and os.path.abspath(old_source) != os.path.abspath(new_source):
+                                try: os.remove(new_source)
+                                except Exception: pass
+                            try: shutil.move(old_source, new_source)
                             except Exception: pass
 
             dest_dir = target_dir or classify_target_directory(clean_title, meta.get('tags', []), enriched_body)

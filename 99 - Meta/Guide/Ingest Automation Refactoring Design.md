@@ -57,7 +57,7 @@ Per ogni nota rilevata con `ready: true`:
    * Rimuove la riga dalla dashboard e pulisce eventuali residui temporanei.
 4. Una volta completata la trascrizione e l'estrazione frame, l'orchestratore invoca `agy` limitatamente a questa nota:
    ```bash
-   agy --model gemini-3.7-flash-low --dangerously-skip-permissions --print "Elabora solo la nota 'Nome Nota' usando i template specifici..."
+   agy --model gemini-3.8-flash-low --dangerously-skip-permissions --print "Elabora solo la nota 'Nome Nota' usando i template specifici..."
    ```
 5. A completamento avvenuto, l'orchestratore:
    * Rinominare il file originario in `raw-Nome Nota.md`.

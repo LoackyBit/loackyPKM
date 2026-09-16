@@ -1171,7 +1171,11 @@ def stage_note(vault_root: str, title: str, body: str, metadata: Optional[Dict[s
     full_body += body_clean.strip()
 
     fm_str = brain_health.format_canonical_frontmatter(meta)
-    breadcrumb = f"[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[{clean_title}]]"
+    if meta.get('course'):
+        clean_course = brain_health.clean_title_str(str(meta['course']))
+        breadcrumb = f"[[Home MOC|Home]] / [[University|University MOC]] / [[{clean_course} MOC]] / [[{clean_title}]]"
+    else:
+        breadcrumb = f"[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[{clean_title}]]"
     note_content = brain_health.assemble_markdown_note(fm_str, breadcrumb, sanitize_style_highlights(full_body))
 
     draft_path = os.path.join(draft_dir, f"{clean_title}.md")
@@ -1350,6 +1354,17 @@ def _handle_promote_item(vault_root: str, draft_path: str, source_path: str, nam
         f.write(final_note)
     if os.path.exists(draft_path):
         os.remove(draft_path)
+
+    # University PACRAR matrix sync hook (D-15, PACRAR-03)
+    if "02 - Atlas/Education & Learning/University/" in target_rel:
+        parts = Path(target_rel).parts
+        if len(parts) >= 5:
+            course_name = parts[3]
+            try:
+                import course_hub
+                course_hub.register_lesson(course_name, real_name, vault_root=vault_root)
+            except Exception as e:
+                logger.warning("Errore durante la registrazione PACRAR per '%s': %s", real_name, e)
 
     if os.path.exists(source_path):
         src_txt = ""
@@ -1674,10 +1689,19 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
     return processed
 
 def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Optional[str] = None,
-                  depth: str = "approfondimento", extract_frames: bool = False, force: bool = False, use_ai: bool = True) -> str:
+                  depth: str = "approfondimento", extract_frames: bool = False, force: bool = False,
+                  use_ai: bool = True, course: Optional[str] = None) -> str:
     """Unified entry point executing the lean 3-macro-phase lifecycle into 03 - Inbox/Draft/."""
     root = brain_health.get_vault_root(vault_root)
     result_path = None
+    clean_course = None
+    if course:
+        import course_hub
+        clean_course = course_hub.sanitize_course_name(course)
+        course_hub.ensure_course_hub(clean_course, vault_root=root)
+        dest_course_dir = f"02 - Atlas/Education & Learning/University/{clean_course}"
+        target_dir = dest_course_dir
+
     with NoteLock(source):
         in_type = detect_input_type(source)
         prov = Path(source).stem if in_type == "file" else (source if in_type in ("youtube", "web") else source.strip().splitlines()[0].lstrip('#').strip()[:40])
@@ -1734,6 +1758,15 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                 dest_dir = target_dir or classify_target_directory(clean_title, ['tech'], source)
                 meta = {'title': clean_title, 'type': 'article' if in_type == 'web' else 'concept', 'area': 'tech', 'source': source if in_type == 'web' else 'original'}
 
+            if clean_course:
+                dest_dir = target_dir
+                meta['area'] = 'education'
+                if 'tags' not in meta:
+                    meta['tags'] = []
+                if 'education/university' not in meta['tags']:
+                    meta['tags'].append('education/university')
+                meta['course'] = clean_course
+
             # -------------------------------------------------------------
             # FASE 2/3: Rielaborazione Concettuale AI
             # -------------------------------------------------------------
@@ -1741,6 +1774,9 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
             dest_dir = target_dir or classify_target_directory(clean_title, meta.get('tags', []), raw_text)
             meta['title'] = clean_title
             meta['target_path'] = f"{dest_dir}/{clean_title}.md"
+            if clean_course:
+                meta['course'] = clean_course
+                meta['area'] = 'education'
             stage_note(root, clean_title, raw_text, meta, target_dir=dest_dir, source_content=raw_text, status='in-progress')
 
             if use_ai:
@@ -1773,6 +1809,9 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
             dest_dir = target_dir or classify_target_directory(clean_title, meta.get('tags', []), enriched_body)
             meta['title'] = clean_title
             meta['target_path'] = f"{dest_dir}/{clean_title}.md"
+            if clean_course:
+                meta['course'] = clean_course
+                meta['area'] = 'education'
             stage_note(root, clean_title, enriched_body, meta, target_dir=dest_dir, source_content=raw_text, status='in-progress')
 
             # -------------------------------------------------------------
@@ -1781,6 +1820,8 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
             linked_body, links = autolink_content(root, enriched_body, clean_title)
             meta['summary'] = summary
             if links:
+                if clean_course:
+                    links = [l for l in links if l not in (f"[[{clean_course} MOC]]", f"[[{clean_course}]]")]
                 meta['related'] = links
             result_path = stage_note(root, clean_title, linked_body, meta, target_dir=dest_dir, status='draft')
 
@@ -1806,6 +1847,7 @@ def main():
     parser.add_argument('--in-progress', dest='set_in_progress', default=None, help="Set active item in progress on Review Dashboard")
     parser.add_argument('--phase', default=None, help="Phase description for in-progress item (e.g. 'Fase 1/3: ...')")
     parser.add_argument('--clear-in-progress', action='store_true', help="Clear in progress section on Review Dashboard")
+    parser.add_argument('--course', default=None, help="Target university course name (auto-initializes Course Hub & PACRAR matrix)")
     parser.add_argument('--target-dir', default=None, help="Custom target directory for promotion")
     parser.add_argument('--vault-root', default=None, help="Vault root directory")
     args = parser.parse_args()
@@ -1837,7 +1879,7 @@ def main():
         print(f"Staged {len(items)} raw inbox notes: {items}")
     elif args.input:
         depth = "approfondimento" if args.depth in ("deep", "approfondimento") else "sintesi"
-        path = ingest_source(args.input, vault_root=root, target_dir=args.target_dir, depth=depth, extract_frames=args.extract_frames, force=args.force, use_ai=not args.no_ai)
+        path = ingest_source(args.input, vault_root=root, target_dir=args.target_dir, depth=depth, extract_frames=args.extract_frames, force=args.force, use_ai=not args.no_ai, course=args.course)
         print(f"Draft staged at: {path}")
     else:
         update_review_dashboard(root)

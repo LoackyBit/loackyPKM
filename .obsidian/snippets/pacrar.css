@@ -1,0 +1,45 @@
+/* .obsidian/snippets/pacrar.css */
+
+.pacrar-progress-widget {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1.5rem 0 1rem 0;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: var(--background-secondary-alt, rgba(0, 0, 0, 0.15));
+}
+
+.pacrar-ring-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+td.pacrar-cell {
+    text-align: center !important;
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+    font-family: var(--font-monospace, monospace);
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+td.pacrar-cell[data-pacrar-state="empty"] {
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+}
+
+td.pacrar-cell[data-pacrar-state="partial"] {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+td.pacrar-cell[data-pacrar-state="completed"] {
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+}
+
+td.pacrar-cell:hover {
+    filter: brightness(1.2);
+}

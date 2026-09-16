@@ -5,6 +5,8 @@ gha-creds-*.json
 !.obsidian/plugins/smart-connections/*
 !.obsidian/plugins/in-progress-checkbox/*
 !.obsidian/plugins/templater-obsidian/*
+!.obsidian/plugins/pacrar-tracker/*
+!.obsidian/snippets/pacrar.css
 .trash/
 .claude/
 .agents/

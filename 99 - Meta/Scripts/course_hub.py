@@ -82,6 +82,144 @@ def atomic_write_file(filepath: str, content: str) -> None:
     os.replace(temp_name, filepath)
 
 
+def split_table_row_cells(line: str) -> List[str]:
+    r"""Splits a markdown table row by '|' ignoring pipes inside [[...]] wikilinks and escaped pipes \|."""
+    cells = []
+    current = []
+    inside_link = False
+    for i, char in enumerate(line):
+        if char == "[" and i + 1 < len(line) and line[i + 1] == "[":
+            inside_link = True
+        elif char == "]" and i > 0 and line[i - 1] == "]":
+            inside_link = False
+
+        if char == "|" and not inside_link and (i == 0 or line[i - 1] != "\\"):
+            cells.append("".join(current).strip())
+            current = []
+        else:
+            current.append(char)
+    cells.append("".join(current).strip())
+    if cells and cells[0] == "":
+        cells = cells[1:]
+    if cells and cells[-1] == "":
+        cells = cells[:-1]
+    return cells
+
+
+def _escape_pipes_outside_wikilinks(text: str) -> str:
+    """Escapes '|' characters outside [[...]] to avoid corrupting Markdown table layout (T-13-03)."""
+    result = []
+    inside_link = False
+    for i, char in enumerate(text):
+        if char == "[" and i + 1 < len(text) and text[i + 1] == "[":
+            inside_link = True
+        elif char == "]" and i > 0 and text[i - 1] == "]":
+            inside_link = False
+
+        if char == "|" and not inside_link and (i == 0 or text[i - 1] != "\\"):
+            result.append("\\|")
+        else:
+            result.append(char)
+    return "".join(result)
+
+
+def parse_pacrar_table(body_lines: List[str]) -> Tuple[int, int, List[Dict[str, Any]]]:
+    """Parses PACRAR table from markdown body lines per D-05, D-07, D-09.
+
+    Returns (start_idx, end_idx, rows) where rows is a list of dicts with:
+    {'key': lookup_key, 'argomento': raw_arg, 'states': [p, a, c, r, a, r]}.
+    """
+    start_idx = -1
+    for i, line in enumerate(body_lines):
+        if RE_TABLE_HEADER.match(line.strip()):
+            start_idx = i
+            break
+
+    if start_idx == -1:
+        return -1, -1, []
+
+    idx = start_idx + 1
+    # Check if next line is divider | :--- | :---: | ...
+    if idx < len(body_lines) and re.match(r"^\s*\|\s*:?-+:?\s*\|", body_lines[idx]):
+        idx += 1
+
+    rows = []
+    while idx < len(body_lines):
+        line = body_lines[idx].strip()
+        if not line.startswith("|") or line == "":
+            break
+
+        cells = split_table_row_cells(line)
+        if len(cells) >= 7:
+            arg = cells[0]
+            checkboxes = cells[1:7]
+            states = []
+            for cb in checkboxes:
+                cb_clean = cb.strip()
+                if cb_clean in VALID_CHECKBOX_STATES:
+                    states.append(cb_clean)
+                else:
+                    states.append("[ ]")
+            while len(states) < 6:
+                states.append("[ ]")
+
+            # Extract lookup key: if wikilink target, use stripped lowercase target; else lowercase arg
+            m = RE_WIKILINK.search(arg)
+            if m:
+                key = m.group(1).strip().lower()
+            else:
+                key = arg.strip().lower()
+
+            rows.append({
+                "key": key,
+                "argomento": arg,
+                "states": states
+            })
+        idx += 1
+
+    end_idx = idx
+    return start_idx, end_idx, rows
+
+
+def merge_lessons_into_rows(existing_rows: List[Dict[str, Any]], lesson_titles: List[str]) -> List[Dict[str, Any]]:
+    """Performs non-destructive Append & Preserve merge of course lessons (D-07, D-08, D-09, D-10).
+
+    Preserves 100% of existing checkbox ticks and manual unwritten lesson rows.
+    """
+    existing_by_key: Dict[str, Dict[str, Any]] = {}
+    for r in existing_rows:
+        existing_by_key[r["key"]] = r
+
+    seen_keys = set()
+    merged: List[Dict[str, Any]] = []
+
+    for title in lesson_titles:
+        clean = brain_health.clean_title_str(title)
+        key = clean.lower()
+        seen_keys.add(key)
+        target_link = f"[[{clean}]]"
+
+        if key in existing_by_key:
+            # Preserve existing row (including 100% of custom checkbox states and manual aliases)
+            merged.append(existing_by_key[key])
+        else:
+            # New lesson row
+            merged.append({
+                "key": key,
+                "argomento": target_link,
+                "states": ["[ ]"] * 6
+            })
+
+    # Preserve manual unwritten rows (D-08)
+    for key, r in existing_by_key.items():
+        if key not in seen_keys:
+            merged.append(r)
+
+    # Sort using Natural Numeric Sort
+    merged.sort(key=lambda r: natural_sort_key(r.get("argomento", "")))
+    return merged
+
+
 def format_pacrar_table(rows: Optional[List[Dict[str, Any]]] = None) -> List[str]:
     """Formats PACRAR table rows into clean GFM Markdown lines per D-05 and T-13-03."""
     lines = [
@@ -96,12 +234,11 @@ def format_pacrar_table(rows: Optional[List[Dict[str, Any]]] = None) -> List[str
 
     for r in sorted_rows:
         arg = r.get("argomento", "").strip()
-        # Escape pipe characters not part of wikilink syntax (T-13-03)
-        # Avoid escaping pipe inside [[Target|Alias]]
+        escaped_arg = _escape_pipes_outside_wikilinks(arg)
         states = r.get("states", ["[ ]"] * 6)
         if len(states) < 6:
             states = states + ["[ ]"] * (6 - len(states))
-        line = f"| {arg} | {states[0]} | {states[1]} | {states[2]} | {states[3]} | {states[4]} | {states[5]} |"
+        line = f"| {escaped_arg} | {states[0]} | {states[1]} | {states[2]} | {states[3]} | {states[4]} | {states[5]} |"
         lines.append(line)
 
     return lines
@@ -291,6 +428,112 @@ def register_in_university_moc(course_name: str, vault_root: Optional[str] = Non
     return True
 
 
+def sync_course_hub(course_name: str, vault_root: Optional[str] = None) -> bool:
+    """Synchronizes course lessons from disk into the PACRAR matrix of the Course Hub MOC.
+
+    Non-destructive (Append & Preserve): preserves all existing checkbox states and manual rows.
+    """
+    if vault_root is None:
+        vault_root = brain_health.get_vault_root()
+
+    clean_name = sanitize_course_name(course_name)
+    moc_path = os.path.join(vault_root, "01 - Map of Content", f"{clean_name} MOC.md")
+    course_dir = os.path.join(vault_root, "02 - Atlas", "Education & Learning", "University", clean_name)
+
+    os.makedirs(course_dir, exist_ok=True)
+
+    if not os.path.exists(moc_path):
+        init_course(clean_name, vault_root=vault_root, force=False)
+
+    # Gather lesson files from course directory
+    lesson_titles = []
+    if os.path.isdir(course_dir):
+        for fname in os.listdir(course_dir):
+            if fname.endswith(".md") and not fname.startswith("."):
+                lesson_titles.append(fname[:-3])
+
+    with open(moc_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    has_fm, fm_text, breadcrumb, body = brain_health.split_markdown_note(content)
+    yaml_engine = brain_health.build_yaml_engine()
+    meta = brain_health.safe_load_frontmatter(fm_text, yaml_engine) if has_fm else {}
+
+    body_lines = body.split("\n")
+    start_idx, end_idx, existing_rows = parse_pacrar_table(body_lines)
+
+    merged_rows = merge_lessons_into_rows(existing_rows, lesson_titles)
+    table_lines = format_pacrar_table(merged_rows)
+
+    if start_idx != -1:
+        new_body_lines = body_lines[:start_idx] + table_lines + body_lines[end_idx:]
+    else:
+        # If no table header found, inject under ## Matrice PACRAR or at end
+        pacrar_header_idx = -1
+        for i, line in enumerate(body_lines):
+            if line.strip().lower() == "## matrice pacrar":
+                pacrar_header_idx = i
+                break
+        if pacrar_header_idx != -1:
+            widget_line = f'<div class="pacrar-progress-widget" data-course="{clean_name}"></div>'
+            new_body_lines = (
+                body_lines[: pacrar_header_idx + 1]
+                + ["", widget_line, ""]
+                + table_lines
+                + body_lines[pacrar_header_idx + 1 :]
+            )
+        else:
+            new_body_lines = body_lines + [
+                "",
+                "## Matrice PACRAR",
+                "",
+                f'<div class="pacrar-progress-widget" data-course="{clean_name}"></div>',
+                "",
+            ] + table_lines
+
+    new_body = "\n".join(new_body_lines)
+    meta["status"] = meta.get("status", "permanent")
+    meta["type"] = "moc"
+    meta["area"] = "education"
+    meta["updated"] = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
+    if "related" not in meta or not meta["related"]:
+        meta["related"] = ['[[University]]']
+
+    canonical_fm = brain_health.format_canonical_frontmatter(meta, is_blog=False)
+    final_bc = breadcrumb or f"[[Home MOC|Home]] / [[University|University MOC]] / [[{clean_name} MOC]]"
+    new_content = brain_health.assemble_markdown_note(canonical_fm, final_bc, new_body)
+
+    atomic_write_file(moc_path, new_content)
+    logger.info("Matrice PACRAR sincronizzata per '%s' con %d lezioni.", clean_name, len(merged_rows))
+    return True
+
+
+def register_lesson(course_name: str, lesson_title: str, vault_root: Optional[str] = None) -> bool:
+    """Registers a lesson title into the Course Hub PACRAR matrix (idempotent)."""
+    if vault_root is None:
+        vault_root = brain_health.get_vault_root()
+
+    clean_name = sanitize_course_name(course_name)
+    ensure_course_hub(clean_name, vault_root=vault_root)
+    return sync_course_hub(clean_name, vault_root=vault_root)
+
+
+def sync_all_courses(vault_root: Optional[str] = None) -> int:
+    """Synchronizes PACRAR tables across all university courses found in the vault."""
+    if vault_root is None:
+        vault_root = brain_health.get_vault_root()
+
+    uni_dir = os.path.join(vault_root, "02 - Atlas", "Education & Learning", "University")
+    synced = 0
+    if os.path.isdir(uni_dir):
+        for course_folder in os.listdir(uni_dir):
+            cpath = os.path.join(uni_dir, course_folder)
+            if os.path.isdir(cpath) and not course_folder.startswith("."):
+                sync_course_hub(course_folder, vault_root=vault_root)
+                synced += 1
+    return synced
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Course Hub & Static PACRAR Matrix Management Engine for Obsidian PKM."
@@ -312,6 +555,13 @@ def main():
     if args.init_course:
         success = init_course(args.init_course, vault_root=vault_root, force=args.force)
         sys.exit(0 if success else 1)
+    elif args.sync_course:
+        success = sync_course_hub(args.sync_course, vault_root=vault_root)
+        sys.exit(0 if success else 1)
+    elif args.sync_all:
+        count = sync_all_courses(vault_root=vault_root)
+        print(f"Sincronizzati {count} Hub di corso universitari.")
+        sys.exit(0)
     else:
         parser.print_help()
 

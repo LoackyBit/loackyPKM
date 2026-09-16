@@ -1,0 +1,9 @@
+{
+  "id": "pacrar-tracker",
+  "name": "PACRAR Study Matrix Tracker",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "Interactive tri-state checkbox tracking and reactive SVG progress ring for University Course Hubs.",
+  "author": "LoackyPKM",
+  "isDesktopOnly": false
+}

@@ -223,7 +223,19 @@ def get_breadcrumbs(filepath: str, clean_title: str) -> str:
     if clean_title == "Home MOC" or filename_base == "Home MOC":
         return ""
 
+    # Normalize parts to vault-relative if absolute path was provided
+    for root_dir in ("01 - Map of Content", "02 - Atlas", "03 - Inbox", "04 - Calendar", "05 - Blog", "99 - Meta"):
+        if root_dir in parts:
+            idx = parts.index(root_dir)
+            parts = parts[idx:]
+            break
+
     path_str = "/".join(parts[:-1])
+
+    # Academic Course Hierarchy per Phase 13 (D-13, D-14)
+    if path_str.startswith("02 - Atlas/Education & Learning/University") and len(parts) >= 5:
+        course_dir = parts[3]
+        return f"[[Home MOC|Home]] / [[University|University MOC]] / [[{course_dir} MOC]] / [[{clean_title}]]"
 
     if path_str.startswith("02 - Atlas/Finance"):
         parent_area = "[[Finanza MOC|Finance]]"
@@ -242,6 +254,10 @@ def get_breadcrumbs(filepath: str, clean_title: str) -> str:
         area = parts[1] if len(parts) > 2 else "Meta"
         parent_area = f"[[{area}]]"
     elif path_str.startswith("01 - Map of Content"):
+        if filename_base.endswith(" MOC") and filename_base not in (
+            "Home MOC", "University MOC", "Corsi MOC", "Finanza MOC", "Prompts MOC", "School MOC", "Blog MOC"
+        ):
+            return f"[[Home MOC|Home]] / [[University|University MOC]] / [[{filename_base}]]"
         parent_area = "[[Home MOC|Home]]"
         self_link = f"[[{filename_base}|{clean_title}]]" if filename_base != clean_title else f"[[{filename_base}]]"
         return f"{parent_area} / {self_link}"

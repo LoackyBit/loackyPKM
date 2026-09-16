@@ -42,6 +42,7 @@ class TestBrainIngestNLM(unittest.TestCase):
         res_path = brain_ingest.ingest_source(
             source=test_file,
             vault_root=self.test_dir,
+            target_dir="02 - Atlas/Tech & AI/AI",
             depth="approfondimento",
             use_ai=True,
             nlm=False
@@ -63,6 +64,7 @@ class TestBrainIngestNLM(unittest.TestCase):
                 brain_ingest.ingest_source(
                     source=test_file,
                     vault_root=self.test_dir,
+                    target_dir="02 - Atlas/Tech & AI/AI",
                     depth="approfondimento",
                     use_ai=True,
                     nlm=True
@@ -85,6 +87,7 @@ class TestBrainIngestNLM(unittest.TestCase):
                 brain_ingest.ingest_source(
                     source=test_file,
                     vault_root=self.test_dir,
+                    target_dir="02 - Atlas/Tech & AI/AI",
                     depth="approfondimento",
                     use_ai=True,
                     nlm=True
@@ -120,6 +123,7 @@ class TestBrainIngestNLM(unittest.TestCase):
         res_path = brain_ingest.ingest_source(
             source=test_file,
             vault_root=self.test_dir,
+            target_dir="02 - Atlas/Tech & AI/AI",
             depth="approfondimento",
             use_ai=True,
             nlm=True
@@ -162,6 +166,7 @@ class TestBrainIngestNLM(unittest.TestCase):
         res_path = brain_ingest.ingest_source(
             source=test_file,
             vault_root=self.test_dir,
+            target_dir="02 - Atlas/Tech & AI/AI",
             depth="approfondimento",
             use_ai=True,
             nlm=True

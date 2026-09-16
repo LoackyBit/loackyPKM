@@ -68,6 +68,12 @@ python3 "99 - Meta/Scripts/brain_ingest.py" "https://www.youtube.com/watch?v=...
 # Ingestione Articolo Web con classificazione euristica automatica
 python3 "99 - Meta/Scripts/brain_ingest.py" "https://example.com/article"
 
+# Ingestione con Sinergia Metacognitiva NotebookLM (Alessandro de Concini)
+python3 "99 - Meta/Scripts/brain_ingest.py" "https://www.youtube.com/watch?v=..." --course "Algoritmi e Strutture Dati" --nlm
+
+# Ingestione File Locale o Testo Diretto con NLM
+python3 "99 - Meta/Scripts/brain_ingest.py" "03 - Inbox/appunti.md" --course "Sistemi Operativi" --nlm
+
 # Ingestione File Locale o Testo Diretto
 python3 "99 - Meta/Scripts/brain_ingest.py" "03 - Inbox/appunti.md" --target-dir "02 - Atlas/Education & Learning"
 
@@ -80,6 +86,28 @@ python3 "99 - Meta/Scripts/brain_ingest.py" --scan-inbox
 # Processa tutte le righe [x] (promozione) e [-] (scarto) in Review Dashboard.md
 python3 "99 - Meta/Scripts/brain_ingest.py" --process-approvals
 ```
+
+---
+
+## 🧠 Sinergia Metacognitiva & NotebookLM (`--nlm`)
+
+Quando invocato con il flag esplicito `--nlm` (D-03), il sistema attiva una consultazione preliminare del notebook metodologico di **Alessandro de Concini** (ID: `b7534dad-1515-44c1-bcc5-c77992b5e416`) tramite la CLI `nlm` e opera secondo una **Sinergia Metacognitiva a Doppio Canale**:
+
+1. **Canale 1 (Invisibile al Vault, Guida Attiva per l'LLM):**
+   - Le direttive estratte vengono iniettate direttamente nel prompt di sistema di `agy` durante la *Fase 2/3 (Rielaborazione Concettuale AI)*.
+   - Vincoli attivi:
+     - **Schematizzazione causale:** Generazione obbligatoria di diagrammi logici Mermaid a cascata con nodi quotati `id["..."]` per modelli mentali o dipendenze concettuali (SYN-01).
+     - **Densità e Principi Primi:** Distillazione rigorosa dei concetti cardine, eliminando riempitivi, frasi fatte e aneddoti superflui (SYN-01).
+     - **Active Recall & Atomicità:** Formulazione di definizioni ed espressioni matematiche/tecniche con esplicitazione di ipotesi e condizioni di validità, favorendo l'atomicità semantica per la successiva generazione di flashcard Anki (SYN-02).
+
+2. **Canale 2 (Permanente nel Vault):**
+   - In calce alla nota permanente viene appesa la sezione pulita `## Direttive Metacognitive` (zero emoji nel titolo H2, conforme alle regole del vault) contenente le linee guida di de Concini elaborate da NotebookLM (D-06).
+   - Meccanismo preventivo anti-duplicazione regex per evitare duplicazioni di titoli se l'LLM ha già incorporato una sezione analoga.
+
+3. **Politica Fail-Fast Assoluta (D-04, NLM-02):**
+   - Se `--nlm` è presente e l'interrogazione remota fallisce per token scaduto (`Authentication expired`), timeout (120s) o assenza di connessione, il processo si arresta immediatamente con exit code 1 e stampa:
+     `ERRORE: Impossibile consultare NotebookLM. Esegui 'nlm login' o verifica la connessione.`
+   - Nessun fallback silenzioso: l'utente viene avvisato esplicitamente di riautenticarsi tramite `nlm login` da terminale.
 
 ---
 

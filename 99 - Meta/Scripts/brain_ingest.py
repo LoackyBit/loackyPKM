@@ -542,7 +542,8 @@ def format_structured_note(title: str, raw_content: str, depth: str = "approfond
 def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth: str = "approfondimento",
                          source_type: str = "text", source_url: str = "original",
                          agy_path: Optional[str] = None, timeout: int = 45,
-                         ai_model: Optional[str] = None) -> tuple[str, str]:
+                         ai_model: Optional[str] = None,
+                         metacognitive_constraints: Optional[str] = None) -> tuple[str, str]:
     """Generates enriched conceptual note body and executive summary via AI (agy CLI) with heuristic fallback.
     Returns (enriched_body, summary)."""
     c_title = brain_health.clean_title_str(title)
@@ -562,6 +563,8 @@ def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth
         "Fornisci una trattazione compatta (1-2 schermate) focalizzata sulla tesi centrale, definizioni essenziali e takeaway operativi."
     )
 
+    meta_section = f"\n{metacognitive_constraints.strip()}\n" if metacognitive_constraints and metacognitive_constraints.strip() else ""
+
     prompt = f"""Sei il motore di elaborazione della conoscenza per un Second Brain PKM in Obsidian.
 Il tuo compito è rielaborare il contenuto sorgente in una nota concettuale permanente di altissima qualità letteraria e tecnica per: "{c_title}".
 
@@ -569,7 +572,7 @@ CONTENUTO SORGENTE:
 {source_content[:9000]}
 
 {depth_instruction}
-
+{meta_section}
 REGOLE CRITICHE DI CONTENUTO E STILE:
 1. FILTRO ANTI-SLOP E ANTI-SPONSOR:
    - Elimina categoricamente sponsor commerciali (es. corsi online, piattaforme cloud, VPN, promozioni), saluti, formule di rito, aneddoti irrilevanti e frasi riempitive.
@@ -1690,7 +1693,7 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
 
 def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Optional[str] = None,
                   depth: str = "approfondimento", extract_frames: bool = False, force: bool = False,
-                  use_ai: bool = True, course: Optional[str] = None) -> str:
+                  use_ai: bool = True, course: Optional[str] = None, nlm: bool = False) -> str:
     """Unified entry point executing the lean 3-macro-phase lifecycle into 03 - Inbox/Draft/."""
     root = brain_health.get_vault_root(vault_root)
     result_path = None
@@ -1779,11 +1782,33 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                 meta['area'] = 'education'
             stage_note(root, clean_title, raw_text, meta, target_dir=dest_dir, source_content=raw_text, status='in-progress')
 
+            metacognitive_prompt = None
+            metacognitive_markdown = None
+            if nlm and use_ai:
+                import nlm_helper
+                try:
+                    directives = nlm_helper.query_notebook(clean_title, raw_text, course=clean_course, vault_root=root)
+                    metacognitive_prompt = nlm_helper.format_metacognitive_constraints_prompt(directives)
+                    metacognitive_markdown = nlm_helper.format_metacognitive_markdown_section(directives)
+                except nlm_helper.NLMError as e:
+                    err_msg = "ERRORE: Impossibile consultare NotebookLM. Esegui 'nlm login' o verifica la connessione."
+                    sys.stderr.write(f"{err_msg}\n")
+                    record_ingest_error(root, prov, err_msg)
+                    update_review_dashboard(root, in_progress="CLEAR_ALL")
+                    sys.exit(1)
+
             if use_ai:
-                enriched_body, summary = enrich_draft_with_ai(root, clean_title, raw_text, depth=depth, source_type=in_type, source_url=source)
+                enriched_body, summary = enrich_draft_with_ai(
+                    root, clean_title, raw_text, depth=depth, source_type=in_type, source_url=source,
+                    metacognitive_constraints=metacognitive_prompt
+                )
             else:
                 enriched_body = format_structured_note(clean_title, raw_text, depth=depth, source_type=in_type, source_url=source)
                 summary = f"Trattazione concettuale ed evidenze chiave per {clean_title}."
+
+            if metacognitive_markdown:
+                if not re.search(r'^##\s+(?:Direttive Metacognitive)', enriched_body, re.MULTILINE | re.IGNORECASE):
+                    enriched_body = f"{enriched_body.rstrip()}\n{metacognitive_markdown}"
 
             if clean_title.lower().startswith("raw note") or clean_title.lower() in ("untitled", "draft", "bozza", "nuova nota"):
                 m_ai_h1 = re.search(r'^\s*#\s+([^\n]+)', enriched_body, re.MULTILINE)
@@ -1848,6 +1873,7 @@ def main():
     parser.add_argument('--phase', default=None, help="Phase description for in-progress item (e.g. 'Fase 1/3: ...')")
     parser.add_argument('--clear-in-progress', action='store_true', help="Clear in progress section on Review Dashboard")
     parser.add_argument('--course', default=None, help="Target university course name (auto-initializes Course Hub & PACRAR matrix)")
+    parser.add_argument('--nlm', action='store_true', help="Consult NotebookLM (Alessandro de Concini) for metacognitive directives during AI conceptual enrichment (D-03)")
     parser.add_argument('--target-dir', default=None, help="Custom target directory for promotion")
     parser.add_argument('--vault-root', default=None, help="Vault root directory")
     args = parser.parse_args()
@@ -1879,7 +1905,7 @@ def main():
         print(f"Staged {len(items)} raw inbox notes: {items}")
     elif args.input:
         depth = "approfondimento" if args.depth in ("deep", "approfondimento") else "sintesi"
-        path = ingest_source(args.input, vault_root=root, target_dir=args.target_dir, depth=depth, extract_frames=args.extract_frames, force=args.force, use_ai=not args.no_ai, course=args.course)
+        path = ingest_source(args.input, vault_root=root, target_dir=args.target_dir, depth=depth, extract_frames=args.extract_frames, force=args.force, use_ai=not args.no_ai, course=args.course, nlm=args.nlm)
         print(f"Draft staged at: {path}")
     else:
         update_review_dashboard(root)

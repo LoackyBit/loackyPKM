@@ -127,6 +127,90 @@ class TestNLMHelperSubprocess(unittest.TestCase):
                 use_cache=False
             )
 
+    def test_compute_cache_key_deterministic(self):
+        k1 = nlm_helper.compute_cache_key("nb1", "Titolo A", "Corso 1", "Snippet 1")
+        k2 = nlm_helper.compute_cache_key("nb1", "Titolo A", "Corso 1", "Snippet 1")
+        k3 = nlm_helper.compute_cache_key("nb1", "Titolo B", "Corso 1", "Snippet 1")
+        k4 = nlm_helper.compute_cache_key("nb1", "Titolo A", None, "Snippet 1")
+
+        self.assertEqual(k1, k2)
+        self.assertNotEqual(k1, k3)
+        self.assertNotEqual(k1, k4)
+        self.assertEqual(len(k1), 64)  # SHA-256 hex length (T-14-02)
+
+    def test_cache_lifecycle_save_and_retrieve(self):
+        cache_key = "testkey123"
+        payload = {"answer": "Risposta cached", "notebook_id": "test_id"}
+
+        nlm_helper.save_response_to_cache(self.test_dir, cache_key, payload)
+        retrieved = nlm_helper.get_cached_response(self.test_dir, cache_key)
+
+        self.assertIsNotNone(retrieved)
+        self.assertEqual(retrieved["answer"], "Risposta cached")
+
+    @patch("subprocess.run")
+    def test_query_notebook_uses_cache_when_available(self, mock_run):
+        title = "Nota In Cache"
+        content = "Estratto nota"
+        cache_key = nlm_helper.compute_cache_key(nlm_helper.DEFAULT_NOTEBOOK_ID, title, None, content)
+        cached_data = {
+            "title": title,
+            "answer": "Risposta prelevata direttamente da cache.",
+            "citations": {}
+        }
+        nlm_helper.save_response_to_cache(self.test_dir, cache_key, cached_data)
+
+        result = nlm_helper.query_notebook(
+            title=title,
+            content=content,
+            vault_root=self.test_dir,
+            use_cache=True
+        )
+
+        self.assertEqual(result["answer"], "Risposta prelevata direttamente da cache.")
+        mock_run.assert_not_called()
+
+    def test_clear_cache(self):
+        cache_dir = nlm_helper.get_cache_dir(self.test_dir)
+        with open(os.path.join(cache_dir, "cache1.json"), "w", encoding="utf-8") as f:
+            f.write("{}")
+        with open(os.path.join(cache_dir, "cache2.json"), "w", encoding="utf-8") as f:
+            f.write("{}")
+        with open(os.path.join(cache_dir, "ignored.txt"), "w", encoding="utf-8") as f:
+            f.write("text")
+
+        deleted = nlm_helper.clear_cache(self.test_dir)
+        self.assertEqual(deleted, 2)
+        self.assertFalse(os.path.exists(os.path.join(cache_dir, "cache1.json")))
+        self.assertTrue(os.path.exists(os.path.join(cache_dir, "ignored.txt")))
+
+    def test_format_metacognitive_sections_zero_emoji(self):
+        directives = {
+            "answer": "Identifica le entità cardine e crea schema causale Mermaid."
+        }
+        prompt_text = nlm_helper.format_metacognitive_constraints_prompt(directives)
+        self.assertIn("DIRETTIVE METACOGNITIVE SPECIALISTICHE", prompt_text)
+        self.assertIn("VINCOLI ATTIVI DI STRUTTURAZIONE", prompt_text)
+        self.assertIn("Mermaid", prompt_text)
+
+        markdown_section = nlm_helper.format_metacognitive_markdown_section(directives)
+        self.assertIn("## Direttive Metacognitive", markdown_section)
+        # Check zero emoji in H1-H3 headings (GEMINI.md, D-06)
+        for line in markdown_section.splitlines():
+            if line.startswith("#"):
+                for char in line:
+                    self.assertLess(ord(char), 0x1F000, f"Emoji detected in heading line: {line}")
+
+    @patch("nlm_helper.clear_cache")
+    def test_cli_standalone_arguments(self, mock_clear):
+        mock_clear.return_value = 5
+        with patch.object(sys, "argv", ["nlm_helper.py", "--clear-cache"]):
+            with self.assertRaises(SystemExit) as cm:
+                nlm_helper.main()
+            self.assertEqual(cm.exception.code, 0)
+            mock_clear.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -152,12 +152,12 @@ Plans:
 2. Il modulo estrae il testo completo delle slide con `pypdf` e garantisce il backup preventivo del PDF in `03 - Inbox/Source/`.
 3. Le immagini e i grafici delle slide vengono filtrati per dimensione (>150px, >10KB), deduplicati tramite hash SHA-256 e salvati in `99 - Meta/Clipboard/<NomeCorso>/`.
 
-**Plans**: 1/2 plans executed
+**Plans**: 2/2 plans executed
 
 Plans:
 
 - [x] 16-01-PLAN.md
-- [ ] 16-02-PLAN.md
+- [x] 16-02-PLAN.md
 
 **Wave 1**
 
@@ -213,7 +213,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17
 | 13. Course Hub & Matrice PACRAR | v1.1.0-alpha | 2/2 | Complete    | 2026-09-16 |
 | 14. NotebookLM & Sinergia Metacognitiva | v1.1.0-alpha | 2/2 | Complete    | 2026-09-17 |
 | 15. Tassonomia ADC & Formulari STEM | v1.1.0-alpha | 2/2 | Complete    | 2026-09-17 |
-| 16. Academic Helper & Slide PDF | v1.1.0-alpha | 1/2 | In Progress|  |
+| 16. Academic Helper & Slide PDF | v1.1.0-alpha | 2/2 | In Progress|  |
 | 17. Flashcard Anki & Preservazione ID | v1.1.0-alpha | 0/2 | Not started | - |
 
 ---

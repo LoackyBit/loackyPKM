@@ -5,16 +5,16 @@ milestone_name: Academic Engine & Metacognitive Deep Ingestion
 current_phase: 16
 current_phase_name: Academic Helper & Pipeline Ingestione Slide PDF
 status: executing
-stopped_at: Completed 16-01-PLAN.md
-last_updated: "2026-09-17T23:30:30.000Z"
+stopped_at: Completed 16-02-PLAN.md
+last_updated: "2026-09-17T23:33:30.000Z"
 last_activity: 2026-09-17
-last_activity_desc: Completed Plan 16-01
-state_head: aa510e0
+last_activity_desc: Completed Plan 16-02
+state_head: 97c3ea4
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -30,9 +30,9 @@ See: .planning/PROJECT.md (updated 2026-09-15 with v1.1.0-alpha, v1.x.0-alpha, v
 
 Phase: 16 (Academic Helper & Pipeline Ingestione Slide PDF) — EXECUTING
 Total Plans in Phase: 2
-Completed Plans in Phase: 1
-Status: Executing Phase 16
-Last activity: 2026-09-17 — Completed Plan 16-01
+Completed Plans in Phase: 2
+Status: Executed all plans in Phase 16
+Last activity: 2026-09-17 — Completed Plan 16-02
 
 ## Performance Metrics
 

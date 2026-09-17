@@ -13,6 +13,7 @@ import unicodedata
 import subprocess
 import argparse
 import tempfile
+import hashlib
 from io import StringIO
 from pathlib import Path
 from typing import Dict, List, Set, Tuple, Optional, Any
@@ -951,6 +952,44 @@ class VaultHealthAuditor:
         return sorted(orphans)
 
 
+def audit_pdf_attachments(vault_root: str) -> Dict[str, Any]:
+    """Audits 99 - Meta/Attachments/ for duplicate SHA-256 files and (v2) versioned slides per D-10."""
+    attachments_dir = os.path.join(vault_root, "99 - Meta", "Attachments")
+    if not os.path.isdir(attachments_dir):
+        return {"total_attachments": 0, "versioned_files": [], "duplicate_hashes": {}}
+
+    versioned_files = []
+    hash_map: Dict[str, List[str]] = {}
+
+    for root, _, files in os.walk(attachments_dir):
+        for f in files:
+            if f.lower().endswith(".pdf") and not f.startswith("."):
+                fpath = os.path.join(root, f)
+                rel_path = os.path.relpath(fpath, vault_root)
+
+                # Check versioned naming pattern: e.g. "Slide (v2).pdf"
+                if re.search(r'\s+\(v\d+\)\.pdf$', f, re.IGNORECASE):
+                    versioned_files.append(rel_path)
+
+                # Hash checking for duplicate content across attachments
+                try:
+                    with open(fpath, "rb") as pf:
+                        h = hashlib.sha256(pf.read()).hexdigest()
+                    if h in hash_map:
+                        hash_map[h].append(rel_path)
+                    else:
+                        hash_map[h] = [rel_path]
+                except Exception:
+                    pass
+
+    duplicates = {h: paths for h, paths in hash_map.items() if len(paths) > 1}
+    return {
+        "total_attachments": sum(len(v) for v in hash_map.values()),
+        "versioned_files": sorted(versioned_files),
+        "duplicate_hashes": duplicates
+    }
+
+
 def generate_health_dashboard(vault_root: str, notes_data: List[Dict[str, Any]], audit_stats: Dict[str, Any]) -> str:
     """Renders the Vault Health Dashboard in 100% static Markdown (no Dataview blocks)."""
     today_iso = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -1010,6 +1049,16 @@ def generate_health_dashboard(vault_root: str, notes_data: List[Dict[str, Any]],
     if audit_stats.get('duplicate_count', 0) > 0:
         duplicate_line = f"\n- **Collisioni Omonime (Note Duplicate):** {audit_stats.get('duplicate_count', 0)}"
 
+    att_stats = audit_stats.get('pdf_attachments')
+    if att_stats is None:
+        att_stats = audit_pdf_attachments(vault_root)
+
+    att_line = ""
+    v_count = len(att_stats.get('versioned_files', []))
+    d_count = len(att_stats.get('duplicate_hashes', {}))
+    if v_count > 0 or d_count > 0:
+        att_line = f"\n- **Allegati Slide Versionati (v2):** {v_count} | **Duplicati SHA:** {d_count}"
+
     return f"""---
 status: permanent
 type: moc
@@ -1038,7 +1087,7 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 - **Bozze Blog:** {len(blog_seeds)}
 - **Note Orfane:** {audit_stats.get('orphan_count', 0)}
 - **Link Interrotti:** {audit_stats.get('broken_link_count', 0)}
-- **Forward-Links Pianificati:** {audit_stats.get('forward_link_count', 0)}{duplicate_line}
+- **Forward-Links Pianificati:** {audit_stats.get('forward_link_count', 0)}{duplicate_line}{att_line}
 
 ---
 
@@ -1399,7 +1448,8 @@ def run_governance_engine(vault_root: str, dry_run: bool = False, auto_fix: bool
         'broken_link_count': sum(len(v) for v in broken_links_map.values()),
         'forward_link_count': sum(len(v) for v in forward_links_map.values()),
         'duplicate_count': len(auditor.duplicate_notes),
-        'duplicate_notes': auditor.duplicate_notes
+        'duplicate_notes': auditor.duplicate_notes,
+        'pdf_attachments': audit_pdf_attachments(vault_root)
     }
 
     if auditor.duplicate_notes:
@@ -1541,7 +1591,8 @@ def run_governance_engine(vault_root: str, dry_run: bool = False, auto_fix: bool
             'broken_link_count': sum(len(v) for v in fresh_broken.values()),
             'forward_link_count': sum(len(v) for v in fresh_forward.values()),
             'duplicate_count': len(fresh_auditor.duplicate_notes),
-            'duplicate_notes': fresh_auditor.duplicate_notes
+            'duplicate_notes': fresh_auditor.duplicate_notes,
+            'pdf_attachments': audit_pdf_attachments(vault_root)
         }
         write_health_dashboard(vault_root, fresh_data, fresh_stats)
         print("Vault health governance fixes applied successfully and dashboard updated.")

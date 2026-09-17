@@ -178,10 +178,12 @@ def is_source_lock_active(source: str) -> bool:
 
 
 def detect_input_type(source: str) -> str:
-    """Classifies polymorphic input into youtube, web, file, or text."""
+    """Classifies polymorphic input into youtube, web, pdf, file, or text."""
     s = source.strip()
     if YT_URL_REGEX.search(s): return "youtube"
     if WEB_URL_REGEX.match(s): return "web"
+    if s.lower().endswith(".pdf") or (os.path.isfile(s) and s.lower().endswith(".pdf")):
+        return "pdf"
     if os.path.isfile(s): return "file"
     return "text"
 
@@ -615,6 +617,12 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
    - NON includere il frontmatter YAML (sarà generato dal sistema).
    - Inizia sempre con il titolo H1 esatto della nota: # {c_title}
    - Alla fine assoluta della risposta, inserisci il marcatore esatto '---SUMMARY---' seguito da una singola frase densa di significato (120-180 caratteri, max 200) per il recupero sub-secondo.
+
+6. SLIDE ACCADEMICHE E ASSET VISIVI (PDF-02, PDF-03, D-01, D-03, D-05, D-16):
+   - TRATTAZIONE CONTINUA E NARRATIVA: Elabora il contenuto come flusso continuo unificato, evitando categoricamente separatori rigidi '### Slide N' o '### Diapositiva N'.
+   - CITAZIONI INLINE A SLIDE: Preserva e posiziona accuratamente i richiami di pagina inline nella forma con escape \\[[[nome.pdf#page=N|N]]] a valle dei concetti e dei teoremi corrispondenti.
+   - RIALLINEAMENTO CODICE E TABELLE: Riorganizza pseudocodice, frammenti di codice e tabelle frammentate in blocchi Markdown sintatticamente evidenziati o tabelle comparative chiare.
+   - EMBEDDING FIGURE DISCREZIONALE: Se nel testo o nel contesto sono presenti figure estratte (![[Figura - ...]]), incorporale solo se apportano reale valore concettuale (diagrammi, grafi, schemi a blocchi), posizionandole direttamente a valle del rispettivo concetto cardine. Ometti loghi ateneo o grafiche decorative.
 """
 
     home_bin = str(Path.home() / ".local" / "bin" / "agy")
@@ -1442,26 +1450,27 @@ def _handle_purge_item(vault_root: str, draft_path: str, source_path: str, name:
                     except Exception:
                         pass
 
-        # 2. Purge based on explicit markdown image embeddings
+        # 2. Purge based on explicit markdown image embeddings (supports course subdirectories)
         img_refs = re.findall(r'!\[\[(.*?)\]\]', body) + re.findall(r'!\[.*?\]\((.*?)\)', body)
         for ref in img_refs:
             base_img = os.path.basename(ref.split('|')[0].strip())
-            img_path = os.path.join(clip_dir, base_img)
-            if os.path.isfile(img_path):
-                try:
-                    os.remove(img_path)
-                except Exception:
-                    pass
+            for root_dir, _, files in os.walk(clip_dir):
+                if base_img in files:
+                    try:
+                        os.remove(os.path.join(root_dir, base_img))
+                    except Exception:
+                        pass
 
         # 3. Fallback: prefix-based purge
         prefix = name[:10]
         slug = name.lower().replace(' ', '_')[:10]
-        for img in os.listdir(clip_dir):
-            if (img.startswith(prefix) or slug in img) and (img.endswith('.jpg') or img.endswith('.png')):
-                try:
-                    os.remove(os.path.join(clip_dir, img))
-                except Exception:
-                    pass
+        for root_dir, _, files in os.walk(clip_dir):
+            for img in files:
+                if (img.startswith(prefix) or slug in img or img.startswith(f"Figura - {name}")) and (img.endswith('.jpg') or img.endswith('.png')):
+                    try:
+                        os.remove(os.path.join(root_dir, img))
+                    except Exception:
+                        pass
 
     # Physical removal of draft and source
     if os.path.exists(draft_path):
@@ -1727,7 +1736,7 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
 
     with NoteLock(source):
         in_type = detect_input_type(source)
-        prov = Path(source).stem if in_type == "file" else (source if in_type in ("youtube", "web") else source.strip().splitlines()[0].lstrip('#').strip()[:40])
+        prov = Path(source).stem if in_type in ("file", "pdf") else (source if in_type in ("youtube", "web") else source.strip().splitlines()[0].lstrip('#').strip()[:40])
 
         # -------------------------------------------------------------
         # FASE 1/3: Estrazione Sorgente
@@ -1756,6 +1765,52 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                 raw_text = " ".join([t.get('text', '') for t in data['transcript']])
                 dest_dir = target_dir or classify_target_directory(clean_title, ['tech/ai', 'video'], raw_text)
                 meta = {'title': clean_title, 'type': 'video', 'area': 'tech', 'source': source, 'video_url': source, 'channel': channel, 'tags': ['tech/ai', 'video']}
+
+            elif in_type == "pdf":
+                try:
+                    import academic_helper
+                    pdf_data = academic_helper.extract_pdf_data(
+                        source,
+                        course=clean_course,
+                        vault_root=root
+                    )
+                except academic_helper.PdfEncryptedError as e:
+                    record_ingest_error(root, source, f"PDF protetto da password: {e}")
+                    update_review_dashboard(root, in_progress="CLEAR_ALL")
+                    raise
+                except academic_helper.PdfTextUnavailableError as e:
+                    record_ingest_error(root, source, f"PDF privo di testo (scansione non OCR): {e}")
+                    update_review_dashboard(root, in_progress="CLEAR_ALL")
+                    raise
+                except Exception as e:
+                    record_ingest_error(root, source, f"Errore estrazione PDF: {e}")
+                    update_review_dashboard(root, in_progress="CLEAR_ALL")
+                    raise
+
+                title = pdf_data['title']
+                clean_title = brain_health.clean_title_str(title)
+                raw_text = pdf_data['raw_text']
+                pdf_filename = pdf_data['pdf_filename']
+
+                if clean_course:
+                    dest_dir = target_dir
+                    meta = {
+                        'title': clean_title,
+                        'type': 'lecture',
+                        'area': 'education',
+                        'source': f"[[{pdf_filename}]]",
+                        'course': clean_course,
+                        'tags': ['education/university', 'education/lecture']
+                    }
+                else:
+                    dest_dir = target_dir or classify_target_directory(clean_title, ['tech'], raw_text)
+                    meta = {
+                        'title': clean_title,
+                        'type': 'concept',
+                        'area': 'tech',
+                        'source': f"[[{pdf_filename}]]",
+                        'tags': ['raw']
+                    }
 
             elif in_type == "file":
                 try:

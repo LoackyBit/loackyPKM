@@ -4,16 +4,16 @@ milestone: v1.1.0-alpha
 milestone_name: Academic Engine & Metacognitive Deep Ingestion
 current_phase: 16
 current_phase_name: Academic Helper & Pipeline Ingestione Slide PDF
-status: executing
-stopped_at: Completed 16-02-PLAN.md
-last_updated: "2026-09-17T23:33:30.000Z"
+status: complete
+stopped_at: Completed Phase 16
+last_updated: "2026-09-17T23:35:00.000Z"
 last_activity: 2026-09-17
-last_activity_desc: Completed Plan 16-02
-state_head: 97c3ea4
+last_activity_desc: Completed Phase 16 Academic Helper & Pipeline Ingestione Slide PDF
+state_head: a4ca09e
 progress:
-  total_phases: 4
-  completed_phases: 3
-  total_plans: 8
+  total_phases: 5
+  completed_phases: 4
+  total_plans: 10
   completed_plans: 8
 ---
 
@@ -28,19 +28,19 @@ See: .planning/PROJECT.md (updated 2026-09-15 with v1.1.0-alpha, v1.x.0-alpha, v
 
 ## Current Position
 
-Phase: 16 (Academic Helper & Pipeline Ingestione Slide PDF) — EXECUTING
+Phase: 16 (Academic Helper & Pipeline Ingestione Slide PDF) — COMPLETE
 Total Plans in Phase: 2
 Completed Plans in Phase: 2
-Status: Executed all plans in Phase 16
-Last activity: 2026-09-17 — Completed Plan 16-02
+Status: Completed Phase 16
+Last activity: 2026-09-17 — Completed Phase 16
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 4
+- Total plans completed: 8
 - Average duration: 15 min
-- Total execution time: 0.5 hours
+- Total execution time: 2.0 hours
 
 **By Phase:**
 
@@ -61,12 +61,10 @@ Last activity: 2026-09-17 — Completed Plan 16-02
 | 11. Test Suite & Copertura CLI | 2/2 | Complete | 2026-09-04 |
 | 12. Clean Code & Audit Fixes | 2/2 | Complete | 2026-09-05 |
 | 13. Course Hub & Matrice PACRAR | 2/2 | Complete | 2026-09-16 |
-| 14. NotebookLM & Sinergia Metacognitiva | 0/2 | Not started | - |
-| 15. Tassonomia ADC & Formulari STEM | 0/2 | Not started | - |
-| 16. Academic Helper & Slide PDF | 0/2 | Not started | - |
+| 14. NotebookLM & Sinergia Metacognitiva | 2/2 | Complete | 2026-09-17 |
+| 15. Tassonomia ADC & Formulari STEM | 2/2 | Complete | 2026-09-17 |
+| 16. Academic Helper & Slide PDF | 2/2 | Complete | 2026-09-17 |
 | 17. Flashcard Anki & Preservazione ID | 0/2 | Not started | - |
-| 14 | 2 | - | - |
-| 15 | 2 | - | - |
 
 **Recent Trend:**
 

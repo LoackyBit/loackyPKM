@@ -529,7 +529,7 @@ def format_structured_note(title: str, raw_content: str, depth: str = "approfond
     if is_deep:
         lines.extend([
             f"## Quadro Concettuale e Fondamenti\n\n{raw_content.strip()}\n",
-            f"## Meccanica e Dettaglio Operativo\n\nAnalisi approfondita dei principi operativi di {c_title}.\n",
+            f"## Meccanica e Dettaglio Operativo\n\nAnalisi approfondita dei <mark style=\"background:rgba(181, 113, 255, 0.36)\"><font color=\"#9a54c1\"><b>principi operativi</b></font></mark> di {c_title}.\n",
             "## Analisi Critica e Casi Applicativi\n\nValutazione di limiti, compromessi architetturali e contesti d'uso.\n"
         ])
     else:
@@ -573,27 +573,47 @@ CONTENUTO SORGENTE:
 
 {depth_instruction}
 {meta_section}
-REGOLE CRITICHE DI CONTENUTO E STILE:
-1. FILTRO ANTI-SLOP E ANTI-SPONSOR:
+REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
+1. SEQUENZA LOGICO-TEMPORALE E DIGRESSIONI DEL DOCENTE (TAX-01, D-06):
+   - Ricalca fedelmente la successione logico-temporale della spiegazione o della lezione del docente senza omettere passaggi concettuali.
+   - Nessun template monolitico o sezione generica fissa/vuota: l'articolazione delle sezioni H2 e H3 deve scaturire spontaneamente dall'ordine di esposizione dei contenuti.
+   - DIVIETO ASSOLUTO DI EMOJI NEI TITOLI: I titoli H1, H2, H3 devono contenere SOLO testo pulito (es. '## Sintesi Esecutiva', '## Analisi Nodale' e MAI '## 🎯 Sintesi').
+   - INCAPSULAMENTO DELLE DIGRESSIONI: Quando il docente introduce aneddoti, divagazioni storiche, commenti extra-curriculari o aneddoti personali, NON creare titoli H3/H4 spuri e non inquinare la tavola dei contenuti (TOC/Outline). Incapsula invece la divagazione in un callout collassabile dedicato:
+     > [!quote]- Divagazione del Docente: [Breve Oggetto della Divagazione]
+     > [Trascrizione o sintesi della divagazione]
+   - NESSUNA SEZIONE COLLEGAMENTI SEPARATA: Non inserire mai sezioni come '## Collegamenti', '## Note Correlate' o '## Vedi anche'. I collegamenti semantici vengono assorbiti organicamente nel testo.
+
+2. FORMULARIO STEM VINCOLATO E FORMALISMO MATEMATICO (TAX-02, D-04, D-05, D-08, D-09):
+   - Adotta un approccio ibrido per formule e passaggi matematici:
+     a) Formule di passaggio, passaggi algebrici e calcoli intermedi: utilizza blocchi display MathJax standard $$...$$ o inline $...$.
+     b) Teoremi, leggi fisiche, principi e formule cardine della materia: racchiudili in un callout dedicato (> [!example] Teorema / Legge: [Nome] oppure > [!info] Principio / Definizione: [Nome]).
+   - OGNI callout di teorema o formula cardine DEVE obbligatoriamente contenere questi 5 elementi strutturati:
+     1. Espressione display LaTeX $$...$$ centrale
+     2. - **Ipotesi:** (assunzioni necessarie e condizioni a monte)
+     3. - **Condizioni di validità:** (limiti operativi, regimi fisici o vincoli di applicabilità)
+     4. - **Significato dei simboli:** (elenco di ogni parametro con la relativa unità di misura SI, es. $[\\text{{V}}]$, $[\\Omega]$, $[\\text{{A}}]$, $[\\text{{m/s}}^2]$)
+     5. - **Esempio operativo:** (caso applicativo pratico, calcolo d'esempio o note operative)
+   - DIVIETO DI BACKTICK PER FORMULE: Non racchiudere MAI le formule LaTeX tra blocchi di codice markdown (```latex o ```). Usa solo la sintassi naturale MathJax ($...$ e $$...$$) per consentire il rendering nativo di Obsidian. Non effettuare conversioni premature per Anki (demandate a fasi successive).
+
+3. EVIDENZIAZIONI CROMATICHE E ARRICCHIMENTO VISIVO (TAX-03, D-01, D-02, D-03):
+   - EVIDENZIAZIONI OBBLIGATORIE SU OGNI NOTA:
+     - Giallo (parole chiave assolute, principi primi, concetti cardine):
+       <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>
+     - Viola (concetti secondari, nomi propri, definizioni derivate):
+       <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>
+     - REGOLA CRITICA: Non racchiudere MAI i tag HTML <mark> o <font> tra backtick markdown (`<mark...>` ❌)!
+   - PALETTE VISIVA COMPLETA: Impiega callout semantici (> [!tip], > [!important], > [!warning], > [!note], > [!example]), checkbox di avanzamento/verifica e tabelle comparative in Markdown standard (zero tabelle HTML).
+   - DIAGRAMMI MERMAID CONTESTUALI (NON OBBLIGATORI): Genera un diagramma ```mermaid flowchart TD solo in presenza di reali catene causali complesse, derivazioni logiche a stadi o flussi di processi che beneficiano concretamente di visualizzazione. Se non vi sono catene complesse, prediligi tabelle o elenchi.
+   - REGOLE MERMAID RIGOROSE: Tutte le etichette dei nodi DEVONO essere rigorosamente racchiuse tra doppi apici (es. A["Testo del Nodo (con dettagli)"] --> B["Secondo Nodo"]). Non inserire MAI tag HTML all'interno dei nodi Mermaid.
+
+4. FILTRO ANTI-SLOP E ANTI-SPONSOR:
    - Elimina categoricamente sponsor commerciali (es. corsi online, piattaforme cloud, VPN, promozioni), saluti, formule di rito, aneddoti irrilevanti e frasi riempitive.
    - Distilla solo principi primi, definizioni rigorose, tesi argomentate, metodologie applicative e limiti critici.
 
-2. ANATOMIA E SEZIONI DELLA NOTA:
-   - Inizia sempre con il titolo H1 esatto della nota: # {c_title}
-   - Struttura le sezioni H2 e H3 in modo completamente libero e flessibile, guidato dalla natura del contenuto (es. Sintesi Esecutiva, Fondamenti Teorici, Meccanica di Funzionamento, Analisi Critica, Applicazioni Pratiche).
-   - DIVIETO ASSOLUTO DI EMOJI NEI TITOLI: I titoli H1, H2, H3 devono contenere SOLO testo pulito (es. '## Sintesi Esecutiva' e MAI '## 🎯 Sintesi Esecutiva').
-   - NESSUNA SEZIONE COLLEGAMENTI SEPARATA: Non inserire mai sezioni come '## Collegamenti', '## Note Correlate' o '## Vedi anche'. I collegamenti semantici verranno gestiti altrove.
-
-3. EVIDENZIAZIONI E ARRICCHIMENTO VISIVO:
-   - Evidenzia i concetti cardine/parole chiave assolute in GIALLO: <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>
-   - Evidenzia i concetti secondari/nomi/luoghi in VIOLA: <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>
-   - CRITICO: Non inserire MAI backtick markdown attorno ai tag HTML <mark>!
-   - Inserisci un diagramma Mermaid solo ed esclusivamente se aggiunge valore cognitivo (usa etichette tra doppi apici).
-   - Utilizza formule LaTeX inline $..$ o display $$..$$ per formalizzazioni matematiche/tecniche.
-
-4. LINGUA E SINTESI FINALE:
+5. LINGUA E SINTESI FINALE:
    - Scrivi rigorosamente in italiano accademico, chiaro e professionale.
    - NON includere il frontmatter YAML (sarà generato dal sistema).
+   - Inizia sempre con il titolo H1 esatto della nota: # {c_title}
    - Alla fine assoluta della risposta, inserisci il marcatore esatto '---SUMMARY---' seguito da una singola frase densa di significato (120-180 caratteri, max 200) per il recupero sub-secondo.
 """
 

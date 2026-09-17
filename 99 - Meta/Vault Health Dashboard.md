@@ -53,7 +53,7 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 ## Note Modificate di Recente
 | Nota | Ultima Modifica | Area |
 |---|---|---|
-| [[Senza nome]] | 2026-09-03 22:40 | N/D |
+| [[test]] | 2026-09-03 22:40 | N/D |
 | [[test]] | 2026-09-03 22:40 | N/D |
 | [[Review Dashboard]] | 2026-09-03 22:31 | meta |
 | [[Clean Code Audit Report - 2026-09-03]] | 2026-09-03 13:10 | meta |

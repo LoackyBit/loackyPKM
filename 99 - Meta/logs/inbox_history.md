@@ -198,3 +198,7 @@ If you are sure that the described cause is not responsible for this error and t
 - 2026-08-31 00:20 | [APPROVED] | [[99 - Meta/Archive/Semantic Versioning]] -> 02 - Atlas/Tech & AI/Raw Note 2026 - 08 - 31 00 - 07.md (source: original)
 - 2026-08-31 23:30 | [APPROVED] | [[Il Lato Oscuro di TikTok Che Ti Nascondono - con i TheShow]] -> 02 - Atlas/Tech & AI/Il Lato Oscuro di TikTok Che Ti Nascondono - con i TheShow.md (source: https://youtu.be/mkGGOxEPV-Q)
 - 2026-08-31 23:58 | [REJECTED] | [[HTTPS - Github Com - ZyphrZero - Termy]] -> PURGED
+- 2026-09-12 01:02 | [PANIC_ABORT] | [[Tutti i processi]] -> STOPPED (source: Review Dashboard)
+- 2026-09-13 15:34 | [REJECTED] | [[L’intelligenza artificiale potrebbe uccidere tutti gli esseri umani entro il 2030]] -> PURGED
+- 2026-09-13 15:39 | [APPROVED] | [[L'Intelligenza Artificiale Potrebbe Uccidere Tutti gli Esseri Umani Entro il 2030]] -> 02 - Atlas/Finance/Investments/L'Intelligenza Artificiale Potrebbe Uccidere Tutti gli Esseri Umani Entro il 2030.md (source: https://youtu.be/i30jVPqQeOM)
+- 2026-09-13 15:39 | [PANIC_ABORT] | [[Tutti i processi]] -> STOPPED (source: Review Dashboard)

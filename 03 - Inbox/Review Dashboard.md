@@ -6,8 +6,8 @@ related: ["[[Home MOC]]", "[[Vault Health Dashboard]]"]
 aliases: []
 source: original
 title: "Review Dashboard"
-date: '2026-08-31'
-updated: 2026-08-31T23:58
+date: '2026-09-13'
+updated: 2026-09-13T15:39
 tags: [meta/dashboard, meta/gtd]
 summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in Inbox."
 ---
@@ -32,13 +32,13 @@ summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in I
 *Nessun errore registrato.*
 
 ## 📜 Storico Recente
-- 2026-08-29 14:21 | [PANIC_ABORT] | [[Tutti i processi]] -> STOPPED (source: Review Dashboard)
-- 2026-08-29 14:34 | [PANIC_ABORT] | [[Tutti i processi]] -> STOPPED (source: Review Dashboard)
-- 2026-08-30 20:32 | [ERROR_DISMISSED] | [[https://youtu.be/rNds9M7WSZk]] -> DISMISSED
-- 2026-08-30 20:32 | [ERROR_DISMISSED] | [[Raw Note 2026-08-30 20-30.md]] -> DISMISSED
 - 2026-08-30 20:34 | [REJECTED] | [[Fisica 2 ~ Prof Marco Mazzeo]] -> PURGED
 - 2026-08-30 22:29 | [REJECTED] | [[Il Lato Oscuro di TikTok Che Ti Nascondono - con i TheShow]] -> PURGED
 - 2026-08-31 00:15 | [APPROVED] | [[99 - Meta/Archive/Semantic Versioning]] -> 02 - Atlas/Tech & AI/Raw Note 2026 - 08 - 31 00 - 07.md (source: original)
 - 2026-08-31 00:20 | [APPROVED] | [[99 - Meta/Archive/Semantic Versioning]] -> 02 - Atlas/Tech & AI/Raw Note 2026 - 08 - 31 00 - 07.md (source: original)
 - 2026-08-31 23:30 | [APPROVED] | [[Il Lato Oscuro di TikTok Che Ti Nascondono - con i TheShow]] -> 02 - Atlas/Tech & AI/Il Lato Oscuro di TikTok Che Ti Nascondono - con i TheShow.md (source: https://youtu.be/mkGGOxEPV-Q)
 - 2026-08-31 23:58 | [REJECTED] | [[HTTPS - Github Com - ZyphrZero - Termy]] -> PURGED
+- 2026-09-12 01:02 | [PANIC_ABORT] | [[Tutti i processi]] -> STOPPED (source: Review Dashboard)
+- 2026-09-13 15:34 | [REJECTED] | [[L’intelligenza artificiale potrebbe uccidere tutti gli esseri umani entro il 2030]] -> PURGED
+- 2026-09-13 15:39 | [APPROVED] | [[L'Intelligenza Artificiale Potrebbe Uccidere Tutti gli Esseri Umani Entro il 2030]] -> 02 - Atlas/Finance/Investments/L'Intelligenza Artificiale Potrebbe Uccidere Tutti gli Esseri Umani Entro il 2030.md (source: https://youtu.be/i30jVPqQeOM)
+- 2026-09-13 15:39 | [PANIC_ABORT] | [[Tutti i processi]] -> STOPPED (source: Review Dashboard)

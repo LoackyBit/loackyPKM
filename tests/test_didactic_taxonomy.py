@@ -241,6 +241,119 @@ Analisi spettrale dei segnali tempo-continui e proprietà della Trasformata di F
         self.assertNotIn("`<mark", note_deep)
         self.assertNotIn("## Collegamenti", note_deep)
 
+    def test_full_academic_stem_note_compliance_end_to_end(self):
+        """Asserts a full realistic STEM university note passes audit_academic_note_compliance with zero issues (TAX-01, TAX-02, TAX-03, D-01, D-02, D-03, D-04, D-06, D-07)."""
+        full_note = r"""# Elettrotecnica - Risonanza RLC e Teoremi di Rete
+[[Home MOC|Home]] / [[University|University MOC]] / [[Elettrotecnica MOC]] / [[Elettrotecnica - Risonanza RLC e Teoremi di Rete]]
+
+## Sintesi Esecutiva
+L'analisi dei regimi sinusoidali in risonanza consente di determinare le condizioni di minimo dell'impedenza d'ingresso nei circuiti RLC.
+
+## Fenomenologia della Risonanza nei Circuiti RLC
+La spiegazione del docente parte dalla configurazione serie. La pulsazione di risonanza <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>pulsazione naturale</b></font></mark> soddisfa l'annullamento della reattanza complessiva:
+$$X(\omega) = \omega L - \frac{1}{\omega C} = 0 \implies \omega_0 = \frac{1}{\sqrt{LC}}$$
+
+> [!quote]- Divagazione del Docente: La Guerra delle Correnti
+> Durante la spiegazione il docente illustra la diatriba storica tra Edison e Tesla riguardo i vantaggi del trasporto di energia in corrente alternata ad alta tensione rispetto alla continua.
+
+## Teoremi Fondamentali e Semplificazione di Bipoli
+Nel passaggio all'analisi delle reti complesse, il docente formalizza la riduzione equivalente:
+
+> [!example] Teorema di Thévenin
+> Qualsiasi rete lineare vista da due morsetti può essere sostituita da un generatore ideale di tensione in serie a un'impedenza equivalente:
+> $$V_{AB} = V_{\text{th}} - Z_{\text{th}} \cdot I$$
+> - **Ipotesi:** Rete lineare a costanti concentrate operante in regime sinusoidale permanente.
+> - **Condizioni di validità:** Risposta lineare garantita nell'intero campo operativo; generatori dipendenti inclusi purché lineari.
+> - **Significato dei simboli:**
+>   - $V_{AB}$: tensione a vuoto tra i morsetti $[\text{V}]$
+>   - $V_{\text{th}}$: tensione a vuoto equivalente $[\text{V}]$
+>   - $Z_{\text{th}}$: impedenza equivalente interna $[\Omega]$
+>   - $I$: corrente erogata al bipolo di carico $[\text{A}]$
+> - **Esempio operativo:** Calcolo della corrente erogata a un carico ad impedenza variabile massimizzando il trasferimento di potenza attiva.
+
+```mermaid
+flowchart TD
+    A["Rete Attiva Lineare con Morsetti A-B"] --> B["Calcolo Tensione a Vuoto Vth"]
+    A --> C["Spegnimento Generatori Indipendenti"]
+    C --> D["Calcolo Impedenza Equivalente Zth"]
+    B --> E["Circuito Equivalente di Thevenin"]
+    D --> E
+```
+
+La valutazione dei parametri di merito mette a confronto la configurazione serie e parallelo mediante la <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>larghezza di banda a -3dB</b></font></mark>:
+
+| Parametro | RLC Serie | RLC Parallelo |
+|:---|:---|:---|
+| Pulsazione $\omega_0$ | $1/\sqrt{LC}$ | $1/\sqrt{LC}$ |
+| Fattore di Merito $Q$ | $\frac{\omega_0 L}{R}$ | $\frac{R}{\omega_0 L}$ |
+| Larghezza di Banda $B$ | $\frac{R}{L}$ | $\frac{1}{RC}$ |
+"""
+        audit_res = brain_health.audit_academic_note_compliance(full_note)
+        self.assertTrue(audit_res["compliant"], f"Audit failed with issues: {audit_res['issues']}")
+        self.assertEqual(len(audit_res["issues"]), 0)
+        self.assertTrue(audit_res["features"]["has_stem_callout"])
+        self.assertTrue(audit_res["features"]["has_highlights"])
+        self.assertTrue(audit_res["features"]["has_yellow_mark"])
+        self.assertTrue(audit_res["features"]["has_purple_mark"])
+        self.assertTrue(audit_res["features"]["has_mermaid"])
+        self.assertTrue(audit_res["features"]["has_digression"])
+
+    def test_ai_enrichment_sanitization_pipeline(self):
+        """Asserts AI enrichment post-sanitization pipeline produces 100% compliant output audited by brain_health."""
+        mock_ai_response = r"""# 💡 Macchine Elettriche e Trasformatori
+
+## ⚙️ Funzionamento del Trasformatore Ideale
+Nel trasformatore ideale il <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>flusso magnetico comune</b></font></mark> concatena primario e secondario.
+`<mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>rapporto di trasformazione k</b></font></mark>`: costante del dispositivo.
+
+Calcolo algebrico della fem indotta:
+$$e_1(t) = -N_1 \frac{d\Phi}{dt}$$
+
+> [!quote]- Divagazione del Docente: Aneddoto su Faraday
+> Il docente cita l'esperimento originale di Faraday dell'anello d'induzione nel 1831.
+
+> [!example] Legge dell'Induzione Elettromagnetica di Faraday-Neumann
+> La forza elettromotrice indotta in un circuito chiuso è pari all'opposto della variazione temporale del flusso concatenato:
+> $$\mathcal{E} = -\frac{d\Phi_B}{dt}$$
+> - **Ipotesi:** Circuito filiforme stazionario immerso in un campo magnetico variabile nel tempo.
+> - **Condizioni di validità:** Velocità del mezzo trascurabile rispetto alla velocità della luce nel vuoto; assenza di effetti relativistici.
+> - **Significato dei simboli:**
+>   - $\mathcal{E}$: forza elettromotrice indotta $[\text{V}]$
+>   - $\Phi_B$: flusso magnetico concatenato $[\text{Wb}]$
+>   - $t$: variabile temporale $[\text{s}]$
+> - **Esempio operativo:** Calcolo della fem indotta ai morsetti di una bobina con $N=500$ spire sottoposta a campo sinusoidale a $50\text{ Hz}$.
+
+```mermaid
+flowchart TD
+    A["Tensione Primaria V1(t)"] --> B["Flusso Magnetico nel Nucleo"]
+    B --> C["Tensione Indotta Secondaria V2(t)"]
+```
+
+## 🔗 Collegamenti
+- [[Elettrotecnica]]
+- [[Fisica]]
+
+---SUMMARY---
+Modello ideale del trasformatore monofase e formulazione della legge di Faraday-Neumann con rapporto di trasformazione.
+"""
+        with patch("subprocess.run") as mock_run:
+            mock_proc = MagicMock()
+            mock_proc.returncode = 0
+            mock_proc.stdout = mock_ai_response
+            mock_run.return_value = mock_proc
+
+            body, summary = brain_ingest.enrich_draft_with_ai(
+                self.test_dir,
+                "Macchine Elettriche e Trasformatori",
+                "Appunti sul trasformatore",
+                depth="approfondimento"
+            )
+
+            audit_res = brain_health.audit_academic_note_compliance(body)
+            self.assertTrue(audit_res["compliant"], f"Post-sanitization note failed compliance: {audit_res['issues']}")
+            self.assertEqual(len(audit_res["issues"]), 0)
+            self.assertIn("Modello ideale del trasformatore monofase", summary)
+
 
 if __name__ == "__main__":
     unittest.main()

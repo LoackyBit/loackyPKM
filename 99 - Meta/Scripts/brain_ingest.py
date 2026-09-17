@@ -752,7 +752,7 @@ def trigger_panic_abort(vault_root: str, pid_file: Optional[str] = None) -> int:
                 cmd = parts[1]
                 if p in (my_pid, watcher_pid, 1, 0):
                     continue
-                if ("brain_ingest.py" in cmd or "youtube_helper.py" in cmd or "yt-dlp" in cmd or "ffmpeg" in cmd) and "watch.sh" not in cmd and "--panic" not in cmd:
+                if ("brain_ingest.py" in cmd or "youtube_helper.py" in cmd or "yt-dlp" in cmd or "ffmpeg" in cmd) and "watch.sh" not in cmd and "--panic" not in cmd and "test_brain_ingest" not in cmd and "unittest" not in cmd:
                     aborted_pids.add(p)
     except Exception:
         pass

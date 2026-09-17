@@ -327,9 +327,94 @@ def strip_isolated_hashtag_lines(body: str) -> Tuple[str, List[str]]:
 
 def sanitize_style_highlights(text: str) -> str:
     """Strips backticks from HTML <mark> and <font> tags to ensure valid rendering in Obsidian and Quartz."""
-    cleaned = re.sub(r'`(<mark\s+style="[^"]*">.*?</mark>)`', r'\1', text)
-    cleaned = re.sub(r'`(<font\s+color="[^"]*">.*?</font>)`', r'\1', cleaned)
+    cleaned = re.sub(r'`(<(?:mark|font)\b[^>]*>[\s\S]*?</(?:mark|font)>)`', r'\1', text)
+    cleaned = re.sub(r'`(<mark\b[^>]*>[\s\S]*?</mark>)`', r'\1', cleaned)
+    cleaned = re.sub(r'`(<font\b[^>]*>[\s\S]*?</font>)`', r'\1', cleaned)
     return cleaned
+
+
+def audit_academic_note_compliance(content: str) -> Dict[str, Any]:
+    """Audits an academic/university note against Phase 15 Didactic Taxonomy (TAX-01, TAX-02, TAX-03) and Style Guide rules.
+    Performs structural and cognitive validation without rigid regex blocking on mathematical expressions (D-07).
+    Returns a dict with 'compliant', 'issues', and 'features'."""
+    issues = []
+    lines = content.splitlines()
+
+    # 1. Zero emoji in H1-H6 headers (TAX-01, GEMINI.md)
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith(('# ', '## ', '### ', '#### ', '##### ', '###### ')):
+            for c in stripped:
+                cat = unicodedata.category(c)
+                if cat in ('So', 'Cs') or 0x1F000 <= ord(c) <= 0x1FFFF or 0x2600 <= ord(c) <= 0x27BF:
+                    issues.append(f"Emoji o simbolo decorativo rilevato nell'intestazione: '{stripped}'")
+                    break
+
+    # 2. No separate ## Collegamenti section (GEMINI.md)
+    if re.search(r'^##\s+(?:🔗\s*)?(?:Collegamenti|Note Correlate|Vedi anche)\b', content, re.MULTILINE | re.IGNORECASE):
+        issues.append("Rilevata sezione separata per i collegamenti (i wiki-link devono essere integrati organicamente nella prosa)")
+
+    # 3. Style Guide highlights without markdown backticks (TAX-03, D-01)
+    if re.search(r'`<(?:mark|font)\b[^>]*>[\s\S]*?</(?:mark|font)>`', content):
+        issues.append("Rilevati tag <mark> o <font> racchiusi tra backtick markdown")
+
+    has_yellow_mark = bool(re.search(r'<mark\s+style="[^"]*rgba\(255,\s*193,\s*69,\s*0\.32\)[^"]*"[^>]*>', content) or "#cc8800" in content)
+    has_purple_mark = bool(re.search(r'<mark\s+style="[^"]*rgba\(181,\s*113,\s*255,\s*0\.36\)[^"]*"[^>]*>', content) or "#9a54c1" in content)
+    has_highlights = has_yellow_mark or has_purple_mark
+
+    # 4. Mermaid diagrams: node labels with special characters must be quoted, no HTML in nodes (TAX-03, D-03)
+    mermaid_blocks = re.findall(r'```mermaid([\s\S]*?)```', content)
+    has_mermaid = bool(mermaid_blocks)
+    for block in mermaid_blocks:
+        for line in block.splitlines():
+            line_str = line.strip()
+            if "-->" in line_str or "---" in line_str:
+                matches = re.findall(r'\b[A-Za-z0-9_]+\[(.*?)\]', line_str)
+                for label in matches:
+                    if "<mark" in label or "<font" in label:
+                        issues.append(f"Rilevato tag HTML all'interno di un nodo Mermaid: '{label}'")
+                    if any(c in label for c in "():, "):
+                        if not (label.startswith('"') and label.endswith('"')):
+                            issues.append(f"Nodo Mermaid con caratteri speciali non quotato tra doppi apici: '{label}'")
+
+    # 5. Constrained STEM callout check (TAX-02, D-04)
+    has_stem_callout = bool(re.search(r'>\s*\[!(?:example|info)\]\s+(?:Teorema|Legge|Formula|Principio)', content, re.IGNORECASE))
+    if has_stem_callout:
+        callout_matches = re.finditer(r'(>\s*\[!(?:example|info)\]\s+(?:Teorema|Legge|Formula|Principio)[\s\S]*?)(?=\n\n[^\s>]|\n#[^#]|\Z)', content, re.IGNORECASE)
+        for m in callout_matches:
+            c_text = m.group(1)
+            missing = []
+            if "$$" not in c_text and "$" not in c_text:
+                missing.append("Espressione display LaTeX ($$...)")
+            if "- **Ipotesi:**" not in c_text and "**Ipotesi**" not in c_text:
+                missing.append("Ipotesi")
+            if "- **Condizioni di validità:**" not in c_text and "**Condizioni di validità**" not in c_text:
+                missing.append("Condizioni di validità")
+            if "- **Significato dei simboli:**" not in c_text and "**Significato dei simboli**" not in c_text:
+                missing.append("Significato dei simboli")
+            if "- **Esempio operativo:**" not in c_text and "**Esempio operativo**" not in c_text:
+                missing.append("Esempio operativo")
+            if missing:
+                issues.append(f"Callout STEM privo di elementi obbligatori: {', '.join(missing)}")
+
+    # 6. Collapsible digressions check (D-06)
+    has_digression = bool(re.search(r'>\s*\[!(?:quote|note)\]-\s+(?:Divagazione del Docente|Aneddoto)', content, re.IGNORECASE))
+
+    compliant = len(issues) == 0
+
+    return {
+        "compliant": compliant,
+        "issues": issues,
+        "features": {
+            "has_stem_callout": has_stem_callout,
+            "has_highlights": has_highlights,
+            "has_yellow_mark": has_yellow_mark,
+            "has_purple_mark": has_purple_mark,
+            "has_mermaid": has_mermaid,
+            "has_digression": has_digression,
+        }
+    }
+
 
 
 def split_markdown_note(content: str) -> Tuple[bool, str, Optional[str], str]:

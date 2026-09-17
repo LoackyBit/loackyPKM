@@ -623,6 +623,83 @@ Corpo della nota per auto fix.
         changed, _ = brain_health.lint_file(moc_path, vault_root=self.test_dir, execute=False)
         self.assertFalse(changed, "Expected 0 changes needed for canonical course MOC.")
 
+    def test_audit_academic_note_compliance_valid(self):
+        """Asserts audit_academic_note_compliance returns compliant=True on fully valid academic STEM note (TAX-01, TAX-02, TAX-03)."""
+        valid_note = r"""# Elettrotecnica - Risonanza RLC
+[[Home MOC|Home]] / [[University|University MOC]] / [[Elettrotecnica MOC]] / [[Elettrotecnica - Risonanza RLC]]
+
+## Circuito RLC Serie in Risonanza
+Nel dominio della frequenza, la pulsazione di risonanza è <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>pulsazione naturale</b></font></mark>:
+$$\omega_0 = \frac{1}{\sqrt{LC}}$$
+
+> [!quote]- Divagazione del Docente: Applicazione nei Sintonizzatori Radio
+> Negli albori delle trasmissioni radiofoniche, i circuiti RLC variabili consentivano la sintonia...
+
+> [!example] Teorema di Risonanza Serie
+> Alla pulsazione di risonanza l'impedenza del bipolo serie è puramente ohmica:
+> $$Z(j\omega_0) = R$$
+> - **Ipotesi:** Elementi ideali $R$, $L$, $C$ a parametri concentrati lineari.
+> - **Condizioni di validità:** Regime sinusoidale permanente a frequenza costante.
+> - **Significato dei simboli:**
+>   - $Z$: impedenza totale del bipolo $[\Omega]$
+>   - $\omega_0$: pulsazione di risonanza $[\text{rad/s}]$
+> - **Esempio operativo:** Calcolo della corrente di picco assorbita dall'alimentatore.
+
+```mermaid
+flowchart TD
+    A["Generatore Sinusoidale"] --> B["Bipolo RLC Serie"]
+    B --> C["Tensione ai Capi del Condensatore"]
+```
+
+Trattazione approfondita con <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>fattore di merito Q</b></font></mark> per il circuito.
+"""
+        result = brain_health.audit_academic_note_compliance(valid_note)
+        self.assertTrue(result["compliant"])
+        self.assertEqual(len(result["issues"]), 0)
+        self.assertTrue(result["features"]["has_stem_callout"])
+        self.assertTrue(result["features"]["has_highlights"])
+        self.assertTrue(result["features"]["has_yellow_mark"])
+        self.assertTrue(result["features"]["has_purple_mark"])
+        self.assertTrue(result["features"]["has_mermaid"])
+        self.assertTrue(result["features"]["has_digression"])
+
+    def test_audit_academic_note_compliance_detects_violations(self):
+        """Asserts audit_academic_note_compliance detects emoji headers, link sections, backticks on marks, and unquoted Mermaid."""
+        invalid_note = r"""# 🚀 Fisica Moderna
+
+## 💡 Relatività Ristretta
+`<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>Invarianza di c</b></font></mark>`: principio fondante.
+
+> [!example] Teorema di Conservazione
+> $$E = mc^2$$
+
+```mermaid
+flowchart TD
+    A[Massa a Riposo (m0)] --> B[Energia Relativistica E]
+```
+
+## 🔗 Collegamenti
+- [[Fisica]]
+"""
+        result = brain_health.audit_academic_note_compliance(invalid_note)
+        self.assertFalse(result["compliant"])
+        self.assertTrue(any("Emoji" in issue for issue in result["issues"]))
+        self.assertTrue(any("sezione separata per i collegamenti" in issue for issue in result["issues"]))
+        self.assertTrue(any("racchiusi tra backtick" in issue for issue in result["issues"]))
+        self.assertTrue(any("Nodo Mermaid con caratteri speciali non quotato" in issue for issue in result["issues"]))
+        self.assertTrue(any("Callout STEM privo di elementi obbligatori" in issue for issue in result["issues"]))
+
+    def test_sanitize_style_highlights_multiline_and_complex(self):
+        """Asserts sanitize_style_highlights reliably unwraps backticks from mark and font tags."""
+        raw_text = 'Test `<mark style="background: yellow"><font color="#cc8800"><b>cardine</b></font></mark>` e `<mark class="test">altro</mark>` con `<font color="red">testo</font>`.'
+        cleaned = brain_health.sanitize_style_highlights(raw_text)
+        self.assertNotIn("`<mark", cleaned)
+        self.assertNotIn("</mark>`", cleaned)
+        self.assertNotIn("`<font", cleaned)
+        self.assertNotIn("</font>`", cleaned)
+        self.assertIn('<mark style="background: yellow"><font color="#cc8800"><b>cardine</b></font></mark>', cleaned)
+
 
 if __name__ == "__main__":
     unittest.main()
+

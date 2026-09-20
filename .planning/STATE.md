@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1.0-alpha
 milestone_name: Academic Engine & Metacognitive Deep Ingestion
-current_phase: 16
-current_phase_name: Academic Helper & Pipeline Ingestione Slide PDF
-status: planning
-stopped_at: Phase 17 complete, ready to plan Phase 16
-last_updated: "2026-09-20T19:45:58.174Z"
+current_phase: 17
+current_phase_name: Generazione Flashcard Anki Contestuali & Preservazione ID
+status: complete
+stopped_at: Completed Phase 17 — Milestone v1.1.0-alpha execution complete
+last_updated: "2026-09-20T21:46:00.000Z"
 last_activity: 2026-09-20
-last_activity_desc: Phase 17 complete, transitioned to Phase 16
-state_head: f9d54475bb9dd3d3f01aeb8742c7f36eaf2aab1e
+last_activity_desc: Completed Phase 17 Generazione Flashcard Anki Contestuali & Preservazione ID
+state_head: 2cb22d9
 progress:
   total_phases: 5
   completed_phases: 5
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-09-15 with v1.1.0-alpha, v1.x.0-alpha, v
 
 ## Current Position
 
-Phase: 16 — Academic Helper & Pipeline Ingestione Slide PDF
+Phase: 17 — Generazione Flashcard Anki Contestuali & Preservazione ID
 Total Plans in Phase: 2
 Completed Plans in Phase: 2
-Status: Ready to plan
-Last activity: 2026-09-20 — Phase 17 complete, transitioned to Phase 16
+Status: Complete
+Last activity: 2026-09-20 — Completed Phase 17 Generazione Flashcard Anki Contestuali & Preservazione ID
 
 ## Performance Metrics
 

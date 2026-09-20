@@ -4,17 +4,17 @@ milestone: v1.1.0-alpha
 milestone_name: Academic Engine & Metacognitive Deep Ingestion
 current_phase: 16
 current_phase_name: Academic Helper & Pipeline Ingestione Slide PDF
-status: complete
-stopped_at: Completed Phase 16
-last_updated: "2026-09-17T23:35:00.000Z"
-last_activity: 2026-09-17
-last_activity_desc: Completed Phase 16 Academic Helper & Pipeline Ingestione Slide PDF
-state_head: a4ca09e
+status: planning
+stopped_at: Phase 17 complete, ready to plan Phase 16
+last_updated: "2026-09-20T19:45:58.174Z"
+last_activity: 2026-09-20
+last_activity_desc: Phase 17 complete, transitioned to Phase 16
+state_head: f9d54475bb9dd3d3f01aeb8742c7f36eaf2aab1e
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 10
 ---
 
 # Project State
@@ -24,21 +24,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-15 with v1.1.0-alpha, v1.x.0-alpha, v1.0.0 roadmap)
 
 **Core value:** Rendere l'acquisizione, la manutenzione e l'interrogazione della conoscenza personale fluidi, immediati e a zero attrito, eliminando la frammentazione degli strumenti con fondamenta strutturali solide, standardizzazione AST dei metadati e governance a puro Markdown statico.
-**Current focus:** Phase 16 — Academic Helper & Pipeline Ingestione Slide PDF
+**Current focus:** Phase 17 — Generazione Flashcard Anki Contestuali & Preservazione ID
 
 ## Current Position
 
-Phase: 16 (Academic Helper & Pipeline Ingestione Slide PDF) — COMPLETE
+Phase: 16 — Academic Helper & Pipeline Ingestione Slide PDF
 Total Plans in Phase: 2
 Completed Plans in Phase: 2
-Status: Completed Phase 16
-Last activity: 2026-09-17 — Completed Phase 16
+Status: Ready to plan
+Last activity: 2026-09-20 — Phase 17 complete, transitioned to Phase 16
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 8
+- Total plans completed: 2
 - Average duration: 15 min
 - Total execution time: 2.0 hours
 
@@ -65,6 +65,7 @@ Last activity: 2026-09-17 — Completed Phase 16
 | 15. Tassonomia ADC & Formulari STEM | 2/2 | Complete | 2026-09-17 |
 | 16. Academic Helper & Slide PDF | 2/2 | Complete | 2026-09-17 |
 | 17. Flashcard Anki & Preservazione ID | 0/2 | Not started | - |
+| 17 | 2 | - | - |
 
 **Recent Trend:**
 
@@ -117,10 +118,10 @@ None.
 
 ## Session Continuity
 
-**Resume file:** .planning/phases/16-academic-helper-pipeline-ingestione-slide-pdf/16-CONTEXT.md
+**Resume file:** .planning/phases/17-generazione-flashcard-anki-contestuali-preservazione-id/17-CONTEXT.md
 
-Last session: 2026-09-17T20:47:56.425Z
-Stopped at: Phase 16 context gathered
+Last session: 2026-09-20T19:19:24.630Z
+Stopped at: Phase 17 complete, ready to plan Phase 16
 
 ## Operator Next Steps
 

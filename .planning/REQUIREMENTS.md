@@ -38,9 +38,9 @@ Requisiti pianificati per la Milestone v1.1.0-alpha, ordinati secondo la sequenz
 
 ### Contextual Anki Flashcard Generation (ANKI)
 
-- [ ] **ANKI-01**: L'AI genera flashcard contestuali atomiche di tipo `Basic` e `Cloze`, posizionate immediatamente a valle della trattazione del rispettivo concetto cardine.
-- [ ] **ANKI-02**: Le flashcard sono formattate con sintassi nativa `obsidian-to-anki-plugin` tramite callout `>[!tip]` e tag di destinazione `%% TARGET DECK: University::<NomeCorso> %%`.
-- [ ] **ANKI-03**: Il sistema preserva rigorosamente immutati tutti i commenti identificativi esistenti (`<!--ID: \d+-->`) durante qualsiasi operazione di rielaborazione o linting, prevenendo la duplicazione di carte in Anki.
+- [x] **ANKI-01**: L'AI genera flashcard contestuali atomiche di tipo `Basic` e `Cloze`, posizionate immediatamente a valle della trattazione del rispettivo concetto cardine.
+- [x] **ANKI-02**: Le flashcard sono formattate con sintassi nativa `obsidian-to-anki-plugin` tramite callout `>[!tip]` e tag di destinazione `%% TARGET DECK: University::<NomeCorso> %%`.
+- [x] **ANKI-03**: Il sistema preserva rigorosamente immutati tutti i commenti identificativi esistenti (`<!--ID: \d+-->`) durante qualsiasi operazione di rielaborazione o linting, prevenendo la duplicazione di carte in Anki.
 
 ---
 
@@ -99,9 +99,9 @@ Mappatura dei requisiti di v1.1.0-alpha sulle fasi della roadmap (popolata duran
 | PDF-01 | Phase 16 | Complete |
 | PDF-02 | Phase 16 | Complete |
 | PDF-03 | Phase 16 | Complete |
-| ANKI-01 | Phase 17 | Pending |
-| ANKI-02 | Phase 17 | Pending |
-| ANKI-03 | Phase 17 | Pending |
+| ANKI-01 | Phase 17 | Complete |
+| ANKI-02 | Phase 17 | Complete |
+| ANKI-03 | Phase 17 | Complete |
 
 **Coverage:**
 

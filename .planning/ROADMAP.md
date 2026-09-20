@@ -43,7 +43,7 @@
 - [x] **Phase 14: NotebookLM CLI Integration & Sinergia Metacognitiva** — Interrogazione CLI de Concini con timeout/fallback e guida alla schematizzazione (completed 2026-09-17)
 - [x] **Phase 15: Tassonomia Didattica ADC & Formulari STEM Vincolati** — Sequenza cronologica lezione, formulari con ipotesi esplicite e diagrammi Mermaid quotati (completed 2026-09-17)
 - [ ] **Phase 16: Academic Helper & Pipeline Ingestione Slide PDF** — Modulo `academic_helper.py`, estrazione testo/figure con deduplica e flag `--course`
-- [ ] **Phase 17: Generazione Flashcard Anki Contestuali & Preservazione ID** — Card `Basic`/`Cloze` in callout `>[!tip]`, target deck e tutela assoluta ID Anki
+- [x] **Phase 17: Generazione Flashcard Anki Contestuali & Preservazione ID** — Card `Basic`/`Cloze` in callout `>[!tip]`, target deck e tutela assoluta ID Anki (completed 2026-09-20)
 
 </details>
 
@@ -218,7 +218,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17
 | 14. NotebookLM & Sinergia Metacognitiva | v1.1.0-alpha | 2/2 | Complete    | 2026-09-17 |
 | 15. Tassonomia ADC & Formulari STEM | v1.1.0-alpha | 2/2 | Complete    | 2026-09-17 |
 | 16. Academic Helper & Slide PDF | v1.1.0-alpha | 2/2 | Complete   | 2026-09-17 |
-| 17. Flashcard Anki & Preservazione ID | v1.1.0-alpha | 0/2 | Not started | - |
+| 17. Flashcard Anki & Preservazione ID | v1.1.0-alpha | 2/2 | Complete    | 2026-09-20 |
 
 ---
 *Roadmap updated: 2026-09-15 after milestone v1.1.0-alpha definition (Phases 13-17)*

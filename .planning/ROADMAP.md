@@ -42,7 +42,7 @@
 - [x] **Phase 13: Course Hub & Matrice PACRAR Statica** — MOC di corso e matrice di studio PACRAR a spunta manuale in puro Markdown statico (completed 2026-09-16)
 - [x] **Phase 14: NotebookLM CLI Integration & Sinergia Metacognitiva** — Interrogazione CLI de Concini con timeout/fallback e guida alla schematizzazione (completed 2026-09-17)
 - [x] **Phase 15: Tassonomia Didattica ADC & Formulari STEM Vincolati** — Sequenza cronologica lezione, formulari con ipotesi esplicite e diagrammi Mermaid quotati (completed 2026-09-17)
-- [ ] **Phase 16: Academic Helper & Pipeline Ingestione Slide PDF** — Modulo `academic_helper.py`, estrazione testo/figure con deduplica e flag `--course`
+- [x] **Phase 16: Academic Helper & Pipeline Ingestione Slide PDF** — Modulo `academic_helper.py`, estrazione testo/figure con deduplica e flag `--course` (completed 2026-09-17)
 - [x] **Phase 17: Generazione Flashcard Anki Contestuali & Preservazione ID** — Card `Basic`/`Cloze` in callout `>[!tip]`, target deck e tutela assoluta ID Anki (completed 2026-09-20)
 
 </details>

@@ -93,9 +93,9 @@ Mappatura dei requisiti di v1.1.0-alpha sulle fasi della roadmap (popolata duran
 | NLM-02 | Phase 14 | Complete |
 | SYN-01 | Phase 14 | Complete |
 | SYN-02 | Phase 14 | Complete |
-| TAX-01 | Phase 15 | Pending |
-| TAX-02 | Phase 15 | Pending |
-| TAX-03 | Phase 15 | Pending |
+| TAX-01 | Phase 15 | Complete |
+| TAX-02 | Phase 15 | Complete |
+| TAX-03 | Phase 15 | Complete |
 | PDF-01 | Phase 16 | Complete |
 | PDF-02 | Phase 16 | Complete |
 | PDF-03 | Phase 16 | Complete |
@@ -111,4 +111,4 @@ Mappatura dei requisiti di v1.1.0-alpha sulle fasi della roadmap (popolata duran
 
 ---
 *Requirements defined: 2026-09-15*  
-*Last updated: 2026-09-16 after Phase 13 completion*
+*Last updated: 2026-09-20 after Phase 17 completion*

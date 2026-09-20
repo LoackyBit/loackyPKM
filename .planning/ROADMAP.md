@@ -189,7 +189,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 17-02: Parser di preservazione per commenti `<!--ID: \d+-->`, protezione in `brain_health.py` e test suite di sincronizzazione Anki
+- [x] 17-02: Parser di preservazione per commenti `<!--ID: \d+-->`, protezione in `brain_health.py` e test suite di sincronizzazione Anki
 
 ---
 

@@ -490,13 +490,22 @@ def autolink_content(vault_root: str, body_text: str, current_title: str) -> Tup
     masked = re.sub(r'~~~[\s\S]*?~~~', mask_block, masked)
     masked = re.sub(r'`[^`\n]+`', mask_block, masked)
 
-    # 2. Mask existing wiki-links
+    # 2. Mask Anki flashcard callout blocks and raw START...END blocks (ANKI-02, Pitfall 2)
+    masked = re.sub(r'^[ \t]*>[ \t]*\[![a-zA-Z0-9_-]+\]-?[ \t]*(?:Flashcard:[^\n]*)?\n(?:^[ \t]*>[ \t]*[^\n]*\n)*?^[ \t]*>[ \t]*END[ \t]*$', mask_block, masked, flags=re.MULTILINE)
+    masked = re.sub(r'^[ \t]*(?:>[ \t]*)?START[ \t]*\n[\s\S]*?^[ \t]*(?:>[ \t]*)?END[ \t]*$', mask_block, masked, flags=re.MULTILINE)
+
+    # 3. Mask Anki MathJax delimiters and standard display math
+    masked = re.sub(r'\[\$\$\][\s\S]*?\[/\$\$\]', mask_block, masked)
+    masked = re.sub(r'\[\$\][\s\S]*?\[/\$\]', mask_block, masked)
+    masked = re.sub(r'\$\$[\s\S]*?\$\$', mask_block, masked)
+
+    # 4. Mask existing wiki-links
     masked = re.sub(r'\[\[[^\]]+\]\]', mask_block, masked)
 
-    # 3. Mask existing standard markdown links [text](url)
+    # 5. Mask existing standard markdown links [text](url)
     masked = re.sub(r'\[[^\]]+\]\([^\)]+\)', mask_block, masked)
 
-    # 4. Mask pure web URLs
+    # 6. Mask pure web URLs
     masked = re.sub(r'https?://[^\s\)]+', mask_block, masked)
 
     linked, inserted, cur_clean = masked, set(), current_title.lower().strip()
@@ -545,7 +554,9 @@ def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth
                          source_type: str = "text", source_url: str = "original",
                          agy_path: Optional[str] = None, timeout: int = 45,
                          ai_model: Optional[str] = None,
-                         metacognitive_constraints: Optional[str] = None) -> tuple[str, str]:
+                         metacognitive_constraints: Optional[str] = None,
+                         enable_anki: bool = False,
+                         course_name: Optional[str] = None) -> tuple[str, str]:
     """Generates enriched conceptual note body and executive summary via AI (agy CLI) with heuristic fallback.
     Returns (enriched_body, summary)."""
     c_title = brain_health.clean_title_str(title)
@@ -566,6 +577,28 @@ def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth
     )
 
     meta_section = f"\n{metacognitive_constraints.strip()}\n" if metacognitive_constraints and metacognitive_constraints.strip() else ""
+
+    anki_rules = ""
+    if enable_anki:
+        clean_deck = course_name.replace(" ", "_") if course_name else "Generale"
+        anki_rules = f"""
+7. GENERAZIONE FLASHCARD ANKI CONTESTUALI (ANKI-01, ANKI-02, D-01..D-12, D-17, D-18):
+   - Genera flashcard contestuali atomiche collocate IMMEDIATAMENTE A VALLE di ciascun concetto cardine evidenziato in giallo (<mark>) o teorema STEM (indicativamente 5-10 card per lezione).
+   - Struttura OBBLIGATORIA callout collassabile:
+     > [!tip]- Flashcard: [Nome Concetto]
+     > %% TARGET DECK: University::{clean_deck} %%
+     > START
+     > [Basic|Cloze]
+     > [Front:|Text:] ...
+     > [Back:|Extra:] ...
+     > Tags: {clean_deck}::[Argomento]::[Dettaglio]
+     > END
+   - EURISTICA ADC: usa 'Basic' (Front:/Back:) per comprensione causale, spiegazione di meccanismi, principi primi e domande 'perché/come funziona'; usa 'Cloze' (Text:/Extra:) con {{{{c1::...}}}} per formule matematiche STEM vincolate, enunciati formali, condizioni di validità e terminologia rigorosa.
+   - FORMULE MATEMATICHE ANKI: All'interno dei campi Front/Back/Text/Extra, converti TUTTE le formule matematiche nei delimitatori MathJax Anki [$]...[/$] e [$$]...[/$$]. Compatta ciascuna formula su una singola riga. Usa \\vert anziché |.
+   - Per le Cloze all'interno di formule matematiche, separa SEMPRE le graffe con uno spazio: [$]{{{{ {{{{c1::A}}}} }}}}[/$].
+   - Figure didattiche consentite SOLO in Back/Extra con ![[Figura - ...png]]. Zero diagrammi Mermaid nelle card.
+   - NON generare mai commenti <!--ID: -->: gli ID vengono assegnati solo dal plugin o preservati dal sistema.
+"""
 
     prompt = f"""Sei il motore di elaborazione della conoscenza per un Second Brain PKM in Obsidian.
 Il tuo compito è rielaborare il contenuto sorgente in una nota concettuale permanente di altissima qualità letteraria e tecnica per: "{c_title}".
@@ -623,7 +656,7 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
    - CITAZIONI INLINE A SLIDE: Preserva e posiziona accuratamente i richiami di pagina inline nella forma con escape \\[[[nome.pdf#page=N|N]]] a valle dei concetti e dei teoremi corrispondenti.
    - RIALLINEAMENTO CODICE E TABELLE: Riorganizza pseudocodice, frammenti di codice e tabelle frammentate in blocchi Markdown sintatticamente evidenziati o tabelle comparative chiare.
    - EMBEDDING FIGURE DISCREZIONALE: Se nel testo o nel contesto sono presenti figure estratte (![[Figura - ...]]), incorporale solo se apportano reale valore concettuale (diagrammi, grafi, schemi a blocchi), posizionandole direttamente a valle del rispettivo concetto cardine. Ometti loghi ateneo o grafiche decorative.
-"""
+{anki_rules}"""
 
     home_bin = str(Path.home() / ".local" / "bin" / "agy")
     if agy_path and os.path.exists(agy_path):
@@ -1722,7 +1755,7 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
 
 def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Optional[str] = None,
                   depth: str = "approfondimento", extract_frames: bool = False, force: bool = False,
-                  use_ai: bool = True, course: Optional[str] = None, nlm: bool = False) -> str:
+                  use_ai: bool = True, course: Optional[str] = None, nlm: bool = False, anki: bool = False) -> str:
     """Unified entry point executing the lean 3-macro-phase lifecycle into 03 - Inbox/Draft/."""
     root = brain_health.get_vault_root(vault_root)
     result_path = None
@@ -1857,6 +1890,26 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                 meta['area'] = 'education'
             stage_note(root, clean_title, raw_text, meta, target_dir=dest_dir, source_content=raw_text, status='in-progress')
 
+            # Check if target note already exists with Anki cards (D-14)
+            original_target_content = ""
+            existing_target_path = None
+            if dest_dir:
+                cand_target = os.path.join(root, dest_dir, f"{clean_title}.md") if not os.path.isabs(dest_dir) else os.path.join(dest_dir, f"{clean_title}.md")
+                if os.path.exists(cand_target):
+                    existing_target_path = cand_target
+            if not existing_target_path:
+                for root_dir, _, files in os.walk(os.path.join(root, "02 - Atlas")):
+                    if f"{clean_title}.md" in files:
+                        existing_target_path = os.path.join(root_dir, f"{clean_title}.md")
+                        break
+
+            if existing_target_path and os.path.exists(existing_target_path):
+                try:
+                    with open(existing_target_path, "r", encoding="utf-8", errors="ignore") as f:
+                        original_target_content = f.read()
+                except Exception:
+                    original_target_content = ""
+
             metacognitive_prompt = None
             metacognitive_markdown = None
             if nlm and use_ai:
@@ -1872,14 +1925,27 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                     update_review_dashboard(root, in_progress="CLEAR_ALL")
                     sys.exit(1)
 
+            enable_anki = bool(
+                anki or clean_course or
+                (meta.get('area') == 'education') or
+                ('education' in meta.get('tags', []))
+            )
+
             if use_ai:
                 enriched_body, summary = enrich_draft_with_ai(
                     root, clean_title, raw_text, depth=depth, source_type=in_type, source_url=source,
-                    metacognitive_constraints=metacognitive_prompt
+                    metacognitive_constraints=metacognitive_prompt,
+                    enable_anki=enable_anki,
+                    course_name=clean_course
                 )
             else:
                 enriched_body = format_structured_note(clean_title, raw_text, depth=depth, source_type=in_type, source_url=source)
                 summary = f"Trattazione concettuale ed evidenze chiave per {clean_title}."
+
+            # Post-enrichment ID realignment (D-14)
+            if original_target_content:
+                import anki_helper
+                enriched_body = anki_helper.reinject_anki_cards(original_target_content, enriched_body)
 
             if metacognitive_markdown:
                 if not re.search(r'^##\s+(?:Direttive Metacognitive)', enriched_body, re.MULTILINE | re.IGNORECASE):
@@ -1949,6 +2015,7 @@ def main():
     parser.add_argument('--clear-in-progress', action='store_true', help="Clear in progress section on Review Dashboard")
     parser.add_argument('--course', default=None, help="Target university course name (auto-initializes Course Hub & PACRAR matrix)")
     parser.add_argument('--nlm', action='store_true', help="Consult NotebookLM (Alessandro de Concini) for metacognitive directives during AI conceptual enrichment (D-03)")
+    parser.add_argument('--anki', action='store_true', help="Generate contextual Anki flashcards (Basic/Cloze) inside collapsible callouts (D-09)")
     parser.add_argument('--target-dir', default=None, help="Custom target directory for promotion")
     parser.add_argument('--vault-root', default=None, help="Vault root directory")
     args = parser.parse_args()
@@ -1980,7 +2047,7 @@ def main():
         print(f"Staged {len(items)} raw inbox notes: {items}")
     elif args.input:
         depth = "approfondimento" if args.depth in ("deep", "approfondimento") else "sintesi"
-        path = ingest_source(args.input, vault_root=root, target_dir=args.target_dir, depth=depth, extract_frames=args.extract_frames, force=args.force, use_ai=not args.no_ai, course=args.course, nlm=args.nlm)
+        path = ingest_source(args.input, vault_root=root, target_dir=args.target_dir, depth=depth, extract_frames=args.extract_frames, force=args.force, use_ai=not args.no_ai, course=args.course, nlm=args.nlm, anki=args.anki)
         print(f"Draft staged at: {path}")
     else:
         update_review_dashboard(root)

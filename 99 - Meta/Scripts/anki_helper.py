@@ -297,6 +297,87 @@ def extract_anki_cards_from_text(content: str) -> List[Dict[str, Any]]:
     return cards
 
 
+def reinject_anki_cards(original_content: str, new_content: str) -> str:
+    """Realigns pre-existing Anki card IDs onto newly generated cards using bi-phase matching (ANKI-03, D-14).
+    Phase 1: Exact concept name match.
+    Phase 2: difflib SequenceMatcher similarity (>= 0.65) on Front/Text field.
+    Appends unmatched legacy cards with IDs in an appendix block to prevent data loss.
+    """
+    orig_cards = extract_anki_cards_from_text(original_content)
+    new_cards = extract_anki_cards_from_text(new_content)
+
+    if not orig_cards or not new_cards:
+        return new_content
+
+    # Pool of original cards that have an ID
+    id_pool = [c for c in orig_cards if c.get("card_id") is not None]
+    if not id_pool:
+        return new_content
+
+    matched_orig_ids: Set[int] = set()
+    replacements: List[Tuple[Tuple[int, int], str]] = []
+
+    for n_card in new_cards:
+        norm_new_concept = re.sub(r'\s+', ' ', n_card["concept_name"].lower()).strip()
+        matched_orig = None
+
+        # 1. Exact Concept Match
+        for o_card in id_pool:
+            if o_card["card_id"] in matched_orig_ids:
+                continue
+            norm_orig_concept = re.sub(r'\s+', ' ', o_card["concept_name"].lower()).strip()
+            if norm_new_concept == norm_orig_concept:
+                matched_orig = o_card
+                break
+
+        # 2. Fuzzy Text Match on Front/Text
+        if not matched_orig:
+            n_text = n_card["fields"].get("Front") or n_card["fields"].get("Text") or ""
+            best_ratio = 0.0
+            best_cand = None
+            for o_card in id_pool:
+                if o_card["card_id"] in matched_orig_ids:
+                    continue
+                o_text = o_card["fields"].get("Front") or o_card["fields"].get("Text") or ""
+                ratio = difflib.SequenceMatcher(None, o_text, n_text).ratio()
+                if ratio > best_ratio and ratio >= 0.65:
+                    best_ratio = ratio
+                    best_cand = o_card
+            matched_orig = best_cand
+
+        # If matched, transplant the ID comment right before "> END" or "END"
+        if matched_orig and matched_orig.get("card_id"):
+            matched_id = matched_orig["card_id"]
+            matched_orig_ids.add(matched_id)
+            raw = n_card["raw_block"]
+            # Remove existing ID comment if any
+            raw = re.sub(r'^[ \t]*(?:>[ \t]*)?<!--ID:[ \t]*\d+-->\n?', '', raw, flags=re.MULTILINE)
+
+            # Inject before END line
+            def inject_id(m: re.Match) -> str:
+                end_line = m.group(0)
+                prefix = "> " if end_line.lstrip().startswith(">") else ""
+                return f"{prefix}<!--ID: {matched_id}-->\n{end_line}"
+
+            updated_raw = re.sub(r'^[ \t]*(?:>[ \t]*)?END[ \t]*$', inject_id, raw, flags=re.MULTILINE)
+            replacements.append((n_card["span"], updated_raw))
+
+    # Apply span replacements in reverse order
+    realigned = new_content
+    for span, repl in sorted(replacements, key=lambda x: x[0][0], reverse=True):
+        realigned = realigned[:span[0]] + repl + realigned[span[1]:]
+
+    # Preserve unmatched orphan cards with IDs in an appendix (D-14)
+    orphans = [c for c in id_pool if c["card_id"] not in matched_orig_ids]
+    if orphans:
+        appendix_lines = ["\n\n## Flashcard Archiviate (Preservazione ID Anki)\n"]
+        for o in orphans:
+            appendix_lines.append(o["raw_block"].strip() + "\n")
+        realigned = realigned.rstrip() + "\n" + "\n".join(appendix_lines)
+
+    return realigned
+
+
 def audit_anki_cards(vault_root: Optional[str] = None) -> Dict[str, Any]:
     """Scans all markdown notes in the vault for Anki flashcards,
     detecting total count, synced IDs, duplicate IDs, and decks (D-13, D-15, D-16).

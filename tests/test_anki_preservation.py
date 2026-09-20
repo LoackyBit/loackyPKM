@@ -16,6 +16,8 @@ if SCRIPTS_DIR not in sys.path:
 
 import anki_helper
 import brain_health
+import brain_ingest
+from unittest.mock import patch, MagicMock
 
 
 class TestAnkiSyntax(unittest.TestCase):
@@ -308,6 +310,280 @@ class TestAnkiAudit(unittest.TestCase):
         # Test check-file CLI
         exit_code_file = anki_helper.main(["--check-file", note1_path, "--vault-root", self.test_dir])
         self.assertEqual(exit_code_file, 0)
+
+
+class TestAnkiGeneration(unittest.TestCase):
+    """Verifies AI prompt injection, --anki flag, and autolink masking (Task 17-02-01)."""
+
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+        self.tech_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech")
+        os.makedirs(self.tech_dir, exist_ok=True)
+        # Create a couple of existing notes for autolinking
+        with open(os.path.join(self.tech_dir, "Algoritmi.md"), "w", encoding="utf-8") as f:
+            f.write("---\ntitle: Algoritmi\nstatus: permanent\ntype: concept\narea: tech\ntags: [tech/algo]\n---\n# Algoritmi\n")
+        with open(os.path.join(self.tech_dir, "Dijkstra.md"), "w", encoding="utf-8") as f:
+            f.write("---\ntitle: Dijkstra\nstatus: permanent\ntype: concept\narea: tech\ntags: [tech/algo]\n---\n# Dijkstra\n")
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_autolink_masks_anki_callouts(self):
+        body = """Questa sezione introduce Dijkstra e Algoritmi nel testo ordinario.
+
+> [!tip]- Flashcard: Dijkstra
+> %% TARGET DECK: University::Algoritmi %%
+> START
+> Basic
+> Front: Come funziona Dijkstra per trovare i cammini minimi?
+> Back: Algoritmi con min-heap binario.
+> Tags: Algoritmi::Grafi
+> END
+
+Testo finale con menzione di Algoritmi.
+"""
+        linked, links = brain_ingest.autolink_content(self.test_dir, body, "Grafi")
+        # Outside callout, words should be autolinked
+        self.assertIn("[[Dijkstra]]", linked)
+        self.assertIn("[[Algoritmi]]", linked)
+
+        # Extract the callout from the linked result
+        callout_start = linked.index("> [!tip]- Flashcard: Dijkstra")
+        callout_end = linked.index("> END") + 5
+        callout_text = linked[callout_start:callout_end]
+
+        # Inside the callout, words MUST NOT be converted to wikilinks
+        self.assertNotIn("[[Dijkstra]]", callout_text)
+        self.assertNotIn("[[Algoritmi]]", callout_text)
+        self.assertIn("Come funziona Dijkstra", callout_text)
+        self.assertIn("Algoritmi con min-heap", callout_text)
+
+    def test_autolink_masks_mathjax_delimiters(self):
+        body = "Formula inline: [$]f(x) con Algoritmi[/$] e display: [$$]\\sum Algoritmi[/$$]."
+        linked, _ = brain_ingest.autolink_content(self.test_dir, body, "Titolo")
+        self.assertNotIn("[[Algoritmi]]", linked)
+        self.assertIn("[$]f(x) con Algoritmi[/$]", linked)
+        self.assertIn("[$$]\\sum Algoritmi[/$$]", linked)
+
+    @patch('subprocess.run')
+    def test_enrich_draft_with_ai_prompt_generation(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=0, stdout="# Titolo Nota\nContenuto\n---SUMMARY---\nSintesi esecutiva.")
+
+        # Test with enable_anki=True
+        brain_ingest.enrich_draft_with_ai(
+            self.test_dir, "Titolo Nota", "Contenuto sorgente",
+            enable_anki=True, course_name="Linguaggi Formali"
+        )
+        self.assertTrue(mock_run.called)
+        call_args = mock_run.call_args[0][0]
+        prompt_arg = [arg for arg in call_args if arg.startswith("--print=")][0]
+
+        self.assertIn("7. GENERAZIONE FLASHCARD ANKI CONTESTUALI", prompt_arg)
+        self.assertIn("%% TARGET DECK: University::Linguaggi_Formali %%", prompt_arg)
+        self.assertIn("> [!tip]- Flashcard:", prompt_arg)
+
+        # Test with enable_anki=False
+        mock_run.reset_mock()
+        brain_ingest.enrich_draft_with_ai(
+            self.test_dir, "Titolo Nota", "Contenuto sorgente",
+            enable_anki=False
+        )
+        call_args_no_anki = mock_run.call_args[0][0]
+        prompt_arg_no_anki = [arg for arg in call_args_no_anki if arg.startswith("--print=")][0]
+        self.assertNotIn("7. GENERAZIONE FLASHCARD ANKI CONTESTUALI", prompt_arg_no_anki)
+
+
+class TestAnkiPreservation(unittest.TestCase):
+    """Verifies bi-phase ID realignment, orphan preservation, bitwise guard, and dashboard section (Task 17-02-02 & 17-02-03)."""
+
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+        self.atlas_dir = os.path.join(self.test_dir, "02 - Atlas", "Tech")
+        os.makedirs(self.atlas_dir, exist_ok=True)
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_reinject_anki_cards_exact_match(self):
+        orig_content = """# Automi a Stati Finiti
+
+> [!tip]- Flashcard: Definizione DFA
+> %% TARGET DECK: University::Linguaggi_Formali %%
+> START
+> Basic
+> Front: Cos'è un DFA?
+> Back: Quintupla formale.
+> Tags: LF::Automi
+> <!--ID: 1726588291001-->
+> END
+"""
+        new_content = """# Automi a Stati Finiti
+
+Rielaborazione migliorata.
+
+> [!tip]- Flashcard: Definizione DFA
+> %% TARGET DECK: University::Linguaggi_Formali %%
+> START
+> Basic
+> Front: Cos'è un automa a stati finiti deterministico (DFA)?
+> Back: Modello descritto da quintupla formale.
+> Tags: LF::Automi
+> END
+"""
+        realigned = anki_helper.reinject_anki_cards(orig_content, new_content)
+        self.assertIn("> <!--ID: 1726588291001-->", realigned)
+        cards = anki_helper.extract_anki_cards_from_text(realigned)
+        self.assertEqual(len(cards), 1)
+        self.assertEqual(cards[0]["card_id"], 1726588291001)
+
+    def test_reinject_anki_cards_fuzzy_match(self):
+        orig_content = """> [!tip]- Flashcard: Complessità Algoritmo Dijkstra
+> %% TARGET DECK: University::Algoritmi %%
+> START
+> Basic
+> Front: Qual è la complessità temporale di Dijkstra con heap binario?
+> Back: Tempo O((V + E) log V).
+> Tags: Algoritmi::Grafi
+> <!--ID: 1726588292002-->
+> END
+"""
+        new_content = """> [!tip]- Flashcard: Tempo Asintotico Dijkstra
+> %% TARGET DECK: University::Algoritmi %%
+> START
+> Basic
+> Front: Qual è la complessità temporale di Dijkstra con heap binario per grafi?
+> Back: Il tempo è O((V + E) log V).
+> Tags: Algoritmi::Grafi
+> END
+"""
+        realigned = anki_helper.reinject_anki_cards(orig_content, new_content)
+        cards = anki_helper.extract_anki_cards_from_text(realigned)
+        self.assertEqual(len(cards), 1)
+        self.assertEqual(cards[0]["card_id"], 1726588292002)
+
+    def test_reinject_preserves_unmatched_orphans(self):
+        orig_content = """> [!tip]- Flashcard: Card Conservata
+> START
+> Basic
+> Front: Domanda 1
+> Back: Risposta 1
+> <!--ID: 3001-->
+> END
+
+> [!tip]- Flashcard: Card Rimossa
+> START
+> Basic
+> Front: Domanda 2 che non esiste più
+> Back: Risposta 2
+> <!--ID: 3002-->
+> END
+"""
+        new_content = """> [!tip]- Flashcard: Card Conservata
+> START
+> Basic
+> Front: Domanda 1
+> Back: Risposta 1
+> END
+"""
+        realigned = anki_helper.reinject_anki_cards(orig_content, new_content)
+        self.assertIn("## Flashcard Archiviate (Preservazione ID Anki)", realigned)
+        self.assertIn("<!--ID: 3002-->", realigned)
+        cards = anki_helper.extract_anki_cards_from_text(realigned)
+        ids = [c["card_id"] for c in cards]
+        self.assertIn(3001, ids)
+        self.assertIn(3002, ids)
+
+    def test_reinject_leaves_new_cards_without_id(self):
+        orig_content = """> [!tip]- Flashcard: Card Vecchia
+> START
+> Basic
+> Front: D1
+> Back: R1
+> <!--ID: 4001-->
+> END
+"""
+        new_content = """> [!tip]- Flashcard: Card Vecchia
+> START
+> Basic
+> Front: D1
+> Back: R1
+> END
+
+> [!tip]- Flashcard: Card Totalmente Nuova
+> START
+> Cloze
+> Text: Testo {{c1::inedito}}
+> Extra: Extra
+> END
+"""
+        realigned = anki_helper.reinject_anki_cards(orig_content, new_content)
+        cards = anki_helper.extract_anki_cards_from_text(realigned)
+        self.assertEqual(len(cards), 2)
+        self.assertEqual(cards[0]["card_id"], 4001)
+        self.assertIsNone(cards[1]["card_id"])
+
+    def test_lint_file_preserves_anki_ids(self):
+        note_path = os.path.join(self.atlas_dir, "Test Linter Anki.md")
+        card = anki_helper.format_anki_card(
+            concept_name="Integrità",
+            course_name="Sistemi",
+            model="Basic",
+            field1_content="Domanda",
+            field2_content="Risposta",
+            card_id=1726588299999
+        )
+        raw_note = f"""---
+title: Test Linter Anki
+area: tech
+tags: [tech/systems]
+---
+# Test Linter Anki
+
+{card}
+"""
+        with open(note_path, "w", encoding="utf-8") as f:
+            f.write(raw_note)
+
+        # Run lint_file with execute=True
+        modified, new_c = brain_health.lint_file(note_path, vault_root=self.test_dir, execute=True)
+        self.assertTrue(modified)
+        with open(note_path, "r", encoding="utf-8") as f:
+            saved_content = f.read()
+
+        self.assertIn("<!--ID: 1726588299999-->", saved_content)
+        cards = anki_helper.extract_anki_cards_from_text(saved_content)
+        self.assertEqual(len(cards), 1)
+        self.assertEqual(cards[0]["card_id"], 1726588299999)
+
+    def test_lint_file_aborts_on_id_tampering(self):
+        note_path = os.path.join(self.atlas_dir, "Tamper Note.md")
+        card = anki_helper.format_anki_card(
+            concept_name="Integrità",
+            course_name="Sistemi",
+            model="Basic",
+            field1_content="Domanda",
+            field2_content="Risposta",
+            card_id=1726588277777
+        )
+        content = f"# Tamper Note\n\n{card}\n"
+        with open(note_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+        # Simulate tampering where assemble_markdown_note strips the ID
+        with patch('brain_health.assemble_markdown_note', return_value="# Tamper Note\n\nCard without ID\n"):
+            modified, ret_content = brain_health.lint_file(note_path, vault_root=self.test_dir, execute=True)
+            self.assertFalse(modified)
+            with open(note_path, "r", encoding="utf-8") as f:
+                disk_content = f.read()
+            # File on disk must remain unchanged with ID intact
+            self.assertIn("<!--ID: 1726588277777-->", disk_content)
+
+    def test_dashboard_contains_anki_integrity_section(self):
+        dashboard = brain_health.generate_health_dashboard(self.test_dir, notes_data=[], audit_stats={})
+        self.assertIn("## Integrità Flashcard Anki", dashboard)
+        self.assertIn("Flashcard Totali", dashboard)
+        self.assertIn("Flashcard Sincronizzate", dashboard)
+        self.assertIn("Flashcard Inedite", dashboard)
 
 
 if __name__ == "__main__":

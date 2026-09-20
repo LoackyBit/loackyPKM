@@ -5,8 +5,8 @@ area: meta
 related: ["[[Home MOC]]", "[[Review Dashboard]]"]
 source: original
 title: "Vault Health Dashboard"
-date: '2026-09-05'
-updated: 2026-09-05T01:27
+date: '2026-09-20'
+updated: 2026-09-20T21:44
 tags: [meta/dashboard, meta/health]
 summary: "Pannello di controllo statico del Second Brain: monitoraggio dello stato di salute, note in staging, bozze del blog e diagnostica del grafo."
 ---
@@ -16,17 +16,17 @@ summary: "Pannello di controllo statico del Second Brain: monitoraggio dello sta
 
 Pannello di controllo in **puro Markdown statico** per monitorare la salute del Vault, le note in staging e l'integrità del grafo semantico.
 
-*Ultimo aggiornamento:* `2026-09-05 01:27`
+*Ultimo aggiornamento:* `2026-09-20 21:44`
 
 ---
 
 ## Metriche Generali del Vault
 - **Note Totali:** 145
-- **Note in Staging (Inbox):** 2
+- **Note in Staging (Inbox):** 1
 - **Bozze Blog:** 3
 - **Note Orfane:** 4
-- **Link Interrotti:** 8
-- **Forward-Links Pianificati:** 2612
+- **Link Interrotti:** 6
+- **Forward-Links Pianificati:** 2614
 - **Collisioni Omonime (Note Duplicate):** 1
 
 ---
@@ -34,8 +34,7 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 ## Note in Staging (Inbox / Bozze)
 | Nota | Creazione | Area | Stato |
 |---|---|---|---|
-| [[Clean Code Audit Report - 2026-09-03]] | 2026-09-03 | meta | `draft` |
-| [[Review Dashboard]] | 2026-08-31 | meta | `draft` |
+| [[Review Dashboard]] | 2026-09-13 | meta | `draft` |
 
 
 ---
@@ -53,17 +52,25 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 ## Note Modificate di Recente
 | Nota | Ultima Modifica | Area |
 |---|---|---|
-| [[test]] | 2026-09-03 22:40 | N/D |
-| [[test]] | 2026-09-03 22:40 | N/D |
-| [[Review Dashboard]] | 2026-09-03 22:31 | meta |
-| [[Clean Code Audit Report - 2026-09-03]] | 2026-09-03 13:10 | meta |
+| [[Personal Growth & Health]] | 2026-09-17 22:15 | tech |
+| [[Review Dashboard]] | 2026-09-13 15:39 | meta |
+| [[L'Intelligenza Artificiale Potrebbe Uccidere Tutti gli Esseri Umani Entro il 2030]] | 2026-09-13 15:39 | tech |
+| [[MILESTONE_SUMMARY-v1.0.1-alpha]] | 2026-09-05 12:59 | N/D |
+| [[MILESTONE_SUMMARY-v1.0.0-alpha]] | 2026-09-05 12:59 | N/D |
 | [[Workflow Perplexity NotebookLM]] | 2026-09-01 00:21 | tech |
 | [[Unfuck Your Brain]] | 2026-09-01 00:21 | tech |
 | [[TIL l'Inganno Dell'Applauso Quintiliano]] | 2026-09-01 00:21 | tech |
 | [[Problema P Vs NP]] | 2026-09-01 00:21 | tech |
 | [[Index]] | 2026-09-01 00:21 | tech |
-| [[Crono S]] | 2026-09-01 00:21 | tech |
 
+
+---
+
+## Integrità Flashcard Anki
+- **Flashcard Totali:** 3 (3 Basic, 0 Cloze)
+- **Flashcard Sincronizzate (con ID):** 3
+- **Flashcard Inedite (senza ID):** 0
+- **Mazzi Registrati:** 0
 
 ---
 

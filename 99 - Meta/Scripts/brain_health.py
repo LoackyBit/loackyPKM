@@ -861,6 +861,20 @@ def lint_file(filepath: str, vault_root: str = '.', execute: bool = False,
 
     new_content = assemble_markdown_note(canonical_yaml, final_breadcrumb, cleaned_body)
 
+    # D-13: Bitwise Invariant Anki ID Guard
+    pre_anki_ids = set(re.findall(r'<!--ID:\s*(\d+)-->', content))
+    post_anki_ids = set(re.findall(r'<!--ID:\s*(\d+)-->', new_content))
+
+    if pre_anki_ids != post_anki_ids:
+        missing_ids = pre_anki_ids - post_anki_ids
+        added_ids = post_anki_ids - pre_anki_ids
+        err_msg = (
+            f"CRITICAL INTEGRITY VIOLATION in {filepath}: Anki IDs altered during linting! "
+            f"Missing: {missing_ids}, Added: {added_ids}. Write aborted."
+        )
+        sys.stderr.write(f"{err_msg}\n")
+        return False, content
+
     if content.strip() != new_content.strip():
         if execute:
             dir_name = os.path.dirname(os.path.abspath(filepath))
@@ -1059,6 +1073,28 @@ def generate_health_dashboard(vault_root: str, notes_data: List[Dict[str, Any]],
     if v_count > 0 or d_count > 0:
         att_line = f"\n- **Allegati Slide Versionati (v2):** {v_count} | **Duplicati SHA:** {d_count}"
 
+    # Anki Flashcard Audit Section (D-13, D-16)
+    anki_stats = audit_stats.get('anki_flashcards')
+    if anki_stats is None:
+        try:
+            import anki_helper
+            anki_stats = anki_helper.audit_anki_cards(vault_root)
+        except Exception:
+            anki_stats = {"total_cards": 0, "synced_cards": 0, "pending_cards": 0, "basic_count": 0, "cloze_count": 0, "decks": [], "duplicate_count": 0}
+
+    anki_duplicate_warning = ""
+    if anki_stats.get('duplicate_count', 0) > 0:
+        anki_duplicate_warning = f"\n> [!warning] **ATTENZIONE:** Rilevati {anki_stats['duplicate_count']} ID Anki duplicati! Esegui `python3 \"99 - Meta/Scripts/anki_helper.py\" --audit` per risolvere."
+
+    anki_section = f"""---
+
+## Integrità Flashcard Anki
+- **Flashcard Totali:** {anki_stats.get('total_cards', 0)} ({anki_stats.get('basic_count', 0)} Basic, {anki_stats.get('cloze_count', 0)} Cloze)
+- **Flashcard Sincronizzate (con ID):** {anki_stats.get('synced_cards', 0)}
+- **Flashcard Inedite (senza ID):** {anki_stats.get('pending_cards', 0)}
+- **Mazzi Registrati:** {len(anki_stats.get('decks', []))}{anki_duplicate_warning}
+"""
+
     return f"""---
 status: permanent
 type: moc
@@ -1104,6 +1140,7 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 ## Note Modificate di Recente
 {recent_table}
 
+{anki_section}
 ---
 
 ## Comandi di Governance

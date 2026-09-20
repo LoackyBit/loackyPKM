@@ -183,8 +183,12 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
+**Wave 1**
 
-- [ ] 17-01: Generatore di flashcard contestuali `>[!tip]` (`Basic` e `Cloze`) con associazione al mazzo di materia
+- [x] 17-01: Generatore di flashcard contestuali `>[!tip]` (`Basic` e `Cloze`) con associazione al mazzo di materia
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 17-02: Parser di preservazione per commenti `<!--ID: \d+-->`, protezione in `brain_health.py` e test suite di sincronizzazione Anki
 
 ---

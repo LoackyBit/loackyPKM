@@ -225,6 +225,31 @@ Testo intermedio tra le carte.
             self.assertIn(1718902991002, ids)
             self.assertIn(1718902845126, ids)
 
+    def test_extract_multiline_comment_card(self):
+        text = """> [!tip]- Flashcard: Convergenza Assoluta e Semplice
+%%
+TARGET DECK: University::Analisi_1
+START
+Basic
+Front: Qual è la relazione logica tra convergenza assoluta e convergenza semplice per una serie numerica in R o C?
+Back: La convergenza assoluta implica sempre la convergenza semplice ([$]\\sum \\vert a_n \\vert < +\\infty \\implies \\sum a_n \\text{ converge}[/$]).
+Tags: Analisi_1::SerieNumeriche::Convergenza
+END
+%%
+"""
+        cards = anki_helper.extract_anki_cards_from_text(text)
+        self.assertEqual(len(cards), 1)
+        card = cards[0]
+        self.assertEqual(card["concept_name"], "Convergenza Assoluta e Semplice")
+        self.assertEqual(card["deck"], "University::Analisi_1")
+        self.assertEqual(card["model"], "Basic")
+        self.assertIn("convergenza assoluta", card["fields"]["Front"])
+        self.assertIn(r"[$]\sum \vert a_n \vert < +\infty", card["fields"]["Back"])
+        self.assertEqual(card["tags"], ["Analisi_1::SerieNumeriche::Convergenza"])
+        self.assertTrue(card["raw_block"].strip().startswith("> [!tip]- Flashcard:"))
+        self.assertTrue(card["raw_block"].strip().endswith("%%"))
+
+
 
 class TestAnkiAudit(unittest.TestCase):
     """Verifies vault audit engine, duplicate detection, and CLI interface (Task 17-01-03)."""
@@ -379,7 +404,7 @@ Testo finale con menzione di Algoritmi.
         prompt_arg = [arg for arg in call_args if arg.startswith("--print=")][0]
 
         self.assertIn("7. GENERAZIONE FLASHCARD ANKI CONTESTUALI", prompt_arg)
-        self.assertIn("%% TARGET DECK: University::Linguaggi_Formali %%", prompt_arg)
+        self.assertIn("TARGET DECK: University::Linguaggi_Formali", prompt_arg)
         self.assertIn("> [!tip]- Flashcard:", prompt_arg)
 
         # Test with enable_anki=False
@@ -586,5 +611,87 @@ tags: [tech/systems]
         self.assertIn("Flashcard Inedite", dashboard)
 
 
+class TestAnkiFormatSanitizationAndValidation(unittest.TestCase):
+    """Tests for flashcard sanitization and validation complying with official Anki documentation."""
+
+    def test_sanitize_math_derivatives(self):
+        raw = "Consideriamo $f'(x) = 2x$ e $f''(t) = a$ e $f'(\\xi)(b - a)$ e $$g'(u) = 1$$. L'insieme dell'operatore."
+        sanitized = anki_helper.sanitize_math_derivatives(raw)
+        self.assertIn(r"$f^\prime(x) = 2x$", sanitized)
+        self.assertIn(r"$f^{\prime\prime}(t) = a$", sanitized)
+        self.assertIn(r"$f^\prime(\xi)(b - a)$", sanitized)
+        self.assertIn(r"$$g^\prime(u) = 1$$", sanitized)
+        self.assertIn("L'insieme dell'operatore", sanitized)
+
+    def test_sanitize_flashcard_text(self):
+        raw_card = """> [!tip]- Flashcard: Teorema Test
+> %%
+> TARGET DECK: University::Analisi_1
+> START
+> cloze
+> text: Enunciato con {{c1:termine errato}} e formula $f'(x) = |x|$.
+> tags: Analisi_1::Test
+> END
+> %%"""
+        sanitized = anki_helper.sanitize_flashcard_text(raw_card)
+        self.assertIn("Cloze", sanitized)
+        self.assertIn("Text: Enunciato con {{c1::termine errato}}", sanitized)
+        self.assertIn(r"$f^\prime(x) = \vert x\vert$", sanitized)
+        self.assertIn("Tags: Analisi_1::Test", sanitized)
+        # Verify no leading '>' inside the %% ... %% block
+        lines = sanitized.splitlines()
+        self.assertTrue(lines[0].startswith("> [!tip]- Flashcard:"))
+        for inner in lines[1:]:
+            self.assertFalse(inner.strip().startswith(">"), f"Line still has leading quote: {inner}")
+
+    def test_validate_flashcard_text(self):
+        valid_card = r"""> [!tip]- Flashcard: Valid Card
+%%
+TARGET DECK: University::Analisi_1
+START
+Cloze
+Text: Formula corretta {{c1::$f^\prime(x) = 2x$}}.
+Extra: Note
+Tags: Analisi_1::Test
+END
+%%"""
+        errors = anki_helper.validate_flashcard_text(valid_card)
+        self.assertEqual(errors, [])
+
+        invalid_card = """> [!tip]- Flashcard: Bad Card
+%%
+START
+Cloze
+Text: Formula con errore {{c1:singolo due punti}} e $f'(x) = 2x$.
+END
+%%"""
+        errs = anki_helper.validate_flashcard_text(invalid_card)
+        self.assertTrue(any("TARGET DECK" in e for e in errs))
+        self.assertTrue(any("single-colon" in e for e in errs))
+        self.assertTrue(any("prime" in e for e in errs))
+
+    def test_sanitize_all_flashcards(self):
+        full_note = """# Nota di Prova
+
+Introduzione concettuale alla materia.
+
+> [!tip]- Flashcard: Derivata
+> %%
+> TARGET DECK: University::Analisi_1
+> START
+> cloze
+> text: La derivata è {{c1:$f'(x)$}}.
+> tags: Analisi_1::Derivate
+> END
+> %%
+
+Trattazione successiva senza alterazioni dell'apostrofo.
+"""
+        result = anki_helper.sanitize_all_flashcards(full_note)
+        self.assertIn(r"{{c1::$f^\prime(x)$}}", result)
+        self.assertIn("Trattazione successiva senza alterazioni dell'apostrofo.", result)
+
+
 if __name__ == "__main__":
     unittest.main()
+

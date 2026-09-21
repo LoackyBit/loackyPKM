@@ -17,7 +17,7 @@ from typing import Dict, List, Tuple, Optional, Any, Set
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if SCRIPT_DIR not in sys.path: sys.path.insert(0, SCRIPT_DIR)
 
-import brain_health, youtube_helper
+import brain_health, youtube_helper, anki_helper
 
 YT_URL_REGEX = re.compile(r'(?:https?://)?(?:www\.|m\.)?(?:youtube\.com/(?:watch\?v=|embed/|v/|shorts/)|youtu\.be/)([a-zA-Z0-9_-]{11})')
 WEB_URL_REGEX = re.compile(r'^https?://[^\s/$.?#].[^\s]*$', re.IGNORECASE)
@@ -199,7 +199,7 @@ def _has_tag(tags: List[str], target_tags: List[str]) -> bool:
 
 
 def _has_keyword(text: str, keywords: List[str]) -> bool:
-    """Checks if any keyword is present using regex word boundaries for short tokens."""
+    """Checks if any keyword is present using regex word boundaries."""
     for kw in keywords:
         kw_clean = kw.lower().strip()
         if not kw_clean:
@@ -208,7 +208,7 @@ def _has_keyword(text: str, keywords: List[str]) -> bool:
             if re.search(r'(?:\b|_)' + re.escape(kw_clean) + r'(?:\b|_)', text):
                 return True
         else:
-            if kw_clean in text:
+            if re.search(r'(?:\b|_)' + re.escape(kw_clean), text):
                 return True
     return False
 
@@ -490,7 +490,8 @@ def autolink_content(vault_root: str, body_text: str, current_title: str) -> Tup
     masked = re.sub(r'~~~[\s\S]*?~~~', mask_block, masked)
     masked = re.sub(r'`[^`\n]+`', mask_block, masked)
 
-    # 2. Mask Anki flashcard callout blocks and raw START...END blocks (ANKI-02, Pitfall 2)
+    # 2. Mask Anki flashcard callout blocks, Obsidian comments, and raw START...END blocks (ANKI-02, Pitfall 2)
+    masked = re.sub(r'%%[\s\S]*?%%', mask_block, masked)
     masked = re.sub(r'^[ \t]*>[ \t]*\[![a-zA-Z0-9_-]+\]-?[ \t]*(?:Flashcard:[^\n]*)?\n(?:^[ \t]*>[ \t]*[^\n]*\n)*?^[ \t]*>[ \t]*END[ \t]*$', mask_block, masked, flags=re.MULTILINE)
     masked = re.sub(r'^[ \t]*(?:>[ \t]*)?START[ \t]*\n[\s\S]*?^[ \t]*(?:>[ \t]*)?END[ \t]*$', mask_block, masked, flags=re.MULTILINE)
 
@@ -552,7 +553,7 @@ def format_structured_note(title: str, raw_content: str, depth: str = "approfond
 
 def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth: str = "approfondimento",
                          source_type: str = "text", source_url: str = "original",
-                         agy_path: Optional[str] = None, timeout: int = 45,
+                         agy_path: Optional[str] = None, timeout: int = 90,
                          ai_model: Optional[str] = None,
                          metacognitive_constraints: Optional[str] = None,
                          enable_anki: bool = False,
@@ -582,29 +583,54 @@ def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth
     if enable_anki:
         clean_deck = course_name.replace(" ", "_") if course_name else "Generale"
         anki_rules = f"""
-7. GENERAZIONE FLASHCARD ANKI CONTESTUALI (ANKI-01, ANKI-02, D-01..D-12, D-17, D-18):
+7. GENERAZIONE FLASHCARD ANKI CONTESTUALI (CONFORMI A DOC ANKI & OBSIDIAN-TO-ANKI):
    - Genera flashcard contestuali atomiche collocate IMMEDIATAMENTE A VALLE di ciascun concetto cardine evidenziato in giallo (<mark>) o teorema STEM (indicativamente 5-10 card per lezione).
-   - Struttura OBBLIGATORIA callout collassabile:
+   - Struttura OBBLIGATORIA: La prima riga è il callout collassabile '> [!tip]- Flashcard: [Nome Concetto]', seguito IMMEDIATAMENTE A CAPO (SENZA '>') dall'intero blocco Anki racchiuso tra delimitatori di commento Obsidian '%%':
      > [!tip]- Flashcard: [Nome Concetto]
-     > %% TARGET DECK: University::{clean_deck} %%
-     > START
-     > [Basic|Cloze]
-     > [Front:|Text:] ...
-     > [Back:|Extra:] ...
-     > Tags: {clean_deck}::[Argomento]::[Dettaglio]
-     > END
-   - EURISTICA ADC: usa 'Basic' (Front:/Back:) per comprensione causale, spiegazione di meccanismi, principi primi e domande 'perché/come funziona'; usa 'Cloze' (Text:/Extra:) con {{{{c1::...}}}} per formule matematiche STEM vincolate, enunciati formali, condizioni di validità e terminologia rigorosa.
-   - FORMULE MATEMATICHE ANKI: All'interno dei campi Front/Back/Text/Extra, converti TUTTE le formule matematiche nei delimitatori MathJax Anki [$]...[/$] e [$$]...[/$$]. Compatta ciascuna formula su una singola riga. Usa \\vert anziché |.
-   - Per le Cloze all'interno di formule matematiche, separa SEMPRE le graffe con uno spazio: [$]{{{{ {{{{c1::A}}}} }}}}[/$].
+     %%
+     TARGET DECK: University::{clean_deck}
+     START
+     [Basic|Cloze]
+     [Front:|Text:] ...
+     [Back:|Extra:] ...
+     Tags: {clean_deck}::[Argomento]::[Dettaglio]
+     END
+     %%
+   - REGOLA CRITICA INDENTAZIONE: NON anteporre mai il carattere '>' alle righe interne del blocco di commento Anki (%%, TARGET DECK, START, Basic/Cloze, Front/Text, Back/Extra, Tags, END, %%). Solo la primissima riga del callout ha '>'.
+   - MODELLI E CAMPI SUPPORTATI (STANDARD UFFICIALE ANKI):
+     * Modello 'Basic': campi 'Front:' (domanda di ragionamento o principio primo) e 'Back:' (risposta concettuale esaustiva).
+     * Modello 'Cloze': campo 'Text:' contenente le cancellazioni {{{{c1::...}}}}, {{{{c2::...}}}} e campo opzionale 'Extra:' per note di contesto.
+    - REGOLE TASSATIVE PER FORMULE MATEMATICHE E CLOZE (DOC UFFICIALE ANKI):
+     a) Derivate in formule matematiche: USARE SEMPRE la notazione LaTeX standard con ^\\prime (es. $f^\\prime(\\xi)$, $f^{{\\prime\\prime}}(x)$, $s^\\prime(t)$). È SEVERAMENTE VIETATO usare l'apostrofo $f'(x)$, poiché il converter HTML del plugin lo codifica in entità HTML che generano errori di sintassi e tag orfani in Anki.
+     b) Notazione Cloze: USARE SEMPRE il doppio due punti {{{{c1::risposta}}}}. Non usare MAI il singolo due punti {{{{c1:risposta}}}}.
+     c) Delimitatori matematici: usare la sintassi MathJax standard $...$ per formule inline o $$...$$ per formule in blocco (es. {{{{c1::$[a, b]$}}}} o $f(x) = {{{{c1::x^2}}}}$). NON usare MAI i vecchi tag proprietari '[$]' o '[/$]'.
+     d) Testo ordinario in Cloze: usa {{{{c1::parola normale}}}} SENZA delimitatori matematici ($). Non racchiudere mai testo in prosa dentro $...$.
+     e) Valori assoluti e pipe: usa \\vert anziché | nelle formule (es. $\\vert x\\vert$).
+     f) Spaziatura graffe nidificate: all'interno delle formule TeX nelle cloze, evitare doppie graffe consecutive '}}}}' senza spazio (usare '{{ {{' o '\\left\\{{ ... \\right\\}}') per non confondere il parser delle cloze di Anki.
    - Figure didattiche consentite SOLO in Back/Extra con ![[Figura - ...png]]. Zero diagrammi Mermaid nelle card.
-   - NON generare mai commenti <!--ID: -->: gli ID vengono assegnati solo dal plugin o preservati dal sistema.
+   - NON generare mai commenti <!--ID: -->: gli ID vengono assegnati esclusivamente dal plugin Anki al momento del sync.
 """
+
+    # Dynamic content budgeting: avoid macOS ARG_MAX limits while preserving full document fidelity
+    # Gemini context window is 1M+ tokens; macOS ARG_MAX limit is ~1MB (~1,000,000 bytes).
+    # 700,000 characters safely accommodates full textbooks up to 300+ pages without cutting off early chapters.
+    MAX_SOURCE_CHARS = 700_000
+    if len(source_content) <= MAX_SOURCE_CHARS:
+        trimmed_content = source_content
+    else:
+        half = (MAX_SOURCE_CHARS - 1000) // 2
+        trimmed_content = (
+            f"{source_content[:half]}\n\n"
+            f"[... OMISSIONE INTERMEDIA: Documento esteso ({len(source_content)} caratteri). "
+            f"Campionate sezioni iniziali e finali per preservare la completezza del corso ...]\n\n"
+            f"{source_content[-half:]}"
+        )
 
     prompt = f"""Sei il motore di elaborazione della conoscenza per un Second Brain PKM in Obsidian.
 Il tuo compito è rielaborare il contenuto sorgente in una nota concettuale permanente di altissima qualità letteraria e tecnica per: "{c_title}".
 
 CONTENUTO SORGENTE:
-{source_content[:9000]}
+{trimmed_content}
 
 {depth_instruction}
 {meta_section}
@@ -651,9 +677,10 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
    - Inizia sempre con il titolo H1 esatto della nota: # {c_title}
    - Alla fine assoluta della risposta, inserisci il marcatore esatto '---SUMMARY---' seguito da una singola frase densa di significato (120-180 caratteri, max 200) per il recupero sub-secondo.
 
-6. SLIDE ACCADEMICHE E ASSET VISIVI (PDF-02, PDF-03, D-01, D-03, D-05, D-16):
+6. SLIDE ACCADEMICHE, DOCUMENTI PDF E ASSET VISIVI (PDF-02, PDF-03, D-01, D-03, D-05, D-16):
    - TRATTAZIONE CONTINUA E NARRATIVA: Elabora il contenuto come flusso continuo unificato, evitando categoricamente separatori rigidi '### Slide N' o '### Diapositiva N'.
-   - CITAZIONI INLINE A SLIDE: Preserva e posiziona accuratamente i richiami di pagina inline nella forma con escape \\[[[nome.pdf#page=N|N]]] a valle dei concetti e dei teoremi corrispondenti.
+   - CITAZIONI INLINE A PAGINE REALI: Preserva e posiziona accuratamente i richiami di pagina inline nella forma con escape \\[[[nome.pdf#page=N|N]]] a valle dei concetti e dei teoremi corrispondenti.
+   - REGOLA ANTI-ALLUCINAZIONE PAGINE: I richiami DEVONO riflettere le pagine REALI del corpo del documento in cui il singolo concetto o teorema viene effettivamente spiegato. NON associare mai le pagine dell'indice (TOC), prefazione o frontespizio (es. pag 1-3) ad argomenti e capitoli trattati nel testo principale (es. pag 8, 30, 108, 206).
    - RIALLINEAMENTO CODICE E TABELLE: Riorganizza pseudocodice, frammenti di codice e tabelle frammentate in blocchi Markdown sintatticamente evidenziati o tabelle comparative chiare.
    - EMBEDDING FIGURE DISCREZIONALE: Se nel testo o nel contesto sono presenti figure estratte (![[Figura - ...]]), incorporale solo se apportano reale valore concettuale (diagrammi, grafi, schemi a blocchi), posizionandole direttamente a valle del rispettivo concetto cardine. Ometti loghi ateneo o grafiche decorative.
 {anki_rules}"""
@@ -670,11 +697,12 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
 
     try:
         model_to_use = ai_model or os.environ.get("BRAIN_AI_MODEL", DEFAULT_AI_MODEL)
+        effective_timeout = max(timeout, min(300, 90 + int(len(trimmed_content) / 3000)))
         proc = subprocess.run(
             [agy_cmd, "--model", model_to_use, "--dangerously-skip-permissions", "--disable-slash-commands", f"--print={prompt}"],
             capture_output=True,
             text=True,
-            timeout=timeout,
+            timeout=effective_timeout,
             env=env
         )
         if proc.returncode == 0 and proc.stdout.strip():
@@ -703,6 +731,10 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
 
             # Strip emojis from any H2/H3 headers
             cleaned_body = re.sub(r'^(#{2,6}\s+)[\U00010000-\U0010ffff\u2600-\u27ff\u2300-\u23ff\s]+', r'\1', cleaned_body, flags=re.MULTILINE)
+
+            # Automatically sanitize and validate any generated Anki flashcards (Anki Official Doc & Plugin Compliance)
+            if "TARGET DECK:" in cleaned_body or enable_anki:
+                cleaned_body = anki_helper.sanitize_all_flashcards(cleaned_body)
 
             return cleaned_body.strip(), summary
     except Exception:

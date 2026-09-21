@@ -128,3 +128,12 @@ Ogni nota prodotta deve rispettare rigorosamente `99 - Meta/Style Guide.md`:
    - Usare `$formula$` per formule inline o `$$formula$$` per blocchi matematici.
 5. **Assorbimento Organico dei Collegamenti:**
    - I collegamenti semantici a note esistenti sono integrati nel testo (`[[Target Note]]`) e sincronizzati in `related: [...]` nel frontmatter YAML. Nessun blocco finale `## Collegamenti`.
+6. **Flashcard Anki Contestuali (Conformità Doc Ufficiale Anki & obsidian-to-anki-plugin):**
+   - Struttura a callout collassabile: `> [!tip]- Flashcard: [Concetto]`, seguita dal blocco racchiuso tra delimitatori `%% ... %%`.
+   - Nessun carattere `>` sulle righe interne del commento `%%`.
+   - Modelli conformi: `Basic` (Front:/Back:) per principi primi/spiegazioni causali; `Cloze` (Text:/Extra:) per teoremi e formule.
+   - Cloze deletion: rigorosamente a doppio due punti `{{c1::contenuto}}`.
+   - Formule MathJax: delimitatori standard `$..$` e `$$..$$`.
+   - Derivate matematiche: usare SEMPRE `^\prime` o `^{\prime\prime}` (es. $f^\prime(\xi)$), MAI apostrofi `$f'(x)$`, per scongiurare collisioni con l'escape HTML del plugin (`&#039;` -> tag `039` -> formula corrotta in `f&;`).
+   - Valori assoluti: usare `\vert` anziché `|`. Spaziare le graffe TeX nelle cloze (`{ {` o `\left\{...\right\}`).
+   - Nessun `<!--ID: -->` manuale generato dall'AI.

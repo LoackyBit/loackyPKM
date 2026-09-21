@@ -57,6 +57,17 @@ def convert_math_to_anki(text: str) -> str:
     masked = re.sub(r'\[\$\$\][\s\S]*?\[/\$\$\]', mask_existing, text)
     masked = re.sub(r'\[\$\][\s\S]*?\[/\$\]', mask_existing, masked)
 
+    # Helper to replace derivative primes with \prime (D-19)
+    def replace_primes(formula: str) -> str:
+        def prime_repl(m: re.Match) -> str:
+            base = m.group(1)
+            primes = m.group(2)
+            count = len(primes)
+            if count == 1:
+                return f"{base}^\\prime"
+            return f"{base}^{{{'\\prime' * count}}}"
+        return re.sub(r'([a-zA-Z0-9_\}\)])(\'+)', prime_repl, formula)
+
     # Helper to replace bare pipes with \vert (only adding trailing space if followed by an alpha char)
     def replace_bare_pipes(formula: str) -> str:
         def repl(m: re.Match) -> str:
@@ -70,6 +81,7 @@ def convert_math_to_anki(text: str) -> str:
     def display_repl(m: re.Match) -> str:
         formula = m.group(1).strip()
         formula = re.sub(r'\s*\n\s*', ' ', formula)
+        formula = replace_primes(formula)
         formula = replace_bare_pipes(formula)
         return f"[$$]{formula}[/$$]"
 
@@ -79,6 +91,7 @@ def convert_math_to_anki(text: str) -> str:
     def inline_repl(m: re.Match) -> str:
         formula = m.group(1).strip()
         formula = re.sub(r'\s*\n\s*', ' ', formula)
+        formula = replace_primes(formula)
         formula = replace_bare_pipes(formula)
         return f"[$]{formula}[/$]"
 
@@ -94,6 +107,170 @@ def convert_math_to_anki(text: str) -> str:
     masked = re.sub(r'(\}\})\s*\}', r'\1 }', masked)
 
     return masked
+
+
+def replace_primes_in_formula(formula: str) -> str:
+    r"""Replaces derivative apostrophes in LaTeX math with ^\prime notation (e.g. f'(x) -> f^\prime(x)).
+    Prevents HTML entity mangling (&#039;) and tag collision (#039) in obsidian-to-anki-plugin.
+    """
+    def prime_repl(m: re.Match) -> str:
+        base = m.group(1)
+        primes = m.group(2)
+        count = len(primes)
+        if count == 1:
+            return f"{base}^\\prime"
+        return f"{base}^{{{'\\prime' * count}}}"
+    return re.sub(r'([a-zA-Z0-9_\}\)])(\'+)', prime_repl, formula)
+
+
+def sanitize_math_derivatives(text: str) -> str:
+    r"""Normalizes all LaTeX derivative apostrophes to ^\prime within all math environments
+    ($...$, $$...$$, \(...\), \[...\], [$]...[/$], [$$]...[/$$]).
+    """
+    text = re.sub(r'\$\$([\s\S]+?)\$\$', lambda m: f"$${replace_primes_in_formula(m.group(1))}$$", text)
+    text = re.sub(r'\\\[([\s\S]+?)\\\]', lambda m: f"\\[{replace_primes_in_formula(m.group(1))}\\]", text)
+    text = re.sub(r'\[\$\$\]([\s\S]+?)\[/\$\$\]', lambda m: f"[$$]{replace_primes_in_formula(m.group(1))}[/$$]", text)
+    text = re.sub(r'\[\$\]([\s\S]+?)\[/\$\]', lambda m: f"[$]{replace_primes_in_formula(m.group(1))}[/$]", text)
+    text = re.sub(r'\\\(([\s\S]+?)\\\)', lambda m: f"\\({replace_primes_in_formula(m.group(1))}\\)", text)
+    text = re.sub(r'(?<!\$)\$(?!\$)([^\n$]+?)(?<!\$)\$(?!\$)', lambda m: f"${replace_primes_in_formula(m.group(1))}$", text)
+    return text
+
+
+def sanitize_flashcard_text(block: str) -> str:
+    r"""Sanitizes an Anki flashcard block according to official Anki and obsidian-to-anki-plugin standards:
+    - Normalizes derivative primes in math mode ($f'(x)$ -> $f^\prime(x)$).
+    - Enforces double-colon cloze syntax ({{c1::...}}).
+    - Ensures outer curly bracket spacing around clozes.
+    - Normalizes bare pipes to \vert in math formulas.
+    - Cleans leading '>' quote markers on lines within the %% comment block.
+    - Normalizes Model (Basic, Cloze) and Field names (Front:, Back:, Text:, Extra:) casing.
+    """
+    # 1. Fix single colon in cloze syntax {{c1:...}} -> {{c1::...}}
+    block = re.sub(r'\{\{c(\d+):([^\:])', r'{{c\1::\2', block)
+
+    # 2. Spacing protection for outer curly braces around clozes
+    block = re.sub(r'\{(\{\{c\d+::)', r'{ \1', block)
+    block = re.sub(r'(\}\})\s*\}', r'\1 }', block)
+
+    # 3. Bare pipes in math mode
+    def replace_bare_pipes(formula: str) -> str:
+        def pipe_repl(m: re.Match) -> str:
+            idx = m.end()
+            if idx < len(formula) and formula[idx].isalpha():
+                return r"\vert "
+            return r"\vert"
+        return re.sub(r'(?<!\\)\|', pipe_repl, formula)
+
+    # 4. Process math derivatives and bare pipes in all math delimiters
+    def math_processor(formula: str) -> str:
+        f = replace_primes_in_formula(formula)
+        f = replace_bare_pipes(f)
+        return f
+
+    block = re.sub(r'\$\$([\s\S]+?)\$\$', lambda m: f"$${math_processor(m.group(1))}$$", block)
+    block = re.sub(r'\\\[([\s\S]+?)\\\]', lambda m: f"\\[{math_processor(m.group(1))}\\]", block)
+    block = re.sub(r'\[\$\$\]([\s\S]+?)\[/\$\$\]', lambda m: f"[$$]{math_processor(m.group(1))}[/$$]", block)
+    block = re.sub(r'\[\$\]([\s\S]+?)\[/\$\]', lambda m: f"[$]{math_processor(m.group(1))}[/$]", block)
+    block = re.sub(r'\\\(([\s\S]+?)\\\)', lambda m: f"\\({math_processor(m.group(1))}\\)", block)
+    block = re.sub(r'(?<!\$)\$(?!\$)([^\n$]+?)(?<!\$)\$(?!\$)', lambda m: f"${math_processor(m.group(1))}$", block)
+
+    # 5. Clean leading '>' on inner lines (only header has '>')
+    lines = block.splitlines()
+    cleaned_lines = []
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if i == 0 and stripped.startswith(">"):
+            cleaned_lines.append(line)
+            continue
+        if stripped.startswith(">"):
+            cleaned_lines.append(re.sub(r'^[ \t]*>[ \t]?', '', line))
+        else:
+            cleaned_lines.append(line)
+    block = "\n".join(cleaned_lines)
+
+    # 6. Fix model and field casing
+    block = re.sub(r'(?m)^[ \t]*basic[ \t]*$', 'Basic', block)
+    block = re.sub(r'(?m)^[ \t]*cloze[ \t]*$', 'Cloze', block)
+    block = re.sub(r'(?m)^[ \t]*front:[ \t]*', 'Front: ', block)
+    block = re.sub(r'(?m)^[ \t]*back:[ \t]*', 'Back: ', block)
+    block = re.sub(r'(?m)^[ \t]*text:[ \t]*', 'Text: ', block)
+    block = re.sub(r'(?m)^[ \t]*extra:[ \t]*', 'Extra: ', block)
+    block = re.sub(r'(?m)^[ \t]*tags:[ \t]*', 'Tags: ', block)
+
+    return block
+
+
+def validate_flashcard_text(block: str) -> List[str]:
+    """Validates an Anki flashcard block against official Anki specifications.
+    Returns a list of error descriptions (empty if valid).
+    """
+    errors: List[str] = []
+    lines = [l.strip().lstrip('>').strip() for l in block.splitlines()]
+    joined = "\n".join(lines)
+
+    if "START" not in lines:
+        errors.append("Missing START directive")
+    if "END" not in lines:
+        errors.append("Missing END directive")
+
+    deck_m = re.search(r'TARGET DECK:\s*([^\n%]+)', block)
+    if not deck_m or not deck_m.group(1).strip():
+        errors.append("Missing or empty TARGET DECK directive")
+
+    model = None
+    start_idx = -1
+    for i, l in enumerate(lines):
+        if l == "START":
+            start_idx = i
+            break
+    if start_idx != -1 and start_idx + 1 < len(lines):
+        model_line = lines[start_idx + 1]
+        if model_line in ("Basic", "Cloze"):
+            model = model_line
+        else:
+            errors.append(f"Invalid model '{model_line}'. Must be 'Basic' or 'Cloze'")
+    else:
+        errors.append("Cannot determine note model after START")
+
+    if model == "Basic":
+        if not re.search(r'(?:^|\n)\s*Front:', joined):
+            errors.append("Missing 'Front:' field for Basic note")
+        if not re.search(r'(?:^|\n)\s*Back:', joined):
+            errors.append("Missing 'Back:' field for Basic note")
+    elif model == "Cloze":
+        if not re.search(r'(?:^|\n)\s*Text:', joined):
+            errors.append("Missing 'Text:' field for Cloze note")
+        else:
+            cloze_matches = re.findall(r'\{\{c(\d+)::([\s\S]+?)\}\}', block)
+            if not cloze_matches:
+                errors.append("Cloze note missing valid {{c1::...}} cloze deletions")
+            single_colon = re.findall(r'\{\{c\d+:[^:].*?\}\}', block)
+            if single_colon:
+                errors.append(f"Found invalid single-colon cloze deletion: {single_colon}")
+
+    # Check math for unescaped primes
+    math_blocks = re.findall(r'\$(.+?)\$', block)
+    for mb in math_blocks:
+        if re.search(r'[a-zA-Z0-9_\}\)]\'', mb):
+            errors.append(f"Found unescaped derivative prime in math: '{mb}'. Use ^\\prime instead of '")
+
+    return errors
+
+
+def sanitize_all_flashcards(content: str) -> str:
+    """Finds all Anki flashcard blocks in a markdown document, sanitizes their syntax,
+    and updates the content in-place (processing spans in reverse order).
+    """
+    cards = extract_anki_cards_from_text(content)
+    if not cards:
+        return content
+    cards_sorted = sorted(cards, key=lambda c: c["span"][0], reverse=True)
+    res = content
+    for c in cards_sorted:
+        start, end = c["span"]
+        sanitized = sanitize_flashcard_text(c["raw_block"])
+        res = res[:start] + sanitized + res[end:]
+    return res
 
 
 def format_anki_card(
@@ -161,14 +338,15 @@ START_END_PATTERN = re.compile(
     r'^[ \t]*(?:>[ \t]*)?START[ \t]*\n'
     r'^[ \t]*(?:>[ \t]*)?(?P<model>[A-Za-z0-9_-]+)[ \t]*\n'
     r'(?P<inner>(?:(?!^[ \t]*(?:>[ \t]*)?START[ \t]*\n)[\s\S])*?)'
-    r'^[ \t]*(?:>[ \t]*)?END[ \t]*$',
+    r'^[ \t]*(?:>[ \t]*)?END[ \t]*(?:%%)?[ \t]*$',
     re.MULTILINE
 )
 
 
 def extract_anki_cards_from_text(content: str) -> List[Dict[str, Any]]:
     """Extracts all structured Anki flashcards from note markdown text (D-01, D-04, D-12, D-15, D-16).
-    Supports callouts (> [!tip]- Flashcard: ...), variants (> [!question]), and raw unquoted cards.
+    Supports callouts (> [!tip]- Flashcard: ...), variants (> [!question]), multi-line Obsidian comments (%% ... %%),
+    and raw unquoted cards.
     """
     cards: List[Dict[str, Any]] = []
 
@@ -192,9 +370,10 @@ def extract_anki_cards_from_text(content: str) -> List[Dict[str, Any]]:
         search_limit = max(0, len(pre_lines) - 8)
         for i in range(len(pre_lines) - 1, search_limit - 1, -1):
             line = pre_lines[i]
+            clean_strip = line.strip()
 
             # Check for TARGET DECK directive
-            deck_m = re.match(r'^[ \t]*(?:>[ \t]*)?%%[ \t]*TARGET DECK:[ \t]*(?P<deck>[^\n%]+?)[ \t]*%%[ \t]*$', line)
+            deck_m = re.match(r'^[ \t]*(?:>[ \t]*)?(?:%%[ \t]*)?TARGET DECK:[ \t]*(?P<deck>[^\n%]+?)(?:[ \t]*%%)?[ \t]*$', line)
             if deck_m and not deck:
                 deck = deck_m.group("deck").strip()
                 continue
@@ -206,18 +385,23 @@ def extract_anki_cards_from_text(content: str) -> List[Dict[str, Any]]:
                 if callout_title:
                     concept_name = brain_health.clean_title_str(callout_title)
                 # Calculate character index of this callout header line
-                # Sum lengths of all lines up to i plus newlines
                 callout_start_pos = sum(len(l) + 1 for l in pre_lines[:i])
                 break
 
-            # If line is completely empty or plain non-quote text and not %% line, stop looking backwards
-            clean_strip = line.strip()
-            if not clean_strip or (not line.startswith(">") and not clean_strip.startswith("%%")):
-                break
+            if clean_strip in ('', '%%') or 'TARGET DECK:' in line or line.startswith(">"):
+                continue
+            break
 
         # If a callout header was found, expand card span and raw block to include it
         final_start = callout_start_pos if callout_start_pos is not None else card_start
         final_end = card_end
+
+        # Check if following line is closing %%
+        post_text = content[card_end:]
+        close_m = re.match(r'^[ \t]*\n[ \t]*%%[ \t]*', post_text)
+        if close_m:
+            final_end = card_end + close_m.end()
+
         # Include trailing newline if present
         if final_end < len(content) and content[final_end] == '\n':
             final_end += 1

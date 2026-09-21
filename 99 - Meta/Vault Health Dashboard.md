@@ -5,8 +5,8 @@ area: meta
 related: ["[[Home MOC]]", "[[Review Dashboard]]"]
 source: original
 title: "Vault Health Dashboard"
-date: '2026-09-20'
-updated: 2026-09-20T21:44
+date: '2026-09-21'
+updated: 2026-09-21T22:42
 tags: [meta/dashboard, meta/health]
 summary: "Pannello di controllo statico del Second Brain: monitoraggio dello stato di salute, note in staging, bozze del blog e diagnostica del grafo."
 ---
@@ -16,7 +16,7 @@ summary: "Pannello di controllo statico del Second Brain: monitoraggio dello sta
 
 Pannello di controllo in **puro Markdown statico** per monitorare la salute del Vault, le note in staging e l'integrità del grafo semantico.
 
-*Ultimo aggiornamento:* `2026-09-20 21:44`
+*Ultimo aggiornamento:* `2026-09-21 22:42`
 
 ---
 
@@ -26,7 +26,7 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 - **Bozze Blog:** 3
 - **Note Orfane:** 4
 - **Link Interrotti:** 6
-- **Forward-Links Pianificati:** 2614
+- **Forward-Links Pianificati:** 2613
 - **Collisioni Omonime (Note Duplicate):** 1
 
 ---
@@ -34,7 +34,7 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 ## Note in Staging (Inbox / Bozze)
 | Nota | Creazione | Area | Stato |
 |---|---|---|---|
-| [[Review Dashboard]] | 2026-09-13 | meta | `draft` |
+| [[Review Dashboard]] | 2026-09-21 | meta | `draft` |
 
 
 ---
@@ -52,8 +52,9 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 ## Note Modificate di Recente
 | Nota | Ultima Modifica | Area |
 |---|---|---|
+| [[Review Dashboard]] | 2026-09-21 22:42 | meta |
+| [[University]] | 2026-09-21 22:42 | tech |
 | [[Personal Growth & Health]] | 2026-09-17 22:15 | tech |
-| [[Review Dashboard]] | 2026-09-13 15:39 | meta |
 | [[L'Intelligenza Artificiale Potrebbe Uccidere Tutti gli Esseri Umani Entro il 2030]] | 2026-09-13 15:39 | tech |
 | [[MILESTONE_SUMMARY-v1.0.1-alpha]] | 2026-09-05 12:59 | N/D |
 | [[MILESTONE_SUMMARY-v1.0.0-alpha]] | 2026-09-05 12:59 | N/D |
@@ -61,7 +62,6 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 | [[Unfuck Your Brain]] | 2026-09-01 00:21 | tech |
 | [[TIL l'Inganno Dell'Applauso Quintiliano]] | 2026-09-01 00:21 | tech |
 | [[Problema P Vs NP]] | 2026-09-01 00:21 | tech |
-| [[Index]] | 2026-09-01 00:21 | tech |
 
 
 ---

@@ -25,10 +25,6 @@ Mappa concettuale relativa all'orientamento universitario, alla Laurea Triennale
 - [[Metodo di Studio - PACRAR]]
 - [[6 Tecniche per Leggere Meglio e Ricordare Cio Che Leggi]]
 
-
-## Corsi Universitari
-- [[Analisi 1 MOC]]
-
 ---
 
 ## Collegamenti

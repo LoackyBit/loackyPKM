@@ -6,8 +6,8 @@ related: ["[[Home MOC]]", "[[Vault Health Dashboard]]"]
 aliases: []
 source: original
 title: "Review Dashboard"
-date: '2026-09-13'
-updated: 2026-09-13T15:39
+date: '2026-09-21'
+updated: 2026-09-21T01:18
 tags: [meta/dashboard, meta/gtd]
 summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in Inbox."
 ---
@@ -32,7 +32,6 @@ summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in I
 *Nessun errore registrato.*
 
 ## 📜 Storico Recente
-- 2026-08-30 20:34 | [REJECTED] | [[Fisica 2 ~ Prof Marco Mazzeo]] -> PURGED
 - 2026-08-30 22:29 | [REJECTED] | [[Il Lato Oscuro di TikTok Che Ti Nascondono - con i TheShow]] -> PURGED
 - 2026-08-31 00:15 | [APPROVED] | [[99 - Meta/Archive/Semantic Versioning]] -> 02 - Atlas/Tech & AI/Raw Note 2026 - 08 - 31 00 - 07.md (source: original)
 - 2026-08-31 00:20 | [APPROVED] | [[99 - Meta/Archive/Semantic Versioning]] -> 02 - Atlas/Tech & AI/Raw Note 2026 - 08 - 31 00 - 07.md (source: original)

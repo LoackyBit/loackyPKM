@@ -17,6 +17,7 @@
 - **Divieto Sezione Collegamenti**: Non inserire mai una sezione finale separata come `## Collegamenti`, `## Note Correlate` o `## Vedi anche`. I collegamenti sono tessuti nel testo e sincronizzati nel frontmatter YAML (`related: [...]`).
 - **Diagrammi Mermaid**: Tutti i nodi con spazi o caratteri speciali devono avere etichette tra virgolette (es. `A["Nodo Principale (dettaglio)"]`). Mai inserire tag HTML all'interno dei nodi Mermaid.
 - **Formule Matematiche (LaTeX)**: Usa la sintassi standard LaTeX inline (`$E = mc^2$`) o in blocco (`$$\int_a^b f(x)dx$$`).
+- **Direttive Inline per l'IA (`%% AI: ... %%`)**: Per comunicare direttamente con l'IA rielaboratrice negli appunti grezzi, usa la sintassi ufficiale di commento `%% AI: <istruzione> %%` (inseribile rapidamente con il template snippet `[[AI Instruction]]`). In alternativa sono ammessi commenti HTML `<!-- AI: <istruzione> -->` o callout `> [!note]- AI: <istruzione>`. L'IA esegue tali istruzioni come prioritarie e le rimuove categoricamente dal corpo finale della nota permanente. Mai usare parentesi quadre inverse `]...[` (che rompono il syntax highlighting dei link in Obsidian).
 
 ## Formattazione e Callouts
 

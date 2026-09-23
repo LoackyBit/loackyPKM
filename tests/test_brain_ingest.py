@@ -2508,6 +2508,42 @@ area: meta
                     model_idx = called_cmd.index("--model")
                     self.assertEqual(called_cmd[model_idx + 1], "custom-model-test")
 
+    def test_strip_ai_directives(self):
+        """Asserts strip_ai_directives cleans %% AI: ... %%, <!-- AI: ... -->, and directive callouts."""
+        sample_text = (
+            "# Architettura\n\n"
+            "Questo è il testo base dell'architettura. "
+            "%% AI: inserire immagine della slide dell'architettura di von neumann, mettila in scala 1:2 %%\n"
+            "Altro testo descrittivo.\n\n"
+            "<!-- AI: fare attenzione al bus dati -->\n"
+            "Ulteriori considerazioni operative.\n\n"
+            "> [!note]- AI: Istruzioni speciali per la sezione successiva\n"
+            "> - Concentrati sulla CPU\n"
+            "> - Aggiungi tabella comparativa\n\n"
+            "## Sezione Successiva\n"
+            "Testo finale."
+        )
+
+        cleaned = brain_ingest.strip_ai_directives(sample_text)
+        self.assertNotIn("%% AI:", cleaned)
+        self.assertNotIn("von neumann, mettila in scala 1:2", cleaned)
+        self.assertNotIn("<!-- AI:", cleaned)
+        self.assertNotIn("fare attenzione al bus dati", cleaned)
+        self.assertNotIn("[!note]- AI:", cleaned)
+        self.assertNotIn("Concentrati sulla CPU", cleaned)
+        self.assertIn("Questo è il testo base dell'architettura.", cleaned)
+        self.assertIn("Altro testo descrittivo.", cleaned)
+        self.assertIn("## Sezione Successiva", cleaned)
+
+    def test_format_structured_note_strips_ai_directives(self):
+        """Asserts format_structured_note fallback strips AI directives from raw_content."""
+        raw_input = "Contenuto grezzo %% AI: non mettere questo commento nella nota %% e dettagli."
+        note = brain_ingest.format_structured_note("Titolo Nota", raw_input)
+        self.assertNotIn("%% AI:", note)
+        self.assertNotIn("non mettere questo commento", note)
+        self.assertIn("Contenuto grezzo", note)
+        self.assertIn("e dettagli.", note)
+
 
 if __name__ == "__main__":
     unittest.main()

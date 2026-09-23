@@ -8,18 +8,25 @@ TEMPLATE_DIR = os.path.join(PROJECT_ROOT, "99 - Meta", "Template")
 class TestTemplates(unittest.TestCase):
     def setUp(self):
         self.template_files = []
+        self.full_note_templates = []
+        self.snippet_templates = []
         for root, dirs, files in os.walk(TEMPLATE_DIR):
             for file in files:
                 if file.endswith(".md"):
-                    self.template_files.append(os.path.join(root, file))
+                    full_p = os.path.join(root, file)
+                    self.template_files.append(full_p)
+                    if file in ("Nota Vault.md", "Articolo Blog.md", "Raw Inbox Note.md"):
+                        self.full_note_templates.append(full_p)
+                    else:
+                        self.snippet_templates.append(full_p)
 
     def test_all_templates_discovered(self):
-        """Asserts that exactly 3 universal templates exist in 99 - Meta/Template/."""
-        self.assertEqual(len(self.template_files), 3)
+        """Asserts that exactly 3 universal full-note templates exist in 99 - Meta/Template/."""
+        self.assertEqual(len(self.full_note_templates), 3)
 
     def test_templates_no_static_frontmatter_prefix(self):
         """Asserts no template starts with a raw static YAML frontmatter block preceding Templater script per D-02."""
-        for path in self.template_files:
+        for path in self.full_note_templates:
             rel_path = os.path.relpath(path, PROJECT_ROOT)
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read().lstrip()
@@ -34,8 +41,8 @@ class TestTemplates(unittest.TestCase):
                 )
 
     def test_templates_have_dynamic_templater_block(self):
-        """Asserts all interactive templates contain dynamic Templater script <%* per D-01, D-03."""
-        for path in self.template_files:
+        """Asserts all interactive full-note templates contain dynamic Templater script <%* per D-01, D-03."""
+        for path in self.full_note_templates:
             rel_path = os.path.relpath(path, PROJECT_ROOT)
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
@@ -46,7 +53,7 @@ class TestTemplates(unittest.TestCase):
     def test_templates_construct_canonical_frontmatter(self):
         """Asserts all permanent and blog templates generate canonical YAML frontmatter strings per D-01."""
         canonical_fields = ["type:", "area:", "related:", "aliases:", "source:", "title:", "date:", "updated:", "tags:", "summary:"]
-        for path in self.template_files:
+        for path in self.full_note_templates:
             rel_path = os.path.relpath(path, PROJECT_ROOT)
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
@@ -69,8 +76,8 @@ class TestTemplates(unittest.TestCase):
                 self.assertIn("status:", content, f"Template {rel_path} missing status field")
 
     def test_templates_have_breadcrumbs_and_no_collegamenti(self):
-        """Asserts all templates construct standard breadcrumbs and have NO ## Collegamenti section."""
-        for path in self.template_files:
+        """Asserts all full-note templates construct standard breadcrumbs and have NO ## Collegamenti section."""
+        for path in self.full_note_templates:
             rel_path = os.path.relpath(path, PROJECT_ROOT)
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
@@ -91,7 +98,7 @@ class TestTemplates(unittest.TestCase):
 
     def test_templates_target_folders_exist(self):
         """Asserts all static targetFolder strings defined in templates point to existing directories in the vault."""
-        for path in self.template_files:
+        for path in self.full_note_templates:
             rel_path = os.path.relpath(path, PROJECT_ROOT)
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
@@ -161,14 +168,24 @@ class TestTemplates(unittest.TestCase):
             )
 
     def test_templates_handle_esc_cancellation(self):
-        """Asserts all interactive templates define cancelCreation logic to abort without creating notes on ESC."""
-        for path in self.template_files:
+        """Asserts all interactive full-note templates define cancelCreation logic to abort without creating notes on ESC."""
+        for path in self.full_note_templates:
             rel_path = os.path.relpath(path, PROJECT_ROOT)
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             self.assertIn("cancelCreation", content, f"Template {rel_path} missing cancelCreation helper.")
             self.assertIn("app.vault.trash", content, f"Template {rel_path} missing app.vault.trash call for clean abort.")
+
+    def test_ai_instruction_snippet(self):
+        """Asserts AI Instruction snippet contains valid %% AI: <% tp.file.cursor() %> %% syntax."""
+        ai_snippet = os.path.join(TEMPLATE_DIR, "AI Instruction.md")
+        self.assertTrue(os.path.exists(ai_snippet), "AI Instruction.md missing in 99 - Meta/Template/")
+        with open(ai_snippet, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+        self.assertTrue(content.startswith("%% AI:"), f"AI Instruction.md should start with '%% AI:', found '{content}'")
+        self.assertTrue(content.endswith("%%"), f"AI Instruction.md should end with '%%', found '{content}'")
+        self.assertIn("tp.file.cursor()", content)
 
 if __name__ == "__main__":
     unittest.main()

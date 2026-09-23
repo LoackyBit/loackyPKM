@@ -528,11 +528,24 @@ def sanitize_style_highlights(text: str) -> str:
     """Strips backticks from HTML <mark> and <font> tags."""
     return re.sub(r'`(<(?:mark|font)\b[^>]*>[\s\S]*?</(?:mark|font)>)`', r'\1', text)
 
+def strip_ai_directives(text: str) -> str:
+    """Removes user-to-AI inline instructions/comments (%% AI: ... %%, <!-- AI: ... -->, and callouts)."""
+    # 1. Strip Obsidian comments: %% AI: ... %% or %% IA: ... %%
+    cleaned = re.sub(r'%%\s*(?:AI|IA):[\s\S]*?%%', '', text, flags=re.IGNORECASE)
+    # 2. Strip HTML comments: <!-- AI: ... --> or <!-- IA: ... -->
+    cleaned = re.sub(r'<!--\s*(?:AI|IA):[\s\S]*?-->', '', cleaned, flags=re.IGNORECASE)
+    # 3. Strip collapsible/standard callouts dedicated to AI instructions: > [!note]- AI: ... or > [!todo]- AI: ...
+    cleaned = re.sub(r'^[ \t]*>[ \t]*\[!(?:note|ai|todo|tip|info)\]-?[ \t]*(?:AI|IA):?[^\n]*\n(?:^[ \t]*>[ \t]*[^\n]*\n*)*', '', cleaned, flags=re.MULTILINE | re.IGNORECASE)
+    # 4. Clean up any leftover multiple blank lines
+    cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
+    return cleaned
+
 def format_structured_note(title: str, raw_content: str, depth: str = "approfondimento", source_type: str = "text", source_url: str = "original") -> str:
     """Formats note body with clean headings (no emoji, no ## Collegamenti) and style guide highlights."""
     c_title = brain_health.clean_title_str(title)
     is_deep = depth in ("deep", "approfondimento")
-    lead = raw_content.strip()[:250].replace('\n', ' ')
+    cleaned_source = strip_ai_directives(raw_content)
+    lead = cleaned_source.strip()[:250].replace('\n', ' ')
     lines = [
         f"# {c_title}\n",
         "## Sintesi Esecutiva\n",
@@ -540,14 +553,14 @@ def format_structured_note(title: str, raw_content: str, depth: str = "approfond
     ]
     if is_deep:
         lines.extend([
-            f"## Quadro Concettuale e Fondamenti\n\n{raw_content.strip()}\n",
+            f"## Quadro Concettuale e Fondamenti\n\n{cleaned_source.strip()}\n",
             f"## Meccanica e Dettaglio Operativo\n\nAnalisi approfondita dei <mark style=\"background:rgba(181, 113, 255, 0.36)\"><font color=\"#9a54c1\"><b>principi operativi</b></font></mark> di {c_title}.\n",
             "## Analisi Critica e Casi Applicativi\n\nValutazione di limiti, compromessi architetturali e contesti d'uso.\n"
         ])
     else:
         lines.extend([
             f"## Concetti Chiave e Takeaway\n\n- <mark style=\"background:rgba(181, 113, 255, 0.36)\"><font color=\"#9a54c1\"><b>Punto Chiave 1</b></font></mark>: {lead[:120]}\n",
-            f"## Quadro Concettuale\n\n{raw_content.strip()}\n"
+            f"## Quadro Concettuale\n\n{cleaned_source.strip()}\n"
         ])
     return "\n".join(lines)
 
@@ -683,6 +696,11 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
    - REGOLA ANTI-ALLUCINAZIONE PAGINE: I richiami DEVONO riflettere le pagine REALI del corpo del documento in cui il singolo concetto o teorema viene effettivamente spiegato. NON associare mai le pagine dell'indice (TOC), prefazione o frontespizio (es. pag 1-3) ad argomenti e capitoli trattati nel testo principale (es. pag 8, 30, 108, 206).
    - RIALLINEAMENTO CODICE E TABELLE: Riorganizza pseudocodice, frammenti di codice e tabelle frammentate in blocchi Markdown sintatticamente evidenziati o tabelle comparative chiare.
    - EMBEDDING FIGURE DISCREZIONALE: Se nel testo o nel contesto sono presenti figure estratte (![[Figura - ...]]), incorporale solo se apportano reale valore concettuale (diagrammi, grafi, schemi a blocchi), posizionandole direttamente a valle del rispettivo concetto cardine. Ometti loghi ateneo o grafiche decorative.
+
+7. DIRETTIVE OPERATIVE UTENTE E META-ISTRUZIONI INLINE (%% AI: ... %%):
+   - Nel testo sorgente possono essere presenti istruzioni dirette dell'utente per te, racchiuse nella sintassi nativa di commento Obsidian '%% AI: <istruzione> %%' (o equivalenti commenti HTML '<!-- AI: <istruzione> -->' o callout '> [!note]- AI: ...').
+   - Esegui queste direttive come COMANDI OPERATIVI PRIORITARI ASSOLUTI (es. richieste di ridimensionamento o posizionamento immagini, focus su argomenti specifici, inserimento di formule, schemi o tabelle mirate).
+   - REGOLA TASSATIVA DI PULIZIA: Rimuovi ed elimina completamente qualsiasi commento o marcatore di direttiva ('%% AI: ... %%', '<!-- AI: ... -->', callout di istruzione) dal corpo finale della nota permanente. La nota finale deve contenere unicamente il testo rielaborato pulito, senza alcuna traccia dei comandi ricevuti.
 {anki_rules}"""
 
     home_bin = str(Path.home() / ".local" / "bin" / "agy")
@@ -731,6 +749,9 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
 
             # Strip emojis from any H2/H3 headers
             cleaned_body = re.sub(r'^(#{2,6}\s+)[\U00010000-\U0010ffff\u2600-\u27ff\u2300-\u23ff\s]+', r'\1', cleaned_body, flags=re.MULTILINE)
+
+            # Strip any leaked AI inline directives or comments
+            cleaned_body = strip_ai_directives(cleaned_body)
 
             # Automatically sanitize and validate any generated Anki flashcards (Anki Official Doc & Plugin Compliance)
             if "TARGET DECK:" in cleaned_body or enable_anki:

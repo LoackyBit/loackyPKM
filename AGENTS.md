@@ -167,6 +167,7 @@ Trattazione concettuale arricchita con evidenziazioni Style Guide ed eventuali d
 - **Secondary Concepts (Purple Highlight):** <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>
 - **CRITICAL Highlight Rule:** Never wrap `<mark>` HTML tags in markdown backticks (e.g. `` `<mark...>` `` ❌). They must be rendered as raw HTML inline.
 - **Mermaid Diagrams:** Always quote node labels containing spaces or parentheses (e.g. `A["Nodo Principale (dettaglio)"]`), start blocks immediately with diagram header (`flowchart TD`), and never use raw HTML tags inside mermaid node labels.
+- **Inline AI Directives (`%% AI: ... %%`):** Use native Obsidian comments `%% AI: <instruction> %%` (or HTML `<!-- AI: <instruction> -->` / callouts `> [!note]- AI: ...`) for direct instructions to the AI rewriter in raw captures. The AI processes these directives with top priority and cleans all comment markers from the final permanent note.
 
 ## Error Handling
 

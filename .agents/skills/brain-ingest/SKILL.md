@@ -137,3 +137,7 @@ Ogni nota prodotta deve rispettare rigorosamente `99 - Meta/Style Guide.md`:
    - Derivate matematiche: usare SEMPRE `^\prime` o `^{\prime\prime}` (es. $f^\prime(\xi)$), MAI apostrofi `$f'(x)$`, per scongiurare collisioni con l'escape HTML del plugin (`&#039;` -> tag `039` -> formula corrotta in `f&;`).
    - Valori assoluti: usare `\vert` anziché `|`. Spaziare le graffe TeX nelle cloze (`{ {` o `\left\{...\right\}`).
    - Nessun `<!--ID: -->` manuale generato dall'AI.
+7. **Direttive Operative Utente & Meta-Istruzioni Inline (`%% AI: ... %%`):**
+   - Riconoscimento prioritario di comandi e direttive inline inserite dall'utente nella nota grezza tramite commenti nativi `%% AI: <istruzione> %%` (o commenti HTML `<!-- AI: ... -->` o callout `> [!note]- AI: ...`).
+   - Esecuzione vincolante dei requisiti richiesti (es. scala immagini, schemi Mermaid specifici, approfondimenti di teoremi).
+   - Rimozione e pulizia tassativa di ogni marcatore di commento/callout dal corpo finale della nota permanente.

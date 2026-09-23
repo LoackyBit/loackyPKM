@@ -110,6 +110,13 @@ None.
 
 None.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260921-vbo | Standardizzazione e Validazione Formato Flashcard Anki Conforme a Doc Ufficiale | 2026-09-21 | 62d0bc3 | [260921-vbo-assicurati-che-le-prossime-flashcard-ris](./quick/260921-vbo-assicurati-che-le-prossime-flashcard-ris/) |
+| 260923-uv9 | Integrazione direttive inline AI %% AI: ... %% | 2026-09-23 | 053d4a9 | [260923-uv9-integrazione-direttive-inline-ai-ai](./quick/260923-uv9-integrazione-direttive-inline-ai-ai/) |
+
 ## Deferred Items
 
 | Category | Item | Status | Deferred At | Milestone |
@@ -120,8 +127,9 @@ None.
 
 **Resume file:** .planning/phases/17-generazione-flashcard-anki-contestuali-preservazione-id/17-CONTEXT.md
 
-Last session: 2026-09-20T19:19:24.630Z
-Stopped at: Phase 17 complete, ready to plan Phase 16
+Last activity: 2026-09-23 - Completed quick task 260923-uv9: Integrazione direttive inline AI %% AI: ... %%
+Last session: 2026-09-23T22:25:00+02:00
+Stopped at: Quick task 260923-uv9 complete, ready for next task
 
 ## Operator Next Steps
 

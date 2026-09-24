@@ -2812,6 +2812,60 @@ area: meta
         self.assertFalse(os.path.exists(transcript_staged))
         self.assertFalse(os.path.exists(draft_path))
 
+    def test_resolve_inbox_dependencies_source_hierarchy_markers(self):
+        """Asserts resolve_inbox_dependencies embeds explicit primary vs supporting hierarchy labels."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        os.makedirs(inbox_dir, exist_ok=True)
+        aux_note = os.path.join(inbox_dir, "appunti ausiliari.md")
+        with open(aux_note, "w", encoding="utf-8") as f:
+            f.write("# Appunti Ausiliari\nConcetti secondari e dettagli.")
+        transcript = os.path.join(inbox_dir, "trascrizione lezione audio.md")
+        with open(transcript, "w", encoding="utf-8") as f:
+            f.write("# Trascrizione Audio\n00:01 Iniziamo la lezione di oggi spiegando i grafi.")
+
+        master_content = (
+            "# Lezione Grafi\n\n"
+            "Appunti della lezione:\n"
+            "- [[appunti ausiliari.md]]\n"
+            "- [[trascrizione lezione audio.md]]\n"
+        )
+        enriched, sources = brain_ingest.resolve_inbox_dependencies(
+            content=master_content,
+            vault_root=self.test_dir
+        )
+
+        self.assertIn("=== NOTA ORIGINALE / CATTURA PRIMARIA DELL'UTENTE ===", enriched)
+        self.assertIn("=== FINE NOTA ORIGINALE ===", enriched)
+        self.assertIn("--- Inizio Contenuto da [[Trascrizione Lezione Audio]] ---", enriched)
+        self.assertIn("FONTE PRIMARIA: Trascrizione Audio Lezione", enriched)
+        self.assertIn("--- Inizio Contenuto da [[Appunti Ausiliari]] ---", enriched)
+        self.assertIn("FONTE DI SUPPORTO: Appunti Ausiliari", enriched)
+
+    def test_enrich_draft_with_ai_prompt_source_fidelity(self):
+        """Asserts enrich_draft_with_ai prompt explicitly mandates primary lecture fidelity and auxiliary role for slides/handouts."""
+        from unittest.mock import patch, MagicMock
+
+        os.environ.pop("BRAIN_INGEST_NO_AI", None)
+        mock_proc = MagicMock()
+        mock_proc.returncode = 0
+        mock_proc.stdout = "# Titolo\nTesto concettuale permanente.\n---SUMMARY---\nSintesi esecutiva densa."
+
+        with patch("brain_ingest.subprocess.run", return_value=mock_proc) as mock_run:
+            brain_ingest.enrich_draft_with_ai(
+                vault_root=self.test_dir,
+                title="Teoria dei Grafi",
+                source_content="Contenuto della lezione sui grafi.",
+                depth="approfondimento"
+            )
+            self.assertTrue(mock_run.called)
+            cmd_args = mock_run.call_args[0][0]
+            # Prompt is in the --print argument
+            prompt_arg = [arg for arg in cmd_args if arg.startswith("--print=")][0]
+            self.assertIn("GERARCHIA DELLE FONTI, FEDELTÀ ALLA LEZIONE", prompt_arg)
+            self.assertIn("FEDELTÀ ASSOLUTA ALLA NOTA ORIGINALE E ALLA TRASCRIZIONE", prompt_arg)
+            self.assertIn("RUOLO RIGOROSAMENTE DI SUPPORTO DI DISPENSE, SLIDE E ALTRI APPUNTI", prompt_arg)
+            self.assertIn("DIVIETO ASSOLUTO DI DIVAGAZIONI O IPER-ESTENSIONI ENCICLOPEDICHE", prompt_arg)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -679,7 +679,12 @@ def resolve_inbox_dependencies(
             new_ref = f"![[{archived_pdf_name}]]" if is_transclusion else f"[[{archived_pdf_name}]]"
             enriched_content = enriched_content.replace(full_match, new_ref)
 
-            aggregated_sections.append(f"--- Inizio Contenuto da PDF: [[{archived_pdf_name}]] ---\n{extracted_pdf_text}\n--- Fine Contenuto da PDF ---")
+            aggregated_sections.append(
+                f"--- Inizio Contenuto da PDF: [[{archived_pdf_name}]] ---\n"
+                f"[FONTE DI SUPPORTO: Dispense / Slide PDF — Materiale didattico ausiliario per formalismo matematico, formule LaTeX, schemi e citazioni di pagina: non discostarsi dalla lezione]\n"
+                f"{extracted_pdf_text}\n"
+                f"--- Fine Contenuto da PDF: [[{archived_pdf_name}]] ---"
+            )
             sources_meta.append({
                 'name': archived_pdf_name,
                 'wikilink': f"[[{archived_pdf_name}]]",
@@ -755,7 +760,20 @@ def resolve_inbox_dependencies(
                 shutil.copy2(cand_abs, staged_path)
 
             sub_stem = brain_health.clean_title_str(Path(cand_abs).stem)
-            aggregated_sections.append(f"--- Inizio Contenuto da [[{sub_stem}]] ---\n{sub_text.strip()}\n--- Fine Contenuto da [[{sub_stem}]] ---")
+            if is_transcript:
+                aggregated_sections.append(
+                    f"--- Inizio Contenuto da [[{sub_stem}]] ---\n"
+                    f"[FONTE PRIMARIA: Trascrizione Audio Lezione — Asse narrativo portante e perimetro concettuale di quanto spiegato a lezione: ricalcare fedelmente]\n"
+                    f"{sub_text.strip()}\n"
+                    f"--- Fine Contenuto da [[{sub_stem}]] ---"
+                )
+            else:
+                aggregated_sections.append(
+                    f"--- Inizio Contenuto da [[{sub_stem}]] ---\n"
+                    f"[FONTE DI SUPPORTO: Appunti Ausiliari — Materiale di supporto integrativo: utilizzare per chiarimenti senza allargare lo scope]\n"
+                    f"{sub_text.strip()}\n"
+                    f"--- Fine Contenuto da [[{sub_stem}]] ---"
+                )
 
             sources_meta.append({
                 'name': sub_stem,
@@ -767,7 +785,13 @@ def resolve_inbox_dependencies(
             })
 
     if aggregated_sections:
-        enriched_content = f"{enriched_content.rstrip()}\n\n" + "\n\n".join(aggregated_sections) + "\n"
+        enriched_content = (
+            f"=== NOTA ORIGINALE / CATTURA PRIMARIA DELL'UTENTE ===\n"
+            f"[Asse portante: non discostarsi troppo da questi appunti e dalla trascrizione]\n"
+            f"{enriched_content.strip()}\n"
+            f"=== FINE NOTA ORIGINALE ===\n\n"
+            + "\n\n".join(aggregated_sections) + "\n"
+        )
 
     return enriched_content, sources_meta
 
@@ -827,7 +851,7 @@ def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth
     if enable_anki:
         clean_deck = course_name.replace(" ", "_") if course_name else "Generale"
         anki_rules = f"""
-7. GENERAZIONE FLASHCARD ANKI CONTESTUALI (CONFORMI A DOC ANKI & OBSIDIAN-TO-ANKI):
+8. GENERAZIONE FLASHCARD ANKI CONTESTUALI (CONFORMI A DOC ANKI & OBSIDIAN-TO-ANKI):
    - Genera flashcard contestuali atomiche collocate IMMEDIATAMENTE A VALLE di ciascun concetto cardine evidenziato in giallo (<mark>) o teorema STEM (indicativamente 5-10 card per lezione).
    - Struttura OBBLIGATORIA: La prima riga è il callout collassabile '> [!tip]- Flashcard: [Nome Concetto]', seguito IMMEDIATAMENTE A CAPO (SENZA '>') dall'intero blocco Anki racchiuso tra delimitatori di commento Obsidian '%%':
      > [!tip]- Flashcard: [Nome Concetto]
@@ -879,9 +903,11 @@ CONTENUTO SORGENTE:
 {depth_instruction}
 {meta_section}
 REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
-1. SEQUENZA LOGICO-TEMPORALE E DIGRESSIONI DEL DOCENTE (TAX-01, D-06):
-   - Ricalca fedelmente la successione logico-temporale della spiegazione o della lezione del docente senza omettere passaggi concettuali.
-   - Nessun template monolitico o sezione generica fissa/vuota: l'articolazione delle sezioni H2 e H3 deve scaturire spontaneamente dall'ordine di esposizione dei contenuti.
+1. GERARCHIA DELLE FONTI, FEDELTÀ ALLA LEZIONE E SEQUENZA LOGICO-TEMPORALE (TAX-01, D-06):
+   - FEDELTÀ ASSOLUTA ALLA NOTA ORIGINALE E ALLA TRASCRIZIONE (FONTI PRIMARIE): La nota originale dell'utente e la trascrizione audio della lezione costituiscono la FONTE PRIMARIA, l'asse portante narrativo e il perimetro concettuale invalicabile. La nota finale NON DEVE MAI discostarsi troppo da quanto effettivamente spiegato, argomentato ed esposto dal docente a lezione o riportato negli appunti originali.
+   - RUOLO RIGOROSAMENTE DI SUPPORTO DI DISPENSE, SLIDE E ALTRI APPUNTI (FONTI DI SUPPORTO): Le dispense del corso, le slide PDF e gli eventuali altri appunti hanno uno scopo puramente AUSILIARIO E DI SUPPORTO. Servono per formalizzare le definizioni, recuperare l'esatta notazione matematica LaTeX per formule menzionate o abbozzate a voce, chiarire passaggi algebrici o teoremi, aggiungere richiami precisi alle slide (\\[[[file.pdf#page=N|Slide N]]]) e arricchire con tabelle o figure pertinenti.
+   - DIVIETO ASSOLUTO DI DIVAGAZIONI O IPER-ESTENSIONI ENCICLOPEDICHE: Non espandere mai la trattazione a capitoli, lemmi o interi argomenti presenti nelle dispense o nelle slide che NON siano stati affrontati o richiamati a lezione. I materiali di supporto non devono MAI stravolgere la sequenza della lezione né trasformare la nota in un compendio enciclopedico del libro di testo estraneo a quanto svolto dal docente.
+   - SEQUENZA LOGICO-TEMPORALE DEL DOCENTE: Ricalca fedelmente la successione logico-temporale della spiegazione senza omettere passaggi concettuali. Nessun template monolitico o sezione generica fissa/vuota: l'articolazione delle sezioni H2 e H3 deve scaturire spontaneamente dall'ordine reale di esposizione dei contenuti.
    - DIVIETO ASSOLUTO DI EMOJI NEI TITOLI: I titoli H1, H2, H3 devono contenere SOLO testo pulito (es. '## Sintesi Esecutiva', '## Analisi Nodale' e MAI '## 🎯 Sintesi').
    - INCAPSULAMENTO DELLE DIGRESSIONI: Quando il docente introduce aneddoti, divagazioni storiche, commenti extra-curriculari o aneddoti personali, NON creare titoli H3/H4 spuri e non inquinare la tavola dei contenuti (TOC/Outline). Incapsula invece la divagazione in un callout collassabile dedicato:
      > [!quote]- Divagazione del Docente: [Breve Oggetto della Divagazione]
@@ -922,8 +948,9 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
    - Alla fine assoluta della risposta, inserisci il marcatore esatto '---SUMMARY---' seguito da una singola frase densa di significato (120-180 caratteri, max 200) per il recupero sub-secondo.
 
 6. SLIDE ACCADEMICHE, DOCUMENTI PDF E ASSET VISIVI (PDF-02, PDF-03, D-01, D-03, D-05, D-16):
+   - RUOLO DI SUPPORTO E ANCORAGGIO: Le slide PDF e le dispense sono materiali di supporto didattico per ancorare e chiarire i punti toccati a lezione, non per sostituire o stravolgere la narrazione del docente.
    - TRATTAZIONE CONTINUA E NARRATIVA: Elabora il contenuto come flusso continuo unificato, evitando categoricamente separatori rigidi '### Slide N' o '### Diapositiva N'.
-   - CITAZIONI INLINE A PAGINE REALI: Preserva e posiziona accuratamente i richiami di pagina inline nella forma con escape \\[[[nome.pdf#page=N|N]]] o \\[[[nome.pdf#page=N|Slide N]]] a valle dei concetti e dei teoremi corrispondenti.
+   - CITAZIONI INLINE A PAGINE REALI: Preserva e posiziona accuratamente i richiami di pagina inline nella forma con escape \\[[[nome.pdf#page=N|N]]] o \\[[[nome.pdf#page=N|Slide N]]] a valle dei concetti e dei teoremi corrispondenti spiegati a lezione.
    - DIVIETO ASSOLUTO DI CITAZIONE DELLE TRASCRIZIONI AUDIO: Non citare o linkare MAI le trascrizioni audio grezze nel testo o nell'intestazione; servono unicamente come input di rielaborazione per l'AI. Cita solo materiali accademici di consultazione diretta (slide PDF ufficiali, paper scientifici, libri di testo, articoli).
    - DENSITÀ CALIBRATA DEI RICHIAMI: Posiziona i link alle slide a livello di macro-argomento o per chiarire passaggi sintetici/astratti ed evitare fraintendimenti, evitando la saturazione frase per frase.
    - DIVIETO ASSOLUTO DI DIAGRAMMI SIMBOLICI ASCII/UNICODE: Non generare MAI blocchi di codice monospazio o testo con box-drawing ('┌┐└┘', '│', '──►'), poiché non renderizzano in modo coerente tra mobile e desktop. Se sono presenti schemi grafici nelle slide, incorpora direttamente l'immagine della slide (![[Schema - ... .png]]) oppure struttura i dati con tabelle Markdown native standard e callout semantici.

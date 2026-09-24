@@ -174,4 +174,8 @@ Ogni nota prodotta deve rispettare rigorosamente `99 - Meta/Style Guide.md`:
    - Per rappresentare schemi, architetture o flussi visivi:
      - Se presenti nelle slide d'aula, estrarre e includere direttamente i ritagli/render ad alta risoluzione (2x Retina PNG) degli schemi ufficiali (`![[Schema - ... .png]]`).
      - Altrimenti, strutturare i dati tramite tabelle Markdown native standard e callout semantici dinamici.
+10. **Gerarchia delle Fonti & Fedeltà alla Lezione (Fonte Primaria vs Fonti di Supporto):**
+    - **FONTE PRIMARIA VINCOLANTE (Nota Originale & Trascrizione Audio):** Costituiscono l'asse concettuale portante e il perimetro invalicabile di ciò che è stato spiegato ed esposto a lezione. L'elaborazione finale non deve MAI discostarsi troppo da questi contenuti.
+    - **FONTI DI SUPPORTO AUSILIARIE (Dispense, Slide PDF, Altri Appunti):** Hanno uno scopo puramente di supporto: servono per formalizzare definizioni, recuperare la notazione matematica corretta LaTeX per formule e teoremi menzionati a voce, aggiungere richiami di pagina (`\[[[file.pdf#page=N|Slide N]]]`) ed estrarre figure o tabelle pertinenti.
+    - **DIVIETO DI DIVAGAZIONI ENCICLOPEDICHE:** È severamente vietato allargare la trattazione ad argomenti o capitoli interi delle dispense/slide non affrontati a lezione. I materiali ausiliari non devono mai snaturare l'ordine o il focus della lezione reale.
 

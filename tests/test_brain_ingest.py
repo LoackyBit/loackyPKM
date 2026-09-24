@@ -2729,6 +2729,89 @@ area: meta
         self.assertFalse(os.path.exists(staged_src))
         self.assertFalse(os.path.exists(created_att))
 
+    def test_promote_cleans_unlisted_transcripts_matching_course(self):
+        """Asserts _handle_promote_item deletes audio transcripts in Source/ matching course or name even if excluded from sources: [...]."""
+        source_dir = os.path.join(self.test_dir, "03 - Inbox", "Source")
+        draft_dir = os.path.join(self.test_dir, "03 - Inbox", "Draft")
+        os.makedirs(source_dir, exist_ok=True)
+        os.makedirs(draft_dir, exist_ok=True)
+
+        transcript_staged = os.path.join(source_dir, "Introduzione alla Programmazione - Trascrizione Audio.md")
+        with open(transcript_staged, "w", encoding="utf-8") as f:
+            f.write("## trascrizione\n00:00:00 Speaker 1\nInizio lezione di programmazione Python.")
+
+        master_source = os.path.join(source_dir, "Introduzione alla Programmazione - 1.md")
+        with open(master_source, "w", encoding="utf-8") as f:
+            f.write("---\nready: true\n---\n# Master Note\nContenuto grezzo con riferimento a [[Introduzione alla Programmazione - Trascrizione Audio]].")
+
+        draft_path = os.path.join(draft_dir, "01 - Elaborazione delle Informazioni.md")
+        draft_content = (
+            "---\n"
+            "status: draft\n"
+            "type: lecture\n"
+            "area: education\n"
+            "course: \"Introduzione alla Programmazione\"\n"
+            "title: \"01 - Elaborazione delle Informazioni\"\n"
+            "sources: [\"[[Slide.pdf]]\"]\n"
+            "target_path: \"02 - Atlas/Education & Learning/University/Introduzione alla Programmazione/01 - Elaborazione delle Informazioni.md\"\n"
+            "---\n\n"
+            "# 01 - Elaborazione delle Informazioni\n\nContenuto elaborato."
+        )
+        with open(draft_path, "w", encoding="utf-8") as f:
+            f.write(draft_content)
+
+        success, err = brain_ingest._handle_promote_item(
+            vault_root=self.test_dir,
+            draft_path=draft_path,
+            source_path=master_source,
+            name="01 - Elaborazione delle Informazioni",
+            raw_name="01 - Elaborazione delle Informazioni",
+            src_name="Introduzione alla Programmazione - 1"
+        )
+        self.assertTrue(success)
+        self.assertFalse(os.path.exists(transcript_staged))
+        self.assertFalse(os.path.exists(draft_path))
+
+    def test_purge_cleans_unlisted_transcripts_matching_course(self):
+        """Asserts _handle_purge_item deletes unlisted audio transcripts in Source/ when draft is rejected [-]."""
+        source_dir = os.path.join(self.test_dir, "03 - Inbox", "Source")
+        draft_dir = os.path.join(self.test_dir, "03 - Inbox", "Draft")
+        os.makedirs(source_dir, exist_ok=True)
+        os.makedirs(draft_dir, exist_ok=True)
+
+        transcript_staged = os.path.join(source_dir, "Introduzione alla Programmazione - Trascrizione Audio.md")
+        with open(transcript_staged, "w", encoding="utf-8") as f:
+            f.write("## trascrizione\n00:00:00 Speaker 1\nTrascrizione da scartare.")
+
+        master_source = os.path.join(source_dir, "Introduzione alla Programmazione - 1.md")
+        with open(master_source, "w", encoding="utf-8") as f:
+            f.write("# Master Note")
+
+        draft_path = os.path.join(draft_dir, "01 - Elaborazione delle Informazioni.md")
+        draft_content = (
+            "---\n"
+            "status: draft\n"
+            "type: lecture\n"
+            "area: education\n"
+            "course: \"Introduzione alla Programmazione\"\n"
+            "title: \"01 - Elaborazione delle Informazioni\"\n"
+            "sources: [\"[[Slide.pdf]]\"]\n"
+            "---\n\n"
+            "# 01 - Elaborazione delle Informazioni"
+        )
+        with open(draft_path, "w", encoding="utf-8") as f:
+            f.write(draft_content)
+
+        purged = brain_ingest._handle_purge_item(
+            vault_root=self.test_dir,
+            draft_path=draft_path,
+            source_path=master_source,
+            name="01 - Elaborazione delle Informazioni"
+        )
+        self.assertTrue(purged)
+        self.assertFalse(os.path.exists(transcript_staged))
+        self.assertFalse(os.path.exists(draft_path))
+
 
 if __name__ == "__main__":
     unittest.main()

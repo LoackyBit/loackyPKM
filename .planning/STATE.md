@@ -118,6 +118,7 @@ None.
 | 260923-uv9 | Integrazione direttive inline AI %% AI: ... %% | 2026-09-23 | 053d4a9 | [260923-uv9-integrazione-direttive-inline-ai-ai](./quick/260923-uv9-integrazione-direttive-inline-ai-ai/) |
 | 260924-n6q | Implementazione Opzione B: Deep Ingestion e Link-Resolution per brain-ingest | 2026-09-24 | 23659a3 | [260924-n6q-implementazione-opzione-b-deep-ingestion](./quick/260924-n6q-implementazione-opzione-b-deep-ingestion/) |
 | 260924-orz | Integrazione regole didattiche e visuali nel sistema Second Brain | 2026-09-24 | 123b699 | [260924-orz-non-salvare-in-memory-md-ma-integra-nel-](./quick/260924-orz-non-salvare-in-memory-md-ma-integra-nel-/) |
+| 260924-qtr | Pulizia automatica trascrizioni audio orfane in 03 - Inbox/Source/ | 2026-09-24 | a6784d9 | [260924-qtr-cleanup-audio-transcripts-inbox-source](./quick/260924-qtr-cleanup-audio-transcripts-inbox-source/) |
 
 ## Deferred Items
 
@@ -129,9 +130,9 @@ None.
 
 **Resume file:** .planning/phases/17-generazione-flashcard-anki-contestuali-preservazione-id/17-CONTEXT.md
 
-Last activity: 2026-09-24 - Completed quick task 260924-orz: Integrazione regole didattiche e visuali nel sistema Second Brain
-Last session: 2026-09-24T17:55:00+02:00
-Stopped at: Quick task 260924-orz complete, ready for next task
+Last activity: 2026-09-24 - Completed quick task 260924-qtr: Pulizia automatica trascrizioni audio orfane in 03 - Inbox/Source/
+Last session: 2026-09-24T18:20:00+02:00
+Stopped at: Quick task 260924-qtr complete, ready for next task
 
 ## Operator Next Steps
 

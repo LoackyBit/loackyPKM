@@ -1717,11 +1717,14 @@ def _handle_promote_item(vault_root: str, draft_path: str, source_path: str, nam
             except Exception as e:
                 logger.warning("Errore durante la registrazione PACRAR per '%s': %s", real_name, e)
 
+    extra_sources = set()
     if os.path.exists(source_path):
         src_txt = ""
         with open(source_path, 'r', encoding='utf-8', errors='ignore') as sf:
-            src_txt = sf.read(500)
-        if src_val == "original" or "ready:" in src_txt:
+            src_txt = sf.read()
+        for m_lnk in re.finditer(r'\[\[(.*?)\]\]', src_txt):
+            extra_sources.add(m_lnk.group(1).split('|')[0].strip())
+        if src_val == "original" or "ready:" in src_txt[:500]:
             arc_dir = os.path.join(vault_root, "99 - Meta", "Archive")
             os.makedirs(arc_dir, exist_ok=True)
             shutil.move(source_path, os.path.join(arc_dir, f"{real_name}.md"))
@@ -1733,11 +1736,16 @@ def _handle_promote_item(vault_root: str, draft_path: str, source_path: str, nam
     if isinstance(sources_list, str):
         sources_list = [s.strip() for s in sources_list.split(',') if s.strip()]
 
+    all_targets = set()
     for s_ref in sources_list:
         clean_s = str(s_ref).strip().strip('"').strip("'")
         m_link = re.search(r'\[\[(.*?)\]\]', clean_s)
         target_name = m_link.group(1).split('|')[0].strip() if m_link else clean_s
+        if target_name:
+            all_targets.add(target_name)
+    all_targets.update(extra_sources)
 
+    for target_name in all_targets:
         cand_srcs = [
             os.path.join(vault_root, "03 - Inbox", "Source", f"{target_name}.md"),
             os.path.join(vault_root, "03 - Inbox", "Source", target_name),
@@ -1774,6 +1782,36 @@ def _handle_promote_item(vault_root: str, draft_path: str, source_path: str, nam
                     except Exception:
                         pass
                 break
+
+    # Proactive cleanup of unlisted audio transcripts in 03 - Inbox/Source/ matching course or note
+    course_val = meta.get('course')
+    course_clean = brain_health.clean_title_str(str(course_val)).lower() if course_val else ""
+    name_clean = real_name.lower()
+    src_clean = src_name.lower() if src_name else ""
+    source_inbox_dir = os.path.join(vault_root, "03 - Inbox", "Source")
+    if os.path.exists(source_inbox_dir):
+        for f_name in os.listdir(source_inbox_dir):
+            if not f_name.endswith('.md') or f_name.startswith('.'):
+                continue
+            f_path = os.path.join(source_inbox_dir, f_name)
+            if not os.path.isfile(f_path):
+                continue
+            try:
+                with open(f_path, 'r', encoding='utf-8', errors='ignore') as sf:
+                    head = sf.read(1500).lower()
+            except Exception:
+                head = ""
+            is_tr = any(k in head or k in f_name.lower() for k in ('trascrizion', 'transcript', 'whisper', 'audio')) or bool(re.search(r'\[\d{2}:\d{2}', head))
+            if is_tr:
+                fn_low = f_name.lower()
+                matches_course = bool(course_clean and (course_clean in fn_low or course_clean in head[:500]))
+                matches_name = any(token in fn_low for token in name_clean.split() if len(token) > 4)
+                matches_src = bool(src_clean and any(token in fn_low for token in src_clean.split() if len(token) > 4))
+                if matches_course or matches_name or matches_src:
+                    try:
+                        os.remove(f_path)
+                    except Exception:
+                        pass
 
     append_inbox_history(vault_root, "APPROVED", real_name, target_rel, src_val)
     return True, None
@@ -1856,11 +1894,19 @@ def _handle_purge_item(vault_root: str, draft_path: str, source_path: str, name:
     if isinstance(sources_list, str):
         sources_list = [s.strip() for s in sources_list.split(',') if s.strip()]
 
+    all_targets = set()
     for s_ref in sources_list:
         clean_s = str(s_ref).strip().strip('"').strip("'")
         m_link = re.search(r'\[\[(.*?)\]\]', clean_s)
         target_name = m_link.group(1).split('|')[0].strip() if m_link else clean_s
+        if target_name:
+            all_targets.add(target_name)
 
+    if note_content:
+        for m_lnk in re.finditer(r'\[\[(.*?)\]\]', note_content):
+            all_targets.add(m_lnk.group(1).split('|')[0].strip())
+
+    for target_name in all_targets:
         cand_srcs = [
             os.path.join(vault_root, "03 - Inbox", "Source", f"{target_name}.md"),
             os.path.join(vault_root, "03 - Inbox", "Source", target_name),
@@ -1881,6 +1927,34 @@ def _handle_purge_item(vault_root: str, draft_path: str, source_path: str, name:
                 if target_name in files:
                     try:
                         os.remove(os.path.join(root_dir, target_name))
+                    except Exception:
+                        pass
+
+    # Proactive purge of unlisted transcripts in 03 - Inbox/Source/
+    course_val = meta.get('course')
+    course_clean = brain_health.clean_title_str(str(course_val)).lower() if course_val else ""
+    name_clean = name.lower()
+    source_inbox_dir = os.path.join(vault_root, "03 - Inbox", "Source")
+    if os.path.exists(source_inbox_dir):
+        for f_name in os.listdir(source_inbox_dir):
+            if not f_name.endswith('.md') or f_name.startswith('.'):
+                continue
+            f_path = os.path.join(source_inbox_dir, f_name)
+            if not os.path.isfile(f_path):
+                continue
+            try:
+                with open(f_path, 'r', encoding='utf-8', errors='ignore') as sf:
+                    head = sf.read(1500).lower()
+            except Exception:
+                head = ""
+            is_tr = any(k in head or k in f_name.lower() for k in ('trascrizion', 'transcript', 'whisper', 'audio')) or bool(re.search(r'\[\d{2}:\d{2}', head))
+            if is_tr:
+                fn_low = f_name.lower()
+                matches_course = bool(course_clean and (course_clean in fn_low or course_clean in head[:500]))
+                matches_name = any(token in fn_low for token in name_clean.split() if len(token) > 4)
+                if matches_course or matches_name:
+                    try:
+                        os.remove(f_path)
                     except Exception:
                         pass
 

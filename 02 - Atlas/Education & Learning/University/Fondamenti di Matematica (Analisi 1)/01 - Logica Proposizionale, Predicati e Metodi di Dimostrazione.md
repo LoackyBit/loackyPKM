@@ -16,9 +16,9 @@ sources: ["[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf]]",
 
 # 01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 
-- **Docente:** Prof. Saverio Salzo
+- **Docente:** Prof. [[Saverio Salzo]]
 - **Data Lezione:** 2026-09-23
-- **Materiale Didattico Originale:** [[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf]]
+- **Materiale Didattico:** [[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf]]
 
 ## Quadro Concettuale e Obiettivi della Lezione
 

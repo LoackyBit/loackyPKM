@@ -7,7 +7,7 @@ aliases: []
 source: original
 title: "Review Dashboard"
 date: '2026-09-24'
-updated: 2026-09-24T17:43
+updated: 2026-09-24T18:06
 tags: [meta/dashboard, meta/gtd]
 summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in Inbox."
 ---
@@ -26,13 +26,12 @@ summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in I
 *Nessun processo attivo.*
 
 ## 📥 Note in Attesa di Approvazione
-- [ ] Approva [[Draft/01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python]] (fonte: [[Source/Introduzione alla Programmazione - 1]])
+*Nessuna nota in attesa di approvazione.*
 
 ## ⚠️ Errori di Acquisizione & Azioni Richieste
 *Nessun errore registrato.*
 
 ## 📜 Storico Recente
-- 2026-08-30 22:29 | [REJECTED] | [[Il Lato Oscuro di TikTok Che Ti Nascondono - con i TheShow]] -> PURGED
 - 2026-08-31 00:15 | [APPROVED] | [[99 - Meta/Archive/Semantic Versioning]] -> 02 - Atlas/Tech & AI/Raw Note 2026 - 08 - 31 00 - 07.md (source: original)
 - 2026-08-31 00:20 | [APPROVED] | [[99 - Meta/Archive/Semantic Versioning]] -> 02 - Atlas/Tech & AI/Raw Note 2026 - 08 - 31 00 - 07.md (source: original)
 - 2026-08-31 23:30 | [APPROVED] | [[Il Lato Oscuro di TikTok Che Ti Nascondono - con i TheShow]] -> 02 - Atlas/Tech & AI/Il Lato Oscuro di TikTok Che Ti Nascondono - con i TheShow.md (source: https://youtu.be/mkGGOxEPV-Q)
@@ -42,3 +41,4 @@ summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in I
 - 2026-09-13 15:39 | [APPROVED] | [[L'Intelligenza Artificiale Potrebbe Uccidere Tutti gli Esseri Umani Entro il 2030]] -> 02 - Atlas/Finance/Investments/L'Intelligenza Artificiale Potrebbe Uccidere Tutti gli Esseri Umani Entro il 2030.md (source: https://youtu.be/i30jVPqQeOM)
 - 2026-09-13 15:39 | [PANIC_ABORT] | [[Tutti i processi]] -> STOPPED (source: Review Dashboard)
 - 2026-09-24 16:26 | [APPROVED] | [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] -> 02 - Atlas/Education & Learning/University/Fondamenti di Matematica Analisi 1/01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione.md (source: Lezione 1 FdM del 23/09/2026 - Prof. Saverio Salzo)
+- 2026-09-24 18:05 | [APPROVED] | [[01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python]] -> 02 - Atlas/Education & Learning/University/Introduzione alla Programmazione/01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python.md (source: Lezione 1 Introduzione alla Programmazione del 23/09/2026 - Canale 1 e 2)

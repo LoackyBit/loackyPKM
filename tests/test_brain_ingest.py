@@ -2544,6 +2544,191 @@ area: meta
         self.assertIn("Contenuto grezzo", note)
         self.assertIn("e dettagli.", note)
 
+    def test_resolve_inbox_dependencies_pdf_and_images(self):
+        """Asserts resolve_inbox_dependencies catalogs PDFs and images to 99 - Meta/Attachments/, cleans 03 - Inbox/, and updates links."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        os.makedirs(inbox_dir, exist_ok=True)
+        pdf_file = os.path.join(inbox_dir, "sample handout.pdf")
+        with open(pdf_file, "wb") as f:
+            f.write(b"%PDF-1.4 dummy pdf bytes")
+        img_file = os.path.join(inbox_dir, "circuit schema.png")
+        with open(img_file, "wb") as f:
+            f.write(b"\x89PNG\r\n\x1a\n dummy image bytes")
+
+        content = (
+            "# Master Capture\n\n"
+            "Ecco le slide: ![[sample handout.pdf]]\n"
+            "Ed ecco il circuito: ![[circuit schema.png]]\n"
+        )
+        enriched, sources = brain_ingest.resolve_inbox_dependencies(
+            content=content,
+            vault_root=self.test_dir,
+            course="Elettronica"
+        )
+
+        self.assertEqual(len(sources), 2)
+        # Verify attachments created in Attachments/Elettronica/
+        att_dir = os.path.join(self.test_dir, "99 - Meta", "Attachments", "Elettronica")
+        self.assertTrue(os.path.exists(att_dir))
+        self.assertTrue(os.path.exists(os.path.join(att_dir, "Sample Handout.pdf")))
+        self.assertTrue(os.path.exists(os.path.join(att_dir, "Circuit Schema.png")))
+
+        # Verify inbox originals cleaned up
+        self.assertFalse(os.path.exists(pdf_file))
+        self.assertFalse(os.path.exists(img_file))
+
+        # Verify links updated in text
+        self.assertIn("![[Sample Handout.pdf]]", enriched)
+        self.assertIn("![[Circuit Schema.png]]", enriched)
+        self.assertIn("--- Inizio Contenuto da PDF: [[Sample Handout.pdf]] ---", enriched)
+
+    def test_resolve_inbox_dependencies_markdown_notes(self):
+        """Asserts resolve_inbox_dependencies moves secondary notes to 03 - Inbox/Source/ and aggregates content."""
+        inbox_dir = os.path.join(self.test_dir, "03 - Inbox")
+        os.makedirs(inbox_dir, exist_ok=True)
+        manual_note = os.path.join(inbox_dir, "appunti personali.md")
+        with open(manual_note, "w", encoding="utf-8") as f:
+            f.write("# Appunti Personali\nTeorema fondamentale spiegato a lezione.")
+        audio_transcript = os.path.join(inbox_dir, "trascrizione lezione.md")
+        with open(audio_transcript, "w", encoding="utf-8") as f:
+            f.write("# Trascrizione Lezione\n[00:01] Buongiorno a tutti, oggi parliamo di integrali.")
+
+        master_content = (
+            "# Lezione 1\n\n"
+            "Riferimenti:\n"
+            "- [[appunti personali.md]]\n"
+            "- [[trascrizione lezione.md]]\n"
+        )
+        enriched, sources = brain_ingest.resolve_inbox_dependencies(
+            content=master_content,
+            vault_root=self.test_dir
+        )
+
+        self.assertEqual(len(sources), 2)
+        source_dir = os.path.join(inbox_dir, "Source")
+        self.assertTrue(os.path.exists(os.path.join(source_dir, "appunti personali.md")))
+        self.assertTrue(os.path.exists(os.path.join(source_dir, "trascrizione lezione.md")))
+        self.assertFalse(os.path.exists(manual_note))
+        self.assertFalse(os.path.exists(audio_transcript))
+
+        self.assertIn("--- Inizio Contenuto da [[Appunti Personali]] ---", enriched)
+        self.assertIn("Teorema fondamentale spiegato a lezione.", enriched)
+        self.assertIn("--- Inizio Contenuto da [[Trascrizione Lezione]] ---", enriched)
+        self.assertIn("Buongiorno a tutti, oggi parliamo di integrali.", enriched)
+
+        kinds = {s['name']: s.get('kind') for s in sources}
+        self.assertEqual(kinds['Appunti Personali'], 'note')
+        self.assertEqual(kinds['Trascrizione Lezione'], 'transcript')
+
+    def test_multi_source_promote_and_archive_lifecycle(self):
+        """Asserts _handle_promote_item moves manual notes to 99 - Meta/Archive/, deletes transcripts, and leaves 03 - Inbox clean."""
+        source_dir = os.path.join(self.test_dir, "03 - Inbox", "Source")
+        draft_dir = os.path.join(self.test_dir, "03 - Inbox", "Draft")
+        os.makedirs(source_dir, exist_ok=True)
+        os.makedirs(draft_dir, exist_ok=True)
+
+        manual_staged = os.path.join(source_dir, "Appunti Manuali.md")
+        with open(manual_staged, "w", encoding="utf-8") as f:
+            f.write("# Appunti Manuali\nMie considerazioni personali.")
+
+        transcript_staged = os.path.join(source_dir, "Trascrizione Audio.md")
+        with open(transcript_staged, "w", encoding="utf-8") as f:
+            f.write("# Trascrizione Audio\n[00:00] Inizio audio.")
+
+        master_source = os.path.join(source_dir, "Nota Sintesi.md")
+        with open(master_source, "w", encoding="utf-8") as f:
+            f.write("---\nready: true\n---\n# Nota Sintesi\nContenuto grezzo.")
+
+        draft_path = os.path.join(draft_dir, "Nota Sintesi.md")
+        draft_content = (
+            "---\n"
+            "status: draft\n"
+            "type: concept\n"
+            "area: tech\n"
+            "title: \"Nota Sintesi\"\n"
+            "sources: [\"[[Appunti Manuali]]\", \"[[Trascrizione Audio]]\"]\n"
+            "target_path: \"02 - Atlas/Tech/Nota Sintesi.md\"\n"
+            "---\n\n"
+            "[[Home MOC|Home]] / [[03 - Inbox|Inbox]] / [[Nota Sintesi]]\n\n"
+            "# Nota Sintesi\n\nContenuto finale elaborato."
+        )
+        with open(draft_path, "w", encoding="utf-8") as f:
+            f.write(draft_content)
+
+        success, err = brain_ingest._handle_promote_item(
+            vault_root=self.test_dir,
+            draft_path=draft_path,
+            source_path=master_source,
+            name="Nota Sintesi",
+            raw_name="Nota Sintesi",
+            src_name="Nota Sintesi"
+        )
+        self.assertTrue(success)
+
+        # Permanent note created
+        perm_note = os.path.join(self.test_dir, "02 - Atlas", "Tech", "Nota Sintesi.md")
+        self.assertTrue(os.path.exists(perm_note))
+
+        # Draft removed
+        self.assertFalse(os.path.exists(draft_path))
+
+        # Manual notes archived in 99 - Meta/Archive/
+        arc_manual = os.path.join(self.test_dir, "99 - Meta", "Archive", "Appunti Manuali.md")
+        self.assertTrue(os.path.exists(arc_manual))
+
+        # Audio transcript deleted
+        self.assertFalse(os.path.exists(transcript_staged))
+
+        # Master source archived (since it had ready: true)
+        arc_master = os.path.join(self.test_dir, "99 - Meta", "Archive", "Nota Sintesi.md")
+        self.assertTrue(os.path.exists(arc_master))
+
+        # Source folder clean
+        self.assertFalse(os.path.exists(manual_staged))
+        self.assertFalse(os.path.exists(master_source))
+
+    def test_multi_source_purge_lifecycle(self):
+        """Asserts _handle_purge_item deletes draft, staged sources, and created attachments leaving zero residue."""
+        source_dir = os.path.join(self.test_dir, "03 - Inbox", "Source")
+        draft_dir = os.path.join(self.test_dir, "03 - Inbox", "Draft")
+        att_dir = os.path.join(self.test_dir, "99 - Meta", "Attachments")
+        os.makedirs(source_dir, exist_ok=True)
+        os.makedirs(draft_dir, exist_ok=True)
+        os.makedirs(att_dir, exist_ok=True)
+
+        staged_src = os.path.join(source_dir, "Raw Note.md")
+        with open(staged_src, "w", encoding="utf-8") as f:
+            f.write("Testo sorgente.")
+
+        created_att = os.path.join(att_dir, "Attachment.pdf")
+        with open(created_att, "wb") as f:
+            f.write(b"dummy attachment")
+
+        draft_path = os.path.join(draft_dir, "Nota Respinta.md")
+        draft_content = (
+            "---\n"
+            "status: draft\n"
+            "type: concept\n"
+            "area: tech\n"
+            "title: \"Nota Respinta\"\n"
+            "sources: [\"[[Raw Note]]\", \"[[Attachment.pdf]]\"]\n"
+            "---\n\n"
+            "# Nota Respinta"
+        )
+        with open(draft_path, "w", encoding="utf-8") as f:
+            f.write(draft_content)
+
+        purged = brain_ingest._handle_purge_item(
+            vault_root=self.test_dir,
+            draft_path=draft_path,
+            source_path=staged_src,
+            name="Nota Respinta"
+        )
+        self.assertTrue(purged)
+        self.assertFalse(os.path.exists(draft_path))
+        self.assertFalse(os.path.exists(staged_src))
+        self.assertFalse(os.path.exists(created_att))
+
 
 if __name__ == "__main__":
     unittest.main()

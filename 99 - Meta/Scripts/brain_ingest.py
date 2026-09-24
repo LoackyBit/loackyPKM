@@ -540,6 +540,237 @@ def strip_ai_directives(text: str) -> str:
     cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
     return cleaned
 
+def resolve_inbox_dependencies(
+    content: str,
+    note_path: Optional[str] = None,
+    vault_root: Optional[str] = None,
+    course: Optional[str] = None
+) -> Tuple[str, List[Dict[str, Any]]]:
+    """Resolves transclusions and links to local inbox/external files (Option B: Deep Ingestion).
+
+    Extracts text from PDFs (via academic_helper) and Markdown notes/transcripts, archives
+    binary attachments (PDFs, images) to 99 - Meta/Attachments/<Course>/ in Title Case,
+    stages secondary Markdown notes to 03 - Inbox/Source/, updates embedded links,
+    and aggregates extracted content for comprehensive AI conceptual elaboration.
+    """
+    root = brain_health.get_vault_root(vault_root)
+    clean_course = None
+    if course:
+        clean_course = brain_health.clean_title_str(str(course))
+    else:
+        has_fm, fm_t, _, _ = brain_health.split_markdown_note(content)
+        if has_fm:
+            meta_temp = brain_health.safe_load_frontmatter(fm_t, brain_health.build_yaml_engine())
+            if meta_temp.get('course'):
+                clean_course = brain_health.clean_title_str(str(meta_temp['course']))
+
+    extracted_refs: List[Tuple[str, str, bool]] = []
+    for m in re.finditer(r'!\[\[(.*?)\]\]', content):
+        extracted_refs.append((m.group(0), m.group(1).strip(), True))
+    for m in re.finditer(r'(?<!!)\[\[(.*?)\]\]', content):
+        extracted_refs.append((m.group(0), m.group(1).strip(), False))
+    for m in re.finditer(r'!\[(.*?)\]\((.*?)\)', content):
+        extracted_refs.append((m.group(0), m.group(2).strip(), True))
+    for m in re.finditer(r'(?<!!)\[(.*?)\]\((.*?)\)', content):
+        extracted_refs.append((m.group(0), m.group(2).strip(), False))
+    for m in re.finditer(r'@\[([^\n\]]+)\]', content):
+        extracted_refs.append((m.group(0), m.group(1).strip(), False))
+    for m in re.finditer(r'(?:^|\s)@([^\s\]\)\'"]+)', content):
+        extracted_refs.append((m.group(0).strip(), m.group(1).strip(), False))
+
+    inbox_dir = os.path.join(root, "03 - Inbox")
+    source_dir = os.path.join(inbox_dir, "Source")
+    os.makedirs(source_dir, exist_ok=True)
+
+    if clean_course:
+        attachments_dir = os.path.join(root, "99 - Meta", "Attachments", clean_course)
+    else:
+        attachments_dir = os.path.join(root, "99 - Meta", "Attachments")
+    os.makedirs(attachments_dir, exist_ok=True)
+
+    enriched_content = content
+    aggregated_sections: List[str] = []
+    sources_meta: List[Dict[str, Any]] = []
+    processed_paths: Set[str] = set()
+
+    for full_match, raw_target, is_transclusion in extracted_refs:
+        clean_target = raw_target.strip().strip('"').strip("'").strip('`')
+        if clean_target.startswith('file://'):
+            clean_target = clean_target[7:]
+        clean_target = clean_target.split('|')[0].strip()
+        clean_target = clean_target.split('#')[0].strip()
+        if not clean_target:
+            continue
+
+        cand_path = None
+        if os.path.isabs(clean_target) and os.path.exists(clean_target):
+            cand_path = clean_target
+        elif note_path and os.path.exists(os.path.join(os.path.dirname(note_path), clean_target)):
+            cand_path = os.path.join(os.path.dirname(note_path), clean_target)
+        elif os.path.exists(os.path.join(root, clean_target)):
+            cand_path = os.path.join(root, clean_target)
+        elif os.path.exists(os.path.join(inbox_dir, clean_target)):
+            cand_path = os.path.join(inbox_dir, clean_target)
+        elif os.path.exists(os.path.join(source_dir, clean_target)):
+            cand_path = os.path.join(source_dir, clean_target)
+        elif not os.path.splitext(clean_target)[1]:
+            for try_p in [
+                os.path.join(inbox_dir, f"{clean_target}.md"),
+                os.path.join(source_dir, f"{clean_target}.md"),
+                os.path.join(os.path.dirname(note_path), f"{clean_target}.md") if note_path else None,
+                os.path.join(root, f"{clean_target}.md")
+            ]:
+                if try_p and os.path.exists(try_p):
+                    cand_path = try_p
+                    break
+
+        if not cand_path and os.path.exists(inbox_dir):
+            target_base = os.path.basename(clean_target).lower()
+            for f in os.listdir(inbox_dir):
+                if f.lower() == target_base or f.lower() == f"{target_base}.md":
+                    cand_path = os.path.join(inbox_dir, f)
+                    break
+
+        if not cand_path or not os.path.isfile(cand_path):
+            continue
+
+        cand_abs = os.path.abspath(cand_path)
+        if note_path and cand_abs == os.path.abspath(note_path):
+            continue
+        if cand_abs in processed_paths:
+            continue
+
+        rel_from_root = os.path.relpath(cand_abs, root)
+        is_inbox = rel_from_root.startswith("03 - Inbox") or rel_from_root.startswith("03 - Inbox/")
+        is_external = not cand_abs.startswith(os.path.abspath(root) + os.sep)
+
+        if not (is_inbox or is_external):
+            continue
+
+        processed_paths.add(cand_abs)
+        ext = os.path.splitext(cand_abs)[1].lower()
+
+        if ext == ".pdf":
+            clean_stem = brain_health.clean_title_str(Path(cand_abs).stem)
+            extracted_pdf_text = ""
+            archived_pdf_name = f"{clean_stem}.pdf"
+            archived_pdf_path = os.path.join(attachments_dir, archived_pdf_name)
+
+            try:
+                import academic_helper
+                pdf_data = academic_helper.extract_pdf_data(cand_abs, course=clean_course, vault_root=root)
+                extracted_pdf_text = pdf_data.get('raw_text', '')
+                archived_pdf_name = pdf_data.get('pdf_filename') or archived_pdf_name
+                archived_pdf_path = pdf_data.get('permanent_pdf_path') or archived_pdf_path
+            except Exception:
+                try:
+                    import academic_helper
+                    archived_pdf_name, archived_pdf_path = academic_helper.archive_pdf_attachment(cand_abs, attachments_dir, clean_stem)
+                except Exception:
+                    shutil.copy2(cand_abs, archived_pdf_path)
+                extracted_pdf_text = f"<!-- PDF allegato: [[{archived_pdf_name}]] (Appunti manoscritti / scansione) -->"
+
+            if is_inbox and os.path.exists(cand_abs) and os.path.abspath(cand_abs) != os.path.abspath(archived_pdf_path):
+                try:
+                    os.remove(cand_abs)
+                except Exception:
+                    pass
+
+            new_ref = f"![[{archived_pdf_name}]]" if is_transclusion else f"[[{archived_pdf_name}]]"
+            enriched_content = enriched_content.replace(full_match, new_ref)
+
+            aggregated_sections.append(f"--- Inizio Contenuto da PDF: [[{archived_pdf_name}]] ---\n{extracted_pdf_text}\n--- Fine Contenuto da PDF ---")
+            sources_meta.append({
+                'name': archived_pdf_name,
+                'wikilink': f"[[{archived_pdf_name}]]",
+                'path': archived_pdf_path,
+                'type': 'pdf',
+                'original_path': cand_abs
+            })
+
+        elif ext in ('.png', '.jpg', '.jpeg', '.webp'):
+            raw_stem = Path(cand_abs).stem
+            clean_stem = brain_health.clean_title_str(raw_stem)
+            if raw_stem.lower().startswith("cleanshot") or "screenshot" in raw_stem.lower():
+                if clean_course:
+                    clean_stem = f"Figura - {clean_course} - {clean_stem}"
+                else:
+                    clean_stem = f"Figura - {clean_stem}"
+
+            target_img_name = f"{clean_stem}{ext}"
+            target_img_path = os.path.join(attachments_dir, target_img_name)
+
+            v = 2
+            while os.path.exists(target_img_path) and os.path.abspath(target_img_path) != cand_abs:
+                try:
+                    with open(cand_abs, 'rb') as sf, open(target_img_path, 'rb') as tf:
+                        if hashlib.sha256(sf.read()).hexdigest() == hashlib.sha256(tf.read()).hexdigest():
+                            break
+                except Exception:
+                    pass
+                target_img_name = f"{clean_stem} (v{v}){ext}"
+                target_img_path = os.path.join(attachments_dir, target_img_name)
+                v += 1
+
+            if is_inbox:
+                shutil.move(cand_abs, target_img_path)
+            else:
+                shutil.copy2(cand_abs, target_img_path)
+
+            new_ref = f"![[{target_img_name}]]"
+            enriched_content = enriched_content.replace(full_match, new_ref)
+
+            sources_meta.append({
+                'name': target_img_name,
+                'wikilink': f"[[{target_img_name}]]",
+                'path': target_img_path,
+                'type': 'image',
+                'original_path': cand_abs
+            })
+
+        elif ext in ('.md', ''):
+            try:
+                with open(cand_abs, 'r', encoding='utf-8', errors='ignore') as mf:
+                    sub_text = mf.read()
+            except Exception:
+                sub_text = ""
+
+            txt_head = sub_text[:1500].lower()
+            is_transcript = any(k in txt_head or k in clean_target.lower() for k in ('trascrizion', 'transcript', 'whisper', 'audio')) or bool(re.search(r'\[\d{2}:\d{2}', txt_head))
+            kind = 'transcript' if is_transcript else 'note'
+
+            file_name = os.path.basename(cand_abs)
+            if not file_name.endswith('.md'):
+                file_name += '.md'
+            staged_path = os.path.join(source_dir, file_name)
+
+            if is_inbox and os.path.abspath(cand_abs) != os.path.abspath(staged_path):
+                if os.path.exists(staged_path):
+                    try:
+                        os.remove(staged_path)
+                    except Exception:
+                        pass
+                shutil.move(cand_abs, staged_path)
+            elif not is_inbox:
+                shutil.copy2(cand_abs, staged_path)
+
+            sub_stem = brain_health.clean_title_str(Path(cand_abs).stem)
+            aggregated_sections.append(f"--- Inizio Contenuto da [[{sub_stem}]] ---\n{sub_text.strip()}\n--- Fine Contenuto da [[{sub_stem}]] ---")
+
+            sources_meta.append({
+                'name': sub_stem,
+                'wikilink': f"[[{sub_stem}]]",
+                'path': staged_path,
+                'type': 'note',
+                'kind': kind,
+                'original_path': cand_abs
+            })
+
+    if aggregated_sections:
+        enriched_content = f"{enriched_content.rstrip()}\n\n" + "\n\n".join(aggregated_sections) + "\n"
+
+    return enriched_content, sources_meta
+
 def format_structured_note(title: str, raw_content: str, depth: str = "approfondimento", source_type: str = "text", source_url: str = "original") -> str:
     """Formats note body with clean headings (no emoji, no ## Collegamenti) and style guide highlights."""
     c_title = brain_health.clean_title_str(title)
@@ -676,8 +907,8 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
      - Viola (concetti secondari, nomi propri, definizioni derivate):
        <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>
      - REGOLA CRITICA: Non racchiudere MAI i tag HTML <mark> o <font> tra backtick markdown (`<mark...>` ❌)!
-   - PALETTE VISIVA COMPLETA: Impiega callout semantici (> [!tip], > [!important], > [!warning], > [!note], > [!example]), checkbox di avanzamento/verifica e tabelle comparative in Markdown standard (zero tabelle HTML).
-   - DIAGRAMMI MERMAID CONTESTUALI (NON OBBLIGATORI): Genera un diagramma ```mermaid flowchart TD solo in presenza di reali catene causali complesse, derivazioni logiche a stadi o flussi di processi che beneficiano concretamente di visualizzazione. Se non vi sono catene complesse, prediligi tabelle o elenchi.
+   - PALETTE VISIVA COMPLETA: Impiega con priorità callout semantici e dinamici (> [!tip], > [!important], > [!warning], > [!note], > [!example], > [!summary]), checkbox avanzate da Style Guide (- [!], - [i], - [*], - [?], - [/], ecc.) e tabelle comparative in Markdown standard (zero tabelle HTML).
+   - DIAGRAMMI MERMAID CONTESTUALI (NON OBBLIGATORI): Non inserire obbligatoriamente diagrammi Mermaid in ogni nota. Usali solo a discrezione in presenza di reali catene causali complesse, derivazioni logiche a stadi o flussi di processi che beneficiano concretamente di visualizzazione grafica. Altrimenti, prediligi callout dinamici, elenchi con checkbox personalizzate o tabelle.
    - REGOLE MERMAID RIGOROSE: Tutte le etichette dei nodi DEVONO essere rigorosamente racchiuse tra doppi apici (es. A["Testo del Nodo (con dettagli)"] --> B["Secondo Nodo"]). Non inserire MAI tag HTML all'interno dei nodi Mermaid.
 
 4. FILTRO ANTI-SLOP E ANTI-SPONSOR:
@@ -1494,6 +1725,53 @@ def _handle_promote_item(vault_root: str, draft_path: str, source_path: str, nam
         else:
             os.remove(source_path)
 
+    # Multi-source dependencies cleanup on promote [x] (Option B)
+    sources_list = meta.get('sources', [])
+    if isinstance(sources_list, str):
+        sources_list = [s.strip() for s in sources_list.split(',') if s.strip()]
+
+    for s_ref in sources_list:
+        clean_s = str(s_ref).strip().strip('"').strip("'")
+        m_link = re.search(r'\[\[(.*?)\]\]', clean_s)
+        target_name = m_link.group(1).split('|')[0].strip() if m_link else clean_s
+
+        cand_srcs = [
+            os.path.join(vault_root, "03 - Inbox", "Source", f"{target_name}.md"),
+            os.path.join(vault_root, "03 - Inbox", "Source", target_name),
+            os.path.join(vault_root, "03 - Inbox", f"{target_name}.md"),
+            os.path.join(vault_root, "03 - Inbox", target_name),
+        ]
+        for c_src in cand_srcs:
+            if os.path.exists(c_src) and os.path.isfile(c_src):
+                if c_src.endswith('.md'):
+                    try:
+                        with open(c_src, 'r', encoding='utf-8', errors='ignore') as f:
+                            txt_head = f.read(1500).lower()
+                    except Exception:
+                        txt_head = ""
+                    is_transcript = any(k in txt_head or k in target_name.lower() for k in ('trascrizion', 'transcript', 'whisper', 'audio')) or bool(re.search(r'\[\d{2}:\d{2}', txt_head))
+                    if is_transcript:
+                        try:
+                            os.remove(c_src)
+                        except Exception:
+                            pass
+                    else:
+                        arc_dir = os.path.join(vault_root, "99 - Meta", "Archive")
+                        os.makedirs(arc_dir, exist_ok=True)
+                        dest_arc = os.path.join(arc_dir, os.path.basename(c_src))
+                        if os.path.exists(dest_arc):
+                            dest_arc = os.path.join(arc_dir, f"{Path(c_src).stem} (Archived){Path(c_src).suffix}")
+                        try:
+                            shutil.move(c_src, dest_arc)
+                        except Exception:
+                            pass
+                elif not c_src.endswith(('.pdf', '.png', '.jpg', '.jpeg', '.webp')):
+                    try:
+                        os.remove(c_src)
+                    except Exception:
+                        pass
+                break
+
     append_inbox_history(vault_root, "APPROVED", real_name, target_rel, src_val)
     return True, None
 
@@ -1569,6 +1847,39 @@ def _handle_purge_item(vault_root: str, draft_path: str, source_path: str, name:
             os.remove(source_path)
         except Exception:
             pass
+
+    # Multi-source dependencies cleanup on purge [-] (Option B)
+    sources_list = meta.get('sources', [])
+    if isinstance(sources_list, str):
+        sources_list = [s.strip() for s in sources_list.split(',') if s.strip()]
+
+    for s_ref in sources_list:
+        clean_s = str(s_ref).strip().strip('"').strip("'")
+        m_link = re.search(r'\[\[(.*?)\]\]', clean_s)
+        target_name = m_link.group(1).split('|')[0].strip() if m_link else clean_s
+
+        cand_srcs = [
+            os.path.join(vault_root, "03 - Inbox", "Source", f"{target_name}.md"),
+            os.path.join(vault_root, "03 - Inbox", "Source", target_name),
+            os.path.join(vault_root, "03 - Inbox", f"{target_name}.md"),
+            os.path.join(vault_root, "03 - Inbox", target_name),
+        ]
+        for c_src in cand_srcs:
+            if os.path.exists(c_src) and os.path.isfile(c_src):
+                try:
+                    os.remove(c_src)
+                except Exception:
+                    pass
+
+        # Purge any newly archived attachments created for this note
+        att_root = os.path.join(vault_root, "99 - Meta", "Attachments")
+        if os.path.exists(att_root):
+            for root_dir, _, files in os.walk(att_root):
+                if target_name in files:
+                    try:
+                        os.remove(os.path.join(root_dir, target_name))
+                    except Exception:
+                        pass
 
     append_inbox_history(vault_root, "REJECTED", name, "PURGED")
     return True
@@ -1748,6 +2059,20 @@ def process_inbox_raw_notes(vault_root: str) -> List[str]:
             update_review_dashboard(vault_root, in_progress=clean_title, phase="Fase 1/3: Estrazione Sorgente...")
             target_dir = classify_target_directory(clean_title, meta.get('tags', []), body)
 
+            # Deep Ingestion (Option B): Resolve local inbox dependencies and attached files
+            course_for_deps = meta.get('course')
+            resolved_content, resolved_sources = resolve_inbox_dependencies(
+                content=content,
+                note_path=file_path,
+                vault_root=vault_root,
+                course=course_for_deps
+            )
+            content = resolved_content
+            has_split, _, _, split_body = brain_health.split_markdown_note(resolved_content)
+            body = split_body if has_split else resolved_content
+            if resolved_sources:
+                meta['sources'] = [s['wikilink'] for s in resolved_sources]
+
             # -------------------------------------------------------------
             # FASE 2/3: Rielaborazione Concettuale AI
             # -------------------------------------------------------------
@@ -1865,9 +2190,19 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                     update_review_dashboard(root, in_progress="CLEAR_ALL")
                     raise
                 except academic_helper.PdfTextUnavailableError as e:
-                    record_ingest_error(root, source, f"PDF privo di testo (scansione non OCR): {e}")
-                    update_review_dashboard(root, in_progress="CLEAR_ALL")
-                    raise
+                    attachments_dir = os.path.join(root, "99 - Meta", "Attachments", clean_course if clean_course else "")
+                    clean_stem = brain_health.clean_title_str(Path(source).stem)
+                    pdf_filename, permanent_pdf_path = academic_helper.archive_pdf_attachment(source, attachments_dir, clean_stem)
+                    raw_text = f"<!-- PDF allegato: [[{pdf_filename}]] (Appunti manoscritti / scansione priva di OCR) -->"
+                    pdf_data = {
+                        'title': clean_stem,
+                        'pdf_filename': pdf_filename,
+                        'permanent_pdf_path': permanent_pdf_path,
+                        'raw_text': raw_text
+                    }
+                    if os.path.dirname(os.path.abspath(source)) == os.path.abspath(os.path.join(root, "03 - Inbox")):
+                        try: os.remove(source)
+                        except Exception: pass
                 except Exception as e:
                     record_ingest_error(root, source, f"Errore estrazione PDF: {e}")
                     update_review_dashboard(root, in_progress="CLEAR_ALL")
@@ -1914,6 +2249,29 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                     dest_dir = target_dir or classify_target_directory(clean_title, ['tech'], source)
                     meta = {'title': clean_title, 'type': 'concept', 'area': 'tech', 'source': 'original'}
 
+                # Deep Ingestion (Option B): Resolve local inbox dependencies and attached files
+                resolved_text, resolved_sources = resolve_inbox_dependencies(
+                    content=raw_text,
+                    note_path=source if os.path.isfile(source) else None,
+                    vault_root=root,
+                    course=clean_course
+                )
+                raw_text = resolved_text
+                if resolved_sources:
+                    meta['sources'] = [s['wikilink'] for s in resolved_sources]
+
+                # If source file is in 03 - Inbox/ root, stage it into 03 - Inbox/Source/
+                if os.path.isfile(source):
+                    src_dir_abs = os.path.abspath(os.path.dirname(source))
+                    inbox_abs = os.path.abspath(os.path.join(root, "03 - Inbox"))
+                    if src_dir_abs == inbox_abs:
+                        target_source_path = os.path.join(inbox_abs, "Source", os.path.basename(source))
+                        if os.path.exists(target_source_path) and os.path.abspath(source) != os.path.abspath(target_source_path):
+                            try: os.remove(target_source_path)
+                            except Exception: pass
+                        try: shutil.move(source, target_source_path)
+                        except Exception: pass
+
             else:
                 lines = [l.strip() for l in source.strip().splitlines() if l.strip()]
                 title = lines[0].lstrip('#').strip() if lines else "Nuova Nota"
@@ -1921,6 +2279,17 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                 raw_text = source
                 dest_dir = target_dir or classify_target_directory(clean_title, ['tech'], source)
                 meta = {'title': clean_title, 'type': 'article' if in_type == 'web' else 'concept', 'area': 'tech', 'source': source if in_type == 'web' else 'original'}
+
+                if in_type != 'web':
+                    resolved_text, resolved_sources = resolve_inbox_dependencies(
+                        content=raw_text,
+                        note_path=None,
+                        vault_root=root,
+                        course=clean_course
+                    )
+                    raw_text = resolved_text
+                    if resolved_sources:
+                        meta['sources'] = [s['wikilink'] for s in resolved_sources]
 
             if clean_course:
                 dest_dir = target_dir

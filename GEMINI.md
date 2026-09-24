@@ -2,16 +2,20 @@
 status: permanent
 type: concept
 area: meta
-related: ["[[Home]]", "[[Vault Health Dashboard]]"]
+related:
+  - "[[Home MOC]]"
+  - "[[Vault Health Dashboard]]"
 aliases: []
 source: original
-title: "Gemini"
-date: '2026-07-17'
+title: Gemini
+date: 2026-07-17
 updated: 2026-08-29T16:00
-tags: [meta/system, tech/ai]
-summary: "Memoria di sistema e system prompt permanente per l'assistente AI Gemini operante nel Vault Obsidian (Second Brain)."
+tags:
+  - meta/system
+  - tech/ai
+summary: Memoria di sistema e system prompt permanente per l'assistente AI Gemini operante nel Vault Obsidian (Second Brain).
 ---
-[[Home|Home]] / [[Meta]] / [[Gemini]]
+[[Home MOC|Home]] / [[Meta]] / [[Gemini]]
 
 # Gemini System Memory & Prompt — Second Brain (Obsidian Vault)
 
@@ -64,6 +68,7 @@ L'ecosistema agentico è consolidato in **3 sole macro-skills ufficiali** in `.a
 
 2. **`brain-ingest` (`.agents/skills/brain-ingest/SKILL.md`):**
  - Ingestione universale polimorfica (URL YouTube con transcript/frame, articoli web, testo libero, file locali) articolata in 3 sole macro-fasi snelle (`Fase 1/3: Estrazione Sorgente`, `Fase 2/3: Rielaborazione Concettuale AI`, `Fase 3/3: Autolinking & Staging`).
+ - **Deep Ingestion & Link-Resolution (Opzione B):** Risoluzione automatica delle dipendenze e allegati locali (`![[file.pdf]]`, `[[note.md]]`, `![[image.png]]`, `@percorso`). Archiviazione immediata dei binari in `99 - Meta/Attachments/<Corso>/` in Title Case, staging delle note secondarie e trascrizioni in `03 - Inbox/Source/`, tracciamento `sources: [...]` nel frontmatter, archiviazione degli appunti manuali in `99 - Meta/Archive/` ed eliminazione trascrizioni temporanee all'approvazione GTD (`[x]`) con garanzia di zero residui in `03 - Inbox/`.
  - Modalità di default `--depth approfondimento` (trattazione densa, ricca ed esaustiva) con `--depth sintesi` opzionale (compatta, 1-2 schermate).
  - Filtro aggressivo anti-sponsor/anti-slop, distillazione principi primi, anatomia adattiva senza emoji nei titoli H1-H3, nessun blocco finale `## Collegamenti`, evidenziazioni Style Guide, autolinking organico nella prosa sincronizzato in `related: [...]`, lock per-fonte (`/tmp/brain_ingest_<hash>.lock`), staging in `03 - Inbox/Draft/` e gestione tri-state in `03 - Inbox/Review Dashboard.md`.
  - *Comando:* `python3 "99 - Meta/Scripts/brain_ingest.py" "<Sorgente>" --depth approfondimento` o `--process-approvals`.
@@ -95,8 +100,8 @@ L'ecosistema agentico è consolidato in **3 sole macro-skills ufficiali** in `.a
  11. `summary` (stringa a doppi apici: sintesi esecutiva densa tra 120 e 180 caratteri, max 200)
 - **Giunzione YAML-Markdown:** Esattamente una riga vuota dopo la chiusura `---`, seguita dalla riga Breadcrumb (`[[Home MOC|Home]] / ...`), e poi il corpo Markdown. Nessun tag HTML o hashtag isolato nel corpo del testo.
 - **Evidenziazioni HTML (Style Guide):** Utilizzare <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark> (giallo) e <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark> (viola). **Mai racchiudere i tag `<mark>` tra backtick markdown.**
-- **Diagrammi Mermaid e LaTeX:** Quote sempre obbligatorie nei nodi Mermaid con caratteri speciali (`id["Etichetta"]`); formule LaTeX `$..$` o `$$..$$`.
+- **Diagrammi Mermaid e LaTeX:** Quote sempre obbligatorie nei nodi Mermaid con caratteri speciali (`id["Etichetta"]`); formule LaTeX `$..$` o `$$..$$`. I grafici Mermaid non sono obbligatori in ogni nota: vanno usati con parsimonia solo se strettamente necessari per strutture complesse. Privilegiare callout semantici/dinamici e checkbox personalizzate da Style Guide (`- [!]`, `- [i]`, `- [*]`, `- [?]`, ecc.).
 - **Integrità File System:** Non creare file al di fuori delle 6 directory principali (eccetto file di configurazione nella root come questo `GEMINI.md`).
 - **Approccio Proattivo:** Quando si analizzano o modificano note, cercare sempre proattivamente opportunità di auto-linking semantico con il resto del Vault, ma **solo ed esclusivamente** verso note effettivamente esistenti.
 - **Divieto Assoluto di Dataview:** Le dashboard devono rimanere in puro Markdown statico autogenerato da Python.
-- **Convenzioni Flashcard Anki (Doc Ufficiale & Obsidian-to-Anki):** Le flashcard contestuali devono risiedere in callout collassabili `> [!tip]- Flashcard: [Concetto]` e racchiuse tra delimitatori di commento `%% ... %%`. Nessun carattere `>` nelle righe interne tra `%%`. Modelli ufficiali `Basic` (Front/Back) e `Cloze` (Text/Extra). Sintassi cloze rigorosamente a doppio due punti `{{c1::...}}`. Nelle formule matematiche MathJax ($..$ e $$..$$), usare sempre `^\prime` o `^{\prime\prime}` per le derivate (MAI apostrofi $f'(x)$ per evitare corruzioni HTML in $f&;$), `\vert` per i valori assoluti, e nessun commento `<!--ID: -->` aggiunto manualmente.
+- **Convenzioni Flashcard Anki (Doc Ufficiale & Obsidian-to-Anki):** Le flashcard devono essere rigorosamente **contestuali e inline**: DEVONO essere collocate IMMEDIATAMENTE A VALLE di ciascun concetto cardine evidenziato in giallo (<mark>) o teorema/definizione a cui fanno riferimento (indicativamente 5-10 card per lezione). **DIVIETO ASSOLUTO di raggrupparle in una sezione o appendice a fondo pagina** (es. mai creare sezioni `## Flashcard...`). Devono risiedere in callout collassabili `> [!tip]- Flashcard: [Concetto]` e racchiuse tra delimitatori di commento `%% ... %%` con `TARGET DECK: University::<Corso>`, `START`, modello (`Basic` o `Cloze`), campi (`Front:`/`Back:` o `Text:`/`Extra:`) e `END`. Nessun carattere `>` nelle righe interne tra `%%`. Modelli ufficiali `Basic` e `Cloze`. Sintassi cloze rigorosamente a doppio due punti `{{c1::...}}`. Nelle formule matematiche MathJax ($..$ e $$..$$), usare sempre `^\prime` o `^{\prime\prime}` per le derivate (MAI apostrofi $f'(x)$ per evitare corruzioni HTML in $f&;$), `\vert` per i valori assoluti, e nessun commento `<!--ID: -->` aggiunto manualmente.

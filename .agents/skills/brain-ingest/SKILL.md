@@ -48,6 +48,15 @@ Replicata in modo deterministico sia da invocazione diretta (`/brain-ingest`, `b
      3. `## ⚠️ Errori di Acquisizione & Azioni Richieste`: errori di trascrizione o duplicati con retry `[x]` o dismiss `[-]`.
      4. `## 📜 Storico Recente`: ultime 10 azioni elaborate sincronizzate con `inbox_history.md`.
 
+7. **Deep Ingestion & Link-Resolution Multi-Sorgente (Opzione B):**
+   - **Single-Note Ingestion Hub:** Quando l'utente fornisce o crea una nota di cattura in `03 - Inbox/` contenente transclusioni o link a risorse locali (`![[file.pdf]]`, `[[appunti.md]]`, `[[trascrizione.md]]`, `![[screenshot.png]]` o `@percorso`), `brain-ingest` risolve automaticamente tutte le dipendenze in profondità.
+   - **Catalogazione Binari Immediata:** I file binari (PDF, PNG, JPG) vengono trasferiti in `99 - Meta/Attachments/<Corso>/` con naming canonico Title Case, deduplicati via SHA-256 e i link nella nota aggiornati. Per i PDF, il testo viene estratto via `academic_helper` (con fallback elegante per scansioni/appunti manoscritti).
+   - **Staging & Aggregazione Testi Secondari:** Gli appunti markdown e le trascrizioni audio secondarie vengono lette per arricchire il contesto AI e spostate immediatamente in `03 - Inbox/Source/`, liberando la radice di `03 - Inbox/`.
+   - **Tracciamento Frontmatter (`sources`):** Tutte le sorgenti collegate vengono indicizzate nel frontmatter della bozza nel campo canonico `sources: ["[[...]]", ...]`.
+   - **Garanzia Zero Residui al Review GTD:**
+     - **Approvazione (`[x]`):** Gli appunti manuali dell'utente vengono archiviati permanentemente in `99 - Meta/Archive/`, le trascrizioni grezze temporanee vengono eliminate, e gli allegati rimangono in `99 - Meta/Attachments/`. `03 - Inbox/` e `03 - Inbox/Source/` restano a zero residui.
+     - **Rifiuto (`[-]`):** Tutte le sorgenti secondarie in `03 - Inbox/Source/` e gli allegati catalogati per la nota in `99 - Meta/Attachments/` vengono eliminati fisicamente.
+
 ---
 
 ## 🛠️ CLI & Invocazione
@@ -96,7 +105,7 @@ Quando invocato con il flag esplicito `--nlm` (D-03), il sistema attiva una cons
 1. **Canale 1 (Invisibile al Vault, Guida Attiva per l'LLM):**
    - Le direttive estratte vengono iniettate direttamente nel prompt di sistema di `agy` durante la *Fase 2/3 (Rielaborazione Concettuale AI)*.
    - Vincoli attivi:
-     - **Schematizzazione causale:** Generazione obbligatoria di diagrammi logici Mermaid a cascata con nodi quotati `id["..."]` per modelli mentali o dipendenze concettuali (SYN-01).
+     - **Schematizzazione flessibile:** Diagrammi Mermaid NON obbligatori. Generarli a discrezione unicamente in presenza di reali catene causali complesse o processi ramificati; privilegiare altrimenti callouts dinamici (anche collassabili `+`/`-`) e checkbox avanzate/personalizzate da Style Guide (SYN-01).
      - **Densità e Principi Primi:** Distillazione rigorosa dei concetti cardine, eliminando riempitivi, frasi fatte e aneddoti superflui (SYN-01).
      - **Active Recall & Atomicità:** Formulazione di definizioni ed espressioni matematiche/tecniche con esplicitazione di ipotesi e condizioni di validità, favorendo l'atomicità semantica per la successiva generazione di flashcard Anki (SYN-02).
 
@@ -121,15 +130,30 @@ Ogni nota prodotta deve rispettare rigorosamente `99 - Meta/Style Guide.md`:
    - **Concetti Cardine (Giallo):** `<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>`
    - **Concetti Secondari (Viola):** `<mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>`
    - *CRITICO:* Non racchiudere mai i tag HTML `<mark>` tra backtick markdown (`` `<mark...>` `` ❌).
-3. **Diagrammi Mermaid:**
-   - Includere sempre apici per i nodi con spazi o parentesi: `id["Etichetta (Dettaglio)"]`.
-   - Nessun tag HTML all'interno dei nodi Mermaid.
+3. **Diagrammi Mermaid & Callouts Dinamici:**
+   - Diagrammi Mermaid discrezionali (nessun obbligo sistematico per nota): da usare solo per reali flussi o dipendenze complesse.
+   - Privilegiare callouts semantici e dinamici (`> [!summary]`, `> [!tip]-`, `> [!example]`, `> [!info]`, `> [!question]`) e checkbox personalizzate da Style Guide (`- [!]`, `- [i]`, `- [*]`, `- [?]`, ecc.).
+   - Se si usa Mermaid: includere sempre apici per i nodi con spazi o parentesi (`id["Etichetta"]`) e nessun tag HTML all'interno dei nodi.
 4. **Formule Matematiche (LaTeX):**
    - Usare `$formula$` per formule inline o `$$formula$$` per blocchi matematici.
 5. **Assorbimento Organico dei Collegamenti:**
    - I collegamenti semantici a note esistenti sono integrati nel testo (`[[Target Note]]`) e sincronizzati in `related: [...]` nel frontmatter YAML. Nessun blocco finale `## Collegamenti`.
 6. **Flashcard Anki Contestuali (Conformità Doc Ufficiale Anki & obsidian-to-anki-plugin):**
+   - **Collocazione Rigorosamente Inline:** DEVONO essere collocate IMMEDIATAMENTE A VALLE di ciascun concetto cardine evidenziato in giallo (`<mark>`) o teorema trattato (5-10 per lezione). **DIVIETO ASSOLUTO di raggrupparle in sezioni o appendici a fondo pagina** (es. mai creare sezioni `## Flashcard...`).
    - Struttura a callout collassabile: `> [!tip]- Flashcard: [Concetto]`, seguita dal blocco racchiuso tra delimitatori `%% ... %%`.
+   - Struttura interna obbligatoria con target deck e modello:
+     ```markdown
+     > [!tip]- Flashcard: [Concetto]
+     %%
+     TARGET DECK: University::<Nome Corso>
+     START
+     Basic (oppure Cloze)
+     Front: [Domanda sui principi primi o definizione]
+     Back: [Risposta concettuale essenziale con LaTeX]
+     Tags: education/university education/math
+     END
+     %%
+     ```
    - Nessun carattere `>` sulle righe interne del commento `%%`.
    - Modelli conformi: `Basic` (Front:/Back:) per principi primi/spiegazioni causali; `Cloze` (Text:/Extra:) per teoremi e formule.
    - Cloze deletion: rigorosamente a doppio due punti `{{c1::contenuto}}`.

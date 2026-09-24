@@ -2,13 +2,18 @@
 status: permanent
 type: concept
 area: tech
-related: ["[[Home]]", "[[Gemini]]", "[[Vault Health Dashboard]]"]
+related:
+  - "[[Home MOC]]"
+  - "[[Gemini]]"
+  - "[[Vault Health Dashboard]]"
 source: original
-title: "Agents"
-date: '2026-08-24'
+title: Agents
+date: 2026-08-24
 updated: 2026-08-25T00:10
-tags: [meta/system, tech/ai]
-summary: "AI Second Brain — Obsidian PKM & Digital Garden system architecture, skills definition, and runtime conventions."
+tags:
+  - meta/system
+  - tech/ai
+summary: AI Second Brain — Obsidian PKM & Digital Garden system architecture, skills definition, and runtime conventions.
 ---
 
 <!-- GSD:project-start source:PROJECT.md -->
@@ -166,7 +171,7 @@ Trattazione concettuale arricchita con evidenziazioni Style Guide ed eventuali d
 - **Primary Concepts (Yellow Highlight):** <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>
 - **Secondary Concepts (Purple Highlight):** <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>
 - **CRITICAL Highlight Rule:** Never wrap `<mark>` HTML tags in markdown backticks (e.g. `` `<mark...>` `` ❌). They must be rendered as raw HTML inline.
-- **Mermaid Diagrams:** Always quote node labels containing spaces or parentheses (e.g. `A["Nodo Principale (dettaglio)"]`), start blocks immediately with diagram header (`flowchart TD`), and never use raw HTML tags inside mermaid node labels.
+- **Mermaid Diagrams & Dynamic Callouts:** Mermaid diagrams are discretionary, not mandatory for every note. Use them selectively for complex flows or branched structures. Prioritize dynamic semantic callouts (e.g. `> [!summary]`, `> [!tip]-`) and custom checkboxes (`- [!]`, `- [i]`, `- [*]`, `- [?]`). When Mermaid is used, always quote node labels containing spaces or parentheses (e.g. `A["Nodo Principale (dettaglio)"]`), start blocks immediately with diagram header (`flowchart TD` / `flowchart LR`), and never use raw HTML tags inside mermaid node labels.
 - **Inline AI Directives (`%% AI: ... %%`):** Use native Obsidian comments `%% AI: <instruction> %%` (or HTML `<!-- AI: <instruction> -->` / callouts `> [!note]- AI: ...`) for direct instructions to the AI rewriter in raw captures. The AI processes these directives with top priority and cleans all comment markers from the final permanent note.
 
 ## Error Handling
@@ -276,11 +281,12 @@ Trattazione concettuale arricchita con evidenziazioni Style Guide ed eventuali d
 
 1. User ingests URL, raw text, or file via `brain-ingest` (`python3 "99 - Meta/Scripts/brain_ingest.py" "<Sorgente>" --depth approfondimento`).
 2. `brain_ingest.py` acquires per-source lock `/tmp/brain_ingest_<hash>.lock`.
-3. If YouTube URL: `youtube_helper.py` fetches transcripts and optional screenshots into `99 - Meta/Clipboard/`.
-4. `brain_ingest.py` applies Style Guide formatting, autolinks concepts organically in prose, and writes `03 - Inbox/Draft/<Title>.md` with `status: draft`.
-5. `brain_ingest.py` registers the draft in `03 - Inbox/Review Dashboard.md` with checkbox `- [ ] Approva [[Draft/<Title>]]`.
-6. User checks checkbox to `- [x] Approva`: `watch.sh` or `brain_ingest.py --process-approvals` sets `status: permanent` and moves file to `02 - Atlas/...` or `05 - Blog/`.
-7. User checks checkbox to `[-] Approva`: `brain_ingest.py --process-approvals` deletes the staging draft, source note, and associated clipboard screenshots.
+3. If source links or transcludes local files (`![[file.pdf]]`, `[[note.md]]`, `![[image.png]]`, `@percorso`), `resolve_inbox_dependencies` extracts content, moves binaries to `99 - Meta/Attachments/<Course>/` in Title Case, stages secondary notes to `03 - Inbox/Source/`, and indexes all sources in YAML `sources: [...]`.
+4. If YouTube URL: `youtube_helper.py` fetches transcripts and optional screenshots into `99 - Meta/Clipboard/`.
+5. `brain_ingest.py` applies Style Guide formatting, autolinks concepts organically in prose, and writes `03 - Inbox/Draft/<Title>.md` with `status: draft`.
+6. `brain_ingest.py` registers the draft in `03 - Inbox/Review Dashboard.md` with checkbox `- [ ] Approva [[Draft/<Title>]]`.
+7. User checks checkbox to `- [x] Approva`: `watch.sh` or `brain_ingest.py --process-approvals` sets `status: permanent`, moves file to `02 - Atlas/...` or `05 - Blog/`, archives manual notes to `99 - Meta/Archive/`, deletes raw audio transcripts, and leaves `03 - Inbox/` with zero residue.
+8. User checks checkbox to `[-] Scarta`: `brain_ingest.py --process-approvals` deletes the staging draft, all staged source notes, newly created attachments, and associated clipboard screenshots.
 
 ### State Management:
 

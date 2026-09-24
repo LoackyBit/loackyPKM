@@ -678,6 +678,17 @@ def format_canonical_frontmatter(metadata: Dict[str, Any], is_blog: bool = False
         if 'professor' in metadata and metadata['professor']:
             doc['professor'] = DoubleQuotedScalarString(str(metadata['professor']).strip().strip('"'))
 
+    if 'course' in metadata and metadata['course']:
+        doc['course'] = DoubleQuotedScalarString(str(metadata['course']).strip().strip('"'))
+
+    if 'sources' in metadata and metadata['sources']:
+        sources_raw = metadata['sources']
+        if isinstance(sources_raw, str):
+            sources_raw = [s.strip() for s in sources_raw.split(',') if s.strip()]
+        sources_seq = CommentedSeq([DoubleQuotedScalarString(str(s).strip().strip('"')) for s in sources_raw if str(s).strip()])
+        sources_seq.fa.set_flow_style()
+        doc['sources'] = sources_seq
+
     stream = StringIO()
     yaml.dump(doc, stream)
     return stream.getvalue().strip()

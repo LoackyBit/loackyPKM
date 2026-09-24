@@ -116,6 +116,7 @@ None.
 |---|-------------|------|--------|-----------|
 | 260921-vbo | Standardizzazione e Validazione Formato Flashcard Anki Conforme a Doc Ufficiale | 2026-09-21 | 62d0bc3 | [260921-vbo-assicurati-che-le-prossime-flashcard-ris](./quick/260921-vbo-assicurati-che-le-prossime-flashcard-ris/) |
 | 260923-uv9 | Integrazione direttive inline AI %% AI: ... %% | 2026-09-23 | 053d4a9 | [260923-uv9-integrazione-direttive-inline-ai-ai](./quick/260923-uv9-integrazione-direttive-inline-ai-ai/) |
+| 260924-n6q | Implementazione Opzione B: Deep Ingestion e Link-Resolution per brain-ingest | 2026-09-24 | pending | [260924-n6q-implementazione-opzione-b-deep-ingestion](./quick/260924-n6q-implementazione-opzione-b-deep-ingestion/) |
 
 ## Deferred Items
 

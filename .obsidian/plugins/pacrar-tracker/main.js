@@ -14,7 +14,7 @@ const SCORES = {
 
 class PacrarTrackerPlugin extends Plugin {
     async onload() {
-        // 1. Reading View Processor
+        // 1. Reading View Markdown Post Processor
         this.registerMarkdownPostProcessor((el, ctx) => {
             this.processPacrarSection(el, ctx);
         });
@@ -23,6 +23,26 @@ class PacrarTrackerPlugin extends Plugin {
         this.registerDomEvent(document, 'click', (evt) => {
             this.handleCheckboxClick(evt);
         }, true);
+
+        // 3. Periodic and Layout Change Scanner for Live Preview
+        this.registerEvent(this.app.workspace.on('layout-change', () => {
+            this.scanAndRenderPacrarTables();
+        }));
+        this.registerInterval(window.setInterval(() => {
+            this.scanAndRenderPacrarTables();
+        }, 2000));
+    }
+
+    scanAndRenderPacrarTables() {
+        const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+        if (!activeView || !activeView.contentEl) return;
+        const tables = activeView.contentEl.querySelectorAll('table');
+        tables.forEach((table) => {
+            const ths = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim().toUpperCase());
+            if (ths.length === 7 && ths.slice(1).join(',') === 'P,A,C,R,A,R') {
+                this.renderPacrarTable(table);
+            }
+        });
     }
 
     processPacrarSection(el, ctx) {
@@ -51,8 +71,19 @@ class PacrarTrackerPlugin extends Plugin {
                     const val = SCORES[txt];
                     rowScore += val;
                     totalScore += val;
-                    cell.setAttribute('data-pacrar-state', txt === '[x]' ? 'completed' : txt === '[-]' ? 'partial' : 'empty');
+                    const state = txt === '[x]' ? 'completed' : txt === '[-]' ? 'partial' : 'empty';
+                    cell.setAttribute('data-pacrar-state', state);
                     cell.classList.add('pacrar-cell');
+                    if (state === 'completed') {
+                        cell.style.setProperty('background-color', 'rgba(34, 197, 94, 0.22)', 'important');
+                        cell.style.setProperty('color', '#22c55e', 'important');
+                    } else if (state === 'partial') {
+                        cell.style.setProperty('background-color', 'rgba(245, 158, 11, 0.22)', 'important');
+                        cell.style.setProperty('color', '#f59e0b', 'important');
+                    } else {
+                        cell.style.setProperty('background-color', 'rgba(239, 68, 68, 0.15)', 'important');
+                        cell.style.setProperty('color', '#ef4444', 'important');
+                    }
                 }
             }
             if (cells[0]) {
@@ -83,11 +114,25 @@ class PacrarTrackerPlugin extends Plugin {
     }
 
     mountSvgRing(table, pct, totalScore, maxScore) {
-        let container = table.parentElement.querySelector('.pacrar-progress-widget');
-        if (!container) {
+        // Find existing container in prior sibling or parent
+        let container = table.previousElementSibling;
+        if (!container || !container.classList.contains('pacrar-progress-widget')) {
+            container = table.parentElement ? table.parentElement.querySelector('.pacrar-progress-widget') : null;
+        }
+        if (!container && table.parentElement) {
             container = document.createElement('div');
             container.className = 'pacrar-progress-widget';
             table.parentElement.insertBefore(container, table);
+        }
+        if (!container) return;
+
+        if (maxScore === 0) {
+            container.innerHTML = `
+                <div class="pacrar-ring-wrap" style="color: var(--text-muted); font-size: 0.85em; padding: 0.5rem; text-align: center;">
+                    <em>Matrice PACRAR pronta — In attesa di lezioni caricate</em>
+                </div>
+            `;
+            return;
         }
 
         const r = 50;
@@ -110,10 +155,19 @@ class PacrarTrackerPlugin extends Plugin {
     }
 
     async handleCheckboxClick(evt) {
-        const cell = evt.target.closest('td.pacrar-cell');
+        const cell = evt.target.closest('td');
         if (!cell) return;
         const txt = cell.textContent.trim();
         if (!(txt in CHECKBOX_CYCLE)) return;
+
+        const table = cell.closest('table');
+        if (!table) return;
+        const ths = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim().toUpperCase());
+        if (ths.length !== 7 || ths.slice(1).join(',') !== 'P,A,C,R,A,R') return;
+
+        const row = cell.parentElement;
+        const cellIdx = Array.from(row.children).indexOf(cell);
+        if (cellIdx < 1 || cellIdx > 6) return;
 
         evt.preventDefault();
         evt.stopPropagation();
@@ -124,21 +178,25 @@ class PacrarTrackerPlugin extends Plugin {
 
         const file = view.file;
         const content = await this.app.vault.read(file);
-        const row = cell.parentElement;
-        const cellIdx = Array.from(row.children).indexOf(cell);
+
         const argCell = row.children[0];
         const argText = argCell.textContent.trim();
 
         const lines = content.split('\n');
         for (let i = 0; i < lines.length; i++) {
-            if (lines[i].includes(argText) && lines[i].includes('|')) {
-                const parts = lines[i].split('|');
-                if (parts.length >= 8 && parts[cellIdx].trim() === txt) {
-                    parts[cellIdx] = ` ${next} `;
-                    lines[i] = parts.join('|');
-                    await this.app.vault.modify(file, lines.join('\n'));
-                    break;
-                }
+            const line = lines[i];
+            if (!line.includes('|')) continue;
+            if (!line.toLowerCase().includes(argText.toLowerCase())) continue;
+
+            const parts = line.split('|');
+            const hasLeadingPipe = line.trim().startsWith('|');
+            const targetPartIdx = hasLeadingPipe ? cellIdx + 1 : cellIdx;
+
+            if (targetPartIdx < parts.length && parts[targetPartIdx].trim() === txt) {
+                parts[targetPartIdx] = ` ${next} `;
+                lines[i] = parts.join('|');
+                await this.app.vault.modify(file, lines.join('\n'));
+                break;
             }
         }
     }

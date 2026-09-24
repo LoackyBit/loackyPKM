@@ -66,6 +66,6 @@ Indice dei corsi completati, workshop e percorsi formativi specialistici.
 ---
 
 ## Collegamenti
-- [[Home|Home]]
+- [[Home MOC|Home]]
 - [[Education & Learning|Education & Learning]]
 - [[University|University]]

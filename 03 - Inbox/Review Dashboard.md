@@ -6,8 +6,8 @@ related: ["[[Home MOC]]", "[[Vault Health Dashboard]]"]
 aliases: []
 source: original
 title: "Review Dashboard"
-date: '2026-09-21'
-updated: 2026-09-21T01:18
+date: '2026-09-24'
+updated: 2026-09-24T17:43
 tags: [meta/dashboard, meta/gtd]
 summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in Inbox."
 ---
@@ -26,7 +26,7 @@ summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in I
 *Nessun processo attivo.*
 
 ## 📥 Note in Attesa di Approvazione
-*Nessuna nota in attesa di approvazione.*
+- [ ] Approva [[Draft/01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python]] (fonte: [[Source/Introduzione alla Programmazione - 1]])
 
 ## ⚠️ Errori di Acquisizione & Azioni Richieste
 *Nessun errore registrato.*
@@ -41,3 +41,4 @@ summary: "Dashboard di revisione GTD per l'approvazione o scarto delle note in I
 - 2026-09-13 15:34 | [REJECTED] | [[L’intelligenza artificiale potrebbe uccidere tutti gli esseri umani entro il 2030]] -> PURGED
 - 2026-09-13 15:39 | [APPROVED] | [[L'Intelligenza Artificiale Potrebbe Uccidere Tutti gli Esseri Umani Entro il 2030]] -> 02 - Atlas/Finance/Investments/L'Intelligenza Artificiale Potrebbe Uccidere Tutti gli Esseri Umani Entro il 2030.md (source: https://youtu.be/i30jVPqQeOM)
 - 2026-09-13 15:39 | [PANIC_ABORT] | [[Tutti i processi]] -> STOPPED (source: Review Dashboard)
+- 2026-09-24 16:26 | [APPROVED] | [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] -> 02 - Atlas/Education & Learning/University/Fondamenti di Matematica Analisi 1/01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione.md (source: Lezione 1 FdM del 23/09/2026 - Prof. Saverio Salzo)

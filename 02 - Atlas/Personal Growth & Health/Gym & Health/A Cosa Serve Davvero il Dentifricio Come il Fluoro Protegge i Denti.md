@@ -2,13 +2,23 @@
 status: permanent
 type: video
 area: mentality
-related: ["[[Home]]", "[[Personal Growth & Health]]", "[[Youtube]]", "[[Skincare]]"]
-aliases: ["Chimica del Dentifricio e del Fluoro", "Biochimica dello Smalto Dentale"]
-source: "https://youtu.be/LEN55dyOKw8"
-title: "Raw Note 2026 - 08 - 25 23 - 30"
-date: '2026-08-25'
+related:
+  - "[[Home MOC]]"
+  - "[[Personal Growth & Health]]"
+  - "[[Youtube]]"
+  - "[[Skincare]]"
+aliases:
+  - Chimica del Dentifricio e del Fluoro
+  - Biochimica dello Smalto Dentale
+source: https://youtu.be/LEN55dyOKw8
+title: Raw Note 2026 - 08 - 25 23 - 30
+date: 2026-08-25
 updated: 2026-08-25T23:48
-tags: [mentality/health, mentality/routine, tech/video, tech/transcript]
+tags:
+  - mentality/health
+  - mentality/routine
+  - tech/video
+  - tech/transcript
 summary: "Trattazione scientifica approfondita sul dentifricio: struttura dell'idrossiapatite, biochimica della demineralizzazione acida, formazione dello scudo di fluoroapatite e igiene orale."
 ---
 [[Home MOC|Home]] / [[Personal Growth & Health]] / [[A Cosa Serve Davvero il Dentifricio Come il Fluoro Protegge i Denti|Raw Note 2026 - 08 - 25 23 - 30]]
@@ -208,7 +218,7 @@ Una particolare cautela è richiesta per i bambini di età inferiore agli **8 an
 
 ## Collegamenti
 
-- [[Home|Home]]
+- [[Home MOC|Home]]
 - [[Personal Growth & Health|Personal Growth & Health]]
 - [[Youtube|Youtube Creators MOC]]
 - [[Skincare|Routine di Cura Fisiologica e Salute dei Tessuti]]

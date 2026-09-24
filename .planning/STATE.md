@@ -116,7 +116,8 @@ None.
 |---|-------------|------|--------|-----------|
 | 260921-vbo | Standardizzazione e Validazione Formato Flashcard Anki Conforme a Doc Ufficiale | 2026-09-21 | 62d0bc3 | [260921-vbo-assicurati-che-le-prossime-flashcard-ris](./quick/260921-vbo-assicurati-che-le-prossime-flashcard-ris/) |
 | 260923-uv9 | Integrazione direttive inline AI %% AI: ... %% | 2026-09-23 | 053d4a9 | [260923-uv9-integrazione-direttive-inline-ai-ai](./quick/260923-uv9-integrazione-direttive-inline-ai-ai/) |
-| 260924-n6q | Implementazione Opzione B: Deep Ingestion e Link-Resolution per brain-ingest | 2026-09-24 | pending | [260924-n6q-implementazione-opzione-b-deep-ingestion](./quick/260924-n6q-implementazione-opzione-b-deep-ingestion/) |
+| 260924-n6q | Implementazione Opzione B: Deep Ingestion e Link-Resolution per brain-ingest | 2026-09-24 | 23659a3 | [260924-n6q-implementazione-opzione-b-deep-ingestion](./quick/260924-n6q-implementazione-opzione-b-deep-ingestion/) |
+| 260924-orz | Integrazione regole didattiche e visuali nel sistema Second Brain | 2026-09-24 | 123b699 | [260924-orz-non-salvare-in-memory-md-ma-integra-nel-](./quick/260924-orz-non-salvare-in-memory-md-ma-integra-nel-/) |
 
 ## Deferred Items
 
@@ -128,9 +129,9 @@ None.
 
 **Resume file:** .planning/phases/17-generazione-flashcard-anki-contestuali-preservazione-id/17-CONTEXT.md
 
-Last activity: 2026-09-23 - Completed quick task 260923-uv9: Integrazione direttive inline AI %% AI: ... %%
-Last session: 2026-09-23T22:25:00+02:00
-Stopped at: Quick task 260923-uv9 complete, ready for next task
+Last activity: 2026-09-24 - Completed quick task 260924-orz: Integrazione regole didattiche e visuali nel sistema Second Brain
+Last session: 2026-09-24T17:55:00+02:00
+Stopped at: Quick task 260924-orz complete, ready for next task
 
 ## Operator Next Steps
 

@@ -165,3 +165,13 @@ Ogni nota prodotta deve rispettare rigorosamente `99 - Meta/Style Guide.md`:
    - Riconoscimento prioritario di comandi e direttive inline inserite dall'utente nella nota grezza tramite commenti nativi `%% AI: <istruzione> %%` (o commenti HTML `<!-- AI: ... -->` o callout `> [!note]- AI: ...`).
    - Esecuzione vincolante dei requisiti richiesti (es. scala immagini, schemi Mermaid specifici, approfondimenti di teoremi).
    - Rimozione e pulizia tassativa di ogni marcatore di commento/callout dal corpo finale della nota permanente.
+8. **Fonti Didattiche, Citazioni Slide e Divieto Citazione Trascrizioni:**
+   - Citare e indicizzare come fonti attive (sia nel frontmatter `sources: [...]` sia nel corpo del testo) esclusivamente materiali ad alto valore accademico e didattico (slide PDF ufficiali d'aula, paper scientifici, libri di testo, articoli autorevoli).
+   - **DIVIETO ASSOLUTO DI CITAZIONE DELLE TRASCRIZIONI AUDIO:** Le trascrizioni audio grezze non vanno MAI citate né inserite in `sources: [...]` o collegate nel testo; fungono esclusivamente da input di rielaborazione per l'AI.
+   - **Sintassi e Densità Citazioni Slide:** Utilizzare la sintassi Obsidian con escape della prima quadra `\[[[NomeFile.pdf#page=N|Slide N]]]`. La densità dei richiami alle slide deve essere bilanciata e strategica (a livello di macro-sezione o per chiarire passaggi sintetici/astratti ed evitare fraintendimenti), evitando la saturazione frase per frase.
+9. **Rappresentazione Visuale & Divieto Assoluto di Diagrammi ASCII/Unicode:**
+   - **DIVIETO ASSOLUTO DI DIAGRAMMI SIMBOLICI ASCII/UNICODE:** Non utilizzare mai blocchi di codice monospazio o testo contenenti schemi con caratteri box-drawing (`┌┐└┘`, `│`, `─`, `──►`), poiché non vengono renderizzati in modo coerente tra i vari dispositivi (mobile, iPad, temi con font variabili).
+   - Per rappresentare schemi, architetture o flussi visivi:
+     - Se presenti nelle slide d'aula, estrarre e includere direttamente i ritagli/render ad alta risoluzione (2x Retina PNG) degli schemi ufficiali (`![[Schema - ... .png]]`).
+     - Altrimenti, strutturare i dati tramite tabelle Markdown native standard e callout semantici dinamici.
+

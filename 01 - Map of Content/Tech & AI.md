@@ -63,7 +63,7 @@ Indice e collezione di prompt ottimizzati per LLM:
 
 ## Collegamenti
 
-- [[Home|Home]]
+- [[Home MOC|Home]]
 - [[Projects|Projects]]
 - [[Education & Learning|Education & Learning]]
 - [[Blog MOC|Blog]]

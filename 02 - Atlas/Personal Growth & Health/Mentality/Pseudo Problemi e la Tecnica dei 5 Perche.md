@@ -121,4 +121,4 @@ A causa dei meccanismi di autodifesa e della confusione emotiva, fare questa chi
 ## Collegamenti
 
 - **Macro Area**: [[Personal Growth & Health]]
-- **Note Correlate**: [[Come Organizzare le Giornate]], [[Laser Focus]], [[Guida al Dopamine Detox]], [[Home]]
+- **Note Correlate**: [[Come Organizzare le Giornate]], [[Laser Focus]], [[Guida al Dopamine Detox]], [[Home MOC]]

@@ -2,14 +2,23 @@
 status: permanent
 type: video
 area: mentality
-related: ["[[Personal Growth & Health]]", "[[Youtube]]", "[[Home]]"]
-aliases: ["Perché Non Ci Piaciamo in Foto", "5 Motivi Psicologici per Cui Non Ti Piaci in Foto"]
-source: "https://youtu.be/LfAInC9MyqM?si=eqHKDhZufe_1uwuO"
-title: "Se Non Ti Piaci in Foto Ci Sono Questi 5 Motivi Psicologici"
-date: '2026-08-29'
+related:
+  - "[[Personal Growth & Health]]"
+  - "[[Youtube]]"
+  - "[[Home MOC]]"
+aliases:
+  - Perché Non Ci Piaciamo in Foto
+  - 5 Motivi Psicologici per Cui Non Ti Piaci in Foto
+source: https://youtu.be/LfAInC9MyqM?si=eqHKDhZufe_1uwuO
+title: Se Non Ti Piaci in Foto Ci Sono Questi 5 Motivi Psicologici
+date: 2026-08-29
 updated: 2026-08-29T02:39
-tags: [mentality/psychology, mentality/self-image, video/psychology, mentality/mindset]
-summary: "Analisi dei 5 fattori psicologici e percettivi (inversione, asimmetria statica, Sé percepito vs ideale, posa e giudizio sociale) alla base del disagio nel vedersi in foto."
+tags:
+  - mentality/psychology
+  - mentality/self-image
+  - video/psychology
+  - mentality/mindset
+summary: Analisi dei 5 fattori psicologici e percettivi (inversione, asimmetria statica, Sé percepito vs ideale, posa e giudizio sociale) alla base del disagio nel vedersi in foto.
 ---
 [[Home MOC|Home]] / [[Personal Growth & Health]] / [[Se Non Ti Piaci in Foto Ci Sono Questi 5 Motivi Psicologici]]
 
@@ -99,4 +108,4 @@ Il rapporto con la propria immagine sta attraversando una mutazione antropologic
 
 - [[Personal Growth & Health|Personal Growth & Health MOC]]
 - [[Youtube|Youtube MOC]]
-- [[Home|Home]]
+- [[Home MOC|Home]]

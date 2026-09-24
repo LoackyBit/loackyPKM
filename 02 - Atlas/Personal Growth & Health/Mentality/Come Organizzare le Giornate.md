@@ -110,4 +110,4 @@ Per mantenere il focus durante le singole sessioni operative, uno strumento chia
 ## Collegamenti
 
 - **Macro Area**: [[Personal Growth & Health]]
-- **Note Correlate**: [[Guida al Dopamine Detox]], [[Laser Focus]], [[Home]]
+- **Note Correlate**: [[Guida al Dopamine Detox]], [[Laser Focus]], [[Home MOC]]

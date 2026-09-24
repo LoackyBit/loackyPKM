@@ -49,5 +49,5 @@ Libreria dei system prompt, generatori di note e workflow avanzati per modelli d
 ---
 
 ## Collegamenti
-- [[Home|Home]]
+- [[Home MOC|Home]]
 - [[Tech & AI|Tech & AI]]

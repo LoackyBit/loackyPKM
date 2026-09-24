@@ -46,6 +46,6 @@ Meccanismi di emissione monetaria, sistemi bancari e commercio internazionale:
 
 ## Collegamenti
 
-- [[Home|Home]]
+- [[Home MOC|Home]]
 - [[Personal Growth & Health|Personal Growth & Health]]
 - [[Tech & AI|Tech & AI]]

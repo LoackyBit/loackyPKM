@@ -37,6 +37,6 @@ Strumenti e pipeline per animazione vettoriale e grafica 2D:
 
 ## Collegamenti
 
-- [[Home|Home]]
+- [[Home MOC|Home]]
 - [[Tech & AI|Tech & AI]]
 - [[Education & Learning|Education & Learning]]

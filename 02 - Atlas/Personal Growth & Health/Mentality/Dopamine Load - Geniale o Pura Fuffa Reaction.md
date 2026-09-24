@@ -98,7 +98,7 @@ Il video evidenzia un problema crescente nell'ecosistema dei contenuti educativi
 
 ## Collegamenti & Note Correlate
 
-- [[Home|Home]]
+- [[Home MOC|Home]]
 - [[Guida al Dopamine Detox]]
 - [[Come Organizzare le Giornate]]
 - [[Learning to Learn ITA]]

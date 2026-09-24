@@ -2,13 +2,25 @@
 status: permanent
 type: video
 area: tech
-related: ["[[Tech & AI]]", "[[Costruire Knowledge Base per AI con LLM Wiki]]", "[[Context Windows in LLM - How They Work and Why They Can Slow Down]]", "[[Youtube]]", "[[Home]]"]
-aliases: ["Top 3 Strategie di Retrieval RAG", "Sparse Dense Hybrid Retrieval RAG", "Strategie di Ricerca RAG"]
-source: "https://youtu.be/r0Dciuq0knU"
-title: "Top 3 RAG Retrieval Strategies - Sparse, Dense, & Hybrid Explained"
-date: '2026-08-29'
+related:
+  - "[[Tech & AI]]"
+  - "[[Costruire Knowledge Base per AI con LLM Wiki]]"
+  - "[[Context Windows in LLM - How They Work and Why They Can Slow Down]]"
+  - "[[Youtube]]"
+  - "[[Home MOC]]"
+aliases:
+  - Top 3 Strategie di Retrieval RAG
+  - Sparse Dense Hybrid Retrieval RAG
+  - Strategie di Ricerca RAG
+source: https://youtu.be/r0Dciuq0knU
+title: Top 3 RAG Retrieval Strategies - Sparse, Dense, & Hybrid Explained
+date: 2026-08-29
 updated: 2026-08-29T02:39
-tags: [tech/ai, tech/rag, video/tech, tech/llm]
+tags:
+  - tech/ai
+  - tech/rag
+  - video/tech
+  - tech/llm
 summary: "Analisi comparativa delle 3 strategie di retrieval per sistemi RAG: Sparse (BM25), Dense (embedding vettoriali) e Hybrid (RRF), con benchmark e trade-off."
 ---
 [[Home MOC|Home]] / [[Tech & AI]] / [[Top 3 RAG Retrieval Strategies - Sparse, Dense, & Hybrid Explained]]
@@ -135,4 +147,4 @@ Sviluppato negli ultimi 2-3 anni come standard de facto nei sistemi RAG di livel
 - [[Costruire Knowledge Base per AI con LLM Wiki|Costruire Knowledge Base per AI con LLM Wiki]]
 - [[Context Windows in LLM - How They Work and Why They Can Slow Down|Context Windows in LLM]]
 - [[Youtube|Youtube MOC]]
-- [[Home|Home]]
+- [[Home MOC|Home]]

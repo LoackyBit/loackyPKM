@@ -53,7 +53,7 @@ Raccolta strutturata delle note e delle lezioni degli anni scolastici precedenti
 
 ## Collegamenti
 
-- [[Home|Home]]
+- [[Home MOC|Home]]
 - [[Tech & AI|Tech & AI]]
 - [[Personal Growth & Health|Personal Growth & Health]]
 - [[Telos]]

@@ -76,5 +76,5 @@ Gli script eseguibili risiedono in `.agents/skills/<nome-skill>/scripts/` e in `
 
 ---
 ## Collegamenti
-- [[Home]]
+- [[Home MOC]]
 - [[Tech & AI]]

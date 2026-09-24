@@ -2,14 +2,22 @@
 status: permanent
 type: video
 area: mentality
-related: ["[[Home]]", "[[Come Impostare una Corretta Progressione dei Carichi]]", "[[Guida al Dopamine Detox]]"]
-aliases: ["Definizione Estrema Sotto il 10% Body Fat", "Strategie per Scendere Sotto il 10% di Grasso"]
-source: "https://youtube.com/watch?v=come-scendere-sotto-10-bodyfat"
-title: "Come Scendere Sotto il 10% di Massa Grassa"
-date: '2026-08-29'
+related:
+  - "[[Home MOC]]"
+  - "[[Come Impostare una Corretta Progressione dei Carichi]]"
+  - "[[Guida al Dopamine Detox]]"
+aliases:
+  - Definizione Estrema Sotto il 10% Body Fat
+  - Strategie per Scendere Sotto il 10% di Grasso
+source: https://youtube.com/watch?v=come-scendere-sotto-10-bodyfat
+title: Come Scendere Sotto il 10% di Massa Grassa
+date: 2026-08-29
 updated: 2026-08-29T02:39
-tags: [mentality/fitness, mentality/nutrizione, mentality/bodybuilding]
-summary: "Strategia metabolica e nutrizionale per superare lo stallo di definizione e scendere sotto il 10% di body fat tramite rialzi calorici ciclici."
+tags:
+  - mentality/fitness
+  - mentality/nutrizione
+  - mentality/bodybuilding
+summary: Strategia metabolica e nutrizionale per superare lo stallo di definizione e scendere sotto il 10% di body fat tramite rialzi calorici ciclici.
 ---
 [[Home MOC|Home]] / [[Personal Growth & Health]] / [[Come Scendere Sotto il 10% di Massa Grassa]]
 
@@ -73,6 +81,6 @@ Il processo di definizione estrema richiede precisione millimetrica:
 
 ## Collegamenti & Note Correlate
 
-- [[Home|Home]]
+- [[Home MOC|Home]]
 - [[Come Impostare una Corretta Progressione dei Carichi]]
 - [[Guida al Dopamine Detox]]

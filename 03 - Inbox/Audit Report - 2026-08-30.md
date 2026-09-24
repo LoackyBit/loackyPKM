@@ -2,12 +2,16 @@
 status: draft
 type: article
 area: meta
-related: ["[[Home]]", "[[Vault Health Dashboard]]"]
+related:
+  - "[[Home MOC]]"
+  - "[[Vault Health Dashboard]]"
 source: original
-title: "Audit Report - 2026 - 08 - 30"
-date: '2026-08-30'
+title: Audit Report - 2026 - 08 - 30
+date: 2026-08-30
 updated: 2026-08-30T21:44
-tags: [meta/audit, meta/health]
+tags:
+  - meta/audit
+  - meta/health
 summary: "Report diagnostico della salute del Vault: note orfane, collegamenti interrotti, forward-references e conformità metadati."
 ---
 [[Home MOC|Home]] / [[Atlas]] / [[Audit Report - 2026-08-30|Audit Report - 2026 - 08 - 30]]
@@ -212,5 +216,5 @@ Diagnostica automatica dello stato di coerenza e integrità semantica del Second
 
 ---
 ## Collegamenti
-- [[Home]]
+- [[Home MOC]]
 - [[Vault Health Dashboard]]

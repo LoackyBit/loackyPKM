@@ -10,7 +10,7 @@ video_url: "https://youtube.com/watch?v=12345"
 channel: "AI Explained"
 related: [[Nota A]], [[Nota B]]
 ---
-[[Home|Home]] / [[Scuola MOC]] / [[Vecchio Appunto di Intelligenza Artificiale]]
+[[Home MOC|Home]] / [[Scuola MOC]] / [[Vecchio Appunto di Intelligenza Artificiale]]
 
 # Vecchio Appunto di Intelligenza Artificiale
 

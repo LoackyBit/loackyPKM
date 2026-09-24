@@ -16,30 +16,43 @@
     align-items: center;
 }
 
-td.pacrar-cell {
+table td.pacrar-cell,
+.markdown-rendered table td.pacrar-cell,
+.cm-table-widget td.pacrar-cell {
     text-align: center !important;
-    cursor: pointer;
-    user-select: none;
-    font-weight: bold;
-    font-family: var(--font-monospace, monospace);
-    transition: background 0.2s ease, color 0.2s ease;
+    cursor: pointer !important;
+    user-select: none !important;
+    font-weight: bold !important;
+    font-family: var(--font-monospace, monospace) !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-td.pacrar-cell[data-pacrar-state="empty"] {
-    background: rgba(239, 68, 68, 0.08);
-    color: #ef4444;
+table td.pacrar-cell[data-pacrar-state="empty"],
+.markdown-rendered table td.pacrar-cell[data-pacrar-state="empty"],
+.cm-table-widget td.pacrar-cell[data-pacrar-state="empty"] {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
 }
 
-td.pacrar-cell[data-pacrar-state="partial"] {
-    background: rgba(245, 158, 11, 0.12);
-    color: #f59e0b;
+table td.pacrar-cell[data-pacrar-state="partial"],
+.markdown-rendered table td.pacrar-cell[data-pacrar-state="partial"],
+.cm-table-widget td.pacrar-cell[data-pacrar-state="partial"] {
+    background-color: rgba(245, 158, 11, 0.22) !important;
+    background: rgba(245, 158, 11, 0.22) !important;
+    color: #f59e0b !important;
 }
 
-td.pacrar-cell[data-pacrar-state="completed"] {
-    background: rgba(34, 197, 94, 0.12);
-    color: #22c55e;
+table td.pacrar-cell[data-pacrar-state="completed"],
+.markdown-rendered table td.pacrar-cell[data-pacrar-state="completed"],
+.cm-table-widget td.pacrar-cell[data-pacrar-state="completed"] {
+    background-color: rgba(34, 197, 94, 0.22) !important;
+    background: rgba(34, 197, 94, 0.22) !important;
+    color: #22c55e !important;
 }
 
-td.pacrar-cell:hover {
-    filter: brightness(1.2);
+table td.pacrar-cell:hover,
+.markdown-rendered table td.pacrar-cell:hover,
+.cm-table-widget td.pacrar-cell:hover {
+    filter: brightness(1.25) !important;
 }

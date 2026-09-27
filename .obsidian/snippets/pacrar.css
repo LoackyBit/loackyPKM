@@ -10,6 +10,11 @@
     background: var(--background-secondary-alt, rgba(0, 0, 0, 0.15));
 }
 
+.pacrar-progress-widget:empty,
+.pacrar-progress-widget:not(:has(.pacrar-ring-wrap)) {
+    display: none !important;
+}
+
 .pacrar-ring-wrap {
     display: flex;
     justify-content: center;

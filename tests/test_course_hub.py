@@ -14,11 +14,12 @@ import brain_health
 class TestCourseHub(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
-        os.makedirs(os.path.join(self.test_dir, "01 - Map of Content"), exist_ok=True)
+        self.moc_dir = os.path.join(self.test_dir, "01 - Map of Content")
+        os.makedirs(self.moc_dir, exist_ok=True)
         os.makedirs(os.path.join(self.test_dir, "02 - Atlas", "Education & Learning", "University"), exist_ok=True)
         
         # Minimal University.md
-        self.uni_path = os.path.join(self.test_dir, "01 - Map of Content", "University.md")
+        self.uni_path = os.path.join(self.moc_dir, "University.md")
         with open(self.uni_path, "w", encoding="utf-8") as f:
             f.write("""---
 status: permanent
@@ -343,6 +344,83 @@ summary: "Indice per corsi extracurricolari."
         with open(app_path, "r", encoding="utf-8") as f:
             appearance = json.load(f)
         self.assertIn("pacrar", appearance.get("enabledCssSnippets", []))
+
+    def test_sync_master_moc_with_children(self):
+        """Asserts master MOC synchronizes PACRAR tables from child course MOCs."""
+        child_moc_content = (
+            "---\nstatus: permanent\ntype: moc\narea: education\nrelated: [\"[[University]]\"]\ntitle: \"Analisi 1 MOC\"\n"
+            "date: '2026-09-01'\nupdated: 2026-09-01T10:00\ntags: [education/university]\nsummary: \"Test\"\n---\n"
+            "[[Home MOC|Home]] / [[University|University MOC]] / [[Analisi 1 MOC]]\n\n"
+            "# Analisi 1 — Course Hub\n\n## Matrice PACRAR\n\n"
+            "| Argomento | P | A | C | R | A | R | Sintesi |\n"
+            "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |\n"
+            "| [[01 - Limiti]] | [x] | [x] | [x] | [ ] | [ ] | [ ] | Definizione di limite |\n"
+            "| [[02 - Derivate]] | [x] | [-] | [ ] | [ ] | [ ] | [ ] | Rapporto incrementale |\n"
+        )
+        child_path = os.path.join(self.moc_dir, "Analisi 1 MOC.md")
+        with open(child_path, "w", encoding="utf-8") as f:
+            f.write(child_moc_content)
+
+        master_moc_content = (
+            "---\nstatus: permanent\ntype: moc\narea: education\nrelated: [\"[[University]]\"]\ntitle: \"Master Hub MOC\"\n"
+            "date: '2026-09-01'\nupdated: 2026-09-01T10:00\ntags: [education/university]\nsummary: \"Master\"\n---\n"
+            "[[Home MOC|Home]] / [[University|University MOC]] / [[Master Hub MOC]]\n\n"
+            "# Master Hub\n\n## Matrice Globale\n\n"
+            "### 1. Analisi 1\n*Hub dedicato:* [[Analisi 1 MOC]]\n\n"
+            "| Lezione / Argomento | P | A | C | R | A | R | Stato / Sintesi |\n"
+            "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |\n"
+            "| [[01 - Limiti]] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | Vecchia sintesi |\n"
+        )
+        master_path = os.path.join(self.moc_dir, "Master Hub MOC.md")
+        with open(master_path, "w", encoding="utf-8") as f:
+            f.write(master_moc_content)
+
+        res = course_hub.sync_master_moc_with_children(master_path, vault_root=self.test_dir)
+        self.assertTrue(res)
+
+        with open(master_path, "r", encoding="utf-8") as f:
+            updated_master = f.read()
+
+        # Row 1 must have updated checkboxes from child
+        self.assertIn("| [[01 - Limiti]] | [x] | [x] | [x] | [ ] | [ ] | [ ] |", updated_master)
+        # Row 2 must have been appended from child
+        self.assertIn("| [[02 - Derivate]] | [x] | [-] | [ ] | [ ] | [ ] | [ ] |", updated_master)
+
+    def test_sync_master_mocs_for_course_auto_cascades(self):
+        """Asserts sync_master_mocs_for_course detects and cascades updates to master MOCs referencing the course."""
+        child_moc_content = (
+            "---\nstatus: permanent\ntype: moc\narea: education\nrelated: [\"[[University]]\"]\ntitle: \"Geometria MOC\"\n"
+            "date: '2026-09-01'\nupdated: 2026-09-01T10:00\ntags: [education/university]\nsummary: \"Test\"\n---\n"
+            "[[Home MOC|Home]] / [[University|University MOC]] / [[Geometria MOC]]\n\n"
+            "# Geometria — Course Hub\n\n## Matrice PACRAR\n\n"
+            "| Argomento | P | A | C | R | A | R | Sintesi |\n"
+            "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |\n"
+            "| [[01 - Vettori]] | [x] | [x] | [x] | [x] | [x] | [x] | Spazi vettoriali |\n"
+        )
+        child_path = os.path.join(self.moc_dir, "Geometria MOC.md")
+        with open(child_path, "w", encoding="utf-8") as f:
+            f.write(child_moc_content)
+
+        master_moc_content = (
+            "---\nstatus: permanent\ntype: moc\narea: education\nrelated: [\"[[University]]\"]\ntitle: \"Ingegneria MOC\"\n"
+            "date: '2026-09-01'\nupdated: 2026-09-01T10:00\ntags: [education/university]\nsummary: \"Master\"\n---\n"
+            "[[Home MOC|Home]] / [[University|University MOC]] / [[Ingegneria MOC]]\n\n"
+            "# Ingegneria Hub\n\n## Matrice Globale\n\n"
+            "### 1. Geometria\n*Hub dedicato:* [[Geometria MOC]]\n\n"
+            "| Lezione / Argomento | P | A | C | R | A | R | Stato / Sintesi |\n"
+            "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |\n"
+            "| [[01 - Vettori]] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | Spazi vettoriali |\n"
+        )
+        master_path = os.path.join(self.moc_dir, "Ingegneria MOC.md")
+        with open(master_path, "w", encoding="utf-8") as f:
+            f.write(master_moc_content)
+
+        count = course_hub.sync_master_mocs_for_course("Geometria", vault_root=self.test_dir)
+        self.assertEqual(count, 1)
+
+        with open(master_path, "r", encoding="utf-8") as f:
+            updated = f.read()
+        self.assertIn("| [[01 - Vettori]] | [x] | [x] | [x] | [x] | [x] | [x] |", updated)
 
 
 if __name__ == "__main__":

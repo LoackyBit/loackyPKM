@@ -29,7 +29,7 @@ logger = logging.getLogger("course_hub")
 
 PACRAR_COLS = ["P", "A", "C", "R", "A", "R"]
 RE_TABLE_HEADER = re.compile(
-    r"^\s*\|\s*Argomento\s*\|\s*P\s*\|\s*A\s*\|\s*C\s*\|\s*R\s*\|\s*A\s*\|\s*R\s*\|\s*$",
+    r"^\s*\|\s*[^|]+\|\s*P\s*\|\s*A\s*\|\s*C\s*\|\s*R\s*\|\s*A\s*\|\s*R\s*\|",
     re.IGNORECASE,
 )
 RE_TABLE_ROW = re.compile(
@@ -123,15 +123,15 @@ def _escape_pipes_outside_wikilinks(text: str) -> str:
     return "".join(result)
 
 
-def parse_pacrar_table(body_lines: List[str]) -> Tuple[int, int, List[Dict[str, Any]]]:
+def parse_pacrar_table(body_lines: List[str], start_from: int = 0) -> Tuple[int, int, List[Dict[str, Any]]]:
     """Parses PACRAR table from markdown body lines per D-05, D-07, D-09.
 
     Returns (start_idx, end_idx, rows) where rows is a list of dicts with:
-    {'key': lookup_key, 'argomento': raw_arg, 'states': [p, a, c, r, a, r]}.
+    {'key': lookup_key, 'argomento': raw_arg, 'states': [p, a, c, r, a, r], 'sintesi': sintesi}.
     """
     start_idx = -1
-    for i, line in enumerate(body_lines):
-        if RE_TABLE_HEADER.match(line.strip()):
+    for i in range(start_from, len(body_lines)):
+        if RE_TABLE_HEADER.match(body_lines[i].strip()):
             start_idx = i
             break
 
@@ -170,10 +170,13 @@ def parse_pacrar_table(body_lines: List[str]) -> Tuple[int, int, List[Dict[str, 
             else:
                 key = arg.strip().lower()
 
+            sintesi = cells[7].strip() if len(cells) > 7 else ""
+
             rows.append({
                 "key": key,
                 "argomento": arg,
-                "states": states
+                "states": states,
+                "sintesi": sintesi,
             })
         idx += 1
 
@@ -207,7 +210,8 @@ def merge_lessons_into_rows(existing_rows: List[Dict[str, Any]], lesson_titles: 
             merged.append({
                 "key": key,
                 "argomento": target_link,
-                "states": ["[ ]"] * 6
+                "states": ["[ ]"] * 6,
+                "sintesi": "",
             })
 
     # Preserve manual unwritten rows (D-08)
@@ -220,12 +224,27 @@ def merge_lessons_into_rows(existing_rows: List[Dict[str, Any]], lesson_titles: 
     return merged
 
 
-def format_pacrar_table(rows: Optional[List[Dict[str, Any]]] = None) -> List[str]:
+def format_pacrar_table(
+    rows: Optional[List[Dict[str, Any]]] = None,
+    include_sintesi: Optional[bool] = None,
+    header_arg: str = "Argomento",
+    header_sintesi: str = "Sintesi",
+) -> List[str]:
     """Formats PACRAR table rows into clean GFM Markdown lines per D-05 and T-13-03."""
-    lines = [
-        "| Argomento | P | A | C | R | A | R |",
-        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: |",
-    ]
+    has_any_sintesi = any(bool(r.get("sintesi", "").strip()) for r in (rows or []))
+    should_include_sintesi = has_any_sintesi if include_sintesi is None else include_sintesi
+
+    if should_include_sintesi:
+        lines = [
+            f"| {header_arg} | P | A | C | R | A | R | {header_sintesi} |",
+            "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |",
+        ]
+    else:
+        lines = [
+            f"| {header_arg} | P | A | C | R | A | R |",
+            "| :--- | :---: | :---: | :---: | :---: | :---: | :---: |",
+        ]
+
     if not rows:
         return lines
 
@@ -238,7 +257,13 @@ def format_pacrar_table(rows: Optional[List[Dict[str, Any]]] = None) -> List[str
         states = r.get("states", ["[ ]"] * 6)
         if len(states) < 6:
             states = states + ["[ ]"] * (6 - len(states))
-        line = f"| {escaped_arg} | {states[0]} | {states[1]} | {states[2]} | {states[3]} | {states[4]} | {states[5]} |"
+
+        if should_include_sintesi:
+            sintesi = r.get("sintesi", "").strip()
+            escaped_sintesi = _escape_pipes_outside_wikilinks(sintesi)
+            line = f"| {escaped_arg} | {states[0]} | {states[1]} | {states[2]} | {states[3]} | {states[4]} | {states[5]} | {escaped_sintesi} |"
+        else:
+            line = f"| {escaped_arg} | {states[0]} | {states[1]} | {states[2]} | {states[3]} | {states[4]} | {states[5]} |"
         lines.append(line)
 
     return lines
@@ -505,7 +530,165 @@ def sync_course_hub(course_name: str, vault_root: Optional[str] = None) -> bool:
 
     atomic_write_file(moc_path, new_content)
     logger.info("Matrice PACRAR sincronizzata per '%s' con %d lezioni.", clean_name, len(merged_rows))
+
+    # Auto-synchronize linked master MOCs referencing this course
+    sync_master_mocs_for_course(clean_name, vault_root=vault_root)
+
     return True
+
+
+RE_DEDICATED_HUB = re.compile(
+    r"\*Hub dedicato:\*\s*\[\[([^\]|]+)(?:\|[^\]]+)?\]\]",
+    re.IGNORECASE,
+)
+
+
+def sync_master_moc_with_children(
+    master_moc_path: str,
+    vault_root: Optional[str] = None,
+) -> bool:
+    """Synchronizes a Master Hub MOC (e.g. Ingegneria Informatica 2026 - 27 MOC.md) with child course MOCs.
+
+    Reads each section referencing '*Hub dedicato:* [[<Child MOC>]]', extracts the child MOC's PACRAR
+    table, and synchronizes rows and checkbox states.
+    """
+    if vault_root is None:
+        vault_root = brain_health.get_vault_root()
+
+    if not os.path.isabs(master_moc_path):
+        master_moc_path = os.path.join(vault_root, master_moc_path)
+
+    if not os.path.exists(master_moc_path):
+        logger.warning("Master MOC '%s' non trovato.", master_moc_path)
+        return False
+
+    with open(master_moc_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    has_fm, fm_text, breadcrumb, body = brain_health.split_markdown_note(content)
+    body_lines = body.split("\n")
+
+    # Locate all dedicated hub references
+    hub_sections = []
+    for i, line in enumerate(body_lines):
+        m = RE_DEDICATED_HUB.search(line)
+        if m:
+            child_moc_title = m.group(1).strip()
+            hub_sections.append((i, child_moc_title))
+
+    if not hub_sections:
+        return False
+
+    modified = False
+
+    # Process in reverse order so line index changes don't affect preceding sections
+    for line_idx, child_moc_title in reversed(hub_sections):
+        # Resolve child MOC path
+        child_path = os.path.join(vault_root, "01 - Map of Content", f"{child_moc_title}.md")
+        if not os.path.exists(child_path):
+            clean_title = brain_health.clean_title_str(child_moc_title)
+            child_path = os.path.join(vault_root, "01 - Map of Content", f"{clean_title}.md")
+            if not os.path.exists(child_path):
+                child_path = os.path.join(vault_root, "01 - Map of Content", f"{clean_title} MOC.md")
+                if not os.path.exists(child_path):
+                    continue
+
+        with open(child_path, "r", encoding="utf-8") as cf:
+            child_content = cf.read()
+
+        _, _, _, child_body = brain_health.split_markdown_note(child_content)
+        child_body_lines = child_body.split("\n")
+        _, _, child_rows = parse_pacrar_table(child_body_lines)
+
+        if not child_rows:
+            continue
+
+        # Find the table in master MOC after line_idx
+        m_start, m_end, master_rows = parse_pacrar_table(body_lines, start_from=line_idx)
+        if m_start == -1:
+            continue
+
+        master_by_key = {r["key"]: r for r in master_rows}
+        merged_rows = []
+        seen = set()
+
+        for crow in child_rows:
+            k = crow["key"]
+            seen.add(k)
+            # If master had a custom sintesi and child doesn't, preserve master sintesi
+            if k in master_by_key and master_by_key[k].get("sintesi") and not crow.get("sintesi"):
+                crow["sintesi"] = master_by_key[k]["sintesi"]
+            merged_rows.append(crow)
+
+        for k, mrow in master_by_key.items():
+            if k not in seen:
+                merged_rows.append(mrow)
+
+        # Detect original master table headers
+        orig_header_line = body_lines[m_start] if m_start < len(body_lines) else ""
+        header_arg = "Lezione / Argomento" if "Lezione" in orig_header_line else "Argomento"
+        header_sintesi = "Stato / Sintesi" if "Stato" in orig_header_line else "Sintesi"
+
+        new_table_lines = format_pacrar_table(
+            merged_rows,
+            include_sintesi=True,
+            header_arg=header_arg,
+            header_sintesi=header_sintesi,
+        )
+
+        body_lines = body_lines[:m_start] + new_table_lines + body_lines[m_end:]
+        modified = True
+
+    if modified:
+        new_body = "\n".join(body_lines)
+        yaml_engine = brain_health.build_yaml_engine()
+        meta = brain_health.safe_load_frontmatter(fm_text, yaml_engine) if has_fm else {}
+        meta["updated"] = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
+        canonical_fm = brain_health.format_canonical_frontmatter(meta, is_blog=False)
+        final_bc = breadcrumb or "[[Home MOC|Home]] / [[University|University MOC]]"
+        new_content = brain_health.assemble_markdown_note(canonical_fm, final_bc, new_body)
+        atomic_write_file(master_moc_path, new_content)
+        logger.info("Master MOC '%s' sincronizzato con successo con le tabelle figlie.", os.path.basename(master_moc_path))
+        return True
+
+    return False
+
+
+def sync_master_mocs_for_course(course_name: str, vault_root: Optional[str] = None) -> int:
+    """Finds all Master Hub MOCs in '01 - Map of Content/' that reference course_name and synchronizes them."""
+    if vault_root is None:
+        vault_root = brain_health.get_vault_root()
+
+    clean_name = sanitize_course_name(course_name)
+    moc_dir = os.path.join(vault_root, "01 - Map of Content")
+    if not os.path.isdir(moc_dir):
+        return 0
+
+    count = 0
+    patterns = [
+        f"[[{clean_name} MOC]]".lower(),
+        f"[[{course_name} MOC]]".lower(),
+        f"[[{clean_name}]]".lower(),
+    ]
+
+    for fname in os.listdir(moc_dir):
+        if not fname.endswith(".md"):
+            continue
+        # Skip the course MOC itself
+        if fname.lower() in (f"{clean_name.lower()} moc.md", f"{course_name.lower()} moc.md"):
+            continue
+
+        fpath = os.path.join(moc_dir, fname)
+        try:
+            with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read().lower()
+            if any(p in content for p in patterns) and "*hub dedicato:*" in content:
+                if sync_master_moc_with_children(fpath, vault_root=vault_root):
+                    count += 1
+        except Exception as e:
+            logger.warning("Errore durante la scansione di %s per sincronizzazione master: %s", fname, e)
+
+    return count
 
 
 def register_lesson(course_name: str, lesson_title: str, vault_root: Optional[str] = None) -> bool:
@@ -531,6 +714,20 @@ def sync_all_courses(vault_root: Optional[str] = None) -> int:
             if os.path.isdir(cpath) and not course_folder.startswith("."):
                 sync_course_hub(course_folder, vault_root=vault_root)
                 synced += 1
+
+    # Also synchronize all master MOCs
+    moc_dir = os.path.join(vault_root, "01 - Map of Content")
+    if os.path.isdir(moc_dir):
+        for fname in os.listdir(moc_dir):
+            if fname.endswith(".md"):
+                fpath = os.path.join(moc_dir, fname)
+                try:
+                    with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
+                        if "*hub dedicato:*" in f.read().lower():
+                            sync_master_moc_with_children(fpath, vault_root=vault_root)
+                except Exception:
+                    pass
+
     return synced
 
 
@@ -540,7 +737,8 @@ def main():
     )
     parser.add_argument("--init-course", metavar="NOME", help="Initialize university Course Hub MOC and Atlas directory")
     parser.add_argument("--sync-course", metavar="NOME", help="Synchronize PACRAR table for specified course")
-    parser.add_argument("--sync-all", action="store_true", help="Synchronize PACRAR tables across all university course hubs")
+    parser.add_argument("--sync-master", metavar="MOC", help="Synchronize specified Master Hub MOC with child course tables")
+    parser.add_argument("--sync-all", action="store_true", help="Synchronize PACRAR tables across all university course hubs and master hubs")
     parser.add_argument("--vault-root", metavar="DIR", help="Specify custom vault root path")
     parser.add_argument("--force", action="store_true", help="Force overwrite of existing Course Hub MOC")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
@@ -558,9 +756,21 @@ def main():
     elif args.sync_course:
         success = sync_course_hub(args.sync_course, vault_root=vault_root)
         sys.exit(0 if success else 1)
+    elif args.sync_master:
+        master_path = args.sync_master
+        if not master_path.endswith(".md"):
+            master_path = f"{master_path}.md"
+        if not os.path.isabs(master_path):
+            if not master_path.startswith("01 - Map of Content"):
+                master_path = os.path.join(vault_root, "01 - Map of Content", master_path)
+            else:
+                master_path = os.path.join(vault_root, master_path)
+        success = sync_master_moc_with_children(master_path, vault_root=vault_root)
+        print(f"Master MOC '{os.path.basename(master_path)}' sincronizzato: {success}")
+        sys.exit(0 if success else 1)
     elif args.sync_all:
         count = sync_all_courses(vault_root=vault_root)
-        print(f"Sincronizzati {count} Hub di corso universitari.")
+        print(f"Sincronizzati {count} Hub di corso universitari e master hub.")
         sys.exit(0)
     else:
         parser.print_help()

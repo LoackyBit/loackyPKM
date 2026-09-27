@@ -45,6 +45,18 @@ function extractLessonKey(text) {
     return clean;
 }
 
+function extractLessonKeyFromCell(cell) {
+    if (!cell) return '';
+    const link = cell.querySelector('a.internal-link, a[data-href]');
+    if (link) {
+        const href = link.getAttribute('data-href') || link.getAttribute('href');
+        if (href) {
+            return extractLessonKey(href);
+        }
+    }
+    return extractLessonKey(cell.textContent || '');
+}
+
 class PacrarTrackerPlugin extends Plugin {
     async onload() {
         // 1. Reading View Markdown Post Processor
@@ -72,6 +84,14 @@ class PacrarTrackerPlugin extends Plugin {
         this.registerInterval(window.setInterval(() => {
             this.scanAndRenderPacrarTables();
         }, 1500));
+
+        this.addCommand({
+            id: 'reload-pacrar',
+            name: 'Ricarica e Sincronizza Matrici PACRAR',
+            callback: () => {
+                this.scanAndRenderPacrarTables();
+            }
+        });
     }
 
     scanAndRenderPacrarTables() {
@@ -339,35 +359,68 @@ class PacrarTrackerPlugin extends Plugin {
 
     async updatePacrarFile(file, lessonKey, cellIdx, nextState) {
         try {
-            const content = await this.app.vault.read(file);
+            // 1. Find any open workspace leaves containing this file
+            const openLeaves = [];
+            this.app.workspace.iterateAllLeaves((leaf) => {
+                if (leaf.view && leaf.view instanceof MarkdownView && leaf.view.file && leaf.view.file.path === file.path) {
+                    openLeaves.push(leaf);
+                }
+            });
+
+            // 2. Read latest content from editor if open, otherwise from disk
+            let content = '';
+            let primaryEditor = null;
+            if (openLeaves.length > 0 && openLeaves[0].view && openLeaves[0].view.editor) {
+                primaryEditor = openLeaves[0].view.editor;
+                content = primaryEditor.getValue();
+            } else {
+                content = await this.app.vault.read(file);
+            }
+
             const lines = content.split('\n');
             let modified = false;
+            let lineIdxModified = -1;
+            let updatedLine = '';
 
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
                 if (!line.includes('|')) continue;
-                const cells = line.split('|');
-                if (cells.length < 8) continue;
-                const rawArg = cells[1] || '';
+                const parts = line.split('|');
+                if (parts.length < 8) continue;
+                const hasLeadingPipe = line.trim().startsWith('|');
+                const rawArg = hasLeadingPipe ? (parts[1] || '') : (parts[0] || '');
                 const lineKey = extractLessonKey(rawArg);
                 if (!lineKey || lineKey !== lessonKey) continue;
 
-                const hasLeadingPipe = line.trim().startsWith('|');
                 const targetPartIdx = hasLeadingPipe ? cellIdx + 1 : cellIdx;
-
-                if (targetPartIdx < cells.length) {
-                    const currentVal = cells[targetPartIdx].trim();
-                    if (currentVal in CHECKBOX_CYCLE) {
-                        cells[targetPartIdx] = ` ${nextState} `;
-                        lines[i] = cells.join('|');
-                        modified = true;
-                        break;
-                    }
+                if (targetPartIdx < parts.length) {
+                    parts[targetPartIdx] = ` ${nextState} `;
+                    lines[i] = parts.join('|');
+                    lineIdxModified = i;
+                    updatedLine = lines[i];
+                    modified = true;
+                    break;
                 }
             }
 
             if (modified) {
-                await this.app.vault.modify(file, lines.join('\n'));
+                let updatedInEditor = false;
+                for (const leaf of openLeaves) {
+                    if (leaf.view && leaf.view.editor) {
+                        leaf.view.editor.setLine(lineIdxModified, updatedLine);
+                        updatedInEditor = true;
+                    }
+                    if (leaf.view && leaf.view.previewMode && typeof leaf.view.previewMode.rerender === 'function') {
+                        leaf.view.previewMode.rerender(true);
+                    }
+                    if (leaf.view && leaf.view.contentEl) {
+                        this.renderAllPacrar(leaf.view.contentEl);
+                    }
+                }
+
+                if (!updatedInEditor) {
+                    await this.app.vault.modify(file, lines.join('\n'));
+                }
                 return true;
             }
         } catch (err) {
@@ -394,54 +447,65 @@ class PacrarTrackerPlugin extends Plugin {
         evt.stopPropagation();
         const next = CHECKBOX_CYCLE[txt];
 
-        // 1. Optimistic DOM update: immediate visual feedback in current view
+        // 1. Optimistic DOM update: immediate visual feedback in current clicked cell
         cell.textContent = next;
         const root = table.closest('.markdown-rendered, .markdown-preview-view, .cm-content') || document;
         this.renderAllPacrar(root);
 
-        // 2. Identify the lesson key
+        // 2. Identify the canonical lesson key from link or text
         const argCell = row.children[0];
-        const lessonKey = extractLessonKey(argCell ? argCell.textContent : '');
+        const lessonKey = extractLessonKeyFromCell(argCell);
+        if (!lessonKey) return;
 
-        // 3. Update the active file on disk
-        const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-        let activeFilePath = '';
-        if (view && view.file) {
-            activeFilePath = view.file.path;
-            await this.updatePacrarFile(view.file, lessonKey, cellIdx, next);
+        // 3. Find the file of the clicked view
+        let activeFile = null;
+        const leafEl = cell.closest('.workspace-leaf');
+        if (leafEl) {
+            this.app.workspace.iterateAllLeaves((l) => {
+                if ((l.containerEl === leafEl || l.containerEl.contains(cell)) && l.view && l.view.file) {
+                    activeFile = l.view.file;
+                }
+            });
+        }
+        if (!activeFile) {
+            const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+            activeFile = activeView ? activeView.file : this.app.workspace.getActiveFile();
         }
 
-        // 4. Synchronize linked MOC files in 01 - Map of Content/ (e.g. Master MOC <-> Course MOCs)
-        if (lessonKey) {
-            const allFiles = this.app.vault.getMarkdownFiles();
-            const mocFiles = allFiles.filter(f => f.path.startsWith('01 - Map of Content/') && f.path !== activeFilePath);
+        const activeFilePath = activeFile ? activeFile.path : '';
+        if (activeFile) {
+            await this.updatePacrarFile(activeFile, lessonKey, cellIdx, next);
+        }
 
-            for (const otherFile of mocFiles) {
-                await this.updatePacrarFile(otherFile, lessonKey, cellIdx, next);
-            }
+        // 4. Synchronize linked MOC files in 01 - Map of Content/
+        const allFiles = this.app.vault.getMarkdownFiles();
+        const mocFiles = allFiles.filter(f => f.path.startsWith('01 - Map of Content/') && f.path !== activeFilePath);
 
-            // 5. Update any other visible tables in the DOM that display this lesson
-            const otherTables = Array.from(document.querySelectorAll('table')).filter(t => t !== table && isPacrarTable(t));
-            let needsRerender = false;
-            otherTables.forEach(ot => {
-                const oRows = Array.from(ot.querySelectorAll('tbody tr')).length > 0
-                    ? Array.from(ot.querySelectorAll('tbody tr'))
-                    : Array.from(ot.querySelectorAll('tr')).slice(1);
-                oRows.forEach(orow => {
-                    const oArg = orow.children[0];
-                    if (oArg && extractLessonKey(oArg.textContent) === lessonKey) {
-                        const oCell = orow.children[cellIdx];
-                        if (oCell) {
-                            oCell.textContent = next;
-                            needsRerender = true;
-                        }
+        for (const otherFile of mocFiles) {
+            await this.updatePacrarFile(otherFile, lessonKey, cellIdx, next);
+        }
+
+        // 5. Update any other visible tables in the DOM that display this lesson
+        const otherTables = Array.from(document.querySelectorAll('table')).filter(t => t !== table && isPacrarTable(t));
+        let needsRerender = false;
+        otherTables.forEach(ot => {
+            const oRows = Array.from(ot.querySelectorAll('tbody tr')).length > 0
+                ? Array.from(ot.querySelectorAll('tbody tr'))
+                : Array.from(ot.querySelectorAll('tr')).slice(1);
+            oRows.forEach(orow => {
+                const oArg = orow.children[0];
+                if (oArg && extractLessonKeyFromCell(oArg) === lessonKey) {
+                    const oCell = orow.children[cellIdx];
+                    if (oCell) {
+                        oCell.textContent = next;
+                        needsRerender = true;
                     }
-                });
+                }
             });
+        });
 
-            if (needsRerender) {
-                this.renderAllPacrar(document);
-            }
+        if (needsRerender) {
+            this.renderAllPacrar(document);
         }
     }
 }

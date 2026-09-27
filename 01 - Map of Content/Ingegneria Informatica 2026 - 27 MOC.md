@@ -7,7 +7,7 @@ aliases: ["Ingegneria Informatica 2026-27 MOC", "Ingegneria Informatica 2026 - 2
 source: original
 title: "Ingegneria Informatica 2026 - 27 MOC"
 date: '2026-09-25'
-updated: 2026-09-27T18:53
+updated: 2026-09-27T19:01
 tags: [education/university, education/moc, tech/engineering, tech/cs]
 summary: "Hub generale e matrice PACRAR per la Laurea Triennale in Ingegneria Informatica 2026-27 (Sapienza Università di Roma, 1° Anno, 1° Semestre)."
 ---
@@ -26,11 +26,12 @@ summary: "Hub generale e matrice PACRAR per la Laurea Triennale in Ingegneria In
 
 ## 🏛️ Insegnamenti Attivi (1° Semestre)
 
-| Insegnamento | Settore | Canale | Docente / Riferimenti | CFU | Hub di Corso |
-| :--- | :---: | :---: | :--- | :---: | :--- |
-| **Fondamenti di Matematica (Analisi 1)** | `MATH-06/A` | Canale A-L | Prof. [[Saverio Salzo]] | 9 CFU | [[Fondamenti di Matematica (Analisi 1) MOC]] |
-| **Introduzione alla Programmazione** | `IINF-05/A` | Canale 1 e 2 | Prof. [[Giuseppe Santucci]] | 9 CFU | [[Introduzione alla Programmazione MOC]] |
-| **Elementi di Calcolo delle Probabilità e Statistica** | `MATH-03/B` | Unico | Prof.ssa Giovanna Nappo, Prof. Fabio Spizzichino | 6 CFU | [[Probabilità e Statistica MOC]] |
+| Insegnamento                                           |   Settore   |    Canale    | Docente / Riferimenti                            |  CFU  | Hub di Corso                                 |
+| :----------------------------------------------------- | :---------: | :----------: | :----------------------------------------------- | :---: | :------------------------------------------- |
+| **Fondamenti di Matematica (Analisi 1)**               | `MATH-06/A` |  Canale A-L  | Prof. [[Saverio Salzo]]                          | 9 CFU | [[Fondamenti di Matematica (Analisi 1) MOC]] |
+| **Introduzione alla Programmazione**                   | `IINF-05/A` | Canale 1 e 2 | Prof. [[Giuseppe Santucci]]                      | 9 CFU | [[Introduzione alla Programmazione MOC]]     |
+| **Elementi di Calcolo delle Probabilità e Statistica** | `MATH-03/B` |    Unico     | Prof.ssa Giovanna Nappo, Prof. Fabio Spizzichino | 6 CFU | [[Probabilità e Statistica MOC]]             |
+
 
 ---
 
@@ -45,7 +46,7 @@ La preparazione accademica segue il framework metodologico PACRAR (*Pianificazio
 
 | Lezione / Argomento | P | A | C | R | A | R | Stato / Sintesi |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] | [x] | [x] | [x] | [x] | [ ] | [ ] | Connettivi, quantificatori, tautologie e metodi di dimostrazione |
+| [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] | [ ] | [x] | [x] | [x] | [-] | [ ] | Connettivi, quantificatori, tautologie e metodi di dimostrazione |
 | [[02 - Teoria degli Insiemi]] | [x] | [x] | [x] | [x] | [ ] | [ ] | Assiomi ZF, estensionalità, unione, specificazione, potenza, Von Neumann |
 
 ### 2. Introduzione alla Programmazione — 9 CFU

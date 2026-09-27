@@ -235,7 +235,7 @@ def get_breadcrumbs(filepath: str, clean_title: str) -> str:
 
     # Academic Course Hierarchy per Phase 13 (D-13, D-14)
     if path_str.startswith("02 - Atlas/Education & Learning/University") and len(parts) >= 5:
-        course_dir = parts[3]
+        course_dir = parts[-2]
         return f"[[Home MOC|Home]] / [[University|University MOC]] / [[{course_dir} MOC]] / [[{clean_title}]]"
 
     if path_str.startswith("02 - Atlas/Finance"):
@@ -867,7 +867,11 @@ def lint_file(filepath: str, vault_root: str = '.', execute: bool = False,
     canonical_yaml = format_canonical_frontmatter(meta, is_blog=is_blog)
 
     # Sync breadcrumb
-    new_breadcrumb = get_breadcrumbs(rel_path, meta['title'])
+    if meta.get('course'):
+        clean_course = clean_title_str(str(meta['course']))
+        new_breadcrumb = f"[[Home MOC|Home]] / [[University|University MOC]] / [[{clean_course} MOC]] / [[{meta['title']}]]"
+    else:
+        new_breadcrumb = get_breadcrumbs(rel_path, meta['title'])
     final_breadcrumb = new_breadcrumb if new_breadcrumb else breadcrumb
 
     new_content = assemble_markdown_note(canonical_yaml, final_breadcrumb, cleaned_body)

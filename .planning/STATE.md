@@ -120,7 +120,7 @@ None.
 | 260924-orz | Integrazione regole didattiche e visuali nel sistema Second Brain | 2026-09-24 | 123b699 | [260924-orz-non-salvare-in-memory-md-ma-integra-nel-](./quick/260924-orz-non-salvare-in-memory-md-ma-integra-nel-/) |
 | 260924-qtr | Pulizia automatica trascrizioni audio orfane in 03 - Inbox/Source/ | 2026-09-24 | a6784d9 | [260924-qtr-cleanup-audio-transcripts-inbox-source](./quick/260924-qtr-cleanup-audio-transcripts-inbox-source/) |
 | 260924-fdt | Fedeltà alla nota originale e trascrizione con dispense e slide di supporto | 2026-09-24 | 35e6d0e | [260924-fdt-fedelta-trascrizione-lezione-fonti-supporto](./quick/260924-fdt-fedelta-trascrizione-lezione-fonti-supporto/) |
-| 260927-pacrar-linked-tables | Sincronizzazione Dinamica tra Tabelle PACRAR Figlie e Master MOC | 2026-09-27 | pending | [260927-pacrar-linked-tables](./quick/260927-pacrar-linked-tables/) |
+| 260927-pacrar-linked-tables | Sincronizzazione Dinamica tra Tabelle PACRAR Figlie e Master MOC | 2026-09-27 | 5b839b8 | [260927-pacrar-linked-tables](./quick/260927-pacrar-linked-tables/) |
 
 ## Deferred Items
 

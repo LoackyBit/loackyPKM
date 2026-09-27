@@ -79,14 +79,14 @@ class TestAnkiSyntax(unittest.TestCase):
             card_id=1726588291001
         )
         self.assertIn("> [!tip]- Flashcard: Equazioni di Maxwell", card)
-        self.assertIn("> %% TARGET DECK: University::Fisica_Generale_II %%", card)
-        self.assertIn("> START", card)
-        self.assertIn("> Basic", card)
-        self.assertIn("> Front: Qual è la prima equazione di Maxwell in forma differenziale?", card)
-        self.assertIn(r"> Back: La legge di Gauss: [$]\nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}[/$].", card)
-        self.assertIn("> Tags: Fisica_II::Elettromagnetismo::Maxwell", card)
-        self.assertIn("> <!--ID: 1726588291001-->", card)
-        self.assertIn("> END", card)
+        self.assertIn("TARGET DECK: University::Fisica Generale II", card)
+        self.assertIn("START", card)
+        self.assertIn("Basic", card)
+        self.assertIn("Front: Qual è la prima equazione di Maxwell in forma differenziale?", card)
+        self.assertIn(r"Back: La legge di Gauss: [$]\nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}[/$].", card)
+        self.assertIn("Tags: Fisica_II::Elettromagnetismo::Maxwell", card)
+        self.assertIn("<!--ID: 1726588291001-->", card)
+        self.assertIn("END", card)
 
     def test_format_anki_card_cloze(self):
         card = anki_helper.format_anki_card(
@@ -98,15 +98,15 @@ class TestAnkiSyntax(unittest.TestCase):
             tags=["ASD::Grafi::Cammini_Minimi"]
         )
         self.assertIn("> [!tip]- Flashcard: Complessità Dijkstra", card)
-        self.assertIn("> %% TARGET DECK: University::Algoritmi_e_Strutture_Dati %%", card)
-        self.assertIn("> START", card)
-        self.assertIn("> Cloze", card)
-        self.assertIn("> Text: ", card)
+        self.assertIn("TARGET DECK: University::Algoritmi e Strutture Dati", card)
+        self.assertIn("START", card)
+        self.assertIn("Cloze", card)
+        self.assertIn("Text: ", card)
         self.assertIn("{{c1::[$]O((\\vert V\\vert + \\vert E\\vert) \\log \\vert V\\vert)[/$]}}", card)
-        self.assertIn("> Extra: ", card)
-        self.assertIn("> Tags: ASD::Grafi::Cammini_Minimi", card)
+        self.assertIn("Extra: ", card)
+        self.assertIn("Tags: ASD::Grafi::Cammini_Minimi", card)
         self.assertNotIn("<!--ID:", card)  # No ID when not provided
-        self.assertIn("> END", card)
+        self.assertIn("END", card)
 
 
 class TestAnkiExtraction(unittest.TestCase):
@@ -403,8 +403,8 @@ Testo finale con menzione di Algoritmi.
         call_args = mock_run.call_args[0][0]
         prompt_arg = [arg for arg in call_args if arg.startswith("--print=")][0]
 
-        self.assertIn("7. GENERAZIONE FLASHCARD ANKI CONTESTUALI", prompt_arg)
-        self.assertIn("TARGET DECK: University::Linguaggi_Formali", prompt_arg)
+        self.assertIn("GENERAZIONE FLASHCARD ANKI CONTESTUALI", prompt_arg)
+        self.assertIn("TARGET DECK: University::Linguaggi Formali", prompt_arg)
         self.assertIn("> [!tip]- Flashcard:", prompt_arg)
 
         # Test with enable_anki=False

@@ -849,7 +849,7 @@ def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth
 
     anki_rules = ""
     if enable_anki:
-        clean_deck = course_name.replace(" ", "_") if course_name else "Generale"
+        clean_deck = course_name.strip() if course_name else "Generale"
         anki_rules = f"""
 8. GENERAZIONE FLASHCARD ANKI CONTESTUALI (CONFORMI A DOC ANKI & OBSIDIAN-TO-ANKI):
    - Genera flashcard contestuali atomiche collocate IMMEDIATAMENTE A VALLE di ciascun concetto cardine evidenziato in giallo (<mark>) o teorema STEM (indicativamente 5-10 card per lezione).
@@ -861,17 +861,17 @@ def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth
      [Basic|Cloze]
      [Front:|Text:] ...
      [Back:|Extra:] ...
-     Tags: {clean_deck}::[Argomento]::[Dettaglio]
+     Tags: education/university tech/programming
      END
      %%
-   - REGOLA CRITICA INDENTAZIONE: NON anteporre mai il carattere '>' alle righe interne del blocco di commento Anki (%%, TARGET DECK, START, Basic/Cloze, Front/Text, Back/Extra, Tags, END, %%). Solo la primissima riga del callout ha '>'.
+   - REGOLA CRITICA INDENTAZIONE: NON anteporre MAI il carattere '>' alle righe interne del blocco di commento Anki (%%, TARGET DECK, START, Basic/Cloze, Front/Text, Back/Extra, Tags, END, %%). Solo la primissima riga del callout ha '>'. Tutte le altre righe devono iniziare a colonna 0 senza '>'.
    - MODELLI E CAMPI SUPPORTATI (STANDARD UFFICIALE ANKI):
      * Modello 'Basic': campi 'Front:' (domanda di ragionamento o principio primo) e 'Back:' (risposta concettuale esaustiva).
      * Modello 'Cloze': campo 'Text:' contenente le cancellazioni {{{{c1::...}}}}, {{{{c2::...}}}} e campo opzionale 'Extra:' per note di contesto.
     - REGOLE TASSATIVE PER FORMULE MATEMATICHE E CLOZE (DOC UFFICIALE ANKI):
      a) Derivate in formule matematiche: USARE SEMPRE la notazione LaTeX standard con ^\\prime (es. $f^\\prime(\\xi)$, $f^{{\\prime\\prime}}(x)$, $s^\\prime(t)$). È SEVERAMENTE VIETATO usare l'apostrofo $f'(x)$, poiché il converter HTML del plugin lo codifica in entità HTML che generano errori di sintassi e tag orfani in Anki.
      b) Notazione Cloze: USARE SEMPRE il doppio due punti {{{{c1::risposta}}}}. Non usare MAI il singolo due punti {{{{c1:risposta}}}}.
-     c) Delimitatori matematici: usare la sintassi MathJax standard $...$ per formule inline o $$...$$ per formule in blocco (es. {{{{c1::$[a, b]$}}}} o $f(x) = {{{{c1::x^2}}}}$). NON usare MAI i vecchi tag proprietari '[$]' o '[/$]'.
+     c) Delimitatori matematici in Cloze: SE il contenuto della cancellazione contiene comandi o simboli matematici LaTeX (es. \\forall, \\exists, \\lor, \\land, \\neg, \\complement, \\cup, \\cap), DEVE ESSERE RIGOROSAMENTE RACCHIUSO TRA DELIMITATORI $...$ ALL'INTERNO DELLA CLOZE (es. {{{{c1::$(\\neg P) \\lor (\\neg Q)$}}}} o {{{{c1::$\\exists x : \\neg P(x)$}}}}). Non lasciare MAI comandi LaTeX "nudi" senza '$' dentro {{{{c1::...}}}}, altrimenti il plugin non li converte in MathJax e Anki mostra il codice LaTeX testuale anziché la formula renderizzata.
      d) Testo ordinario in Cloze: usa {{{{c1::parola normale}}}} SENZA delimitatori matematici ($). Non racchiudere mai testo in prosa dentro $...$.
      e) Valori assoluti e pipe: usa \\vert anziché | nelle formule (es. $\\vert x\\vert$).
      f) Spaziatura graffe nidificate: all'interno delle formule TeX nelle cloze, evitare doppie graffe consecutive '}}}}' senza spazio (usare '{{ {{' o '\\left\\{{ ... \\right\\}}') per non confondere il parser delle cloze di Anki.
@@ -903,7 +903,7 @@ CONTENUTO SORGENTE:
 {depth_instruction}
 {meta_section}
 REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
-1. GERARCHIA DELLE FONTI, FEDELTÀ ALLA LEZIONE E SEQUENZA LOGICO-TEMPORALE (TAX-01, D-06):
+1. GERARCHIA DELLE FONTI, FEDELTÀ ALLA LEZIONE, SEQUENZA LOGICO-TEMPORALE E DIGRESSIONI DEL DOCENTE (TAX-01, D-06):
    - FEDELTÀ ASSOLUTA ALLA NOTA ORIGINALE E ALLA TRASCRIZIONE (FONTI PRIMARIE): La nota originale dell'utente e la trascrizione audio della lezione costituiscono la FONTE PRIMARIA, l'asse portante narrativo e il perimetro concettuale invalicabile. La nota finale NON DEVE MAI discostarsi troppo da quanto effettivamente spiegato, argomentato ed esposto dal docente a lezione o riportato negli appunti originali.
    - RUOLO RIGOROSAMENTE DI SUPPORTO DI DISPENSE, SLIDE E ALTRI APPUNTI (FONTI DI SUPPORTO): Le dispense del corso, le slide PDF e gli eventuali altri appunti hanno uno scopo puramente AUSILIARIO E DI SUPPORTO. Servono per formalizzare le definizioni, recuperare l'esatta notazione matematica LaTeX per formule menzionate o abbozzate a voce, chiarire passaggi algebrici o teoremi, aggiungere richiami precisi alle slide (\\[[[file.pdf#page=N|Slide N]]]) e arricchire con tabelle o figure pertinenti.
    - DIVIETO ASSOLUTO DI DIVAGAZIONI O IPER-ESTENSIONI ENCICLOPEDICHE: Non espandere mai la trattazione a capitoli, lemmi o interi argomenti presenti nelle dispense o nelle slide che NON siano stati affrontati o richiamati a lezione. I materiali di supporto non devono MAI stravolgere la sequenza della lezione né trasformare la nota in un compendio enciclopedico del libro di testo estraneo a quanto svolto dal docente.

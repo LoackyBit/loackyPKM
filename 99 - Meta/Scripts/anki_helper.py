@@ -286,7 +286,7 @@ def format_anki_card(
     (D-01, D-02, D-03, D-04, D-05, D-06, D-07, D-08, D-12).
     """
     clean_concept = brain_health.clean_title_str(concept_name)
-    clean_course = course_hub.sanitize_course_name(course_name).replace(" ", "_") if course_name else "Generale"
+    clean_course = course_hub.sanitize_course_name(course_name) if course_name else "Generale"
 
     norm_model = model.strip()
     is_cloze = norm_model.lower() == "cloze"
@@ -308,28 +308,31 @@ def format_anki_card(
             if formatted_tag:
                 clean_tags.append(formatted_tag)
     if not clean_tags:
-        clean_tags = [f"{clean_course}::Generale"]
+        clean_course_tag = clean_course.replace(" ", "_").replace("(", "").replace(")", "")
+        clean_tags = [f"University::{clean_course_tag}::Generale"]
     tag_line = " ".join(clean_tags)
 
-    # Format multi-line fields with blockquote prefix '> '
+    # Format multi-line fields without blockquote prefix (only callout header has '>')
     f1_lines = clean_f1.splitlines() or [""]
     f2_lines = clean_f2.splitlines() or [""]
 
-    f1_block = [f"> {f1_label}: {f1_lines[0]}"] + [f"> {l}" for l in f1_lines[1:]]
-    f2_block = [f"> {f2_label}: {f2_lines[0]}"] + [f"> {l}" for l in f2_lines[1:]]
+    f1_block = [f"{f1_label}: {f1_lines[0]}"] + [f"{l}" for l in f1_lines[1:]]
+    f2_block = [f"{f2_label}: {f2_lines[0]}"] + [f"{l}" for l in f2_lines[1:]]
 
     lines = [
         f"> [!tip]- Flashcard: {clean_concept}",
-        f"> %% TARGET DECK: University::{clean_course} %%",
-        "> START",
-        f"> {card_model}",
+        "%%",
+        f"TARGET DECK: University::{clean_course}",
+        "START",
+        f"{card_model}",
         *f1_block,
         *f2_block,
-        f"> Tags: {tag_line}"
+        f"Tags: {tag_line}"
     ]
     if card_id is not None:
-        lines.append(f"> <!--ID: {card_id}-->")
-    lines.append("> END")
+        lines.append(f"<!--ID: {card_id}-->")
+    lines.append("END")
+    lines.append("%%")
 
     return "\n".join(lines) + "\n"
 

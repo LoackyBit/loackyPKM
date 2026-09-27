@@ -22,7 +22,8 @@ Indice aggregatore per la formazione accademica, corsi di perfezionamento, tecni
 
 Appunti universitari, corsi teorici e laboratori del percorso accademico:
 
-- [[University]] — Indice dei corsi di Ingegneria Informatica
+- [[University]] — Mappa di orientamento generale e percorso universitario
+- [[Ingegneria Informatica 2026 - 27 MOC]] — Master Hub dell'Anno Accademico 2026/2027 (1° Semestre, 24 CFU)
 
 ---
 

@@ -2,14 +2,14 @@
 status: permanent
 type: moc
 area: education
-related: ["[[University]]"]
+related: ["[[University]]", "[[Ingegneria Informatica 2026 - 27 MOC]]", "[[Metodo di Studio - PACRAR]]", "[[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]]", "[[02 - Teoria degli Insiemi]]"]
 aliases: ["Fondamenti di Matematica (Analisi 1) MOC", "Fondamenti di Matematica MOC", "Analisi 1 MOC", "FdM MOC"]
 source: original
 title: "Fondamenti di Matematica Analisi 1 MOC"
 date: '2026-09-23'
-updated: 2026-09-23T22:30
+updated: 2026-09-27T18:00
 tags: [education/university, education/moc, education/math]
-summary: "Hub del corso universitario di Fondamenti di Matematica (Analisi 1) per Ingegneria Informatica, con scheda insegnamento e matrice PACRAR."
+summary: "Hub del corso universitario di Fondamenti di Matematica (Analisi 1) per Ingegneria Informatica, con scheda insegnamento, matrice PACRAR e dispense."
 ---
 [[Home MOC|Home]] / [[University|University MOC]] / [[Fondamenti di Matematica (Analisi 1) MOC]]
 
@@ -24,8 +24,9 @@ summary: "Hub del corso universitario di Fondamenti di Matematica (Analisi 1) pe
   - Prof.ssa Elisa Trasatti (`elisa.trasatti@uniroma1.it`)
 - **CFU:** 9 CFU (1° Anno, 1° Semestre)
 - **Corso di Laurea:** Ingegneria Informatica — Sapienza Università di Roma
+- **Hub Generale di Anno:** [[Ingegneria Informatica 2026 - 27 MOC]]
 - **Ubicazione:** Edificio Marco Polo, Aula 105 / Aula 1204
-- **Cartella Vault:** `02 - Atlas/Education & Learning/University/Fondamenti di Matematica (Analisi 1)/`
+- **Cartella Vault:** `02 - Atlas/Education & Learning/University/Ingegneria Informatica 2026-27/Fondamenti di Matematica (Analisi 1)/`
 
 ## Obiettivi Formativi
 - **Obiettivi Generali:** Apprendimento delle nozioni di base del calcolo differenziale e integrale per funzioni reali di una variabile reale.
@@ -39,11 +40,13 @@ summary: "Hub del corso universitario di Fondamenti di Matematica (Analisi 1) pe
 
 <div class="pacrar-progress-widget" data-course="Fondamenti di Matematica Analisi 1"></div>
 
-| Argomento                                                           |  P  |  A  |  C  |  R  |  A  |  R  |
-| :------------------------------------------------------------------ | :-: | :-: | :-: | :-: | :-: | :-: |
-| [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] | [x] | [x] | [-] | [x] | [ ] | [ ] |
+| Argomento | P | A | C | R | A | R | Sintesi |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] | [x] | [x] | [x] | [x] | [ ] | [ ] | Connettivi, quantificatori, tautologie e metodi di dimostrazione |
+| [[02 - Teoria degli Insiemi]] | [x] | [x] | [x] | [x] | [ ] | [ ] | Assiomi ZF, estensionalità, unione, specificazione, potenza, Von Neumann |
 
-
-## Formulari & Risorse Chiave
+## Formulari & Risorse Didattiche
 - [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] — Connettivi, quantificatori, tautologie e metodi di dimostrazione.
+- [[02 - Teoria degli Insiemi]] — Assiomi ZF, inclusione, unione, intersezione, potenza, costruzione di Von Neumann ed infinito.
 - [[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf|Appunti Manoscritti — Lezione 01 (PDF Originale)]]
+- [[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf|Dispensa Didattica — Lezione 02 (Teoria degli Insiemi - Prof. Salzo)]]

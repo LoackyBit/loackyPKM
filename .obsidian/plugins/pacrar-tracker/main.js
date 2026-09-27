@@ -305,11 +305,13 @@ class PacrarTrackerPlugin extends Plugin {
         if (!container) return;
 
         if (maxScore === 0) {
-            container.innerHTML = `
-                <div class="pacrar-ring-wrap" style="color: var(--text-muted); font-size: 0.85em; padding: 0.5rem; text-align: center;">
-                    <em>Matrice PACRAR pronta — In attesa di lezioni caricate</em>
-                </div>
-            `;
+            if (!container.querySelector('.pacrar-empty-msg')) {
+                container.innerHTML = `
+                    <div class="pacrar-ring-wrap pacrar-empty-msg" style="color: var(--text-muted); font-size: 0.85em; padding: 0.5rem; text-align: center;">
+                        <em>Matrice PACRAR pronta — In attesa di lezioni caricate</em>
+                    </div>
+                `;
+            }
             container.style.display = 'flex';
             return;
         }
@@ -319,15 +321,29 @@ class PacrarTrackerPlugin extends Plugin {
         const offset = circ * (1 - pct / 100);
         const strokeColor = this.interpolateColor(pct / 100);
 
+        // Update in-place if SVG elements already exist to avoid layout reflows
+        const existingCircle = container.querySelector('circle.pacrar-progress-circle');
+        const existingPctText = container.querySelector('text.pacrar-pct-text');
+        const existingScoreText = container.querySelector('text.pacrar-score-text');
+
+        if (existingCircle && existingPctText && existingScoreText) {
+            existingCircle.setAttribute('stroke', strokeColor);
+            existingCircle.style.strokeDashoffset = `${offset}`;
+            existingPctText.textContent = `${pct}%`;
+            existingScoreText.textContent = `${totalScore} / ${maxScore} fasi`;
+            container.style.display = 'flex';
+            return;
+        }
+
         container.innerHTML = `
             <div class="pacrar-ring-wrap">
                 <svg width="120" height="120" viewBox="0 0 120 120">
                     <circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--background-modifier-border, #333)" stroke-width="4" />
-                    <circle cx="60" cy="60" r="${r}" fill="none" stroke="${strokeColor}" stroke-width="4"
+                    <circle class="pacrar-progress-circle" cx="60" cy="60" r="${r}" fill="none" stroke="${strokeColor}" stroke-width="4"
                             stroke-dasharray="${circ}" stroke-dashoffset="${offset}"
                             stroke-linecap="round" transform="rotate(-90 60 60)" style="transition: stroke-dashoffset 0.4s ease, stroke 0.4s ease;" />
-                    <text x="60" y="56" text-anchor="middle" font-size="20" font-weight="bold" fill="var(--text-normal)">${pct}%</text>
-                    <text x="60" y="74" text-anchor="middle" font-size="11" fill="var(--text-muted)">${totalScore} / ${maxScore} fasi</text>
+                    <text class="pacrar-pct-text" x="60" y="56" text-anchor="middle" font-size="20" font-weight="bold" fill="var(--text-normal)">${pct}%</text>
+                    <text class="pacrar-score-text" x="60" y="74" text-anchor="middle" font-size="11" fill="var(--text-muted)">${totalScore} / ${maxScore} fasi</text>
                 </svg>
             </div>
         `;
@@ -338,9 +354,12 @@ class PacrarTrackerPlugin extends Plugin {
         const container = this.findWidgetContainer(table);
         if (container) {
             this.renderSvgIntoContainer(container, pct, totalScore, maxScore);
-            if (table.previousElementSibling && table.previousElementSibling.classList.contains('pacrar-progress-widget') && table.previousElementSibling !== container) {
-                table.previousElementSibling.remove();
-            }
+            return;
+        }
+
+        // If the document already contains a pacrar widget container, do not inject fallbacks before individual tables
+        const docRoot = table.closest('.markdown-rendered, .markdown-preview-view, .cm-content') || (table.ownerDocument ? table.ownerDocument.body : document);
+        if (docRoot && docRoot.querySelector('.pacrar-progress-widget')) {
             return;
         }
 
@@ -406,15 +425,26 @@ class PacrarTrackerPlugin extends Plugin {
             if (modified) {
                 let updatedInEditor = false;
                 for (const leaf of openLeaves) {
+                    const scroller = leaf.containerEl ? leaf.containerEl.querySelector('.cm-scroller, .markdown-preview-view') : null;
+                    const prevTop = scroller ? scroller.scrollTop : null;
+                    const prevLeft = scroller ? scroller.scrollLeft : null;
+
                     if (leaf.view && leaf.view.editor) {
                         leaf.view.editor.setLine(lineIdxModified, updatedLine);
                         updatedInEditor = true;
                     }
-                    if (leaf.view && leaf.view.previewMode && typeof leaf.view.previewMode.rerender === 'function') {
-                        leaf.view.previewMode.rerender(true);
-                    }
+
                     if (leaf.view && leaf.view.contentEl) {
                         this.renderAllPacrar(leaf.view.contentEl);
+                    }
+
+                    if (scroller && prevTop !== null) {
+                        scroller.scrollTop = prevTop;
+                        scroller.scrollLeft = prevLeft;
+                        requestAnimationFrame(() => {
+                            if (scroller.scrollTop !== prevTop) scroller.scrollTop = prevTop;
+                            if (scroller.scrollLeft !== prevLeft) scroller.scrollLeft = prevLeft;
+                        });
                     }
                 }
 
@@ -445,19 +475,31 @@ class PacrarTrackerPlugin extends Plugin {
 
         evt.preventDefault();
         evt.stopPropagation();
+
+        // Lock scroll container position to prevent page jump
+        const scroller = cell.closest('.cm-scroller, .markdown-preview-view');
+        const prevScrollTop = scroller ? scroller.scrollTop : null;
+        const prevScrollLeft = scroller ? scroller.scrollLeft : null;
+
         const next = CHECKBOX_CYCLE[txt];
 
-        // 1. Optimistic DOM update: immediate visual feedback in current clicked cell
+        // 1. Optimistic in-place cell update
         cell.textContent = next;
         const root = table.closest('.markdown-rendered, .markdown-preview-view, .cm-content') || document;
         this.renderAllPacrar(root);
 
-        // 2. Identify the canonical lesson key from link or text
+        // Immediate scroll restore
+        if (scroller && prevScrollTop !== null) {
+            scroller.scrollTop = prevScrollTop;
+            scroller.scrollLeft = prevScrollLeft;
+        }
+
+        // 2. Identify canonical lesson key from link or text
         const argCell = row.children[0];
         const lessonKey = extractLessonKeyFromCell(argCell);
         if (!lessonKey) return;
 
-        // 3. Find the file of the clicked view
+        // 3. Find file of the clicked view
         let activeFile = null;
         const leafEl = cell.closest('.workspace-leaf');
         if (leafEl) {
@@ -485,7 +527,7 @@ class PacrarTrackerPlugin extends Plugin {
             await this.updatePacrarFile(otherFile, lessonKey, cellIdx, next);
         }
 
-        // 5. Update any other visible tables in the DOM that display this lesson
+        // 5. Update other visible tables in DOM
         const otherTables = Array.from(document.querySelectorAll('table')).filter(t => t !== table && isPacrarTable(t));
         let needsRerender = false;
         otherTables.forEach(ot => {
@@ -506,6 +548,16 @@ class PacrarTrackerPlugin extends Plugin {
 
         if (needsRerender) {
             this.renderAllPacrar(document);
+        }
+
+        // Final scroll stabilization
+        if (scroller && prevScrollTop !== null) {
+            scroller.scrollTop = prevScrollTop;
+            scroller.scrollLeft = prevScrollLeft;
+            requestAnimationFrame(() => {
+                if (scroller.scrollTop !== prevScrollTop) scroller.scrollTop = prevScrollTop;
+                if (scroller.scrollLeft !== prevScrollLeft) scroller.scrollLeft = prevScrollLeft;
+            });
         }
     }
 }

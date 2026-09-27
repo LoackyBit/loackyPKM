@@ -44,10 +44,10 @@ La preparazione accademica segue il framework metodologico PACRAR (*Pianificazio
 ### 1. Fondamenti di Matematica (Analisi 1) — 9 CFU
 *Hub dedicato:* [[Fondamenti di Matematica (Analisi 1) MOC]]
 
-| Lezione / Argomento | P | A | C | R | A | R | Stato / Sintesi |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] | [ ] | [x] | [x] | [x] | [-] | [ ] | Connettivi, quantificatori, tautologie e metodi di dimostrazione |
-| [[02 - Teoria degli Insiemi]] | [x] | [x] | [x] | [x] | [ ] | [ ] | Assiomi ZF, estensionalità, unione, specificazione, potenza, Von Neumann |
+| Lezione / Argomento                                                 |  P  |  A  |  C  |  R  |  A  |  R  | Stato / Sintesi                                                          |
+| :------------------------------------------------------------------ | :-: | :-: | :-: | :-: | :-: | :-: | :----------------------------------------------------------------------- |
+| [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] | [ ] | [x] | [x] | [x] | [-] | [ ] | Connettivi, quantificatori, tautologie e metodi di dimostrazione         |
+| [[02 - Teoria degli Insiemi]]                                       | [x] | [x] | [x] | [x] | [ ] | [-] | Assiomi ZF, estensionalità, unione, specificazione, potenza, Von Neumann |
 
 ### 2. Introduzione alla Programmazione — 9 CFU
 *Hub dedicato:* [[Introduzione alla Programmazione MOC]]

@@ -108,6 +108,49 @@ class TestAnkiSyntax(unittest.TestCase):
         self.assertNotIn("<!--ID:", card)  # No ID when not provided
         self.assertIn("END", card)
 
+    def test_format_anki_card_with_note_subdeck(self):
+        card = anki_helper.format_anki_card(
+            concept_name="Validità Sillogismo",
+            course_name="Fondamenti di Matematica (Analisi 1)",
+            model="Basic",
+            field1_content="In cosa risiede la validità logica di un sillogismo?",
+            field2_content="Nella correttezza della struttura formale inferenziale.",
+            tags=["education/university", "education/math"],
+            note_title="01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione"
+        )
+        self.assertIn("TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione", card)
+        self.assertIn("> [!tip]- Flashcard: Validità Sillogismo", card)
+
+    def test_update_note_flashcard_subdecks_and_id_preservation(self):
+        content = """# Lezione
+
+> [!tip]- Flashcard: Concetto Chiave
+%%
+TARGET DECK: University::Ingegneria Software
+START
+Basic
+Front: Domanda test?
+Back: Risposta test.
+<!--ID: 1729999999999-->
+END
+%%
+"""
+        updated = anki_helper.update_note_flashcard_subdecks(
+            content,
+            note_title="02 - Requisiti e Architettura",
+            course_name="Ingegneria Software"
+        )
+        self.assertIn("TARGET DECK: University::Ingegneria Software::02 - Requisiti e Architettura", updated)
+        self.assertIn("<!--ID: 1729999999999-->", updated)
+
+        # Verify idempotence
+        updated_again = anki_helper.update_note_flashcard_subdecks(
+            updated,
+            note_title="02 - Requisiti e Architettura",
+            course_name="Ingegneria Software"
+        )
+        self.assertEqual(updated, updated_again)
+
 
 class TestAnkiExtraction(unittest.TestCase):
     """Verifies AST extraction of flashcards, callouts, fields, and IDs (Task 17-01-02)."""

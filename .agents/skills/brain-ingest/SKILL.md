@@ -140,12 +140,13 @@ Ogni nota prodotta deve rispettare rigorosamente `99 - Meta/Style Guide.md`:
    - I collegamenti semantici a note esistenti sono integrati nel testo (`[[Target Note]]`) e sincronizzati in `related: [...]` nel frontmatter YAML. Nessun blocco finale `## Collegamenti`.
 6. **Flashcard Anki Contestuali (Conformità Doc Ufficiale Anki & obsidian-to-anki-plugin):**
    - **Collocazione Rigorosamente Inline & Alta Densità Sistematica:** DEVONO essere collocate IMMEDIATAMENTE A VALLE di ciascun concetto cardine evidenziato in giallo (`<mark>`), assioma, definizione, proprietà o teorema trattato con **alta densità sistematica** (copertura capillare per il ripasso attivo Anki, senza alcun limite restrittivo di 5-10 card per lezione). **DIVIETO ASSOLUTO di raggrupparle in sezioni o appendici a fondo pagina** (es. mai creare sezioni `## Flashcard...`).
+   - Organizzazione in **sottodeck gerarchici per singola nota**: `TARGET DECK: University::<Nome Corso>::<Titolo Nota>` (con il sottodeck nominato esattamente come il titolo della nota, compreso eventuale prefisso numerico `01`, `02`, ecc.).
    - Struttura a callout collassabile: `> [!tip]- Flashcard: [Concetto]`, seguita dal blocco racchiuso tra delimitatori `%% ... %%`.
    - Struttura interna obbligatoria con target deck e modello:
      ```markdown
      > [!tip]- Flashcard: [Concetto]
      %%
-     TARGET DECK: University::<Nome Corso>
+     TARGET DECK: University::<Nome Corso>::<Titolo Nota>
      START
      Basic (oppure Cloze)
      Front: [Domanda sui principi primi o definizione]

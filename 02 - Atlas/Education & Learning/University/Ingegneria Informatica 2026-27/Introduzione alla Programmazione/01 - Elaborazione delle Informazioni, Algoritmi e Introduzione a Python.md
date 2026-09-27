@@ -64,7 +64,7 @@ Il calcolatore esegue internamente operazioni logico-aritmetiche primitive su se
 
 > [!tip]- Flashcard: Definizione di Informatica e Ruolo del Calcolatore
 %%
-TARGET DECK: University::Introduzione alla Programmazione
+TARGET DECK: University::Introduzione alla Programmazione::01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python
 START
 Basic
 Front: Qual è la definizione fondativa dell'informatica come disciplina scientifica e come si colloca il calcolatore rispetto ad essa?
@@ -99,7 +99,7 @@ Per essere considerato tale, un procedimento deve soddisfare congiuntamente tre 
 
 > [!tip]- Flashcard: Proprietà Fondative dell'Algoritmo
 %%
-TARGET DECK: University::Introduzione alla Programmazione
+TARGET DECK: University::Introduzione alla Programmazione::01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python
 START
 Basic
 Front: Quali sono le tre proprietà formali necessarie affinché una sequenza di istruzioni sia definibile come algoritmo?
@@ -158,7 +158,7 @@ La formalizzazione di un algoritmo si sviluppa per gradi di dettaglio progressiv
 
 > [!tip]- Flashcard: Metodo dei Raffinamenti Successivi
 %%
-TARGET DECK: University::Introduzione alla Programmazione
+TARGET DECK: University::Introduzione alla Programmazione::01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python
 START
 Basic
 Front: In cosa consiste il metodo dei raffinamenti successivi (top-down) nello sviluppo di un algoritmo?
@@ -186,7 +186,7 @@ Senza il sistema operativo, ogni programmatore dovrebbe scrivere codice capace d
 
 > [!tip]- Flashcard: Ruolo e Principio del Sistema Operativo
 %%
-TARGET DECK: University::Introduzione alla Programmazione
+TARGET DECK: University::Introduzione alla Programmazione::01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python
 START
 Basic
 Front: Perché il Sistema Operativo funge da strato di disaccoppiamento tra applicazioni software e hardware fisico?
@@ -214,7 +214,7 @@ La quasi totalità dei calcolatori elettronici per uso generale adotta l'archite
 
 > [!tip]- Flashcard: Componenti dell'Architettura di von Neumann
 %%
-TARGET DECK: University::Introduzione alla Programmazione
+TARGET DECK: University::Introduzione alla Programmazione::01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python
 START
 Cloze
 Text: L'architettura di von Neumann è costituita da quattro sottosistemi principali:
@@ -236,7 +236,7 @@ All'avvio di un programma, il file eseguibile memorizzato sul disco secondario v
 
 > [!tip]- Flashcard: Modello di von Neumann e Programma Memorizzato
 %%
-TARGET DECK: University::Introduzione alla Programmazione
+TARGET DECK: University::Introduzione alla Programmazione::01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python
 START
 Basic
 Front: Qual è l'innovazione concettuale fondamentale introdotta dal modello della Macchina di von Neumann del 1945?
@@ -268,7 +268,7 @@ L'interprete legge il codice sorgente riga per riga, traducendo ed eseguendo cia
 
 > [!tip]- Flashcard: Compilatore vs Interprete
 %%
-TARGET DECK: University::Introduzione alla Programmazione
+TARGET DECK: University::Introduzione alla Programmazione::01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python
 START
 Basic
 Front: Qual è la differenza strutturale tra il modello di compilazione e quello di interpretazione di un linguaggio di programmazione?
@@ -299,7 +299,7 @@ Guido van Rossum è stato per quasi trent'anni il *Benevolent Dictator For Life*
 
 > [!tip]- Flashcard: Tipizzazione Forte e Dinamica in Python
 %%
-TARGET DECK: University::Introduzione alla Programmazione
+TARGET DECK: University::Introduzione alla Programmazione::01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python
 START
 Basic
 Front: Cosa significa che Python è un linguaggio a tipizzazione dinamica e forte (*strong dynamically typed*)?
@@ -325,7 +325,7 @@ Python adotta un'architettura di esecuzione ibrida a due stadi \[[[Introduzione 
 
 > [!tip]- Flashcard: Modello a Due Stadi di Python (Bytecode e PVM)
 %%
-TARGET DECK: University::Introduzione alla Programmazione
+TARGET DECK: University::Introduzione alla Programmazione::01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python
 START
 Basic
 Front: Come si articola il modello di esecuzione pseudo-compilato di Python attraverso bytecode e PVM?
@@ -343,7 +343,7 @@ Il modello a due stadi determina una netta distinzione tra le fasi di errore:
 
 > [!tip]- Flashcard: Errori di Sintassi vs Eccezioni a Runtime
 %%
-TARGET DECK: University::Introduzione alla Programmazione
+TARGET DECK: University::Introduzione alla Programmazione::01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python
 START
 Basic
 Front: Qual è la differenza sostanziale tra un SyntaxError e un'eccezione a runtime (es. TypeError, ZeroDivisionError) in Python?
@@ -401,7 +401,7 @@ Nello studio universitario, l'LLM deve agire come un tutor socratico finalizzato
 
 > [!tip]- Flashcard: Cognitive Surrender e Tri-System Theory
 %%
-TARGET DECK: University::Introduzione alla Programmazione
+TARGET DECK: University::Introduzione alla Programmazione::01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python
 START
 Basic
 Front: Cosa si intende per "Cognitive Surrender" (resa cognitiva) nell'apprendimento della programmazione secondo la Tri-System Theory di Shaw e Nave?

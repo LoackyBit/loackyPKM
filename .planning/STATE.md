@@ -122,6 +122,7 @@ None.
 | 260924-fdt | Fedeltà alla nota originale e trascrizione con dispense e slide di supporto | 2026-09-24 | 35e6d0e | [260924-fdt-fedelta-trascrizione-lezione-fonti-supporto](./quick/260924-fdt-fedelta-trascrizione-lezione-fonti-supporto/) |
 | 260927-pacrar-linked-tables | Sincronizzazione Dinamica tra Tabelle PACRAR Figlie e Master MOC | 2026-09-27 | 5b839b8 | [260927-pacrar-linked-tables](./quick/260927-pacrar-linked-tables/) |
 | 260927-hfd | Alta Densità Flashcard Anki su Note Universitarie e Integrazione Regole Second Brain | 2026-09-27 | 2223117 | [260927-hfd-alta-densita-flashcard-note](./quick/260927-hfd-alta-densita-flashcard-note/) |
+| 260927-ur5 | Creazione Generale Sottodeck Flashcard Anki per Singola Nota | 2026-09-27 | e360b17 | [260927-ur5-sottodeck-flashcard-per-nota](./quick/260927-ur5-sottodeck-flashcard-per-nota/) |
 
 ## Deferred Items
 
@@ -133,9 +134,9 @@ None.
 
 **Resume file:** .planning/phases/17-generazione-flashcard-anki-contestuali-preservazione-id/17-CONTEXT.md
 
-Last activity: 2026-09-27 - Completed quick task 260927-hfd: Alta Densità Flashcard Anki su Note Universitarie e Integrazione Regole Second Brain
-Last session: 2026-09-27T18:55:00+02:00
-Stopped at: Quick task 260927-pacrar-linked-tables complete, ready for next task
+Last activity: 2026-09-27 - Completed quick task 260927-ur5: Creazione Generale Sottodeck Flashcard Anki per Singola Nota
+Last session: 2026-09-27T22:15:00+02:00
+Stopped at: Quick task 260927-ur5 complete, ready for next task
 
 ## Operator Next Steps
 

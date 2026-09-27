@@ -45,7 +45,7 @@ Il simbolo **due punti uguale** ($:=$) rappresenta l'operatore di <mark style="b
 
 > [!tip]- Flashcard: Definizione di Insieme
 > %%
-> TARGET DECK: University::Probabilità e Statistica
+> TARGET DECK: University::Probabilità e Statistica::01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità
 > START
 > Basic
 > Front: Cos'è un insieme nella formulazione matematica e quali sono le sue due proprietà fondamentali rispetto agli elementi?
@@ -71,7 +71,7 @@ Gli insiemi possono essere finiti o infiniti:
 
 > [!tip]- Flashcard: Notazione Intensiva ed Estensiva
 > %%
-> TARGET DECK: University::Probabilità e Statistica
+> TARGET DECK: University::Probabilità e Statistica::01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità
 > START
 > Basic
 > Front: Qual è la differenza sostanziale tra la rappresentazione estensiva e quella intensiva di un insieme?
@@ -99,7 +99,7 @@ Le operazioni insiemistiche associano o modificano collezioni di elementi all'in
 
 > [!tip]- Flashcard: Operazioni Insiemistiche Fondamentali
 %%
-TARGET DECK: University::Probabilità e Statistica
+TARGET DECK: University::Probabilità e Statistica::01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità
 START
 Cloze
 Text: Dati $A, B \subseteq \Omega$, si definiscono:
@@ -141,7 +141,7 @@ END
 
 > [!tip]- Flashcard: Dimostrazione Differenza Insiemistica
 > %%
-> TARGET DECK: University::Probabilità e Statistica
+> TARGET DECK: University::Probabilità e Statistica::01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità
 > START
 > Basic
 > Front: Come si dimostra l'uguaglianza insiemistica $A \setminus B = A \cap B^\complement$?
@@ -166,7 +166,7 @@ END
 
 > [!tip]- Flashcard: Fenomeno vs Esperimento Aleatorio
 > %%
-> TARGET DECK: University::Probabilità e Statistica
+> TARGET DECK: University::Probabilità e Statistica::01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità
 > START
 > Basic
 > Front: Qual è la distinzione concettuale tra fenomeno aleatorio ed esperimento aleatorio nel calcolo delle probabilità?
@@ -183,7 +183,7 @@ END
 
 > [!tip]- Flashcard: Spazio Campionario ed Eventi Elementari
 %%
-TARGET DECK: University::Probabilità e Statistica
+TARGET DECK: University::Probabilità e Statistica::01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità
 START
 Basic
 Front: Come sono definiti lo spazio campionario $\Omega$ e un evento elementare nella modellazione di un esperimento aleatorio?
@@ -215,7 +215,7 @@ END
 
 > [!tip]- Flashcard: Tipologie di Eventi (Certo, Impossibile, Esaustivi)
 %%
-TARGET DECK: University::Probabilità e Statistica
+TARGET DECK: University::Probabilità e Statistica::01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità
 START
 Cloze
 Text: All'interno di uno spazio campionario $\Omega$:
@@ -232,7 +232,7 @@ END
 
 > [!tip]- Flashcard: Definizione di Evento e Incompatibilità
 > %%
-> TARGET DECK: University::Probabilità e Statistica
+> TARGET DECK: University::Probabilità e Statistica::01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità
 > START
 > Basic
 > Front: Nel contesto di uno spazio campionario $\Omega$, come si definiscono formalmente un evento e la condizione di incompatibilità tra due eventi?
@@ -266,7 +266,7 @@ La <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>ca
 
 > [!tip]- Flashcard: Cardinalità dell'Insieme delle Parti
 > %%
-> TARGET DECK: University::Probabilità e Statistica
+> TARGET DECK: University::Probabilità e Statistica::01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità
 > START
 > Cloze
 > Text: Dato uno spazio campionario finito $\Omega$ composto da $n$ eventi elementari ($\#\Omega = n$), il numero complessivo di eventi distinti (sottoinsiemi) definibili è pari a {{c1::$2^n$}}, corrispondente alla cardinalità dell'insieme delle parti {{c2::$\mathcal{P}(\Omega)$}}.

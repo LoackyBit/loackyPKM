@@ -850,13 +850,16 @@ def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth
     anki_rules = ""
     if enable_anki:
         clean_deck = course_name.strip() if course_name else "Generale"
+        subdeck_target = f"University::{clean_deck}::{c_title}"
         anki_rules = f"""
 8. GENERAZIONE FLASHCARD ANKI CONTESTUALI (CONFORMI A DOC ANKI & OBSIDIAN-TO-ANKI):
    - Genera flashcard contestuali atomiche collocate IMMEDIATAMENTE A VALLE di ciascun concetto cardine evidenziato in giallo (<mark>), definizione formale, assioma, proprietà o teorema STEM ad ALTA DENSITÀ SISTEMATICA (copertura capillare di ogni concetto chiave per l'active recall, senza alcun limite restrittivo di 5-10 card per lezione).
+   - Sottodeck gerarchico per ogni singola nota: organizza le flashcard in sottodeck specifici per la singola nota utilizzando la gerarchia Anki con doppio due punti '::'. Il nome del sottodeck deve essere esattamente il titolo della nota (incluso eventuale prefisso numerico es. 01, 02):
+     TARGET DECK: {subdeck_target}
    - Struttura OBBLIGATORIA: La prima riga è il callout collassabile '> [!tip]- Flashcard: [Nome Concetto]', seguito IMMEDIATAMENTE A CAPO (SENZA '>') dall'intero blocco Anki racchiuso tra delimitatori di commento Obsidian '%%':
      > [!tip]- Flashcard: [Nome Concetto]
      %%
-     TARGET DECK: University::{clean_deck}
+     TARGET DECK: {subdeck_target}
      START
      [Basic|Cloze]
      [Front:|Text:] ...
@@ -1016,6 +1019,7 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
 
             # Automatically sanitize and validate any generated Anki flashcards (Anki Official Doc & Plugin Compliance)
             if "TARGET DECK:" in cleaned_body or enable_anki:
+                cleaned_body = anki_helper.update_note_flashcard_subdecks(cleaned_body, c_title, course_name=clean_deck)
                 cleaned_body = anki_helper.sanitize_all_flashcards(cleaned_body)
 
             return cleaned_body.strip(), summary
@@ -2497,6 +2501,9 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
                                 except Exception: pass
                             try: shutil.move(old_source, new_source)
                             except Exception: pass
+                        if enable_anki or "TARGET DECK:" in enriched_body:
+                            import anki_helper
+                            enriched_body = anki_helper.update_note_flashcard_subdecks(enriched_body, clean_title, course_name=clean_course)
 
             dest_dir = target_dir or classify_target_directory(clean_title, meta.get('tags', []), enriched_body)
             meta['title'] = clean_title

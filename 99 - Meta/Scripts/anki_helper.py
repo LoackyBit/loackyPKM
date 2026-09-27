@@ -280,13 +280,30 @@ def format_anki_card(
     field1_content: str,
     field2_content: str,
     tags: Optional[List[str]] = None,
-    card_id: Optional[int] = None
+    card_id: Optional[int] = None,
+    note_title: Optional[str] = None
 ) -> str:
     """Formats a single atomic Anki card into an Obsidian collapsible callout block
     (D-01, D-02, D-03, D-04, D-05, D-06, D-07, D-08, D-12).
+    Supports hierarchical subdecks per note (TARGET DECK: University::<Course>::<Note Title>).
     """
     clean_concept = brain_health.clean_title_str(concept_name)
-    clean_course = course_hub.sanitize_course_name(course_name) if course_name else "Generale"
+    if course_name:
+        raw_course = course_name.strip()
+        if raw_course.startswith("University::"):
+            raw_course = raw_course[12:].strip()
+        clean_course = re.sub(r'[\r\n\t]', ' ', raw_course).strip() if raw_course else "Generale"
+    else:
+        clean_course = "Generale"
+
+    if note_title:
+        clean_note = note_title.strip()
+        if not clean_course.endswith(f"::{clean_note}") and clean_course != clean_note:
+            target_deck = f"University::{clean_course}::{clean_note}"
+        else:
+            target_deck = f"University::{clean_course}"
+    else:
+        target_deck = f"University::{clean_course}"
 
     norm_model = model.strip()
     is_cloze = norm_model.lower() == "cloze"
@@ -308,7 +325,7 @@ def format_anki_card(
             if formatted_tag:
                 clean_tags.append(formatted_tag)
     if not clean_tags:
-        clean_course_tag = clean_course.replace(" ", "_").replace("(", "").replace(")", "")
+        clean_course_tag = clean_course.split("::")[0].replace(" ", "_").replace("(", "").replace(")", "")
         clean_tags = [f"University::{clean_course_tag}::Generale"]
     tag_line = " ".join(clean_tags)
 
@@ -322,7 +339,7 @@ def format_anki_card(
     lines = [
         f"> [!tip]- Flashcard: {clean_concept}",
         "%%",
-        f"TARGET DECK: University::{clean_course}",
+        f"TARGET DECK: {target_deck}",
         "START",
         f"{card_model}",
         *f1_block,
@@ -335,6 +352,72 @@ def format_anki_card(
     lines.append("%%")
 
     return "\n".join(lines) + "\n"
+
+
+def update_note_flashcard_subdecks(content: str, note_title: str, course_name: Optional[str] = None) -> str:
+    """Ensures all Anki flashcard blocks in a note use a hierarchical subdeck named after the note title:
+    TARGET DECK: University::<Course>::<Note Title>
+    Preserves all existing <!--ID: ...--> comments, fields, formatting, and tags.
+    """
+    clean_note = note_title.strip() if note_title else ""
+    if not clean_note:
+        return content
+
+    def repl(m: re.Match) -> str:
+        lead = m.group("lead") or ""
+        deck = m.group("deck").strip()
+        trail = m.group("trail") or ""
+
+        # Normalize University prefix
+        if not deck.startswith("University::"):
+            if deck.startswith("University"):
+                deck_inner = deck[10:].lstrip(':').strip()
+                deck = f"University::{deck_inner}" if deck_inner else f"University::{course_name.strip() if course_name else 'Generale'}"
+            else:
+                deck = f"University::{deck}"
+
+        # If it already ends with ::{clean_note}, return as is
+        if deck.endswith(f"::{clean_note}"):
+            return f"{lead}TARGET DECK: {deck}{trail}"
+
+        # If course_name is explicitly provided and deck is just University:: or University::Generale
+        if course_name and deck in ("University::", "University::Generale"):
+            deck = f"University::{course_name.strip()}"
+
+        new_deck = f"{deck}::{clean_note}"
+        return f"{lead}TARGET DECK: {new_deck}{trail}"
+
+    pattern = re.compile(
+        r'^(?P<lead>[ \t]*(?:>[ \t]*)?(?:%%[ \t]*)?)TARGET DECK:[ \t]*(?P<deck>[^\n%]+?)(?P<trail>(?:[ \t]*%%)?[ \t]*)$',
+        re.MULTILINE
+    )
+    return pattern.sub(repl, content)
+
+
+def update_file_flashcard_subdecks(file_path: str, course_name: Optional[str] = None) -> bool:
+    """Updates all TARGET DECK lines in a markdown file to include note title subdeck.
+    Returns True if file was modified, False otherwise.
+    """
+    if not os.path.exists(file_path):
+        return False
+
+    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        content = f.read()
+
+    # Determine note title: from frontmatter 'title:' or file basename without extension
+    title = None
+    m_title = re.search(r'(?m)^title:\s*["\']?(.*?)["\']?\s*$', content[:2000])
+    if m_title:
+        title = m_title.group(1).strip()
+    if not title:
+        title = Path(file_path).stem
+
+    updated = update_note_flashcard_subdecks(content, title, course_name=course_name)
+    if updated != content:
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(updated)
+        return True
+    return False
 
 
 START_END_PATTERN = re.compile(
@@ -642,6 +725,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Anki Helper — Flashcard syntax, MathJax conversion & ID preservation.")
     parser.add_argument("--audit", action="store_true", help="Run vault-wide Anki card integrity audit.")
     parser.add_argument("--check-file", type=str, default=None, help="Check Anki cards within a single file.")
+    parser.add_argument("--update-subdecks", type=str, default=None, help="Update TARGET DECK in file to include note title subdeck.")
+    parser.add_argument("--update-all-subdecks", action="store_true", help="Update TARGET DECK across all vault notes to include note title subdecks.")
+    parser.add_argument("--course", type=str, default=None, help="Course name to use when updating subdecks.")
     parser.add_argument("--vault-root", type=str, default=None, help="Custom vault root directory.")
     return parser
 
@@ -673,6 +759,39 @@ def main(cli_args: Optional[List[str]] = None) -> int:
 
         print("=" * 60)
         print("✅ All Anki IDs are unique and consistent.")
+        return 0
+
+    if args.update_subdecks:
+        target_file = os.path.abspath(args.update_subdecks)
+        if not os.path.exists(target_file):
+            print(f"File not found: {target_file}", file=sys.stderr)
+            return 1
+        changed = update_file_flashcard_subdecks(target_file, course_name=args.course)
+        if changed:
+            print(f"✅ Updated flashcard subdecks in: {target_file}")
+        else:
+            print(f"ℹ️  No changes needed in: {target_file}")
+        return 0
+
+    if args.update_all_subdecks:
+        modified_count = 0
+        ignore_dirs = {
+            '.git', '.obsidian', '.trash', '.planning',
+            '99 - Meta/Template', '99 - Meta/Templates',
+            'node_modules', '.agents', '.gemini', '.antigravitycli'
+        }
+        for dirpath, dirnames, filenames in os.walk(root):
+            rel_dir = os.path.relpath(dirpath, root)
+            if any(rel_dir == ign or rel_dir.startswith(ign + os.sep) or f"{os.sep}{ign}" in rel_dir for ign in ignore_dirs):
+                continue
+            for f in filenames:
+                if not f.endswith(".md"):
+                    continue
+                fpath = os.path.join(dirpath, f)
+                if update_file_flashcard_subdecks(fpath, course_name=args.course):
+                    modified_count += 1
+                    print(f"  • Updated subdecks in: {os.path.relpath(fpath, root)}")
+        print(f"✅ Vault subdecks update complete: {modified_count} file(s) modified.")
         return 0
 
     if args.check_file:

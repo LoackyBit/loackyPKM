@@ -70,7 +70,7 @@ Per snellire la scrittura formale si adottano le consuete abbreviazioni matemati
 
 > [!tip]- Flashcard: Relazioni Primitive e Oggetti della Teoria
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 > START
 > Basic
 > Front: Quali sono le relazioni primitive della teoria assiomatica degli insiemi e che natura hanno i suoi elementi?
@@ -93,7 +93,7 @@ Questo assioma prescrive che due insiemi sono uguali se e solo se hanno gli stes
 
 > [!tip]- Flashcard: Assioma di Estensionalità
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 > START
 > Cloze
 > Text: Dati due insiemi $A$ e $B$, l'assioma di estensionalità stabilisce che {{c1::$A = B \iff (\forall x) \, (x \in A \iff x \in B)$}}.
@@ -117,7 +117,7 @@ Mentre l'assioma di estensionalità descrive la relazione tra insiemi, non garan
 
 > [!tip]- Flashcard: Assioma dell'Insieme Vuoto ed Unicità
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 > START
 > Basic
 > Front: Come si formula l'assioma dell'insieme vuoto e perché tale insieme è necessariamente unico?
@@ -148,7 +148,7 @@ Accanto alle nozioni primitive, introduciamo per definizione la relazione di <ma
 
 > [!tip]- Flashcard: Inclusione Universale dell'Insieme Vuoto
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 START
 Basic
 Front: Come si dimostra formalmente che per ogni insieme $A$ vale $\emptyset \subset A$?
@@ -167,7 +167,7 @@ END
 
 > [!tip]- Flashcard: Principio della Doppia Inclusione
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 START
 Basic
 Front: Come si enuncia e dimostra il principio della doppia inclusione per l'uguaglianza tra insiemi?
@@ -194,7 +194,7 @@ Per costruire nuovi insiemi a partire da enti già noti, si postula l'<mark styl
 
 > [!tip]- Flashcard: Assioma della Coppia Non Ordinata e Singoletto
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 START
 Cloze
 Text: Dati due insiemi $x$ e $y$, l'assioma della coppia non ordinata assicura l'esistenza dell'insieme {{c1::$\{x, y\}$}} tale che {{c2::$z \in \{x, y\} \iff z = x \lor z = y$}}. Il singoletto è definito ponendo {{c3::$\{x\} := \{x, x\}$}}, per cui $z \in \{x\} \iff z = x$.
@@ -221,7 +221,7 @@ END
 
 > [!tip]- Flashcard: Insieme Vuoto vs Singoletto del Vuoto
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 > START
 > Basic
 > Front: Perché l'insieme vuoto $\emptyset$ e il singoletto $\{\emptyset\}$ sono ontologicamente distinti?
@@ -253,7 +253,7 @@ Il vincolo dell'Assioma 4 di specificare la proprietà su un **insieme $A$ già 
 
 > [!tip]- Flashcard: Assioma di Specificazione e Paradosso di Russell
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 > START
 > Basic
 > Front: Come è formulato l'assioma di specificazione e quale fallacia logica previene?
@@ -286,7 +286,7 @@ Appoggiandoci all'Assioma 4 di specificazione possiamo definire rigorosamente le
 
 > [!tip]- Flashcard: Intersezione, Differenza e Complementare
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 > START
 > Cloze
 > Text: L'intersezione è definita da $A \cap B :=$ {{c1::$\{x \in A \mid x \in B\}$}} e corrisponde alla congiunzione logica. La differenza è definita da $A \setminus B :=$ {{c2::$\{x \in A \mid x \notin B\}$}}. Quando $B \subset A$, la differenza prende il nome di {{c3::complementare di $B$ rispetto ad $A$}} e si scrive $\complement_A(B)$.
@@ -314,7 +314,7 @@ $$\bigcap \mathcal{F} = A \cap B \cap C \cap D \cap \dots$$
 
 > [!tip]- Flashcard: Intersezione di una Famiglia di Insiemi
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 START
 Basic
 Front: Come si definisce rigorosamente l'intersezione di una famiglia non vuota di insiemi $\mathcal{F}$ mediante l'Assioma di Specificazione?
@@ -334,7 +334,7 @@ A differenza dell'intersezione, per unire due o più insiemi generici **non è p
 
 > [!tip]- Flashcard: Perché l'Unione Richiede un Assioma Autonomo
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 START
 Basic
 Front: Perché per definire l'unione di insiemi non è possibile usare l'Assioma di Specificazione e serve un assioma autonomo?
@@ -363,7 +363,7 @@ L'operazione di unione riflette esattamente la **disgiunzione logica inclusiva**
 
 > [!tip]- Flashcard: Assioma dell'Unione e Definizione di $A \cup B$
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 > START
 > Basic
 > Front: Come viene formulato l'assioma dell'unione e come si definisce l'unione di due insiemi $A \cup B$?
@@ -401,7 +401,7 @@ L'interazione tra le operazioni di unione, intersezione e differenza genera una 
 
 > [!tip]- Flashcard: Proprietà Distributive Insiemistiche
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 START
 Cloze
 Text: L'intersezione e l'unione godono di reciproca distributività:
@@ -433,7 +433,7 @@ Poiché l'equivalenza vale per ogni $x$, per l'Assioma 1 di estensionalità i du
 
 > [!tip]- Flashcard: Leggi di De Morgan per Insiemi
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 START
 Cloze
 Text: Siano $B, C \subset A$. Le leggi di De Morgan insiemistiche stabiliscono:
@@ -446,7 +446,7 @@ END
 
 > [!tip]- Flashcard: Dimostrazione Formale della Legge di De Morgan per Complementari
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 START
 Basic
 Front: Come si dimostra formalmente che $\complement_A(B \cup C) = \complement_A(B) \cap \complement_A(C)$ per $B, C \subset A$?
@@ -476,7 +476,7 @@ Grazie alla combinazione dell'Assioma 3 (coppia non ordinata) e dell'Assioma 5 (
 
 > [!tip]- Flashcard: Definizione Formale di Insiemi per Elencazione
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 START
 Basic
 Front: Come si giustifica rigorosamente la notazione per elencazione $\{a, b, c\}$ mediante gli assiomi ZF?
@@ -532,7 +532,7 @@ L'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>ass
 
 > [!tip]- Flashcard: Assioma dell'Insieme Potenza e Cardinalità
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 > START
 > Basic
 > Front: Che cos'è l'insieme potenza $\mathcal{P}(A)$, perché non è mai vuoto e qual è la sua cardinalità per un insieme finito di $n$ elementi?
@@ -563,7 +563,7 @@ La costruzione assiomatica consente di edificare l'intero edificio dei numeri a 
 
 > [!tip]- Flashcard: Assioma di Fondazione e Divieto di Auto-Appartenenza
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 START
 Basic
 Front: Come si formula l'assioma di fondazione (o regolarità) e come dimostra che nessun insieme può appartenere a se stesso ($x \notin x$)?
@@ -600,7 +600,7 @@ $$0 \in 1 \in 2 \in 3 \in 4 \in \dots$$
 
 > [!tip]- Flashcard: Successivo di un Insieme e Numeri di Von Neumann
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 > START
 > Basic
 > Front: Come si definisce il successivo di un insieme $x$ e in cosa consiste la costruzione dei numeri naturali di Von Neumann?
@@ -638,7 +638,7 @@ Se $\mathcal{F}$ è una famiglia non vuota di insiemi induttivi, la loro interse
 
 > [!tip]- Flashcard: Assioma dell'Infinito e Teorema di $\mathbb{N}$
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 > START
 > Basic
 > Front: Come si formula l'assioma dell'infinito e come si dimostra l'esistenza del più piccolo insieme induttivo $\mathbb{N}$?
@@ -663,7 +663,7 @@ Mediante l'insieme $X$, la teoria assicura la possibilità di "scegliere" esatta
 
 > [!tip]- Flashcard: Assioma della Scelta
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::02 - Teoria degli Insiemi
 > START
 > Basic
 > Front: Qual è l'enunciato formale dell'assioma della scelta (Axiom of Choice)?

@@ -65,7 +65,7 @@ Anche se le affermazioni descrivono scenari privi di riscontro nella realtà fis
 
 > [!tip]- Flashcard: Struttura del Sillogismo e Validità Formale
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 > START
 > Basic
 > Front: In cosa risiede la validità logica di un sillogismo (es. "Se $x$ è marziano, allora vive su Plutone") e perché la matematica adotta il formalismo?
@@ -89,7 +89,7 @@ Nel formalismo matematico, le proposizioni semplici si denotano per convenzione 
 
 > [!tip]- Flashcard: Definizione di Proposizione
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 > START
 > Basic
 > Front: Qual è la definizione formale di proposizione nella logica matematica?
@@ -159,7 +159,7 @@ Per chiarire la semantica dei connettivi binari, il docente propone l'analogia g
 
 > [!tip]- Flashcard: Congiunzione e Disgiunzione Inclusiva
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 START
 Cloze
 Text: In matematica si adotta rigorosamente la {{c1::disgiunzione inclusiva}} ($P \lor Q$), che risulta falsa {{c2::esclusivamente quando entrambe le proposizioni $P$ e $Q$ sono false}}. La congiunzione logica ($P \land Q$) è vera {{c3::esclusivamente quando entrambe le componenti sono vere}}.
@@ -182,7 +182,7 @@ L'implicazione materiale è falsa **esclusivamente quando l'ipotesi è vera e la
 
 > [!tip]- Flashcard: Implicazione Materiale e Falsificabilità
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 > START
 > Cloze
 > Text: L'implicazione materiale $P \implies Q$ è falsa {{c1::esclusivamente quando l'ipotesi $P$ è vera e la tesi $Q$ è falsa}}. In tutte le altre tre combinazioni di verità ($V \implies V$, $F \implies V$, $F \implies F$) l'implicazione è sempre {{c2::vera}}.
@@ -203,7 +203,7 @@ Nell'implicazione $P \implies Q$:
 
 > [!tip]- Flashcard: Condizione Necessaria vs Sufficiente
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 > START
 > Cloze
 > Text: Nella proposizione condizionale $A \implies B$, $A$ rappresenta una {{c1::condizione sufficiente}} per $B$, mentre $B$ rappresenta una {{c2::condizione necessaria}} per $A$.
@@ -227,7 +227,7 @@ $$(P \iff Q) \equiv (P \implies Q) \land (Q \implies P)$$
 
 > [!tip]- Flashcard: Equivalenza Logica e Doppia Implicazione
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 START
 Basic
 Front: Come è definita l'equivalenza logica $P \iff Q$ e come si esprime mediante implicazioni materiali?
@@ -250,7 +250,7 @@ Una formula proposizionale che risulta sempre vera per qualsiasi attribuzione di
 
 > [!tip]- Flashcard: Legge del Terzo Escluso (Tertium Non Datur)
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 START
 Basic
 Front: Come si enuncia formalmente la Legge del Terzo Escluso (*Tertium Non Datur*) nella logica classica bivalente?
@@ -270,7 +270,7 @@ END
 
 > [!tip]- Flashcard: Leggi di De Morgan Proposizionali
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 > START
 > Cloze
 > Text: Enunciare le due leggi di De Morgan per la logica proposizionale:
@@ -288,7 +288,7 @@ END
 
 > [!tip]- Flashcard: Legge della Contronominale
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 > START
 > Basic
 > Front: Come si formula la legge della contronominale e perché è utile nelle dimostrazioni matematiche?
@@ -305,7 +305,7 @@ END
 
 > [!tip]- Flashcard: Metodo di Dimostrazione per Assurdo
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 START
 Basic
 Front: Su quale principio logico si fonda la dimostrazione per assurdo di un teorema $P \implies Q$?
@@ -327,7 +327,7 @@ La logica delle proposizioni considera gli enunciati come blocchi indivisibili. 
 
 > [!tip]- Flashcard: Definizione di Predicato Logico
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 START
 Basic
 Front: Che cos'è un predicato (o proposizione aperta) nella logica matematica?
@@ -352,7 +352,7 @@ END
 
 > [!tip]- Flashcard: Variabili Libere vs Variabili Legate
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 START
 Basic
 Front: Qual è la differenza tra una variabile libera e una variabile legata (o vincolata)?
@@ -378,7 +378,7 @@ Quando la negazione interagisce con i quantificatori, scambia il tipo di quantif
 
 > [!tip]- Flashcard: Negazione dei Quantificatori
 > %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 > START
 > Cloze
 > Text: Sotto l'azione della negazione logica, i quantificatori si trasformano secondo le regole di dualità:
@@ -397,7 +397,7 @@ Nelle formule con più quantificatori, l'ordine di scrittura definisce la dipend
 
 > [!tip]- Flashcard: Dipendenza e Ordine nei Quantificatori Multipli
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 START
 Cloze
 Text: Nelle formule con quantificatori misti, l'ordine di scrittura non è permutabile:
@@ -433,7 +433,7 @@ Il docente illustra l'efficacia della dimostrazione per contronominale su un cla
 
 > [!tip]- Flashcard: Dimostrazione per Contronominale della Parità del Quadrato
 %%
-TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)::01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 START
 Basic
 Front: Come si dimostra per contronominale il teorema: per ogni $x \in \mathbb{N}^+$, se $x^2$ è pari allora $x$ è pari?

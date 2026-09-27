@@ -62,7 +62,7 @@ Gli elementi strutturali della pianificazione comprendono:
 
 > [!tip]- Flashcard: Ruolo e Natura della Pianificazione
 %%
-TARGET DECK: University::Metodo di Studio
+TARGET DECK: University::Metodo di Studio::Metodo di Studio - PACRAR
 START
 Basic
 Front: Nel metodo PACRAR, qual è la funzione della fase di Pianificazione e perché si afferma che essa non costituisce ancora studio cognitivo?
@@ -83,7 +83,7 @@ I due cardini operativi dell'acquisizione:
 
 > [!tip]- Flashcard: Obiettivo dell'Acquisizione
 %%
-TARGET DECK: University::Metodo di Studio
+TARGET DECK: University::Metodo di Studio::Metodo di Studio - PACRAR
 START
 Basic
 Front: Qual è l'errore più comune commesso durante la fase di Acquisizione nel metodo PACRAR?
@@ -104,7 +104,7 @@ Strumenti metodologici di supporto:
 
 > [!tip]- Flashcard: La Tecnica di Feynman nel PACRAR
 %%
-TARGET DECK: University::Metodo di Studio
+TARGET DECK: University::Metodo di Studio::Metodo di Studio - PACRAR
 START
 Basic
 Front: Come si inserisce la Tecnica di Feynman all'interno della fase di Comprensione del metodo PACRAR?
@@ -123,7 +123,7 @@ Questo stadio si fonda su due pilastri teorico-pratici:
 
 > [!tip]- Flashcard: Dual Coding e Schematizzazione
 %%
-TARGET DECK: University::Metodo di Studio
+TARGET DECK: University::Metodo di Studio::Metodo di Studio - PACRAR
 START
 Basic
 Front: Perché nella fase di Rielaborazione del PACRAR si privilegia la schematizzazione basata sul Dual Coding rispetto al riassunto scritto tradizionale?
@@ -144,7 +144,7 @@ Le leve decisive dell'applicazione:
 
 > [!tip]- Flashcard: Recupero Attivo vs Rilettura Passiva
 %%
-TARGET DECK: University::Metodo di Studio
+TARGET DECK: University::Metodo di Studio::Metodo di Studio - PACRAR
 START
 Basic
 Front: Perché la rilettura passiva fallisce nel costruire memoria a lungo termine rispetto al recupero attivo impiegato nella fase di Applicazione?
@@ -163,7 +163,7 @@ Questa fase si articola in due componenti ben distinte:
 
 > [!tip]- Flashcard: Ambito Corretto delle Mnemotecniche nel Ricordo
 %%
-TARGET DECK: University::Metodo di Studio
+TARGET DECK: University::Metodo di Studio::Metodo di Studio - PACRAR
 START
 Basic
 Front: Qual è il perimetro corretto di utilizzo delle mnemotecniche nella fase di Ricordo del PACRAR?

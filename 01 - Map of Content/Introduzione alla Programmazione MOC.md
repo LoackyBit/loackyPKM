@@ -45,7 +45,7 @@ summary: "Hub del corso universitario di Introduzione alla Programmazione per In
 
 | Argomento | P | A | C | R | A | R | Sintesi |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| [[01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python]] | [ ] | [x] | [x] | [x] | [ ] | [ ] | Sistemi di calcolo, architettura Von Neumann, PVM e LLM |
+| [[01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python]] | [x] | [x] | [x] | [x] | [x] | [ ] | Sistemi di calcolo, architettura Von Neumann, PVM e LLM |
 
 ## Formulari & Risorse Chiave
 - [[01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python]] — Sistemi di elaborazione, nozione formale di algoritmo, raffinamenti successivi, architettura di von Neumann, interprete Python (bytecode/PVM), ambienti di sviluppo e metodologia con LLM (Cognitive Surrender).

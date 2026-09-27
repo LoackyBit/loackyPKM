@@ -852,7 +852,7 @@ def enrich_draft_with_ai(vault_root: str, title: str, source_content: str, depth
         clean_deck = course_name.strip() if course_name else "Generale"
         anki_rules = f"""
 8. GENERAZIONE FLASHCARD ANKI CONTESTUALI (CONFORMI A DOC ANKI & OBSIDIAN-TO-ANKI):
-   - Genera flashcard contestuali atomiche collocate IMMEDIATAMENTE A VALLE di ciascun concetto cardine evidenziato in giallo (<mark>) o teorema STEM (indicativamente 5-10 card per lezione).
+   - Genera flashcard contestuali atomiche collocate IMMEDIATAMENTE A VALLE di ciascun concetto cardine evidenziato in giallo (<mark>), definizione formale, assioma, proprietà o teorema STEM ad ALTA DENSITÀ SISTEMATICA (copertura capillare di ogni concetto chiave per l'active recall, senza alcun limite restrittivo di 5-10 card per lezione).
    - Struttura OBBLIGATORIA: La prima riga è il callout collassabile '> [!tip]- Flashcard: [Nome Concetto]', seguito IMMEDIATAMENTE A CAPO (SENZA '>') dall'intero blocco Anki racchiuso tra delimitatori di commento Obsidian '%%':
      > [!tip]- Flashcard: [Nome Concetto]
      %%

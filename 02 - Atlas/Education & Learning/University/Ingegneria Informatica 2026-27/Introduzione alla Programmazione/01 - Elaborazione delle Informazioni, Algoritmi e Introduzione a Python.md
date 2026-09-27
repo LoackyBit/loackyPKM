@@ -97,6 +97,17 @@ Per essere considerato tale, un procedimento deve soddisfare congiuntamente tre 
 2. **Eseguibilità (Effettività):** Ciascun singolo passo deve essere atomicamente realizzabile dall'esecutore meccanico con risorse e in tempi finiti.
 3. **Terminazione (Finitudine):** La computazione deve obbligatoriamente concludersi dopo un numero finito di operazioni per qualsiasi insieme ammesso di dati in ingresso. Un procedimento che incorra in un ciclo infinito senza fine non è un algoritmo corretto.
 
+> [!tip]- Flashcard: Proprietà Fondative dell'Algoritmo
+%%
+TARGET DECK: University::Introduzione alla Programmazione
+START
+Basic
+Front: Quali sono le tre proprietà formali necessarie affinché una sequenza di istruzioni sia definibile come algoritmo?
+Back: 1. **Non ambiguità (determinatezza):** ogni passo deve avere un significato univoco e privo di discrezionalità soggettiva; 2. **Eseguibilità (effettività):** ogni operazione deve essere concretamente realizzabile dall'esecutore in un intervallo di tempo finito; 3. **Terminazione (finitudine):** la computazione deve necessariamente arrestarsi dopo un numero finito di passi per qualsiasi dato di ingresso valido.
+Tags: education/university tech/programming tech/cs
+END
+%%
+
 ### Principio di Generalità del Software
 
 I programmi non vengono progettati per risolvere una singola circostanza isolata, bensì un'intera classe universale di problemi. In un'applicazione di calcolo di percorsi stradali, il software non modella unicamente il tragitto tra due vie note, ma riceve come **dati di ingresso** le coordinate generiche di partenza e destinazione, fornendo una risposta riutilizzabile in qualunque contesto.
@@ -145,15 +156,14 @@ La formalizzazione di un algoritmo si sviluppa per gradi di dettaglio progressiv
 > print("MCD:", mcd)
 > ```
 
-> [!tip]- Flashcard: Proprietà Fondative dell'Algoritmo
+> [!tip]- Flashcard: Metodo dei Raffinamenti Successivi
 %%
 TARGET DECK: University::Introduzione alla Programmazione
 START
 Basic
-Front: Quali sono le tre proprietà formali necessarie affinché una sequenza di istruzioni sia definibile come algoritmo?
-Back: 1. **Non ambiguità (determinatezza):** ogni passo deve avere un significato univoco e privo di discrezionalità soggettiva; 2. **Eseguibilità (effettività):** ogni operazione deve essere concretamente realizzabile dall'esecutore in un intervallo di tempo finito; 3. **Terminazione (finitudine):** la computazione deve necessariamente arrestarsi dopo un numero finito di passi per qualsiasi dato di ingresso valido.
+Front: In cosa consiste il metodo dei raffinamenti successivi (top-down) nello sviluppo di un algoritmo?
+Back: Consiste nel decomporre progressivamente un problema complesso in sotto-problemi più semplici e dettagliati, partendo da una specifica concettuale astratta (linguaggio naturale), passando per la strutturazione logica in pseudocodice, fino a giungere all'implementazione concreta nella sintassi del linguaggio di programmazione prescelto.
 Tags: education/university tech/programming tech/cs
-<!--ID: 1790280114756-->
 END
 %%
 
@@ -201,6 +211,21 @@ La quasi totalità dei calcolatori elettronici per uso generale adotta l'archite
 | **Memorie Secondarie** | Dischi fissi, SSD | Supporti magnetici o a stato solido non volatili a capacità elevata per la persistenza a lungo termine dei file. |
 | **Dispositivi di I/O** | Tastiera, mouse, display, schede di rete | Interfacce di ingresso per acquisire segnali esterni e di uscita per restituire dati all'utente. |
 | **BUS di Sistema** | Bus Dati, Bus Indirizzi, Bus Controllo | Fascio di piste elettriche ad alta frequenza che connette tutte le unità per il transito simultaneo di segnali e comandi. |
+
+> [!tip]- Flashcard: Componenti dell'Architettura di von Neumann
+%%
+TARGET DECK: University::Introduzione alla Programmazione
+START
+Cloze
+Text: L'architettura di von Neumann è costituita da quattro sottosistemi principali:
+1. {{c1::CPU (Central Processing Unit)}}, suddivisa in ALU (calcoli), CU (controllo e decodifica) e registri;
+2. {{c2::Memoria Centrale (RAM)}}, volatile ad accesso diretto contenente dati e istruzioni di programma;
+3. {{c3::Interfacce di Ingresso/Uscita (I/O)}}, per comunicare con periferiche e memorie di massa;
+4. {{c4::Bus di Sistema}}, canale di interconnessione condiviso (dati, indirizzi e controllo).
+Extra: Tutti i componenti dialogano mediante il bus di sistema sotto il coordinamento della Control Unit.
+Tags: education/university tech/programming tech/cs
+END
+%%
 
 ### Ciclo Operativo di Esecuzione
 
@@ -272,6 +297,17 @@ Guido van Rossum è stato per quasi trent'anni il *Benevolent Dictator For Life*
 3. **Gestione Automatica della Memoria (<mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>Garbage Collection</b></font></mark>):** La liberazione della memoria per oggetti non più utilizzati è gestita in background dal sistema mediante conteggio dei riferimenti e spazzamento dei cicli \[[[Introduzione alla Programmazione - Lezione 01 - Slide.pdf#page=52|Slide 52]]].
 4. **Batteries Included:** La libreria standard include una vastissima dotazione di moduli integrati per manipolazione dati, matematica, formati file e comunicazioni di rete.
 
+> [!tip]- Flashcard: Tipizzazione Forte e Dinamica in Python
+%%
+TARGET DECK: University::Introduzione alla Programmazione
+START
+Basic
+Front: Cosa significa che Python è un linguaggio a tipizzazione dinamica e forte (*strong dynamically typed*)?
+Back: È **dinamica** perché le variabili non necessitano di dichiarazione preventiva del tipo ed esso è associato all'oggetto a runtime anziché alla variabile. È **forte** perché l'interprete non esegue conversioni di tipo implicite arbitrarie (ad esempio `3 + "5"` genera un `TypeError` invece di forzare la conversione automatica).
+Tags: education/university tech/programming tech/python
+END
+%%
+
 ### Il Modello Pseudo-Compilato: Bytecode e Python Virtual Machine (PVM)
 
 Python adotta un'architettura di esecuzione ibrida a due stadi \[[[Introduzione alla Programmazione - Lezione 01 - Slide.pdf#page=53|Slide 53]]]:
@@ -287,20 +323,6 @@ Python adotta un'architettura di esecuzione ibrida a due stadi \[[[Introduzione 
 ![[Interpretazione di un Programma Python.png]]
 *(Dettaglio del flusso di traduzione ed esecuzione: rif. \[[[Introduzione alla Programmazione - Lezione 01 - Slide.pdf#page=55|Slide 55]]])*
 
-### Distinzione tra Errori Sintattici ed Errori a Runtime
-
-Il modello a due stadi determina una netta distinzione tra le fasi di errore:
-- **Errori di Sintassi (`SyntaxError`):** Rilevati a monte durante la fase di pre-compilazione; impediscono la generazione del bytecode e bloccano completamente l'avvio della PVM.
-- **Eccezioni a Runtime (`RuntimeError`, `TypeError`, `ZeroDivisionError`):** Rilevate durante l'esecuzione del bytecode da parte della PVM a seguito di un'operazione non ammessa (es. divisione per zero o accesso a indice inesistente).
-
-### Modalità di Esecuzione e Spyder IDE
-
-L'interazione con l'interprete Python può avvenire attraverso due canali principali \[[[Introduzione alla Programmazione - Lezione 01 - Slide.pdf#page=58|Slide 58-60]]]:
-- **Modalità Interattiva (Shell / REPL):** Esegue un comando alla volta restituendo subito l'output (ad es. `print(5*3)`). È ideale per verifiche atomiche e collaudi immediati, ma le istruzioni non vengono salvate.
-- **Esecuzione di Script (File `.py`):** Il codice viene scritto e salvato in file testuali riutilizzabili e modificabili nel tempo (es. `hello.py`).
-
-L'ambiente di sviluppo di riferimento per il corso è l'**IDE Spyder** (`https://www.spyder-ide.org/`) \[[[Introduzione alla Programmazione - Lezione 01 - Slide.pdf#page=14|Slide 14]]], che integra in un'unica schermata l'editor di testo per gli script, la console interattiva IPython e l'esploratore delle variabili per ispezionare lo stato della memoria.
-
 > [!tip]- Flashcard: Modello a Due Stadi di Python (Bytecode e PVM)
 %%
 TARGET DECK: University::Introduzione alla Programmazione
@@ -312,6 +334,31 @@ Tags: education/university tech/programming tech/python
 <!--ID: 1790280114760-->
 END
 %%
+
+### Distinzione tra Errori Sintattici ed Errori a Runtime
+
+Il modello a due stadi determina una netta distinzione tra le fasi di errore:
+- **Errori di Sintassi (`SyntaxError`):** Rilevati a monte durante la fase di pre-compilazione; impediscono la generazione del bytecode e bloccano completamente l'avvio della PVM.
+- **Eccezioni a Runtime (`RuntimeError`, `TypeError`, `ZeroDivisionError`):** Rilevate durante l'esecuzione del bytecode da parte della PVM a seguito di un'operazione non ammessa (es. divisione per zero o accesso a indice inesistente).
+
+> [!tip]- Flashcard: Errori di Sintassi vs Eccezioni a Runtime
+%%
+TARGET DECK: University::Introduzione alla Programmazione
+START
+Basic
+Front: Qual è la differenza sostanziale tra un SyntaxError e un'eccezione a runtime (es. TypeError, ZeroDivisionError) in Python?
+Back: Il **SyntaxError** viene rilevato prima dell'esecuzione durante la fase di pre-compilazione sintattica, bloccando a monte la generazione del bytecode e l'avvio della PVM. Le **eccezioni a runtime** si verificano invece durante l'effettiva esecuzione del bytecode da parte della PVM a seguito di un'operazione formalmente lecita dal punto di vista sintattico ma illegale semanticamente (es. divisione per zero).
+Tags: education/university tech/programming tech/python
+END
+%%
+
+### Modalità di Esecuzione e Spyder IDE
+
+L'interazione con l'interprete Python può avvenire attraverso due canali principali \[[[Introduzione alla Programmazione - Lezione 01 - Slide.pdf#page=58|Slide 58-60]]]:
+- **Modalità Interattiva (Shell / REPL):** Esegue un comando alla volta restituendo subito l'output (ad es. `print(5*3)`). È ideale per verifiche atomiche e collaudi immediati, ma le istruzioni non vengono salvate.
+- **Esecuzione di Script (File `.py`):** Il codice viene scritto e salvato in file testuali riutilizzabili e modificabili nel tempo (es. `hello.py`).
+
+L'ambiente di sviluppo di riferimento per il corso è l'**IDE Spyder** (`https://www.spyder-ide.org/`) \[[[Introduzione alla Programmazione - Lezione 01 - Slide.pdf#page=14|Slide 14]]], che integra in un'unica schermata l'editor di testo per gli script, la console interattiva IPython e l'esploratore delle variabili per ispezionare lo stato della memoria.
 
 ---
 

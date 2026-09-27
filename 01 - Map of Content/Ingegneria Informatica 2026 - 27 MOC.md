@@ -46,15 +46,15 @@ La preparazione accademica segue il framework metodologico PACRAR (*Pianificazio
 
 | Lezione / Argomento | P | A | C | R | A | R | Stato / Sintesi |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] | [x] | [x] | [x] | [x] | [ ] | [x] | Connettivi, quantificatori, tautologie e metodi di dimostrazione |
-| [[02 - Teoria degli Insiemi]] | [x] | [x] | [x] | [x] | [-] | [ ] | Assiomi ZF, estensionalità, unione, specificazione, potenza, Von Neumann |
+| [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] | [x] | [x] | [-] | [ ] | [ ] | [ ] | Connettivi, quantificatori, tautologie e metodi di dimostrazione |
+| [[02 - Teoria degli Insiemi]] | [x] | [x] | [-] | [ ] | [ ] | [ ] | Assiomi ZF, estensionalità, unione, specificazione, potenza, Von Neumann |
 
 ### 2. Introduzione alla Programmazione — 9 CFU
 *Hub dedicato:* [[Introduzione alla Programmazione MOC]]
 
 | Lezione / Argomento | P | A | C | R | A | R | Stato / Sintesi |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| [[01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python]] | [ ] | [x] | [x] | [x] | [ ] | [ ] | Sistemi di calcolo, architettura Von Neumann, PVM e LLM |
+| [[01 - Elaborazione delle Informazioni, Algoritmi e Introduzione a Python]] | [x] | [x] | [x] | [x] | [x] | [ ] | Sistemi di calcolo, architettura Von Neumann, PVM e LLM |
 
 ### 3. Probabilità e Statistica — 6 CFU
 *Hub dedicato:* [[Probabilità e Statistica MOC]]
@@ -69,7 +69,7 @@ La preparazione accademica segue il framework metodologico PACRAR (*Pianificazio
 
 ### Fondamenti di Matematica (Analisi 1)
 - [[Fondamenti di Matematica - Scheda Insegnamento.png|Scheda Insegnamento Ufficiale]]
-- [[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf|Lezione 01 — Appunti Manoscritti (PDF)]]
+- [[Lezione 1 FdM.pdf|Lezione 01 — Appunti Manoscritti (PDF)]]
 - [[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf|Lezione 02 — Dispensa Ufficiale Teoria degli Insiemi (Prof. Salzo)]]
 
 ### Introduzione alla Programmazione

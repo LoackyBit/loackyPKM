@@ -42,11 +42,11 @@ summary: "Hub del corso universitario di Fondamenti di Matematica (Analisi 1) pe
 
 | Argomento | P | A | C | R | A | R | Sintesi |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] | [x] | [x] | [x] | [x] | [ ] | [x] | Connettivi, quantificatori, tautologie e metodi di dimostrazione |
-| [[02 - Teoria degli Insiemi]] | [x] | [x] | [x] | [x] | [-] | [ ] | Assiomi ZF, estensionalità, unione, specificazione, potenza, Von Neumann |
+| [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] | [x] | [x] | [-] | [ ] | [ ] | [ ] | Connettivi, quantificatori, tautologie e metodi di dimostrazione |
+| [[02 - Teoria degli Insiemi]] | [x] | [x] | [-] | [ ] | [ ] | [ ] | Assiomi ZF, estensionalità, unione, specificazione, potenza, Von Neumann |
 
 ## Formulari & Risorse Didattiche
 - [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]] — Connettivi, quantificatori, tautologie e metodi di dimostrazione.
 - [[02 - Teoria degli Insiemi]] — Assiomi ZF, inclusione, unione, intersezione, potenza, costruzione di Von Neumann ed infinito.
-- [[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf|Appunti Manoscritti — Lezione 01 (PDF Originale)]]
+- [[Lezione 1 FdM.pdf|Appunti Manoscritti — Lezione 01 (PDF Originale)]]
 - [[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf|Dispensa Didattica — Lezione 02 (Teoria degli Insiemi - Prof. Salzo)]]

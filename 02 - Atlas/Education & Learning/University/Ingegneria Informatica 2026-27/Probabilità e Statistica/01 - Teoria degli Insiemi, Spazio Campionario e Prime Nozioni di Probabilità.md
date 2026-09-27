@@ -97,6 +97,21 @@ Le operazioni insiemistiche associano o modificano collezioni di elementi all'in
 > 4. **Differenza Insiemistica ($A \setminus B$ o $A - B$):** individua gli elementi che stanno in $A$ e non appartengono a $B$:
 >    $$A \setminus B := \{x \in \Omega \mid x \in A \land x \notin B\}$$
 
+> [!tip]- Flashcard: Operazioni Insiemistiche Fondamentali
+%%
+TARGET DECK: University::Probabilità e Statistica
+START
+Cloze
+Text: Dati $A, B \subseteq \Omega$, si definiscono:
+- Unione: $A \cup B :=$ {{c1::$\{x \in \Omega \mid x \in A \lor x \in B\}$}}
+- Intersezione: $A \cap B :=$ {{c2::$\{x \in \Omega \mid x \in A \land x \in B\}$}}
+- Complementare: $A^\complement :=$ {{c3::$\{x \in \Omega \mid x \notin A\}$}}
+- Differenza: $A \setminus B :=$ {{c4::$\{x \in \Omega \mid x \in A \land x \notin B\}$}}
+Extra: Nel calcolo delle probabilità, l'unione corrisponde al verificarsi di almeno uno tra gli eventi, mentre l'intersezione al verificarsi congiunto di entrambi.
+Tags: education/university education/math math/probability
+END
+%%
+
 ![[Schema - Diagramma di Eulero-Venn - Unione.png]]
 *(Rappresentazione grafica dell'unione $A \cup B$)*
 
@@ -166,6 +181,17 @@ Le operazioni insiemistiche associano o modificano collezioni di elementi all'in
 > Lo **spazio campionario** $\Omega$ è l'insieme di tutti i possibili esiti atomici e mutuamente esclusivi di un esperimento aleatorio.
 > Ciascun singolo elemento $\omega \in \Omega$ prende il nome di **evento elementare**.
 
+> [!tip]- Flashcard: Spazio Campionario ed Eventi Elementari
+%%
+TARGET DECK: University::Probabilità e Statistica
+START
+Basic
+Front: Come sono definiti lo spazio campionario $\Omega$ e un evento elementare nella modellazione di un esperimento aleatorio?
+Back: Lo **spazio campionario** $\Omega$ è l'insieme di tutti i possibili esiti atomici e mutuamente esclusivi dell'esperimento. Ciascun singolo esito atomico $\omega \in \Omega$ costituisce un **evento elementare**.
+Tags: education/university education/math math/probability
+END
+%%
+
 > [!example] Esempi Notabili di Spazio Campionario
 > 1. **Lancio della Moneta:** $\Omega := \{T, C\}$
 > 2. **Lancio del Dado a 6 Facce:** $\Omega := \{1, 2, 3, 4, 5, 6\}$
@@ -186,6 +212,20 @@ Le operazioni insiemistiche associano o modificano collezioni di elementi all'in
 >   $$A \cap B = \emptyset$$
 >   I due eventi non possono verificarsi simultaneamente.
 > - **Eventi Esaustivi:** due o più eventi la cui unione coincide con l'intero spazio campionario ($A \cup B = \Omega$).
+
+> [!tip]- Flashcard: Tipologie di Eventi (Certo, Impossibile, Esaustivi)
+%%
+TARGET DECK: University::Probabilità e Statistica
+START
+Cloze
+Text: All'interno di uno spazio campionario $\Omega$:
+- L'{{c1::evento certo}} coincide con $\Omega$ e si verifica sempre.
+- L'{{c2::evento impossibile}} coincide con $\emptyset$ e non si verifica mai.
+- Due o più eventi si dicono {{c3::esaustivi}} se la loro unione copre l'intero spazio campionario: $A \cup B = \Omega$.
+Extra: Due eventi $A$ e $B$ sono incompatibili (o disgiunti) se $A \cap B = \emptyset$.
+Tags: education/university education/math math/probability
+END
+%%
 
 ![[Schema - Diagramma di Eulero-Venn - Spazio Campionario ed Eventi.png]]
 *(Rappresentazione di eventi come sottoinsiemi dello spazio campionario $\Omega$)*

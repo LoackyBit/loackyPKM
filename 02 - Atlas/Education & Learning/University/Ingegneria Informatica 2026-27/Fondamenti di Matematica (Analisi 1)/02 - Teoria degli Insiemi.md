@@ -146,6 +146,17 @@ Accanto alle nozioni primitive, introduciamo per definizione la relazione di <ma
 > 1. Per verificare che $\emptyset \subset A$, applichiamo la Definizione 1.1: dobbiamo provare che $(\forall x) \, (x \in \emptyset \implies x \in A)$. Per l'Assioma 2, la premessa $x \in \emptyset$ è falsa per ogni elemento $x$. Per la semantica dell'implicazione materiale nella logica proposizionale, una proposizione condizionale con premessa falsa è identicamente vera (*ex falso quodlibet*). Ne consegue che l'implicazione è vera per qualunque $x$, dimostrando che $\emptyset \subset A$.
 > 2. Per verificare che $A \subset A$, dobbiamo provare che $(\forall x) \, (x \in A \implies x \in A)$. Assegnando al predicato $x \in A$ il valore proposizionale $P$, l'espressione assume la forma $P \implies P$, che è una tautologia sempre vera per ogni $x$. Dunque ogni insieme è sottoinsieme di se stesso (proprietà riflessiva dell'inclusione).
 
+> [!tip]- Flashcard: Inclusione Universale dell'Insieme Vuoto
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Come si dimostra formalmente che per ogni insieme $A$ vale $\emptyset \subset A$?
+Back: Applicando la definizione di inclusione, dobbiamo verificare che $(\forall x) \, (x \in \emptyset \implies x \in A)$. Poiché per l'assioma dell'insieme vuoto la premessa $x \in \emptyset$ è sempre falsa per qualsiasi $x$, l'implicazione logica risulta identicamente vera per il principio di *ex falso quodlibet*. Dunque $\emptyset \subset A$ vale universalmente.
+Tags: education/university education/math tech/logic
+END
+%%
+
 > [!danger] Teorema: Principio della Doppia Inclusione
 > Dati due insiemi $A$ e $B$:
 > $$A = B \iff (A \subset B \land B \subset A)$$
@@ -154,16 +165,18 @@ Accanto alle nozioni primitive, introduciamo per definizione la relazione di <ma
 > - **$(\implies)$:** Se $A = B$, allora per l'Assioma 1 vale $(\forall x)(x \in A \iff x \in B)$. Scomponendo il bicondizionale nella congiunzione di due implicazioni, otteniamo $(\forall x)(x \in A \implies x \in B)$ (ossia $A \subset B$) e $(\forall x)(x \in B \implies x \in A)$ (ossia $B \subset A$).
 > - **$(\impliedby)$:** Se valgono congiuntamente $A \subset B$ e $B \subset A$, allora per ogni $x$ sono vere contemporaneamente le implicazioni $x \in A \implies x \in B$ e $x \in B \implies x \in A$. Per la definizione del connettivo $\iff$, ciò equivale a $(\forall x)(x \in A \iff x \in B)$, che per l'Assioma 1 implica $A = B$.
 
-> [!tip]- Flashcard: Inclusione Universale dell'Insieme Vuoto
-> %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
-> START
-> Basic
-> Front: Come si dimostra formalmente che per ogni insieme $A$ vale $\emptyset \subset A$?
-> Back: Applicando la definizione di inclusione, dobbiamo verificare che $(\forall x) \, (x \in \emptyset \implies x \in A)$. Poiché per l'assioma dell'insieme vuoto la premessa $x \in \emptyset$ è sempre falsa per qualsiasi $x$, l'implicazione logica risulta identicamente vera per il principio di *ex falso quodlibet*. Dunque $\emptyset \subset A$ vale universalmente.
-> Tags: education/university education/math tech/logic
-> END
-> %%
+> [!tip]- Flashcard: Principio della Doppia Inclusione
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Come si enuncia e dimostra il principio della doppia inclusione per l'uguaglianza tra insiemi?
+Back: Dati due insiemi $A$ e $B$:
+$$A = B \iff (A \subset B \land B \subset A)$$
+Dimostrazione: per l'assioma di estensionalità $A = B \iff (\forall x)(x \in A \iff x \in B)$. Scomponendo il bicondizionale nella congiunzione di due implicazioni reciproche, si ottiene $(\forall x)(x \in A \implies x \in B)$ ($A \subset B$) e $(\forall x)(x \in B \implies x \in A)$ ($B \subset A$).
+Tags: education/university education/math tech/logic
+END
+%%
 
 ---
 
@@ -178,6 +191,17 @@ Per costruire nuovi insiemi a partire da enti già noti, si postula l'<mark styl
 > $$\{x\} := \{x, x\}$$
 > detto **singoletto** (o insieme ridotto ad un solo elemento). Evidentemente vale:
 > $$(\forall z) \, (z \in \{x\} \iff z = x)$$
+
+> [!tip]- Flashcard: Assioma della Coppia Non Ordinata e Singoletto
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Cloze
+Text: Dati due insiemi $x$ e $y$, l'assioma della coppia non ordinata assicura l'esistenza dell'insieme {{c1::$\{x, y\}$}} tale che {{c2::$z \in \{x, y\} \iff z = x \lor z = y$}}. Il singoletto è definito ponendo {{c3::$\{x\} := \{x, x\}$}}, per cui $z \in \{x\} \iff z = x$.
+Extra: L'assioma della coppia permette la genesi di insiemi con elementi distinti a partire dal solo insieme vuoto.
+Tags: education/university education/math tech/logic
+END
+%%
 
 > [!example] Esempio 1.3: Costruzione di Insiemi dall'Insieme Vuoto
 > All'inizio del sistema formale l'unico insieme esistente è l'insieme vuoto $\emptyset$. Applicando iterativamente l'assioma della coppia non ordinata possiamo costruire la successione di insiemi distinti:
@@ -288,11 +312,36 @@ L'intersezione può essere generalizzata non soltanto a due insiemi, ma a una co
 Intuitivamente, se la famiglia $\mathcal{F}$ contiene gli insiemi $A, B, C, D, \dots$, l'intersezione corrisponde alla parte comune a tutti:
 $$\bigcap \mathcal{F} = A \cap B \cap C \cap D \cap \dots$$
 
+> [!tip]- Flashcard: Intersezione di una Famiglia di Insiemi
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Come si definisce rigorosamente l'intersezione di una famiglia non vuota di insiemi $\mathcal{F}$ mediante l'Assioma di Specificazione?
+Back: Scelto un elemento $B \in \mathcal{F}$, si definisce mediante l'Assioma 4:
+$$\bigcap \mathcal{F} := \{x \in B \mid (\forall A \in \mathcal{F}) \, (x \in A)\}$$
+Tale insieme non dipende dalla scelta iniziale di $B$ e soddisfa:
+$$(\forall x) \, (x \in \bigcap \mathcal{F} \iff (\forall A \in \mathcal{F})(x \in A))$$
+Tags: education/university education/math tech/logic
+END
+%%
+
 ---
 
 ## 8. Assioma dell'Unione e Unione di Insiemi
 
 A differenza dell'intersezione, per unire due o più insiemi generici **non è possibile fare ricorso all'Assioma 4 di specificazione**, poiché non disponiamo a priori di un insieme universo già costituito che contenga entrambi gli insiemi. L'esistenza dell'unione deve essere quindi introdotta tramite un apposito postulato \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=4|Dispensa p. 4]]].
+
+> [!tip]- Flashcard: Perché l'Unione Richiede un Assioma Autonomo
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Perché per definire l'unione di insiemi non è possibile usare l'Assioma di Specificazione e serve un assioma autonomo?
+Back: L'Assioma di Specificazione consente di ritagliare sottoinsiemi solo a partire da un insieme universo $A$ già esistente nel sistema formale. Per due insiemi generici $A$ e $B$ non si dispone a priori di un insieme più grande che li contenga entrambi; l'esistenza di un insieme contenitore deve essere postulata espressamente tramite l'Assioma dell'Unione.
+Tags: education/university education/math tech/logic
+END
+%%
 
 > [!danger] Assioma 5: Assioma dell'Unione
 > Sia $\mathcal{F}$ un insieme (pensato come una famiglia di insiemi). Esiste un insieme, che denotiamo con $\bigcup \mathcal{F}$ o con $\bigcup_{A \in \mathcal{F}} A$ e chiamiamo **unione degli insiemi di $\mathcal{F}$**, che ha per elementi tutti e soli gli elementi appartenenti ad almeno un insieme di $\mathcal{F}$:
@@ -350,6 +399,19 @@ L'interazione tra le operazioni di unione, intersezione e differenza genera una 
 > $$\complement_A(B \cap C) = \complement_A(B) \cup \complement_A(C)$$
 > $$\complement_A(B \cup C) = \complement_A(B) \cap \complement_A(C)$$
 
+> [!tip]- Flashcard: Proprietà Distributive Insiemistiche
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Cloze
+Text: L'intersezione e l'unione godono di reciproca distributività:
+1. $A \cap (B \cup C) =$ {{c1::$(A \cap B) \cup (A \cap C)$}}
+2. $A \cup (B \cap C) =$ {{c2::$(A \cup B) \cap (A \cup C)$}}
+Extra: A differenza dell'algebra numerica ordinaria (dove la somma non distribuisce sul prodotto), nell'algebra di Boole degli insiemi entrambe le operazioni distribuiscono l'una rispetto all'altra.
+Tags: education/university education/math tech/logic
+END
+%%
+
 ### Dimostrazione Formale delle Leggi di De Morgan
 
 Dimostriamo la prima legge per complementari: $\complement_A(B \cup C) = \complement_A(B) \cap \complement_A(C)$.
@@ -370,17 +432,32 @@ $$
 Poiché l'equivalenza vale per ogni $x$, per l'Assioma 1 di estensionalità i due insiemi coincidono. La seconda legge si dimostra specularmente impiegando l'altra dualità: $\neg(P \land Q) \equiv \neg P \lor \neg Q$.
 
 > [!tip]- Flashcard: Leggi di De Morgan per Insiemi
-> %%
-> TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
-> START
-> Cloze
-> Text: Siano $B, C \subset A$. Le leggi di De Morgan insiemistiche stabiliscono:
-> 1. $\complement_A(B \cup C) =$ {{c1::$\complement_A(B) \cap \complement_A(C)$}}
-> 2. $\complement_A(B \cap C) =$ {{c2::$\complement_A(B) \cup \complement_A(C)$}}
-> Extra: Il passaggio al complementare trasforma l'unione in intersezione e l'intersezione in unione, riflettendo esattamente la dualità logica tra congiunzione e disgiunzione.
-> Tags: education/university education/math tech/logic
-> END
-> %%
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Cloze
+Text: Siano $B, C \subset A$. Le leggi di De Morgan insiemistiche stabiliscono:
+1. $\complement_A(B \cup C) =$ {{c1::$\complement_A(B) \cap \complement_A(C)$}}
+2. $\complement_A(B \cap C) =$ {{c2::$\complement_A(B) \cup \complement_A(C)$}}
+Extra: Il passaggio al complementare trasforma l'unione in intersezione e l'intersezione in unione, riflettendo esattamente la dualità logica tra congiunzione e disgiunzione.
+Tags: education/university education/math tech/logic
+END
+%%
+
+> [!tip]- Flashcard: Dimostrazione Formale della Legge di De Morgan per Complementari
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Come si dimostra formalmente che $\complement_A(B \cup C) = \complement_A(B) \cap \complement_A(C)$ per $B, C \subset A$?
+Back: Mediante catena di equivalenze logiche per ogni $x \in A$:
+$$x \in \complement_A(B \cup C) \iff x \in A \land \neg(x \in B \lor x \in C)$$
+Applicando De Morgan proposizionale $\neg(P \lor Q) \equiv \neg P \land \neg Q$:
+$$\iff x \in A \land (x \notin B \land x \notin C) \iff (x \in \complement_A(B)) \land (x \in \complement_A(C)) \iff x \in (\complement_A(B) \cap \complement_A(C))$$
+Per l'assioma di estensionalità, i due insiemi coincidono.
+Tags: education/university education/math tech/logic
+END
+%%
 
 ---
 
@@ -396,6 +473,19 @@ Grazie alla combinazione dell'Assioma 3 (coppia non ordinata) e dell'Assioma 5 (
 > Evidentemente vale:
 > $$(\forall x) \, (x \in \{a, b, c, d\} \iff x = a \lor x = b \lor x = c \lor x = d)$$
 > Iterando questo procedimento è possibile definire formalmente qualunque insieme finito mediante l'elencazione esplicita dei suoi elementi tra parentesi graffe.
+
+> [!tip]- Flashcard: Definizione Formale di Insiemi per Elencazione
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Come si giustifica rigorosamente la notazione per elencazione $\{a, b, c\}$ mediante gli assiomi ZF?
+Back: Si costruiscono prima la coppia $\{a, b\}$ e il singoletto $\{c\}$ (Assioma 3 della coppia) e si definisce:
+$$\{a, b, c\} := \{a, b\} \cup \{c\}$$
+mediante l'Assioma 5 dell'unione. Iterando il procedimento $(\{a_1, \dots, a_n\} \cup \{a_{n+1}\})$ si fonda rigorosamente qualsiasi insieme finito per elencazione.
+Tags: education/university education/math tech/logic
+END
+%%
 
 > [!example] Esempio 1.11: Calcolo di Operazioni su Insiemi Finiti
 > Siano dati gli insiemi finiti:
@@ -470,6 +560,18 @@ La costruzione assiomatica consente di edificare l'intero edificio dei numeri a 
    L'assioma assicura inoltre che per ogni insieme $x$ vale:
    $$x \ne x \cup \{x\}$$
    Infatti $x \in (x \cup \{x\})$, ma per quanto appena dimostrato $x \notin x$. Essendo i due insiemi distinti, la nozione di successivo è rigorosamente ben posta.
+
+> [!tip]- Flashcard: Assioma di Fondazione e Divieto di Auto-Appartenenza
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Come si formula l'assioma di fondazione (o regolarità) e come dimostra che nessun insieme può appartenere a se stesso ($x \notin x$)?
+Back: Enunciato: ogni insieme non vuoto $A$ possiede un elemento disgiunto da $A$: $(\forall A \ne \emptyset)(\exists x \in A)(x \cap A = \emptyset)$.
+Dimostrazione $x \notin x$: se per assurdo $x \in x$, nel singoletto $A = \{x\}$ l'unico elemento $x$ soddisfa $x \in (x \cap A)$, dunque $x \cap A \ne \emptyset$, contraddicendo l'assioma. Ne segue che $(\forall x)(x \notin x)$.
+Tags: education/university education/math tech/logic
+END
+%%
 
 > [!danger] Definizione 2.1: Successivo di un Insieme
 > Sia $x$ un insieme. Si chiama **successivo di $x$** l'insieme:

@@ -2,16 +2,29 @@
 status: permanent
 type: lecture
 area: education
-related: ["[[Fondamenti di Matematica (Analisi 1) MOC]]", "[[Ingegneria Informatica 2026 - 27 MOC]]", "[[University]]", "[[Metodo di Studio - PACRAR]]", "[[02 - Teoria degli Insiemi]]", "[[01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità]]"]
-aliases: ["Lezione 1 Fondamenti di Matematica", "FdM Lezione 1", "Logica Proposizionale, Predicati e Metodi di Dimostrazione"]
+related:
+  - "[[Fondamenti di Matematica (Analisi 1) MOC]]"
+  - "[[Ingegneria Informatica 2026 - 27 MOC]]"
+  - "[[University]]"
+  - "[[Metodo di Studio - PACRAR]]"
+  - "[[02 - Teoria degli Insiemi]]"
+  - "[[01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità]]"
+aliases:
+  - Lezione 1 Fondamenti di Matematica
+  - FdM Lezione 1
+  - Logica Proposizionale, Predicati e Metodi di Dimostrazione
 source: Lezione 1 FdM del 23/09/2026 - Prof. Saverio Salzo
-title: "01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione"
-date: '2026-09-23'
+title: 01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione
+date: 2026-09-23
 updated: 2026-09-27T18:00
-tags: [education/university, education/math, tech/logic]
-summary: "Fondamenti di logica e sillogismi, proposizioni e connettivi, tabelle di verità, leggi notevoli, predicati con quantificatori e dimostrazione per contronominale."
-course: "Fondamenti di Matematica Analisi 1"
-sources: ["[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf]]"]
+tags:
+  - education/university
+  - education/math
+  - tech/logic
+summary: Fondamenti di logica e sillogismi, proposizioni e connettivi, tabelle di verità, leggi notevoli, predicati con quantificatori e dimostrazione per contronominale.
+course: Fondamenti di Matematica Analisi 1
+sources:
+  - "[[Lezione 1 FdM.pdf]]"
 ---
 [[Home MOC|Home]] / [[University|University MOC]] / [[Fondamenti di Matematica Analisi 1 MOC]] / [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]]
 
@@ -20,14 +33,14 @@ sources: ["[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf]]"]
 - **Docente:** Prof. Saverio Salzo (Esercitatori: Dott. Giovanni Franzina, Prof.ssa Elisa Trasatti)
 - **Contatti:** `saverio.salzo@uniroma1.it`, `giovanni.franzina@cnr.it`, `elisa.trasatti@uniroma1.it`
 - **Data Lezione:** 2026-09-23
-- **Materiale Didattico Ufficiale:** \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=1|Appunti Manoscritti Lezione 01]]]
+- **Materiale Didattico Ufficiale:** \[[[Lezione 1 FdM.pdf#page=1|Appunti Manoscritti Lezione 01]]]
 - **Riferimento MOC:** [[Fondamenti di Matematica (Analisi 1) MOC]], [[Ingegneria Informatica 2026 - 27 MOC]]
 - **Lezione Successiva:** [[02 - Teoria degli Insiemi]]
 - **Collegamento Interdisciplinare:** [[01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità]]
 
 L'insegnamento di Analisi Matematica poggia su due concetti strutturali cardine: la proprietà di **completezza dei numeri reali** ($\mathbb{R}$) e il rigore del linguaggio formale. Da un punto di vista storico ed epistemologico, l'evoluzione della disciplina ha seguito un andamento a ritroso: il calcolo infinitesimale (derivate e integrali, formulati nel XVII secolo da Newton e Leibniz per risolvere problemi fisici e geometrici) ha preceduto di oltre due secoli la sua completa formalizzazione logica e assiomatica (sviluppata tra la fine dell'Ottocento e l'inizio del Novecento da Peano, Frege, Russell e Hilbert). La sistemazione assiomatica si è resa necessaria per eliminare i paradossi derivanti dall'intuito geometrico e costruire una teoria priva di fallacie deduttive.
 
-Il <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>formalismo matematico</b></font></mark> non costituisce una complicazione fine a se stessa, ma lo strumento indispensabile per eliminare qualsiasi forma di <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>ambiguità</b></font></mark> insita nel linguaggio naturale, garantendo l'oggettività e la riproducibilità delle inferenze logiche \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=1|Appunti p. 1]]].
+Il <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>formalismo matematico</b></font></mark> non costituisce una complicazione fine a se stessa, ma lo strumento indispensabile per eliminare qualsiasi forma di <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>ambiguità</b></font></mark> insita nel linguaggio naturale, garantendo l'oggettività e la riproducibilità delle inferenze logiche \[[[Lezione 1 FdM.pdf#page=1|Appunti p. 1]]].
 
 ---
 
@@ -37,7 +50,7 @@ La logica costituisce lo studio delle regole formali del ragionamento valido, as
 
 ### 1. Sillogismi e Validità Formale
 
-Il modello classico del ragionamento deduttivo è rappresentato dal <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>sillogismo</b></font></mark>, in cui da due premesse assunte come vere discende necessariamente una conclusione. Il docente introduce la struttura attraverso l'argomento guida \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=1|Appunti p. 1]]]:
+Il modello classico del ragionamento deduttivo è rappresentato dal <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>sillogismo</b></font></mark>, in cui da due premesse assunte come vere discende necessariamente una conclusione. Il docente introduce la struttura attraverso l'argomento guida \[[[Lezione 1 FdM.pdf#page=1|Appunti p. 1]]]:
 
 > *I Marziani vivono su Plutone.*
 > *Socrate è un Marziano.*
@@ -67,7 +80,7 @@ Anche se le affermazioni descrivono scenari privi di riscontro nella realtà fis
 
 ### 1. Definizione di Proposizione
 
-L'atomo elementare della logica proposizionale è la <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>proposizione</b></font></mark> \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=1|Appunti p. 1]]].
+L'atomo elementare della logica proposizionale è la <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>proposizione</b></font></mark> \[[[Lezione 1 FdM.pdf#page=1|Appunti p. 1]]].
 
 > [!danger] Definizione: Proposizione
 > Una **proposizione** è una frase dichiarativa del linguaggio naturale o formale alla quale è possibile attribuire, in modo univoco e oggettivo, uno e un solo valore di verità: <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>vero ($V$)</b></font></mark> oppure <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>falso ($F$)</b></font></mark>, senza alcuna ambiguità interpretativa.
@@ -100,7 +113,7 @@ Non ogni frase del linguaggio ordinario costituisce una proposizione:
 
 ### 3. Composizione di Proposizioni e Operatori Logici
 
-A partire da proposizioni atomiche, è possibile costruire espressioni più articolate mediante gli <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>operatori logici (connettivi logici)</b></font></mark> \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=1|Appunti p. 1]]].
+A partire da proposizioni atomiche, è possibile costruire espressioni più articolate mediante gli <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>operatori logici (connettivi logici)</b></font></mark> \[[[Lezione 1 FdM.pdf#page=1|Appunti p. 1]]].
 
 > [!danger] Definizione: Operatori Logici (Connettivi)
 > Siano $P$ e $Q$ proposizioni. Si definiscono le operazioni logiche fondamentali:
@@ -122,7 +135,7 @@ A partire da proposizioni atomiche, è possibile costruire espressioni più arti
 Le <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>tabelle di verità</b></font></mark> costituiscono lo strumento sistematico per enumerare tutti i possibili valori di verità assunti da una formula composta al variare delle combinazioni di verità delle variabili componenti.
 
 #### Negazione ($\neg P$)
-L'operatore monadico inverte il valore di verità della proposizione d'ingresso \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=2|Appunti p. 2]]]:
+L'operatore monadico inverte il valore di verità della proposizione d'ingresso \[[[Lezione 1 FdM.pdf#page=2|Appunti p. 2]]]:
 
 | $P$ | $\neg P$ |
 | :---: | :---: |
@@ -130,7 +143,7 @@ L'operatore monadico inverte il valore di verità della proposizione d'ingresso 
 | F | **V** |
 
 #### Congiunzione ($P \land Q$) e Disgiunzione ($P \lor Q$)
-Per chiarire la semantica dei connettivi binari, il docente propone l'analogia genitoriale tra madre e figlio per concedere l'uscita da casa \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=2|Appunti p. 2]]]:
+Per chiarire la semantica dei connettivi binari, il docente propone l'analogia genitoriale tra madre e figlio per concedere l'uscita da casa \[[[Lezione 1 FdM.pdf#page=2|Appunti p. 2]]]:
 1. *Regola A:* *"Per uscire devi fare i piatti **e** portare fuori l'immondizia"* ($P \land Q$).
 2. *Regola B:* *"Per uscire devi fare i piatti **o** portare fuori l'immondizia"* ($P \lor Q$).
 
@@ -144,8 +157,19 @@ Per chiarire la semantica dei connettivi binari, il docente propone l'analogia g
 - **Congiunzione ($P \land Q$):** è vera **esclusivamente** quando entrambe le proposizioni $P$ e $Q$ sono vere.
 - **Disgiunzione ($P \lor Q$):** è falsa **esclusivamente** quando entrambe le proposizioni $P$ e $Q$ sono false; in matematica si adotta **rigorosamente solo la disgiunzione inclusiva** ($P \lor Q$ è vera anche quando sia $P$ sia $Q$ sono entrambe vere). Questo principio si ricollega direttamente alla definizione di unione tra insiemi in [[02 - Teoria degli Insiemi]] e [[01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità]].
 
+> [!tip]- Flashcard: Congiunzione e Disgiunzione Inclusiva
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Cloze
+Text: In matematica si adotta rigorosamente la {{c1::disgiunzione inclusiva}} ($P \lor Q$), che risulta falsa {{c2::esclusivamente quando entrambe le proposizioni $P$ e $Q$ sono false}}. La congiunzione logica ($P \land Q$) è vera {{c3::esclusivamente quando entrambe le componenti sono vere}}.
+Extra: A differenza dell'"o" esclusivo del linguaggio comune (*aut-aut*), $P \lor Q$ è vera anche quando sia $P$ sia $Q$ sono entrambe contemporaneamente vere.
+Tags: education/university education/math tech/logic
+END
+%%
+
 #### Implicazione Materiale ($P \implies Q$)
-La proposizione condizionale $P \implies Q$ ("se $P$, allora $Q$") vincola l'ipotesi $P$ alla tesi $Q$ \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=3|Appunti p. 3]]]:
+La proposizione condizionale $P \implies Q$ ("se $P$, allora $Q$") vincola l'ipotesi $P$ alla tesi $Q$ \[[[Lezione 1 FdM.pdf#page=3|Appunti p. 3]]]:
 
 | $P$ | $Q$ | $P \implies Q$ |
 | :---: | :---: | :---: |
@@ -189,7 +213,7 @@ Nell'implicazione $P \implies Q$:
 > %%
 
 #### Equivalenza Logica ($P \iff Q$)
-L'equivalenza (o bicondizionale, "se e solo se") stabilisce che due proposizioni possiedono sempre il medesimo valore di verità \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=3|Appunti p. 3]]]:
+L'equivalenza (o bicondizionale, "se e solo se") stabilisce che due proposizioni possiedono sempre il medesimo valore di verità \[[[Lezione 1 FdM.pdf#page=3|Appunti p. 3]]]:
 
 | $P$ | $Q$ | $P \iff Q$ |
 | :---: | :---: | :---: |
@@ -201,16 +225,41 @@ L'equivalenza (o bicondizionale, "se e solo se") stabilisce che due proposizioni
 L'equivalenza corrisponde formalmente alla congiunzione di due implicazioni reciproche:
 $$(P \iff Q) \equiv (P \implies Q) \land (Q \implies P)$$
 
+> [!tip]- Flashcard: Equivalenza Logica e Doppia Implicazione
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Come è definita l'equivalenza logica $P \iff Q$ e come si esprime mediante implicazioni materiali?
+Back: L'equivalenza (o bicondizionale) stabilisce che $P$ e $Q$ possiedono sempre il medesimo valore di verità. Equivale formalmente alla congiunzione di due implicazioni reciproche:
+$$(P \iff Q) \equiv (P \implies Q) \land (Q \implies P)$$
+Tags: education/university education/math tech/logic
+END
+%%
+
 ---
 
 ## Leggi del Calcolo Proposizionale e Tautologie
 
-Una formula proposizionale che risulta sempre vera per qualsiasi attribuzione di verità alle proposizioni atomiche componenti prende il nome di <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>tautologia</b></font></mark> \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=4|Appunti p. 4]]].
+Una formula proposizionale che risulta sempre vera per qualsiasi attribuzione di verità alle proposizioni atomiche componenti prende il nome di <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>tautologia</b></font></mark> \[[[Lezione 1 FdM.pdf#page=4|Appunti p. 4]]].
 
 > [!danger] Assioma / Principio Fondamentale: Legge del Terzo Escluso (Tertium Non Datur)
 > Per qualunque proposizione $P$:
 > $$P \lor (\neg P) \equiv V$$
 > Una proposizione è o vera o falsa: non esiste una terza alternativa logica nel sistema classico bivalente.
+
+> [!tip]- Flashcard: Legge del Terzo Escluso (Tertium Non Datur)
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Come si enuncia formalmente la Legge del Terzo Escluso (*Tertium Non Datur*) nella logica classica bivalente?
+Back: Per qualunque proposizione $P$:
+$$P \lor (\neg P) \equiv V$$
+Una proposizione è o vera o falsa: non esiste una terza alternativa di verità nel sistema classico.
+Tags: education/university education/math tech/logic
+END
+%%
 
 > [!danger] Teorema: Leggi di De Morgan del Calcolo Proposizionale
 > Siano $P$ e $Q$ due proposizioni. Valgono le equivalenze tautologiche:
@@ -254,14 +303,38 @@ Una formula proposizionale che risulta sempre vera per qualsiasi attribuzione di
 > $$(P \implies Q) \iff [(P \land \neg Q) \implies (R \land \neg R)]$$
 > dove $R \land \neg R$ rappresenta una contraddizione ($F$). Se assumendo simultaneamente vera l'ipotesi $P$ e falsa la tesi ($\neg Q$) si deduce una contraddizione logica, allora l'assunzione $\neg Q$ è insostenibile e la tesi $Q$ deve essere necessariamente **vera**.
 
+> [!tip]- Flashcard: Metodo di Dimostrazione per Assurdo
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Su quale principio logico si fonda la dimostrazione per assurdo di un teorema $P \implies Q$?
+Back: Si fonda sulla tautologia:
+$$(P \implies Q) \iff [(P \land \neg Q) \implies (R \land \neg R)]$$
+Assumendo contemporaneamente vera l'ipotesi $P$ e falsa la tesi ($\neg Q$), se si deduce una contraddizione logica ($R \land \neg R \equiv F$), allora l'assunzione $\neg Q$ è insostenibile e la tesi $Q$ deve essere necessariamente vera.
+Tags: education/university education/math tech/logic
+END
+%%
+
 ---
 
 ## Logica dei Predicati e Quantificatori
 
-La logica delle proposizioni considera gli enunciati come blocchi indivisibili. Per esprimere proprietà matematiche dipendenti da variabili è necessario passare alla <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>logica dei predicati</b></font></mark> \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=5|Appunti p. 5]]].
+La logica delle proposizioni considera gli enunciati come blocchi indivisibili. Per esprimere proprietà matematiche dipendenti da variabili è necessario passare alla <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>logica dei predicati</b></font></mark> \[[[Lezione 1 FdM.pdf#page=5|Appunti p. 5]]].
 
 > [!danger] Definizione: Predicato Logico (Proposizione Aperta)
 > Un **predicato** (denotato con $P(x)$, $Q(x, y)$, ecc.) è un'espressione del linguaggio che contiene una o più variabili e che si trasforma in una proposizione (dotata di valore di verità vero o falso) non appena alle variabili viene sostituito un valore specifico del loro dominio di interpretazione.
+
+> [!tip]- Flashcard: Definizione di Predicato Logico
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Che cos'è un predicato (o proposizione aperta) nella logica matematica?
+Back: È un'espressione linguistica contenente una o più variabili (es. $P(x)$, $Q(x, y)$) che si trasforma in una proposizione (dotata di valore di verità $V$ o $F$) non appena a ciascuna variabile viene sostituito uno specifico valore del suo dominio di interpretazione.
+Tags: education/university education/math tech/logic
+END
+%%
 
 > [!danger] Definizione: Quantificatori Logici
 > Per trasformare una formula predicativa in un enunciato categorico valido sull'intero dominio si introducono i quantificatori:
@@ -277,13 +350,24 @@ La logica delle proposizioni considera gli enunciati come blocchi indivisibili. 
 > - Una variabile si dice **legata (o vincolata)** se ricade all'interno del campo d'azione di un quantificatore $(\forall x)$ o $(\exists x)$.
 > - Una variabile si dice **libera** se non è vincolata da alcun quantificatore. Nell'Assioma 4 di specificazione di [[02 - Teoria degli Insiemi]], il predicato $P(x)$ richiede espressamente che la variabile $x$ compaia libera.
 
+> [!tip]- Flashcard: Variabili Libere vs Variabili Legate
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Qual è la differenza tra una variabile libera e una variabile legata (o vincolata)?
+Back: Una variabile è **legata (o vincolata)** se ricade all'interno del campo d'azione di un quantificatore $(\forall x)$ o $(\exists x)$. È **libera** se non è vincolata da alcun quantificatore. Nell'assioma di specificazione insiemistica, la proprietà $P(x)$ richiede che $x$ compaia come variabile libera.
+Tags: education/university education/math tech/logic
+END
+%%
+
 ---
 
 ## Leggi della Quantificazione
 
 ### 1. Dualità e Negazione dei Quantificatori
 
-Quando la negazione interagisce con i quantificatori, scambia il tipo di quantificatore e si applica internamente al predicato \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=6|Appunti p. 6]]]:
+Quando la negazione interagisce con i quantificatori, scambia il tipo di quantificatore e si applica internamente al predicato \[[[Lezione 1 FdM.pdf#page=6|Appunti p. 6]]]:
 
 > [!danger] Teorema: Negazione dei Quantificatori
 > Per ogni proposizione aperta $P(x)$:
@@ -307,13 +391,26 @@ Quando la negazione interagisce con i quantificatori, scambia il tipo di quantif
 
 ### 2. Quantificatori Multipli e Dipendenze
 
-Nelle formule con più quantificatori, l'ordine di scrittura definisce la dipendenza logica e **non è permutabile** \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=7|Appunti p. 7]]]. Ad esempio:
+Nelle formule con più quantificatori, l'ordine di scrittura definisce la dipendenza logica e **non è permutabile** \[[[Lezione 1 FdM.pdf#page=7|Appunti p. 7]]]. Ad esempio:
 - $(\forall x) (\exists y) \, P(x, y)$: per ogni elemento $x$, esiste un $y$ (che può dipendere dalla scelta di $x$);
 - $(\exists y) (\forall x) \, P(x, y)$: esiste un elemento universale $y$ che va bene simultaneamente per tutti gli $x$.
 
+> [!tip]- Flashcard: Dipendenza e Ordine nei Quantificatori Multipli
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Cloze
+Text: Nelle formule con quantificatori misti, l'ordine di scrittura non è permutabile:
+- $(\forall x) (\exists y) \, P(x, y)$ significa che {{c1::per ogni $x$ esiste un $y$, il quale può dipendere dalla scelta di $x$}}.
+- $(\exists y) (\forall x) \, P(x, y)$ asserisce invece l'esistenza di {{c2::un elemento universale $y$ comune che soddisfa la proprietà simultaneamente per tutti gli $x$}}.
+Extra: Scambiare i quantificatori altera radicalmente il significato logico dell'enunciato matematico.
+Tags: education/university education/math tech/logic
+END
+%%
+
 ### 3. Applicazione: Dimostrazione per Contronominale
 
-Il docente illustra l'efficacia della dimostrazione per contronominale su un classico teorema di aritmetica dei numeri interi \[[[Fondamenti di Matematica - Lezione 01 - Appunti Manoscritti.pdf#page=8|Appunti p. 8]]]:
+Il docente illustra l'efficacia della dimostrazione per contronominale su un classico teorema di aritmetica dei numeri interi \[[[Lezione 1 FdM.pdf#page=8|Appunti p. 8]]]:
 
 > [!danger] Teorema: Parità del Quadrato e Dimostrazione per Contronominale
 > Sia $x \in \mathbb{N}^+$. Vale l'implicazione:
@@ -333,3 +430,19 @@ Il docente illustra l'efficacia della dimostrazione per contronominale su un cla
 > 5. **Conclusione:** la quantità $x^2$ ha la forma canonica di un numero dispari.
 > 
 > Essendo dimostrata l'implicazione contronominale, per la legge di contrapposizione logica resta rigorosamente provato il teorema di partenza: se $x^2$ è pari, allora $x$ è pari.
+
+> [!tip]- Flashcard: Dimostrazione per Contronominale della Parità del Quadrato
+%%
+TARGET DECK: University::Fondamenti di Matematica (Analisi 1)
+START
+Basic
+Front: Come si dimostra per contronominale il teorema: per ogni $x \in \mathbb{N}^+$, se $x^2$ è pari allora $x$ è pari?
+Back: La contronominale equivale a: se $x$ è dispari, allora $x^2$ è dispari.
+1. Poniamo $x = 2n + 1$ con $n \in \mathbb{N}$.
+2. Elevando al quadrato: $x^2 = (2n + 1)^2 = 4n^2 + 4n + 1 = 2(2n^2 + 2n) + 1$.
+3. Posto $k = 2n^2 + 2n \in \mathbb{N}$, si ha $x^2 = 2k + 1$, che è la forma canonica di un numero dispari.
+Essendo vera la contronominale, resta provata l'implicazione originaria.
+Tags: education/university education/math tech/logic
+END
+%%
+

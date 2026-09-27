@@ -41,7 +41,7 @@ function extractLessonKey(text) {
     if (match) {
         clean = match[1];
     }
-    clean = clean.replace(/[*_`]/g, '').trim().toLowerCase();
+    clean = clean.split('/').pop().replace(/[*_`]/g, '').trim().toLowerCase();
     return clean;
 }
 
@@ -95,9 +95,11 @@ class PacrarTrackerPlugin extends Plugin {
     }
 
     scanAndRenderPacrarTables() {
-        const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-        if (!activeView || !activeView.contentEl) return;
-        this.renderAllPacrar(activeView.contentEl);
+        this.app.workspace.iterateAllLeaves((leaf) => {
+            if (leaf.view && leaf.view instanceof MarkdownView && leaf.view.contentEl) {
+                this.renderAllPacrar(leaf.view.contentEl);
+            }
+        });
     }
 
     processPacrarSection(el, ctx) {
@@ -376,7 +378,7 @@ class PacrarTrackerPlugin extends Plugin {
         }
     }
 
-    async updatePacrarFile(file, lessonKey, cellIdx, nextState) {
+    async updatePacrarFile(file, lessonKey, rowStates, cellIdx, nextState) {
         try {
             // 1. Find any open workspace leaves containing this file
             const openLeaves = [];
@@ -388,10 +390,12 @@ class PacrarTrackerPlugin extends Plugin {
 
             // 2. Read latest content from editor if open, otherwise from disk
             let content = '';
-            let primaryEditor = null;
             if (openLeaves.length > 0 && openLeaves[0].view && openLeaves[0].view.editor) {
-                primaryEditor = openLeaves[0].view.editor;
-                content = primaryEditor.getValue();
+                try {
+                    content = openLeaves[0].view.editor.getValue();
+                } catch (_) {
+                    content = await this.app.vault.read(file);
+                }
             } else {
                 content = await this.app.vault.read(file);
             }
@@ -411,27 +415,45 @@ class PacrarTrackerPlugin extends Plugin {
                 const lineKey = extractLessonKey(rawArg);
                 if (!lineKey || lineKey !== lessonKey) continue;
 
-                const targetPartIdx = hasLeadingPipe ? cellIdx + 1 : cellIdx;
-                if (targetPartIdx < parts.length) {
-                    parts[targetPartIdx] = ` ${nextState} `;
-                    lines[i] = parts.join('|');
-                    lineIdxModified = i;
-                    updatedLine = lines[i];
-                    modified = true;
-                    break;
+                if (rowStates && Array.isArray(rowStates) && rowStates.length === 6) {
+                    for (let c = 0; c < 6; c++) {
+                        const targetIdx = hasLeadingPipe ? c + 2 : c + 1;
+                        if (targetIdx < parts.length) {
+                            parts[targetIdx] = ` ${rowStates[c]} `;
+                        }
+                    }
+                } else if (cellIdx !== undefined && nextState !== undefined) {
+                    const targetPartIdx = hasLeadingPipe ? cellIdx + 1 : cellIdx;
+                    if (targetPartIdx < parts.length) {
+                        parts[targetPartIdx] = ` ${nextState} `;
+                    }
                 }
+
+                lines[i] = parts.join('|');
+                lineIdxModified = i;
+                updatedLine = lines[i];
+                modified = true;
+                break;
             }
 
             if (modified) {
-                let updatedInEditor = false;
+                const newContent = lines.join('\n');
+
+                // 3. Unconditionally write to disk via vault.modify to guarantee persistence across sessions and background tabs
+                await this.app.vault.modify(file, newContent);
+
+                // 4. Update all open leaves in memory for instantaneous feedback
                 for (const leaf of openLeaves) {
                     const scroller = leaf.containerEl ? leaf.containerEl.querySelector('.cm-scroller, .markdown-preview-view') : null;
                     const prevTop = scroller ? scroller.scrollTop : null;
                     const prevLeft = scroller ? scroller.scrollLeft : null;
 
                     if (leaf.view && leaf.view.editor) {
-                        leaf.view.editor.setLine(lineIdxModified, updatedLine);
-                        updatedInEditor = true;
+                        try {
+                            leaf.view.editor.setLine(lineIdxModified, updatedLine);
+                        } catch (_) {
+                            try { leaf.view.editor.setValue(newContent); } catch (__) {}
+                        }
                     }
 
                     if (leaf.view && leaf.view.contentEl) {
@@ -446,10 +468,6 @@ class PacrarTrackerPlugin extends Plugin {
                             if (scroller.scrollLeft !== prevLeft) scroller.scrollLeft = prevLeft;
                         });
                     }
-                }
-
-                if (!updatedInEditor) {
-                    await this.app.vault.modify(file, lines.join('\n'));
                 }
                 return true;
             }
@@ -499,35 +517,13 @@ class PacrarTrackerPlugin extends Plugin {
         const lessonKey = extractLessonKeyFromCell(argCell);
         if (!lessonKey) return;
 
-        // 3. Find file of the clicked view
-        let activeFile = null;
-        const leafEl = cell.closest('.workspace-leaf');
-        if (leafEl) {
-            this.app.workspace.iterateAllLeaves((l) => {
-                if ((l.containerEl === leafEl || l.containerEl.contains(cell)) && l.view && l.view.file) {
-                    activeFile = l.view.file;
-                }
-            });
-        }
-        if (!activeFile) {
-            const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-            activeFile = activeView ? activeView.file : this.app.workspace.getActiveFile();
+        // 3. Extract the full 6 PACRAR states for this row
+        const rowStates = [];
+        for (let c = 1; c <= 6; c++) {
+            rowStates.push(extractCheckboxState(row.children[c]) || '[ ]');
         }
 
-        const activeFilePath = activeFile ? activeFile.path : '';
-        if (activeFile) {
-            await this.updatePacrarFile(activeFile, lessonKey, cellIdx, next);
-        }
-
-        // 4. Synchronize linked MOC files in 01 - Map of Content/
-        const allFiles = this.app.vault.getMarkdownFiles();
-        const mocFiles = allFiles.filter(f => f.path.startsWith('01 - Map of Content/') && f.path !== activeFilePath);
-
-        for (const otherFile of mocFiles) {
-            await this.updatePacrarFile(otherFile, lessonKey, cellIdx, next);
-        }
-
-        // 5. Update other visible tables in DOM
+        // 4. Update all other visible tables in the DOM immediately
         const otherTables = Array.from(document.querySelectorAll('table')).filter(t => t !== table && isPacrarTable(t));
         let needsRerender = false;
         otherTables.forEach(ot => {
@@ -537,10 +533,12 @@ class PacrarTrackerPlugin extends Plugin {
             oRows.forEach(orow => {
                 const oArg = orow.children[0];
                 if (oArg && extractLessonKeyFromCell(oArg) === lessonKey) {
-                    const oCell = orow.children[cellIdx];
-                    if (oCell) {
-                        oCell.textContent = next;
-                        needsRerender = true;
+                    for (let c = 1; c <= 6; c++) {
+                        const oCell = orow.children[c];
+                        if (oCell && rowStates[c - 1]) {
+                            oCell.textContent = rowStates[c - 1];
+                            needsRerender = true;
+                        }
                     }
                 }
             });
@@ -549,6 +547,41 @@ class PacrarTrackerPlugin extends Plugin {
         if (needsRerender) {
             this.renderAllPacrar(document);
         }
+
+        // 5. Enqueue file updates to avoid race conditions with rapid clicks
+        this.updateQueue = (this.updateQueue || Promise.resolve()).then(async () => {
+            try {
+                // Find file of the clicked view
+                let activeFile = null;
+                const leafEl = cell.closest('.workspace-leaf');
+                if (leafEl) {
+                    this.app.workspace.iterateAllLeaves((l) => {
+                        if ((l.containerEl === leafEl || l.containerEl.contains(cell)) && l.view && l.view.file) {
+                            activeFile = l.view.file;
+                        }
+                    });
+                }
+                if (!activeFile) {
+                    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+                    activeFile = activeView ? activeView.file : this.app.workspace.getActiveFile();
+                }
+
+                const activeFilePath = activeFile ? activeFile.path : '';
+                if (activeFile) {
+                    await this.updatePacrarFile(activeFile, lessonKey, rowStates, cellIdx, next);
+                }
+
+                // Synchronize all other MOC files in 01 - Map of Content/
+                const allFiles = this.app.vault.getMarkdownFiles();
+                const mocFiles = allFiles.filter(f => f.path.startsWith('01 - Map of Content/') && f.path !== activeFilePath);
+
+                for (const otherFile of mocFiles) {
+                    await this.updatePacrarFile(otherFile, lessonKey, rowStates, cellIdx, next);
+                }
+            } catch (err) {
+                console.error('Error during PACRAR file sync queue:', err);
+            }
+        });
 
         // Final scroll stabilization
         if (scroller && prevScrollTop !== null) {

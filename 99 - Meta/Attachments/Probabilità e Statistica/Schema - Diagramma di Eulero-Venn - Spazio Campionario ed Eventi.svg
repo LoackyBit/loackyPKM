@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="800" height="480">
+  <defs>
+    <filter id="glow-evento" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#38bdf8" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <!-- Background Card -->
+  <rect x="15" y="15" width="770" height="450" rx="24" fill="#141820" stroke="#2a3242" stroke-width="2"/>
+  
+  <!-- Header Bar -->
+  <text x="45" y="52" fill="#64748b" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif" font-size="12" font-weight="700" letter-spacing="1.5">SPAZIO CAMPIONARIO</text>
+  <text x="400" y="52" fill="#f1f5f9" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif" font-size="20" font-weight="700" text-anchor="middle">Spazio Campionario ed Eventi (E ⊆ Ω)</text>
+  <text x="750" y="54" fill="#38bdf8" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif" font-size="24" font-weight="700" text-anchor="end">Ω</text>
+  <line x1="35" y1="70" x2="765" y2="70" stroke="#1f293d" stroke-width="1.5"/>
+
+  <!-- Event E (Organic smooth blob enclosing outcomes) -->
+  <path d="M 220 160 C 340 130, 480 150, 490 240 C 500 320, 360 350, 240 330 C 150 310, 140 190, 220 160 Z" 
+        fill="rgba(56, 189, 248, 0.22)" stroke="#38bdf8" stroke-width="3" filter="url(#glow-evento)"/>
+  <text x="210" y="195" fill="#38bdf8" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif" font-size="22" font-weight="800">Evento E</text>
+
+  <!-- Points inside Event E -->
+  <circle cx="260" cy="245" r="6" fill="#38bdf8"/>
+  <text x="280" y="252" fill="#f1f5f9" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="17" font-weight="600">ω₁</text>
+
+  <circle cx="370" cy="210" r="6" fill="#38bdf8"/>
+  <text x="390" y="217" fill="#f1f5f9" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="17" font-weight="600">ω₂</text>
+
+  <circle cx="360" cy="290" r="6" fill="#38bdf8"/>
+  <text x="380" y="297" fill="#f1f5f9" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="17" font-weight="600">ω₄</text>
+
+  <!-- Elementary Event (isolated singleton) -->
+  <circle cx="640" cy="235" r="42" fill="rgba(192, 132, 252, 0.2)" stroke="#c084fc" stroke-width="2.5" stroke-dasharray="4,4"/>
+  <circle cx="640" cy="235" r="6" fill="#c084fc"/>
+  <text x="640" y="210" fill="#c084fc" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="14" font-weight="700" text-anchor="middle">Evento Elementare</text>
+  <text x="640" y="262" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="17" font-weight="700" text-anchor="middle">{ω₃}</text>
+
+  <!-- Other outcomes in sample space -->
+  <circle cx="160" cy="115" r="5" fill="#64748b"/>
+  <text x="175" y="121" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="15">ω₅</text>
+
+  <circle cx="680" cy="130" r="5" fill="#64748b"/>
+  <text x="695" y="136" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="15">ω₆</text>
+
+  <circle cx="560" cy="340" r="5" fill="#64748b"/>
+  <text x="575" y="346" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="15">ω₇</text>
+
+  <!-- Footer Formula Bar -->
+  <line x1="35" y1="395" x2="765" y2="395" stroke="#1f293d" stroke-width="1.5"/>
+  <text x="400" y="423" fill="#38bdf8" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', Menlo, monospace" font-size="16" font-weight="700" text-anchor="middle">E ⊆ Ω  ⟺  E ∈ P(Ω)</text>
+  <text x="400" y="445" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="12.5" text-anchor="middle">Qualsiasi sottoinsieme dello spazio campionario rappresenta un evento osservabile</text>
+</svg>

@@ -10,7 +10,7 @@ updated: 2026-05-24T21:56
 tags: []
 summary: "Crea un report personalizzato in italiano per lo studio in vista dell'Esame di Stato. Deve essere scritto con tono sintetico ma discorsivo, non accademico: spiega sempre il perché dietro i fatti, n..."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[Report Gemini]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[Report Gemini]]
 
 ```markdown
 Crea un report personalizzato in italiano per lo studio in vista dell'Esame di Stato. Deve essere scritto con tono sintetico ma discorsivo, non accademico: spiega sempre il **perché** dietro i fatti, non si limita a elencare. Usa nessi causali tra biografia e opera, tra contesto storico e pensiero filosofico, tra scoperta scientifica e applicazione pratica. Lo stile è diretto: “Pascoli rifiuta…”, “D’Annunzio vede nel teatro…”, “la chiave è…”, “non è solo X ma anche Y…”.
@@ -62,5 +62,3 @@ Inoltre, segui queste regole operative:
 - La nota completa non deve mai essere inferiore a 12.000 caratteri spazi inclusi.
 ```
 
----
-## Collegamenti

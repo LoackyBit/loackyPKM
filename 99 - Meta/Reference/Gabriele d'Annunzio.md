@@ -1,12 +1,17 @@
 ---
+status: reference
+type: concept
+area: meta
+related: ["[[Giovanni Pascoli]]", "[[Style Guide]]"]
+aliases: ["D'Annunzio"]
+source: original
 title: "Gabriele d'Annunzio"
-date: 2026-01-19
-updated: 2026-04-18T23:36
-tags: [school, 2025-26 (esame), italiano]
-status: draft
-macro_area: school
+date: '2026-01-19'
+updated: 2026-10-01T19:30
+tags: [meta/reference, school/italiano]
+summary: "Nota di riferimento e modello stilistico per la frequenza e la gerarchia delle evidenziazioni HTML Style Guide."
 ---
-[[Home MOC|Home]] / [[School MOC|School]] / [[Gabriele d'Annunzio]]
+[[Home MOC|Home]] / [[Meta]] / [[Reference]] / [[Gabriele d'Annunzio]]
 
 # Vita
 

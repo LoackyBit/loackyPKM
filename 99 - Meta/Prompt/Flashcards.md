@@ -10,7 +10,7 @@ updated: 2026-05-24T21:56
 tags: []
 summary: "Ho allegato un documento con flashcards, genera file .txt distinti per ogni tipo di flashcard (es. Basic e Cloze). Ogni file deve contenere solo le carte di quel tipo, formattate per l'importazione..."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[Flashcards]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[Flashcards]]
 
 ```
 Ho allegato un documento con flashcards, genera file .txt distinti per ogni tipo di flashcard (es. Basic e Cloze). Ogni file deve contenere solo le carte di quel tipo, formattate per l'importazione su Anki con i seguenti criteri:
@@ -29,5 +29,3 @@ Ho allegato un documento con flashcards, genera file .txt distinti per ogni tipo
 Crea un set di flashcard formattate per l'importazione su Anki sull'argomento ''. Le flashcard devono essere in formato CSV, con domande e risposte separate da pipe (|). Concentrati su domande che aiutino a ricordare l'argomento per cultura personale, includendo il "perché" (es. motivi di eventi o scelte) e le "novità" (es. innovazioni o cambiamenti introdotti). Genera un numero sufficiente di flashcard per coprire adeguatamente l'argomento, con risposte concise e chiare, adatte a uno studio efficace.
 ```
 
----
-## Collegamenti

@@ -240,8 +240,12 @@ def get_breadcrumbs(filepath: str, clean_title: str) -> str:
 
     if path_str.startswith("02 - Atlas/Finance"):
         parent_area = "[[Finanza MOC|Finance]]"
-    elif path_str.startswith("02 - Atlas/Prompt"):
-        parent_area = "[[Prompts MOC|Prompt]]"
+    elif path_str.startswith("02 - Atlas/Prompt") or path_str.startswith("99 - Meta/Prompt"):
+        parent_area = "[[Prompts|Prompts MOC]]"
+    elif path_str.startswith("99 - Meta/Guide"):
+        return f"[[Home MOC|Home]] / [[Meta]] / [[Guide]] / [[{clean_title}]]"
+    elif path_str.startswith("99 - Meta/Reference"):
+        return f"[[Home MOC|Home]] / [[Meta]] / [[Reference]] / [[{clean_title}]]"
     elif path_str.startswith("02 - Atlas/Corsi"):
         parent_area = "[[Corsi MOC|Corsi]]"
     elif path_str.startswith("03 - Inbox/School"):

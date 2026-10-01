@@ -10,7 +10,7 @@ updated: 2026-07-07T01:20
 tags: []
 summary: "Sei un Professore esperto e uno sviluppatore specializzato in Anki."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[Flashcard Parole Tra Parentesi]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[Flashcard Parole Tra Parentesi]]
 
 ```
 Sei un Professore esperto e uno sviluppatore specializzato in Anki.
@@ -59,5 +59,3 @@ Formato: `Testo|Tags`
 [INCOLLA QUI LE TUE DOMANDE]
 ```
 
----
-## Collegamenti

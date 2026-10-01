@@ -10,7 +10,7 @@ updated: 2026-05-24T21:56
 tags: []
 summary: "Sei il mio assistente editoriale per un Digital Garden in Quartz + Obsidian."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[Imbuto Blog]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[Imbuto Blog]]
 
 ```
 Sei il mio assistente editoriale per un Digital Garden in Quartz + Obsidian.

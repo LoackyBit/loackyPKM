@@ -1,12 +1,17 @@
 ---
+status: reference
+type: concept
+area: meta
+related: ["[[Gabriele d'Annunzio]]", "[[Style Guide]]"]
+aliases: ["Pascoli"]
+source: original
 title: "Giovanni Pascoli"
-date: 2025-12-10
-updated: 2026-04-18T23:36
-tags: [school, 2025-26 (esame), italiano]
-status: draft
-macro_area: school
+date: '2025-12-10'
+updated: 2026-10-01T19:30
+tags: [meta/reference, school/italiano]
+summary: "Nota di riferimento e modello stilistico per la frequenza e la gerarchia delle evidenziazioni HTML Style Guide."
 ---
-[[Home MOC|Home]] / [[School MOC|School]] / [[Giovanni Pascoli]]
+[[Home MOC|Home]] / [[Meta]] / [[Reference]] / [[Giovanni Pascoli]]
 
 # Vita
 

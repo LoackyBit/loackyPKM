@@ -10,7 +10,7 @@ updated: 2026-05-24T21:56
 tags: []
 summary: "Scrivi una spiegazione dettagliata, completa e coinvolgente sul testo letterario [inserire parte specifica], come se fosse una sezione di una nota di studio in Obsidian, di circa 5-7 pagine. La ris..."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[School Notes - Chapter]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[School Notes - Chapter]]
 
 ```
 Scrivi una spiegazione dettagliata, completa e coinvolgente sul testo letterario [inserire parte specifica], come se fosse una sezione di una nota di studio in Obsidian, di circa 5-7 pagine. La risposta deve essere una risorsa autonoma per studiare la parte specifica del testo, assumendo che informazioni generali sull’opera (es. contesto storico, introduzione all’autore, attualità del Purgatorio) siano fornite altrove. Concentrati sull’analisi del testo specifico e includi:
@@ -32,5 +32,3 @@ Usa un linguaggio chiaro, accessibile e coinvolgente, evitando tecnicismi eccess
 Spiega come la parte specifica si inserisce nell’opera complessiva (es. il suo posto nel viaggio del Purgatorio) e il suo legame con il progetto narrativo o tematico dell’autore. Fornisci un quadro chiaro del ruolo del testo nel contesto dell’opera, senza ripetere informazioni storiche o generali sull’autore.
 ```
 
----
-## Collegamenti

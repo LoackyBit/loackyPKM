@@ -2,7 +2,7 @@
 status: permanent
 type: concept
 area: tech
-related: []
+related: ["[[How to Write Effective Planning Prompts for AI Assistants]]"]
 source: original
 title: "Mastering AI Prompting"
 date: '2025-12-01'
@@ -10,7 +10,7 @@ updated: 2025-12-01T15:25
 tags: [tech/tech, tech/prompting, tech/ai]
 summary: "Prompting AI effectively remains a crucial skill, even as technology advances. Many users feel confident in their abilities, but deeper exploration often reveals room for improvement. This guide de..."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[Mastering AI Prompting]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[Mastering AI Prompting]]
 
 # Mastering AI Prompting
 
@@ -76,8 +76,5 @@ Underpinning all techniques is **clarity of thought**—the ability to express i
 
 Personas clarify perspective, context defines facts, CoT outlines logic, and examples illustrate quality. Ultimately, these aren't tricks but tools to sharpen human cognition. When AI frustrates, it's often a skill issue: unclear instructions mirror unclear minds.
 
-To master this, think first—describe goals in a notebook—then prompt. Save effective prompts in libraries for reuse. Advanced users employ prompt enhancers to refine raw ideas, but clarity starts with self-understanding. Embracing AI this way enhances critical thinking, turning it from a crutch into a superpower for career and innovation.
+To master this, think first—describe goals in a notebook—then prompt. Save effective prompts in libraries for reuse. Advanced users employ prompt enhancers to refine raw ideas, but clarity starts with self-understanding. Per flussi operativi di pianificazione avanzata, consulta [[How to Write Effective Planning Prompts for AI Assistants]]. Embracing AI this way enhances critical thinking, turning it from a crutch into a superpower for career and innovation.
 
----
-## Collegamenti
-- [[How to Write Effective Planning Prompts for AI Assistants]]

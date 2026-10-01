@@ -10,7 +10,7 @@ updated: 2026-05-24T21:56
 tags: [tech/roadmap]
 summary: "Crea un file Markdown che rappresenti una roadmap per l'argomento \"[argomento]\". La roadmap deve essere organizzata in sezioni logiche e coerenti che riflettano le principali categorie, temi o fasi..."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[Roadmap]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[Roadmap]]
 
 ```
 Crea un file Markdown che rappresenti una roadmap per l'argomento "[argomento]". La roadmap deve essere organizzata in sezioni logiche e coerenti che riflettano le principali categorie, temi o fasi dell'argomento, senza necessariamente dividerla in anni scolastici o limitarla a un contesto accademico. Usa il formato della roadmap fornita come modello, con titoli Markdown (## per le sezioni principali, ### per sottosezioni, e link interni [[ ]] per elementi specifici come concetti, autori, opere o altri argomenti rilevanti). Mantieni la stessa chiarezza, struttura e livello di dettaglio del file originale, adattando i contenuti all'argomento specificato.
@@ -79,5 +79,3 @@ Ecco il modello da seguire:
         - [[Sottoelemento 17]]
 ```
 
----
-## Collegamenti

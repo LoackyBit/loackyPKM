@@ -2,7 +2,7 @@
 status: permanent
 type: concept
 area: tech
-related: []
+related: ["[[Mastering AI Prompting]]"]
 source: original
 title: "How to Write Effective Planning Prompts for AI Assistants"
 date: '2026-01-22'
@@ -10,7 +10,7 @@ updated: 2026-01-22T10:51
 tags: [tech/tech, tech/prompting, tech/ai, tech/planning]
 summary: "The traditional way of writing instructions for intelligent AI assistants involves a highly specific approach: providing every detail, every coordinate, every variable, and expecting the model to e..."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[How to Write Effective Planning Prompts for AI Assistants]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[How to Write Effective Planning Prompts for AI Assistants]]
 
 # How to Write Effective Planning Prompts for AI Assistants
 
@@ -134,6 +134,3 @@ The paradigm shift consists of recognizing that **iterative planning is more eff
 
 Starting vague, dialoguing, clarifying, refining, and finally implementing: this is the cycle that **reduces total time**, **limits computational resource waste**, and produces more solid architectures because they've been thought through critically rather than generated hastily.
 
----
-## Collegamenti
-- [[Mastering AI Prompting]]

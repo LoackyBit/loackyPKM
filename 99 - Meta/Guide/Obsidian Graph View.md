@@ -1,3 +1,18 @@
+---
+status: permanent
+type: concept
+area: meta
+related: ["[[Home MOC]]", "[[Guida MOC]]"]
+aliases: ["Graph View"]
+source: "https://www.youtube.com/watch?v=Z8WIALfgaA4"
+title: "Obsidian Graph View"
+date: '2026-08-24'
+updated: 2026-10-01T19:30
+tags: [meta/guide, meta/graph]
+summary: "Guida all'utilizzo avanzato della Graph View in Obsidian: filtri, forze, gruppi cromatici e gestione delle note orfane."
+---
+[[Home MOC|Home]] / [[Meta]] / [[Guide]] / [[Obsidian Graph View]]
+
 # How I Use The Obsidian Graph View
 ![](https://i.ytimg.com/vi/Z8WIALfgaA4/maxresdefault.jpg)
 

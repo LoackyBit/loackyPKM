@@ -42,10 +42,10 @@ Un Second Brain e Personal Knowledge Management (PKM) su base Obsidian, trasform
 ## Languages
 
 - Markdown (CommonMark / Obsidian Flavour) - Entire knowledge base, MOCs, Atlas notes, Blog posts, Templates, and Agent Memory (`01 - Map of Content/`, `02 - Atlas/`, `03 - Inbox/`, `04 - Calendar/`, `05 - Blog/`, `99 - Meta/Template/`, `.agents/MEMORY.md`).
-- Python (3.10 - 3.13) - Automation scripts, data fetchers, linting utilities, and health governance (`99 - Meta/Scripts/brain_health.py`, `99 - Meta/Scripts/brain_ingest.py`, `99 - Meta/Scripts/youtube_helper.py`, `99 - Meta/School/fetch-registro.py`).
+- Python (3.10 - 3.13) - Automation scripts, data fetchers, linting utilities, and health governance (`99 - Meta/Scripts/brain_health.py`, `99 - Meta/Scripts/brain_ingest.py`, `99 - Meta/Scripts/youtube_helper.py`, `99 - Meta/Scripts/course_hub.py`, `99 - Meta/Scripts/recall_engine.py`).
 - Bash / Shell Scripting - Daemon watchers (`99 - Meta/Scripts/watch.sh`).
 - YAML - Metadata frontmatter headers across all vault notes and agent skills configurations.
-- JSON / JSONL - App configuration (`99 - Meta/School/config.json`, `.obsidian/*.json`), vector embeddings (`.smart-env/`), and conversation transcripts (`transcript.jsonl`).
+- JSON / JSONL - App configuration (`.obsidian/*.json`), vector embeddings (`.smart-env/`), and conversation transcripts (`transcript.jsonl`).
 
 ## Runtime
 
@@ -246,7 +246,7 @@ Trattazione concettuale arricchita con evidenziazioni Style Guide ed eventuali d
 | YouTube Media Helper | Fetches transcripts and extracts visual screenshots into `99 - Meta/Clipboard/` via `yt-dlp` and `ffmpeg` | `99 - Meta/Scripts/youtube_helper.py` |
 | Brain Health Engine | AST 10-field YAML normalizer, Title Case linter, smart forward/broken link auditor, orphan note detector, static dashboard builder | `99 - Meta/Scripts/brain_health.py` |
 | Health Dashboard Generator | Rebuilds `Vault Health Dashboard.md` in pure static Markdown (without Dataview) | `99 - Meta/Scripts/brain_health.py` |
-| ClasseViva Exporter | Fetches school agenda, lesson subjects, and didactics materials via REST API | `99 - Meta/School/fetch-registro.py` |
+| Course Hub Manager | Manages academic course MOCs, syllabus metadata, and PACRAR tracking | `99 - Meta/Scripts/course_hub.py` |
 | Agent System Prompt | Root definition of vault rules, folder roles, 3 macro-skills, and operating conventions | `GEMINI.md` |
 | Persistent Agent Memory | Master memory file storing user profile, project states, and strict rules | `.agents/MEMORY.md` |
 

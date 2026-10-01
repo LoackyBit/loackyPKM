@@ -2,11 +2,11 @@
 status: permanent
 type: moc
 area: tech
-related: []
+related: ["[[Home MOC]]", "[[Tech & AI]]"]
 source: original
 title: "Prompts MOC"
 date: '2026-08-24'
-updated: 2026-08-24T21:38
+updated: 2026-10-01T19:30
 tags: [tech/moc, tech/prompts, tech/ai, tech/llm]
 summary: "Indice e mappa concettuale per Prompts MOC."
 ---
@@ -14,7 +14,7 @@ summary: "Indice e mappa concettuale per Prompts MOC."
 
 # Prompt Engineering — Map of Content
 
-Libreria dei system prompt, generatori di note e workflow avanzati per modelli di linguaggio.
+Libreria dei system prompt, generatori di note e workflow avanzati per modelli di linguaggio, integrata con il dominio [[Tech & AI]].
 
 ---
 
@@ -45,9 +45,3 @@ Libreria dei system prompt, generatori di note e workflow avanzati per modelli d
 - [[Figurine]]
 - [[Mastering AI Prompting]]
 - [[How to Write Effective Planning Prompts for AI Assistants]]
-
----
-
-## Collegamenti
-- [[Home MOC|Home]]
-- [[Tech & AI|Tech & AI]]

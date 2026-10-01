@@ -10,7 +10,7 @@ updated: 2026-05-24T21:56
 tags: []
 summary: "Sei un assistente esperto di Anki."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[Notebook to Anki]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[Notebook to Anki]]
 
 ```
 Sei un assistente esperto di Anki.  
@@ -63,5 +63,3 @@ OUTPUT
 Ora, partendo SOLO dalle flashcards presenti nella pagina/documento attuale, genera i file/files.
 ```
 
----
-## Collegamenti

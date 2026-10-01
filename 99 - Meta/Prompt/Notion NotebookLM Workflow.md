@@ -10,7 +10,7 @@ updated: 2026-07-07T01:20
 tags: []
 summary: "Devi leggere TUTTO il notebook allegato e trasformarlo in un briefing operativo per Perplexity, che dovrà creare una pagina Notion di letteratura italiana per l'Esame di Stato 2026."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[Notion NotebookLM Workflow|Notion Notebooklm Workflow]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[Notion NotebookLM Workflow]]
 
 1.
 ```

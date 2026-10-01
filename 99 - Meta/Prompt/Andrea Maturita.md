@@ -10,7 +10,7 @@ updated: 2026-07-07T01:20
 tags: []
 summary: "Agisci come un analizzatore testuale avanzato, progettato per creare guide di studio letterarie destinate a studenti dell'ultimo anno delle superiori (Maturità). Il documento finale deve essere un ..."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[Andrea Maturita]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[Andrea Maturita]]
 
 ```markdown
 RUOLO E CONTESTO
@@ -51,5 +51,3 @@ Genera l'output utilizzando esattamente i titoli di secondo livello (##) e la nu
 [Spiega in che modo questo testo riflette perfettamente le idee e le regole della corrente letteraria a cui l'autore appartiene. Suggerisci infine come collegare questi temi ai grandi percorsi multidisciplinari della Maturità.]
 ```
 
----
-## Collegamenti

@@ -10,7 +10,7 @@ updated: 2026-05-24T21:56
 tags: []
 summary: "Scrivi una spiegazione dettagliata, completa e coinvolgente sul testo letterario [inserire testo], come se fosse un capitolo di un libro di testo scolastico di circa 20 pagine. La risposta deve ess..."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[School Notes - Text]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[School Notes - Text]]
 
 ```
 Scrivi una spiegazione dettagliata, completa e coinvolgente sul testo letterario [inserire testo], come se fosse un capitolo di un libro di testo scolastico di circa 20 pagine. La risposta deve essere l’unica risorsa necessaria per studiare il testo, quindi includi:
@@ -29,5 +29,3 @@ Scrivi una spiegazione dettagliata, completa e coinvolgente sul testo letterario
 Usa un linguaggio chiaro, accessibile e coinvolgente, evitando tecnicismi eccessivi o elenchi di dettagli fine a sé stessi. Integra esempi pratici, analogie o riferimenti alla cultura pop per rendere la spiegazione interessante e non noiosa. Evidenzia il **perché** il testo conta e come ha influenzato la letteratura o la società, trasformandolo in una narrazione avvincente. Struttura la risposta con titoli e sottotitoli per facilitare lo studio. Evidenzia in grassetto le parole importanti, cioè quelle che guidano la lettura e rendono il testo più chiaro e coinvolgente, evitando di marcare concetti personali o interpretativi.
 ```
 
----
-## Collegamenti

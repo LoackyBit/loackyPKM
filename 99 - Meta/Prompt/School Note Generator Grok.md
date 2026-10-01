@@ -10,7 +10,7 @@ updated: 2026-05-24T21:56
 tags: []
 summary: "Sono uno studente di scuola superiore che deve creare appunti scolastici organizzati per un corso di letteratura italiana, da utilizzare nel mio vault scolastico su Obsidian. Il mio obiettivo è cap..."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[School Note Generator Grok]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[School Note Generator Grok]]
 
 ```
 Sono uno studente di scuola superiore che deve creare appunti scolastici organizzati per un corso di letteratura italiana, da utilizzare nel mio vault scolastico su Obsidian. Il mio obiettivo è **capire tutto perfettamente anche fra 6 mesi**, quindi gli appunti devono essere **chiari, completi, ben strutturati**, ma **non troppo sintetici né schematici in modo rigido**.
@@ -110,5 +110,3 @@ Segui queste linee guida:
    - Se manca l’argomento, chiedimelo.
 ```
 
----
-## Collegamenti

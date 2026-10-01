@@ -1,3 +1,18 @@
+---
+status: permanent
+type: concept
+area: meta
+related: ["[[Home MOC]]", "[[Obsidian Graph View]]"]
+aliases: ["MOC Guide", "Mappe dei Contenuti"]
+source: "https://publish.obsidian.md/aidanhelfant"
+title: "Guida MOC"
+date: '2026-08-24'
+updated: 2026-10-01T19:30
+tags: [meta/guide, meta/moc]
+summary: "Guida approfondita alla strutturazione e all'emergenza delle Mappe dei Contenuti (MOC) all'interno di Obsidian."
+---
+[[Home MOC|Home]] / [[Meta]] / [[Guide]] / [[Guida MOC]]
+
 Quando inizi a usare Obsidian, organizzare è facile. Devi solo creare qualche appunto e lasciare che il tuo sé futuro si occupi dei tuoi problemi. Proprio come nella vita reale!
 
 Ma se stai migrando da un altro programma o stai iniziando a raccogliere centinaia di note nel tuo caveau, dovrai semplicemente iniziare a organizzare il tuo caveau in qualche modo.

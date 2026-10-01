@@ -23,7 +23,7 @@ if SCRIPT_DIR not in sys.path:
 
 import brain_health as lint_yaml
 
-CHECKPOINT_FILE = os.path.join("99 - Meta", ".backfill_checkpoint.json")
+CHECKPOINT_FILE = os.path.join("99 - Meta", "Cache", ".backfill_checkpoint.json")
 
 IGNORE_FOLDERS = {
     '.git', '.obsidian', '.agents', '.gemini', '.trash', '.vscode',

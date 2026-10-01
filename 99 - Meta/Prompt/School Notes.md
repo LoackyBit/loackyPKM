@@ -10,7 +10,7 @@ updated: 2026-05-24T21:56
 tags: []
 summary: "Scrivi una spiegazione dettagliata, completa e coinvolgente sull'argomento [inserire argomento], come se fosse un capitolo di un libro di testo scolastico di circa 20 pagine. La risposta deve esser..."
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[School Notes]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[School Notes]]
 
 ```
 Scrivi una spiegazione dettagliata, completa e coinvolgente sull'argomento [inserire argomento], come se fosse un capitolo di un libro di testo scolastico di circa 20 pagine. La risposta deve essere l'unica risorsa necessaria per studiare l'argomento, quindi includi:
@@ -26,5 +26,3 @@ Scrivi una spiegazione dettagliata, completa e coinvolgente sull'argomento [inse
 Usa un linguaggio chiaro, accessibile e coinvolgente, evitando tecnicismi eccessivi o elenchi di date fine a sé stessi. Integra esempi pratici, analogie, o riferimenti alla cultura pop per rendere la spiegazione interessante e non noiosa. Evidenzia il **perché** l'argomento conta e come ha influenzato il suo campo (es. letteratura, scienza) o la società, trasformandolo in una storia viva. Struttura la risposta con titoli e sottotitoli per facilitare lo studio. Evidenzia in grassetto le parole importanti, cioè quelle che rendono il testo più chiaro, coinvolgente e facilmente comprensibile. Non evidenziare le parole chiave nel senso tecnico del termine: il grassetto deve servire a guidare la lettura, non a marcare concetti personali o interpretativi.
 ```
 
----
-## Collegamenti

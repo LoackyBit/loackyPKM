@@ -16,7 +16,7 @@ import backfill_summaries
 class TestBackfillSummaries(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
-        self.checkpoint_file = os.path.join(self.test_dir, "99 - Meta", ".backfill_checkpoint.json")
+        self.checkpoint_file = os.path.join(self.test_dir, "99 - Meta", "Cache", ".backfill_checkpoint.json")
         os.makedirs(os.path.dirname(self.checkpoint_file), exist_ok=True)
 
     def tearDown(self):

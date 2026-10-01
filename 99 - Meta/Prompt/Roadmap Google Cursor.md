@@ -10,7 +10,7 @@ updated: 2026-07-07T01:20
 tags: []
 summary: "If I want to learn {argument}. Would you please create a Learning Roadmap for me?"
 ---
-[[Home MOC|Home]] / [[Tech & AI]] / [[Roadmap Google Cursor]]
+[[Home MOC|Home]] / [[Prompts|Prompts MOC]] / [[Roadmap Google Cursor]]
 
 # Google Deep Research
 
@@ -55,5 +55,3 @@ Passo 3: Per ogni punto di conoscenza, crea una file markdown
 Aggiungi la lista dei nomi dei file che hai creato nel file originale '{nome della roadmap}.md', posizionandoli sotto ogni argomento correlato. Ricorda di usare [[ ]] per citare il nome del file.
 ```
 
----
-## Collegamenti

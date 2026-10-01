@@ -5,8 +5,8 @@ area: meta
 related: ["[[Home MOC]]", "[[Review Dashboard]]"]
 source: original
 title: "Vault Health Dashboard"
-date: '2026-09-21'
-updated: 2026-09-21T22:42
+date: '2026-10-01'
+updated: 2026-10-01T19:34
 tags: [meta/dashboard, meta/health]
 summary: "Pannello di controllo statico del Second Brain: monitoraggio dello stato di salute, note in staging, bozze del blog e diagnostica del grafo."
 ---
@@ -16,17 +16,17 @@ summary: "Pannello di controllo statico del Second Brain: monitoraggio dello sta
 
 Pannello di controllo in **puro Markdown statico** per monitorare la salute del Vault, le note in staging e l'integrità del grafo semantico.
 
-*Ultimo aggiornamento:* `2026-09-21 22:42`
+*Ultimo aggiornamento:* `2026-10-01 19:34`
 
 ---
 
 ## Metriche Generali del Vault
-- **Note Totali:** 145
+- **Note Totali:** 163
 - **Note in Staging (Inbox):** 1
 - **Bozze Blog:** 3
-- **Note Orfane:** 4
-- **Link Interrotti:** 6
-- **Forward-Links Pianificati:** 2613
+- **Note Orfane:** 0
+- **Link Interrotti:** 2
+- **Forward-Links Pianificati:** 4937
 - **Collisioni Omonime (Note Duplicate):** 1
 
 ---
@@ -34,7 +34,7 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 ## Note in Staging (Inbox / Bozze)
 | Nota | Creazione | Area | Stato |
 |---|---|---|---|
-| [[Review Dashboard]] | 2026-09-21 | meta | `draft` |
+| [[Review Dashboard]] | 2026-10-01 | meta | `draft` |
 
 
 ---
@@ -52,25 +52,25 @@ Pannello di controllo in **puro Markdown statico** per monitorare la salute del 
 ## Note Modificate di Recente
 | Nota | Ultima Modifica | Area |
 |---|---|---|
-| [[Review Dashboard]] | 2026-09-21 22:42 | meta |
-| [[University]] | 2026-09-21 22:42 | tech |
-| [[Personal Growth & Health]] | 2026-09-17 22:15 | tech |
-| [[L'Intelligenza Artificiale Potrebbe Uccidere Tutti gli Esseri Umani Entro il 2030]] | 2026-09-13 15:39 | tech |
-| [[MILESTONE_SUMMARY-v1.0.1-alpha]] | 2026-09-05 12:59 | N/D |
-| [[MILESTONE_SUMMARY-v1.0.0-alpha]] | 2026-09-05 12:59 | N/D |
-| [[Workflow Perplexity NotebookLM]] | 2026-09-01 00:21 | tech |
-| [[Unfuck Your Brain]] | 2026-09-01 00:21 | tech |
-| [[TIL l'Inganno Dell'Applauso Quintiliano]] | 2026-09-01 00:21 | tech |
-| [[Problema P Vs NP]] | 2026-09-01 00:21 | tech |
+| [[Prompts]] | 2026-10-01 19:34 | tech |
+| [[05 - probabilità]] | 2026-10-01 19:29 | N/D |
+| [[Audit Report - 2026-10-01]] | 2026-10-01 19:18 | meta |
+| [[Fondamenti di Matematica (Analisi 1) MOC]] | 2026-10-01 18:56 | education |
+| [[Review Dashboard]] | 2026-10-01 18:56 | meta |
+| [[04 - Funzioni Parte II]] | 2026-10-01 18:56 | education |
+| [[03 - Funzioni (Parte I)]] | 2026-10-01 18:54 | education |
+| [[06 FdM]] | 2026-10-01 18:47 | N/D |
+| [[05 FdM]] | 2026-10-01 18:47 | N/D |
+| [[03 - altre proprietà della prob.]] | 2026-10-01 18:43 | N/D |
 
 
 ---
 
 ## Integrità Flashcard Anki
-- **Flashcard Totali:** 3 (3 Basic, 0 Cloze)
-- **Flashcard Sincronizzate (con ID):** 3
-- **Flashcard Inedite (senza ID):** 0
-- **Mazzi Registrati:** 0
+- **Flashcard Totali:** 97 (71 Basic, 26 Cloze)
+- **Flashcard Sincronizzate (con ID):** 57
+- **Flashcard Inedite (senza ID):** 40
+- **Mazzi Registrati:** 7
 
 ---
 

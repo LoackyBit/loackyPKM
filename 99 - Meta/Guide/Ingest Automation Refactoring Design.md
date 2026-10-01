@@ -1,4 +1,19 @@
-# 🛠️ Ingest Automation Refactoring Design
+---
+status: permanent
+type: concept
+area: meta
+related: ["[[Home MOC]]", "[[Vault Health Dashboard]]"]
+aliases: ["Ingest Automation Design"]
+source: original
+title: "Ingest Automation Refactoring Design"
+date: '2026-08-24'
+updated: 2026-10-01T19:30
+tags: [meta/guide, meta/architecture]
+summary: "Design architetturale e flussi di lavoro per l'automazione di ingestione del Second Brain e integrazione agy CLI."
+---
+[[Home MOC|Home]] / [[Meta]] / [[Guide]] / [[Ingest Automation Refactoring Design]]
+
+# Ingest Automation Refactoring Design
 
 Questo documento definisce il design dell'architettura e dei flussi di lavoro per il rifacimento dell'automazione di ingestione del Second Brain. L'obiettivo principale è separare le responsabilità meccaniche (gestite via script deterministici Python) da quelle semantiche (gestite dall'agente LLM), ottimizzando le performance e garantendo feedback in tempo reale in Obsidian.
 

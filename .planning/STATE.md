@@ -124,7 +124,7 @@ None.
 | 260927-hfd | Alta Densità Flashcard Anki su Note Universitarie e Integrazione Regole Second Brain | 2026-09-27 | 2223117 | [260927-hfd-alta-densita-flashcard-note](./quick/260927-hfd-alta-densita-flashcard-note/) |
 | 260927-ur5 | Creazione Generale Sottodeck Flashcard Anki per Singola Nota | 2026-09-27 | e360b17 | [260927-ur5-sottodeck-flashcard-per-nota](./quick/260927-ur5-sottodeck-flashcard-per-nota/) |
 | 261001-r0v | Riorganizzazione Strutturale e Bonifica di 99 - Meta | 2026-10-01 | 54ac866 | [261001-r0v-riordina-99-meta](./quick/261001-r0v-riordina-99-meta/) |
-| 261006-vir | Fix University Course Path Resolution and Extra Folder Creation | 2026-10-06 | pending | [261006-vir-fix-university-course-path-bug-in-brain-](./quick/261006-vir-fix-university-course-path-bug-in-brain-/) |
+| 261006-vir | Fix University Course Path Resolution and Extra Folder Creation | 2026-10-06 | 31d4820 | [261006-vir-fix-university-course-path-bug-in-brain-](./quick/261006-vir-fix-university-course-path-bug-in-brain-/) |
 
 ## Deferred Items
 

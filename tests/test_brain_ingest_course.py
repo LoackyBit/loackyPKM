@@ -368,6 +368,78 @@ Illustrazione dei semafori di Dijkstra:
         self.assertIn(os.path.relpath(v2_path, self.test_dir), stats["versioned_files"])
         self.assertEqual(len(stats["duplicate_hashes"]), 1)
 
+    def test_promote_nested_university_degree_note_does_not_create_duplicate_folder(self):
+        """Asserts promoting a note inside a nested degree folder (e.g. Ingegneria Informatica 2026-27/<Course>)
+        correctly updates the course MOC and does NOT create a stray 'Ingegneria Informatica 2026 - 27' folder."""
+        course_name = "Fondamenti di Matematica (Analisi 1)"
+        nested_dir = os.path.join(
+            self.test_dir,
+            "02 - Atlas",
+            "Education & Learning",
+            "University",
+            "Ingegneria Informatica 2026-27",
+            course_name,
+        )
+        os.makedirs(nested_dir, exist_ok=True)
+        course_hub.init_course(course_name, vault_root=self.test_dir)
+
+        lesson_title = "06 - Valore Assoluto e Principio di Induzione"
+        target_path = f"02 - Atlas/Education & Learning/University/Ingegneria Informatica 2026-27/{course_name}/{lesson_title}.md"
+
+        meta = {
+            "title": lesson_title,
+            "status": "draft",
+            "type": "concept",
+            "area": "education",
+            "tags": ["education/university"],
+            "course": course_name,
+            "target_path": target_path,
+        }
+        draft_content = brain_health.assemble_markdown_note(
+            brain_health.format_canonical_frontmatter(meta),
+            "[[Home MOC|Home]]",
+            "Corpo della lezione sul valore assoluto."
+        )
+
+        draft_path = os.path.join(self.test_dir, "03 - Inbox", "Draft", f"{lesson_title}.md")
+        with open(draft_path, "w", encoding="utf-8") as f:
+            f.write(draft_content)
+
+        source_path = os.path.join(self.test_dir, "03 - Inbox", "Source", f"{lesson_title}.md")
+        with open(source_path, "w", encoding="utf-8") as f:
+            f.write("Raw source")
+
+        success, err = brain_ingest._handle_promote_item(
+            self.test_dir,
+            draft_path,
+            source_path,
+            lesson_title,
+            lesson_title,
+            lesson_title,
+        )
+        self.assertTrue(success, f"Promote failed: {err}")
+
+        # Check lesson reached final destination
+        final_dest = os.path.join(self.test_dir, target_path)
+        self.assertTrue(os.path.exists(final_dest))
+
+        # Check course MOC PACRAR table has registered the lesson
+        moc_path = os.path.join(self.test_dir, "01 - Map of Content", f"{course_name} MOC.md")
+        self.assertTrue(os.path.exists(moc_path))
+        with open(moc_path, "r", encoding="utf-8") as f:
+            moc_text = f.read()
+        self.assertIn(f"[[{lesson_title}]]", moc_text)
+
+        # CRITICAL ASSERTION: Stray folder 'Ingegneria Informatica 2026 - 27' must NOT exist!
+        stray_folder = os.path.join(
+            self.test_dir,
+            "02 - Atlas",
+            "Education & Learning",
+            "University",
+            "Ingegneria Informatica 2026 - 27",
+        )
+        self.assertFalse(os.path.exists(stray_folder), "Stray 'Ingegneria Informatica 2026 - 27' directory should not be created!")
+
 
 if __name__ == "__main__":
     unittest.main()

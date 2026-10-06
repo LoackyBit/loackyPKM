@@ -57,13 +57,67 @@ def sanitize_course_name(course_name: str) -> str:
     # Strip leading/trailing whitespace
     cleaned = cleaned.strip()
 
-    # Apply intelligent Title Case normalization
-    cleaned = brain_health.clean_title_str(cleaned)
+    # Protect parenthetical expressions so clean_title_str doesn't strip them (e.g. (Analisi 1))
+    m = re.match(r"^(.*?)\s*(\([^)]+\))\s*$", cleaned)
+    if m:
+        main_part, paren_part = m.group(1), m.group(2)
+        clean_main = brain_health.clean_title_str(main_part)
+        clean_paren = brain_health.clean_title_str(paren_part[1:-1])
+        cleaned = f"{clean_main} ({clean_paren})"
+    else:
+        cleaned = brain_health.clean_title_str(cleaned)
 
     if not cleaned:
         raise ValueError(f"Invalid course name '{course_name}' resulted in an empty string.")
 
     return cleaned
+
+
+def resolve_course_dir(course_name: str, vault_root: Optional[str] = None) -> str:
+    """Resolves existing directory for a course, supporting nested degree folders like Ingegneria Informatica 2026-27."""
+    if vault_root is None:
+        vault_root = brain_health.get_vault_root()
+
+    clean_name = sanitize_course_name(course_name)
+    uni_dir = os.path.join(vault_root, "02 - Atlas", "Education & Learning", "University")
+
+    # 1. Match in nested degree subdirectories first (more specific, e.g. Ingegneria Informatica 2026-27/<course>)
+    if os.path.isdir(uni_dir):
+        for sub in sorted(os.listdir(uni_dir)):
+            sub_path = os.path.join(uni_dir, sub)
+            if os.path.isdir(sub_path) and not sub.startswith("."):
+                for name in (clean_name, course_name):
+                    candidate = os.path.join(sub_path, name)
+                    if os.path.isdir(candidate):
+                        return candidate
+
+    # 2. Direct match under University/<name>
+    for name in (clean_name, course_name):
+        candidate = os.path.join(uni_dir, name)
+        if os.path.isdir(candidate):
+            return candidate
+
+    # 3. Default fallback: create under University/<clean_name>
+    return os.path.join(uni_dir, clean_name)
+
+
+def resolve_course_moc_path(course_name: str, vault_root: Optional[str] = None) -> str:
+    """Resolves MOC file for a course in 01 - Map of Content, supporting parenthetical names and aliases."""
+    if vault_root is None:
+        vault_root = brain_health.get_vault_root()
+
+    clean_name = sanitize_course_name(course_name)
+    moc_dir = os.path.join(vault_root, "01 - Map of Content")
+
+    # Check candidates
+    for name in (clean_name, course_name):
+        for candidate_name in (f"{name} MOC.md", f"{name}.md"):
+            candidate = os.path.join(moc_dir, candidate_name)
+            if os.path.exists(candidate):
+                return candidate
+
+    return os.path.join(moc_dir, f"{clean_name} MOC.md")
+
 
 
 def natural_sort_key(title: str) -> List[Union[int, str]]:
@@ -271,7 +325,7 @@ def format_pacrar_table(
 
 def build_course_moc_content(course_name: str, rows: Optional[List[Dict[str, Any]]] = None) -> str:
     """Generates canonical 10-field frontmatter and body per D-04, D-05, D-13."""
-    clean_name = brain_health.clean_title_str(course_name)
+    clean_name = sanitize_course_name(course_name)
     now_date = datetime.date.today().isoformat()
     now_updated = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
 
@@ -325,8 +379,8 @@ def init_course(course_name: str, vault_root: Optional[str] = None, force: bool 
 
     clean_name = sanitize_course_name(course_name)
 
-    moc_path = os.path.join(vault_root, "01 - Map of Content", f"{clean_name} MOC.md")
-    course_dir = os.path.join(vault_root, "02 - Atlas", "Education & Learning", "University", clean_name)
+    moc_path = resolve_course_moc_path(course_name, vault_root=vault_root)
+    course_dir = resolve_course_dir(course_name, vault_root=vault_root)
 
     # Security check: resolve paths to ensure no folder escape (T-13-01)
     vault_path_obj = Path(vault_root).resolve()
@@ -360,8 +414,8 @@ def ensure_course_hub(course_name: str, vault_root: Optional[str] = None) -> boo
         vault_root = brain_health.get_vault_root()
 
     clean_name = sanitize_course_name(course_name)
-    moc_path = os.path.join(vault_root, "01 - Map of Content", f"{clean_name} MOC.md")
-    course_dir = os.path.join(vault_root, "02 - Atlas", "Education & Learning", "University", clean_name)
+    moc_path = resolve_course_moc_path(course_name, vault_root=vault_root)
+    course_dir = resolve_course_dir(course_name, vault_root=vault_root)
 
     os.makedirs(course_dir, exist_ok=True)
 
@@ -389,7 +443,7 @@ def register_in_university_moc(course_name: str, vault_root: Optional[str] = Non
     with open(uni_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    clean_name = brain_health.clean_title_str(course_name)
+    clean_name = sanitize_course_name(course_name)
     target_link = f"[[{clean_name} MOC]]"
 
     # If link is already present, return True
@@ -462,8 +516,8 @@ def sync_course_hub(course_name: str, vault_root: Optional[str] = None) -> bool:
         vault_root = brain_health.get_vault_root()
 
     clean_name = sanitize_course_name(course_name)
-    moc_path = os.path.join(vault_root, "01 - Map of Content", f"{clean_name} MOC.md")
-    course_dir = os.path.join(vault_root, "02 - Atlas", "Education & Learning", "University", clean_name)
+    moc_path = resolve_course_moc_path(course_name, vault_root=vault_root)
+    course_dir = resolve_course_dir(course_name, vault_root=vault_root)
 
     os.makedirs(course_dir, exist_ok=True)
 
@@ -709,11 +763,23 @@ def sync_all_courses(vault_root: Optional[str] = None) -> int:
     uni_dir = os.path.join(vault_root, "02 - Atlas", "Education & Learning", "University")
     synced = 0
     if os.path.isdir(uni_dir):
-        for course_folder in os.listdir(uni_dir):
+        for course_folder in sorted(os.listdir(uni_dir)):
             cpath = os.path.join(uni_dir, course_folder)
             if os.path.isdir(cpath) and not course_folder.startswith("."):
-                sync_course_hub(course_folder, vault_root=vault_root)
-                synced += 1
+                # Check if this folder is a degree-year container with child course subdirectories
+                subdirs = [
+                    d for d in sorted(os.listdir(cpath))
+                    if os.path.isdir(os.path.join(cpath, d)) and not d.startswith(".")
+                ]
+                if subdirs:
+                    for sub_course in subdirs:
+                        sync_course_hub(sub_course, vault_root=vault_root)
+                        synced += 1
+                else:
+                    # Guard against empty stray container folders matching Ingegneria Informatica
+                    if not re.match(r"^Ingegneria Informatica \d{4}\s*-\s*\d{2}$", course_folder, re.IGNORECASE):
+                        sync_course_hub(course_folder, vault_root=vault_root)
+                        synced += 1
 
     # Also synchronize all master MOCs
     moc_dir = os.path.join(vault_root, "01 - Map of Content")

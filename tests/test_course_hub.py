@@ -422,6 +422,54 @@ summary: "Indice per corsi extracurricolari."
             updated = f.read()
         self.assertIn("| [[01 - Vettori]] | [x] | [x] | [x] | [x] | [x] | [x] |", updated)
 
+    def test_resolve_course_dir_nested_degree_structure(self):
+        """Asserts resolve_course_dir finds nested courses under degree folders and preserves parentheses."""
+        nested_dir = os.path.join(
+            self.test_dir,
+            "02 - Atlas",
+            "Education & Learning",
+            "University",
+            "Ingegneria Informatica 2026-27",
+            "Fondamenti di Matematica (Analisi 1)",
+        )
+        os.makedirs(nested_dir, exist_ok=True)
+
+        # Should resolve to the nested folder instead of creating a top-level University folder
+        resolved = course_hub.resolve_course_dir("Fondamenti di Matematica (Analisi 1)", vault_root=self.test_dir)
+        self.assertEqual(os.path.abspath(resolved), os.path.abspath(nested_dir))
+
+    def test_sync_all_courses_nested_degree_structure(self):
+        """Asserts sync_all_courses iterates over nested course subdirectories and ignores degree containers."""
+        degree_dir = os.path.join(
+            self.test_dir,
+            "02 - Atlas",
+            "Education & Learning",
+            "University",
+            "Ingegneria Informatica 2026-27",
+        )
+        course_a = os.path.join(degree_dir, "Introduzione alla Programmazione")
+        course_b = os.path.join(degree_dir, "Probabilità e Statistica")
+        os.makedirs(course_a, exist_ok=True)
+        os.makedirs(course_b, exist_ok=True)
+
+        with open(os.path.join(course_a, "01 - Lezione Python.md"), "w", encoding="utf-8") as f:
+            f.write("# Lezione Python")
+        with open(os.path.join(course_b, "01 - Lezione Prob.md"), "w", encoding="utf-8") as f:
+            f.write("# Lezione Prob")
+
+        synced = course_hub.sync_all_courses(vault_root=self.test_dir)
+        self.assertEqual(synced, 2)
+
+        # Ensure no stray folder with spaces was created
+        stray_dir = os.path.join(
+            self.test_dir,
+            "02 - Atlas",
+            "Education & Learning",
+            "University",
+            "Ingegneria Informatica 2026 - 27",
+        )
+        self.assertFalse(os.path.exists(stray_dir))
+
 
 if __name__ == "__main__":
     unittest.main()

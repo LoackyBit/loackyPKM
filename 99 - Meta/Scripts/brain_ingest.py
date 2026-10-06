@@ -204,7 +204,7 @@ def _has_keyword(text: str, keywords: List[str]) -> bool:
         kw_clean = kw.lower().strip()
         if not kw_clean:
             continue
-        if len(kw_clean) <= 3:
+        if len(kw_clean) <= 4 or kw_clean == "defi":
             if re.search(r'(?:\b|_)' + re.escape(kw_clean) + r'(?:\b|_)', text):
                 return True
         else:
@@ -277,7 +277,23 @@ DIRECTORY_ROUTING_RULES: List[Tuple[str, List[str], List[str]]] = [
         ["education/method", "education/learning", "education/study", "education/memory", "education/mnemonics", "education/school", "education/highschool", "apprendimento", "metodo-studio", "memoria", "scuola", "liceo"],
         ["metodo di studio", "apprendimento", "imparare", "feynman", "active recall", "spaced repetition", "ripetizione spaziata", "lettura veloce", "memorizzazione", "pacrar", "memoria", "mnemotecniche", "palazzo della memoria", "tecniche di memoria", "ricordare cio che leggi", "memorizzare", "leggere libri", "scuola", "liceo", "registro elettronico", "classeviva", "maturita", "professori", "interrogazione", "compiti", "bravo a scuola", "learning to learn"],
     ),
-    # 4.2 University Sub-branches
+    # 4.2 Active University Courses (Ingegneria Informatica 2026-27)
+    (
+        "02 - Atlas/Education & Learning/University/Ingegneria Informatica 2026-27/Fondamenti di Matematica (Analisi 1)",
+        ["education/university/fdm", "education/university/fondamenti-matematica", "education/university/analisi-1"],
+        ["fondamenti di matematica", "fdm", "salzo", "prof salzo", "saverio salzo"],
+    ),
+    (
+        "02 - Atlas/Education & Learning/University/Ingegneria Informatica 2026-27/Probabilità e Statistica",
+        ["education/university/probabilita-statistica", "education/university/pes"],
+        ["probabilita e statistica", "nappo", "spizzichino", "giovanna nappo", "fabio spizzichino"],
+    ),
+    (
+        "02 - Atlas/Education & Learning/University/Ingegneria Informatica 2026-27/Introduzione alla Programmazione",
+        ["education/university/iap", "education/university/introduzione-programmazione"],
+        ["introduzione alla programmazione", "iap", "programmazione python"],
+    ),
+    # 4.3 University Sub-branches
     (
         "02 - Atlas/Education & Learning/University/Architettura & Sistemi",
         ["education/university/systems", "education/university/os"],
@@ -376,8 +392,14 @@ def classify_target_directory(title: str, tags: List[str], content: str = "", va
     tags_lower = [str(t).lower().strip().lstrip('#') for t in tags if t]
     c = (title + " " + " ".join(tags_lower) + " " + content[:2500]).lower()
 
-    for target_dir, rule_tags, rule_kws in DIRECTORY_ROUTING_RULES:
-        if (rule_tags and _has_tag(tags_lower, rule_tags)) or (rule_kws and _has_keyword(c, rule_kws)):
+    # Priority 1: Match explicit tags across all rules
+    for target_dir, rule_tags, _ in DIRECTORY_ROUTING_RULES:
+        if rule_tags and _has_tag(tags_lower, rule_tags):
+            return target_dir
+
+    # Priority 2: Keyword match in title/content
+    for target_dir, _, rule_kws in DIRECTORY_ROUTING_RULES:
+        if rule_kws and _has_keyword(c, rule_kws):
             return target_dir
 
     # AI Assisted Classification Fallback (D-06)
@@ -389,6 +411,9 @@ def classify_target_directory(title: str, tags: List[str], content: str = "", va
         "02 - Atlas/Personal Growth & Health/Gym & Health",
         "02 - Atlas/Personal Growth & Health/Mentality",
         "02 - Atlas/Education & Learning/Learning",
+        "02 - Atlas/Education & Learning/University/Ingegneria Informatica 2026-27/Fondamenti di Matematica (Analisi 1)",
+        "02 - Atlas/Education & Learning/University/Ingegneria Informatica 2026-27/Probabilità e Statistica",
+        "02 - Atlas/Education & Learning/University/Ingegneria Informatica 2026-27/Introduzione alla Programmazione",
         "02 - Atlas/Education & Learning/University",
         "02 - Atlas/Education & Learning/Courses",
         "02 - Atlas/Projects/Active",
@@ -1741,12 +1766,16 @@ def _handle_promote_item(vault_root: str, draft_path: str, source_path: str, nam
     if "02 - Atlas/Education & Learning/University/" in target_rel:
         parts = Path(target_rel).parts
         if len(parts) >= 5:
-            course_name = parts[3]
-            try:
-                import course_hub
-                course_hub.register_lesson(course_name, real_name, vault_root=vault_root)
-            except Exception as e:
-                logger.warning("Errore durante la registrazione PACRAR per '%s': %s", real_name, e)
+            # parts[-1] is the markdown file (<Note>.md)
+            # parts[-2] is the immediate parent directory (the course folder)
+            course_name = parts[-2]
+            # Guard against root University or degree-year container folders
+            if course_name != "University" and not re.match(r"^Ingegneria Informatica \d{4}\s*-\s*\d{2}$", course_name, re.IGNORECASE):
+                try:
+                    import course_hub
+                    course_hub.register_lesson(course_name, real_name, vault_root=vault_root)
+                except Exception as e:
+                    logger.warning("Errore durante la registrazione PACRAR per '%s': %s", real_name, e)
 
     extra_sources = set()
     if os.path.exists(source_path):
@@ -2249,8 +2278,9 @@ def ingest_source(source: str, vault_root: Optional[str] = None, target_dir: Opt
     if course:
         import course_hub
         clean_course = course_hub.sanitize_course_name(course)
-        course_hub.ensure_course_hub(clean_course, vault_root=root)
-        dest_course_dir = f"02 - Atlas/Education & Learning/University/{clean_course}"
+        course_dir_abs = course_hub.resolve_course_dir(course, vault_root=root)
+        dest_course_dir = os.path.relpath(course_dir_abs, root)
+        course_hub.ensure_course_hub(course, vault_root=root)
         target_dir = dest_course_dir
 
     with NoteLock(source):

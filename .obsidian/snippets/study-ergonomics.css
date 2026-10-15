@@ -15,13 +15,18 @@
    1. Supporto Evidenziazione Rapida Utente & Palette Style Guide
    -------------------------------------------------------------------------- */
 
-/* Default Highlight (Giallo - Concetto Cardine Style Guide) */
-mark,
-.cm-highlight,
-mark:not([class]):not([data-color]) {
-    background: rgba(255, 193, 69, 0.32) !important;
-    color: #cc8800 !important;
-    font-weight: 600 !important;
+/* Stile base per tutti i mark (arrotondamento e padding senza alterare i colori) */
+mark {
+    border-radius: 3px;
+    padding: 0 3px;
+}
+
+/* Default Highlight per la sintassi nativa Markdown ==testo== (senza style inline) */
+mark:not([style]):not([class]),
+.cm-highlight:not([style]):not([class]) {
+    background: rgba(255, 193, 69, 0.32);
+    color: #cc8800;
+    font-weight: 600;
     border-radius: 3px;
     padding: 0 3px;
 }
@@ -80,7 +85,7 @@ mark[data-color="r"],
     padding: 0 3px;
 }
 
-/* Supporto per markup HTML Style Guide nativo */
+/* Salvaguardia esplicita per markup HTML Style Guide nativo */
 mark[style*="255, 193, 69"],
 mark[style*="#cc8800"] {
     background: rgba(255, 193, 69, 0.32) !important;

@@ -126,19 +126,29 @@ Ogni nota prodotta deve rispettare rigorosamente `99 - Meta/Style Guide.md`:
 
 1. **Titoli e Intestazioni (H1, H2, H3):**
    - Zero emoji nei titoli (es. `# Titolo Nota`, `## Sintesi Esecutiva`, `## Quadro Concettuale`). Mai `# 🎯 Titolo` o `## 🔑 Takeaways`.
-2. **Evidenziazioni HTML Valide (Senza Backtick):**
-   - **Concetti Cardine (Giallo):** `<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>`
-   - **Concetti Secondari (Viola):** `<mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>`
+2. **Evidenziazioni HTML Valide & Budget di Parsimonia Estrema per l'AI:**
+   - **Concetti Cardine (Giallo):** `<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>` (MASSIMO 1 sola evidenziazione per sotto-sezione).
+   - **Concetti Secondari (Viola):** `<mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>` (MASSIMO 2-3 evidenziazioni per sotto-sezione).
+   - **Enfasi Standard:** Per tutte le altre parole chiave, enfasi o elementi importanti usa il normale `**grassetto**` e `*corsivo*` Markdown, lasciando il testo pulito, leggero e pronto all'evidenziazione manuale dello studente in fase di studio.
    - *CRITICO:* Non racchiudere mai i tag HTML `<mark>` tra backtick markdown (`` `<mark...>` `` ❌).
-3. **Diagrammi Mermaid & Callouts Dinamici:**
+3. **Architettura "Scheletro Esecutivo + Progressive Disclosure" e Stile Telegrafico:**
+   - Sostituire i muri di prosa accademica prolissa con **elenchi puntati o numerati telegrafici, densi e schematici** (ispirati al modello stilistico di `99 - Meta/Reference/Gabriele d'Annunzio.md`).
+   - Limitare la prosa continua a massimo 3-4 righe di introduzione contestuale per sezione; sviluppare poi concetti, proprietà ed esempi tramite elenchi puntati con trattini (`—`) o sotto-bullet compatti.
+4. **Teoremi, Formule e Dimostrazioni (Pattern Dual-Layer):**
+   - **Livello 1 (Visibile nel flusso o nel callout del teorema):** mostra solo l'enunciato formale, la formula LaTeX centrale `$$...$$` e l'**Idea chiave / Strategia della dimostrazione** in massimo 2-3 bullet sintetici che spiegano il *perché* logico funziona.
+   - **Livello 2 (Progressive Disclosure):** tutti i passaggi algebrici estesi e i calcoli dettagliati sono racchiusi in un **callout collassato di default**:
+     `> [!abstract]- Dimostrazione Formale Passo-Passo`
+     (con tutte le righe interne prefissate da `> ` affinché rimanga realmente chiuso in Obsidian).
+   - **Eliminazione dei 5 Sotto-Bullet Fissi:** non imporre la griglia rigida dei 5 punti (Ipotesi, Condizioni, Simboli con SI, Esempio) a ogni proposizione matematica elementare. Includere `Significato dei simboli (con unità SI)` e `Condizioni di validità` **solo** per formule fisiche, ingegneristiche o multivariate non auto-evidenti.
+5. **Diagrammi Mermaid & Callouts Dinamici:**
    - Diagrammi Mermaid discrezionali (nessun obbligo sistematico per nota): da usare solo per reali flussi o dipendenze complesse.
    - Privilegiare callouts semantici e dinamici (`> [!summary]`, `> [!tip]-`, `> [!example]`, `> [!info]`, `> [!question]`) e checkbox personalizzate da Style Guide (`- [!]`, `- [i]`, `- [*]`, `- [?]`, ecc.).
    - Se si usa Mermaid: includere sempre apici per i nodi con spazi o parentesi (`id["Etichetta"]`) e nessun tag HTML all'interno dei nodi.
-4. **Formule Matematiche (LaTeX):**
+6. **Formule Matematiche (LaTeX):**
    - Usare `$formula$` per formule inline o `$$formula$$` per blocchi matematici.
-5. **Assorbimento Organico dei Collegamenti:**
+7. **Assorbimento Organico dei Collegamenti:**
    - I collegamenti semantici a note esistenti sono integrati nel testo (`[[Target Note]]`) e sincronizzati in `related: [...]` nel frontmatter YAML. Nessun blocco finale `## Collegamenti`.
-6. **Flashcard Anki Contestuali (Conformità Doc Ufficiale Anki & obsidian-to-anki-plugin):**
+8. **Flashcard Anki Contestuali (Conformità Doc Ufficiale Anki & obsidian-to-anki-plugin):**
    - **Collocazione Rigorosamente Inline & Alta Densità Sistematica:** DEVONO essere collocate IMMEDIATAMENTE A VALLE di ciascun concetto cardine evidenziato in giallo (`<mark>`), assioma, definizione, proprietà o teorema trattato con **alta densità sistematica** (copertura capillare per il ripasso attivo Anki, senza alcun limite restrittivo di 5-10 card per lezione). **DIVIETO ASSOLUTO di raggrupparle in sezioni o appendici a fondo pagina** (es. mai creare sezioni `## Flashcard...`).
    - Organizzazione in **sottodeck gerarchici per singola nota**: `TARGET DECK: University::<Nome Corso>::<Titolo Nota>` (con il sottodeck nominato esattamente come il titolo della nota, compreso eventuale prefisso numerico `01`, `02`, ecc.).
    - Struttura a callout collassabile: `> [!tip]- Flashcard: [Concetto]`, seguita dal blocco racchiuso tra delimitatori `%% ... %%`.
@@ -162,20 +172,21 @@ Ogni nota prodotta deve rispettare rigorosamente `99 - Meta/Style Guide.md`:
    - Derivate matematiche: usare SEMPRE `^\prime` o `^{\prime\prime}` (es. $f^\prime(\xi)$), MAI apostrofi `$f'(x)$`, per scongiurare collisioni con l'escape HTML del plugin (`&#039;` -> tag `039` -> formula corrotta in `f&;`).
    - Valori assoluti: usare `\vert` anziché `|`. Spaziare le graffe TeX nelle cloze (`{ {` o `\left\{...\right\}`).
    - Nessun `<!--ID: -->` manuale generato dall'AI.
-7. **Direttive Operative Utente & Meta-Istruzioni Inline (`%% AI: ... %%`):**
+9. **Direttive Operative Utente, Meta-Istruzioni Inline (`%% AI: ... %%`) e Risoluzione Dubbi:**
    - Riconoscimento prioritario di comandi e direttive inline inserite dall'utente nella nota grezza tramite commenti nativi `%% AI: <istruzione> %%` (o commenti HTML `<!-- AI: ... -->` o callout `> [!note]- AI: ...`).
-   - Esecuzione vincolante dei requisiti richiesti (es. scala immagini, schemi Mermaid specifici, approfondimenti di teoremi).
-   - Rimozione e pulizia tassativa di ogni marcatore di commento/callout dal corpo finale della nota permanente.
-8. **Fonti Didattiche, Citazioni Slide e Divieto Citazione Trascrizioni:**
-   - Citare e indicizzare come fonti attive (sia nel frontmatter `sources: [...]` sia nel corpo del testo) esclusivamente materiali ad alto valore accademico e didattico (slide PDF ufficiali d'aula, paper scientifici, libri di testo, articoli autorevoli).
-   - **DIVIETO ASSOLUTO DI CITAZIONE DELLE TRASCRIZIONI AUDIO:** Le trascrizioni audio grezze non vanno MAI citate né inserite in `sources: [...]` o collegate nel testo; fungono esclusivamente da input di rielaborazione per l'AI.
-   - **Sintassi e Densità Citazioni Slide:** Utilizzare la sintassi Obsidian con escape della prima quadra `\[[[NomeFile.pdf#page=N|Slide N]]]`. La densità dei richiami alle slide deve essere bilanciata e strategica (a livello di macro-sezione o per chiarire passaggi sintetici/astratti ed evitare fraintendimenti), evitando la saturazione frase per frase.
-9. **Rappresentazione Visuale & Divieto Assoluto di Diagrammi ASCII/Unicode:**
-   - **DIVIETO ASSOLUTO DI DIAGRAMMI SIMBOLICI ASCII/UNICODE:** Non utilizzare mai blocchi di codice monospazio o testo contenenti schemi con caratteri box-drawing (`┌┐└┘`, `│`, `─`, `──►`), poiché non vengono renderizzati in modo coerente tra i vari dispositivi (mobile, iPad, temi con font variabili).
-   - Per rappresentare schemi, architetture o flussi visivi:
-     - Se presenti nelle slide d'aula, estrarre e includere direttamente i ritagli/render ad alta risoluzione (2x Retina PNG) degli schemi ufficiali (`![[Schema - ... .png]]`).
-     - Altrimenti, strutturare i dati tramite tabelle Markdown native standard e callout semantici dinamici.
-10. **Gerarchia delle Fonti & Fedeltà alla Lezione (Fonte Primaria vs Fonti di Supporto):**
+   - Se l'utente esprime un dubbio o domanda (es. `%% AI: non ho capito il passaggio... %%`), l'IA risponde e chiarisce puntualmente all'interno di un callout dedicato `> [!question] Chiarimento sul tuo dubbio` nel punto esatto del testo.
+   - Esecuzione vincolante dei requisiti richiesti (es. scala immagini, schemi Mermaid specifici, tabelle mirate).
+   - Rimozione e pulizia tassativa di ogni marcatore di commento/callout originario dal corpo finale della nota permanente.
+10. **Fonti Didattiche, Citazioni Slide e Divieto Citazione Trascrizioni:**
+    - Citare e indicizzare come fonti attive (sia nel frontmatter `sources: [...]` sia nel corpo del testo) esclusivamente materiali ad alto valore accademico e didattico (slide PDF ufficiali d'aula, paper scientifici, libri di testo, articoli autorevoli).
+    - **DIVIETO ASSOLUTO DI CITAZIONE DELLE TRASCRIZIONI AUDIO:** Le trascrizioni audio grezze non vanno MAI citate né inserite in `sources: [...]` o collegate nel testo; fungono esclusivamente da input di rielaborazione per l'AI.
+    - **Sintassi e Densità Citazioni Slide:** Utilizzare la sintassi Obsidian con escape della prima quadra `\[[[NomeFile.pdf#page=N|Slide N]]]`. La densità dei richiami alle slide deve essere bilanciata e strategica (a livello di macro-sezione o per chiarire passaggi sintetici/astratti ed evitare fraintendimenti), evitando la saturazione frase per frase.
+11. **Rappresentazione Visuale & Divieto Assoluto di Diagrammi ASCII/Unicode:**
+    - **DIVIETO ASSOLUTO DI DIAGRAMMI SIMBOLICI ASCII/UNICODE:** Non utilizzare mai blocchi di codice monospazio o testo contenenti schemi con caratteri box-drawing (`┌┐└┘`, `│`, `─`, `──►`), poiché non vengono renderizzati in modo coerente tra i vari dispositivi (mobile, iPad, temi con font variabili).
+    - Per rappresentare schemi, architetture o flussi visivi:
+      - Se presenti nelle slide d'aula, estrarre e includere direttamente i ritagli/render ad alta risoluzione (2x Retina PNG) degli schemi ufficiali (`![[Schema - ... .png]]`).
+      - Altrimenti, strutturare i dati tramite tabelle Markdown native standard e callout semantici dinamici.
+12. **Gerarchia delle Fonti & Fedeltà alla Lezione (Fonte Primaria vs Fonti di Supporto):**
     - **FONTE PRIMARIA VINCOLANTE (Nota Originale & Trascrizione Audio):** Costituiscono l'asse concettuale portante e il perimetro invalicabile di ciò che è stato spiegato ed esposto a lezione. L'elaborazione finale non deve MAI discostarsi troppo da questi contenuti.
     - **FONTI DI SUPPORTO AUSILIARIE (Dispense, Slide PDF, Altri Appunti):** Hanno uno scopo puramente di supporto: servono per formalizzare definizioni, recuperare la notazione matematica corretta LaTeX per formule e teoremi menzionati a voce, aggiungere richiami di pagina (`\[[[file.pdf#page=N|Slide N]]]`) ed estrarre figure o tabelle pertinenti.
     - **DIVIETO DI DIVAGAZIONI ENCICLOPEDICHE:** È severamente vietato allargare la trattazione ad argomenti o capitoli interi delle dispense/slide non affrontati a lezione. I materiali ausiliari non devono mai snaturare l'ordine o il focus della lezione reale.

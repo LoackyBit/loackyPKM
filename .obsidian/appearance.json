@@ -1,7 +1,7 @@
 {
   "cssTheme": "Cupertino",
-  "interfaceFontFamily": "",
-  "textFontFamily": "Arial",
+  "interfaceFontFamily": "Arial",
+  "textFontFamily": "NewComputerModern Math",
   "monospaceFontFamily": "JetBrains Mono,FiraCode Nerd Font Mono",
   "accentColor": "#007ecc",
   "enabledCssSnippets": [
@@ -11,13 +11,14 @@
     "Colored Sidebar Items",
     "Extended Color Schemes",
     "pacrar",
-    "compact-mermaid"
+    "compact-mermaid",
+    "study-ergonomics"
   ],
   "theme": "system",
   "translucency": false,
   "showViewHeader": true,
   "showRibbon": true,
   "nativeMenus": true,
-  "baseFontSize": 19,
+  "baseFontSize": 18,
   "baseFontSizeAction": true
 }

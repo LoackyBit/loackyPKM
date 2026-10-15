@@ -1,0 +1,145 @@
+/* ==========================================================================
+   Study Ergonomics Snippet (UI/UX & Cognitive Alignment)
+   - Palette Style Guide per evidenziazioni (giallo, viola, rosso) su <mark>,
+     .cm-highlight e tag rapidi da studio (<y>, <v>, <r>).
+   - Respiro visivo per formule MathJax (mjx-container) e liste.
+   - Riduzione padding callout collassati per densità simile a dispense LaTeX.
+   ========================================================================== */
+
+:root {
+    --text-highlight-bg: rgba(255, 193, 69, 0.32);
+    --text-highlight-bg-active: rgba(255, 193, 69, 0.45);
+}
+
+/* --------------------------------------------------------------------------
+   1. Supporto Evidenziazione Rapida Utente & Palette Style Guide
+   -------------------------------------------------------------------------- */
+
+/* Default Highlight (Giallo - Concetto Cardine Style Guide) */
+mark,
+.cm-highlight,
+mark:not([class]):not([data-color]) {
+    background: rgba(255, 193, 69, 0.32) !important;
+    color: #cc8800 !important;
+    font-weight: 600 !important;
+    border-radius: 3px;
+    padding: 0 3px;
+}
+
+/* Giallo Esplicito: <y>, mark.y, mark.yellow, .cm-highlight.y */
+y,
+mark.y,
+mark.yellow,
+mark.giallo,
+mark[data-color="yellow"],
+mark[data-color="giallo"],
+mark[data-color="y"],
+.cm-highlight.y,
+.cm-highlight.yellow,
+.cm-highlight.giallo {
+    background: rgba(255, 193, 69, 0.32) !important;
+    color: #cc8800 !important;
+    font-weight: 600 !important;
+    border-radius: 3px;
+    padding: 0 3px;
+}
+
+/* Viola: <v>, mark.v, mark.purple, mark.viola, .cm-highlight.v */
+v,
+mark.v,
+mark.purple,
+mark.viola,
+mark[data-color="purple"],
+mark[data-color="viola"],
+mark[data-color="v"],
+.cm-highlight.v,
+.cm-highlight.purple,
+.cm-highlight.viola {
+    background: rgba(181, 113, 255, 0.36) !important;
+    color: #9a54c1 !important;
+    font-weight: 600 !important;
+    border-radius: 3px;
+    padding: 0 3px;
+}
+
+/* Rosso: <r>, mark.r, mark.red, mark.rosso, .cm-highlight.r */
+r,
+mark.r,
+mark.red,
+mark.rosso,
+mark[data-color="red"],
+mark[data-color="rosso"],
+mark[data-color="r"],
+.cm-highlight.r,
+.cm-highlight.red,
+.cm-highlight.rosso {
+    background: rgba(237, 0, 0, 0.31) !important;
+    color: #C1302B !important;
+    font-weight: 600 !important;
+    border-radius: 3px;
+    padding: 0 3px;
+}
+
+/* Supporto per markup HTML Style Guide nativo */
+mark[style*="255, 193, 69"],
+mark[style*="#cc8800"] {
+    background: rgba(255, 193, 69, 0.32) !important;
+    color: #cc8800 !important;
+    font-weight: 600 !important;
+}
+
+mark[style*="181, 113, 255"],
+mark[style*="#9a54c1"] {
+    background: rgba(181, 113, 255, 0.36) !important;
+    color: #9a54c1 !important;
+    font-weight: 600 !important;
+}
+
+mark[style*="237, 0, 0"],
+mark[style*="#C1302B"] {
+    background: rgba(237, 0, 0, 0.31) !important;
+    color: #C1302B !important;
+    font-weight: 600 !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Spaziatura e Respiro Visivo Formule MathJax (mjx-container)
+   -------------------------------------------------------------------------- */
+
+.math.math-block,
+.math-block,
+.block-language-math,
+mjx-container[display="true"],
+.markdown-rendered mjx-container[display="true"] {
+    margin: 1.25em 0 !important;
+    padding: 0.2em 0 !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   3. Callout Collassati: Compattezza e Ordine Visivo
+   -------------------------------------------------------------------------- */
+
+.callout.is-collapsed {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+}
+
+.callout.is-collapsed .callout-title {
+    padding: 2px 4px !important;
+    margin: 0 !important;
+}
+
+.callout.is-collapsed .callout-content {
+    display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Leggibilità e Ritmo Elenchi
+   -------------------------------------------------------------------------- */
+
+.markdown-rendered ul,
+.markdown-rendered ol {
+    line-height: 1.6;
+}

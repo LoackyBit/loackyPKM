@@ -933,6 +933,10 @@ CONTENUTO SORGENTE:
 REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
 1. GERARCHIA DELLE FONTI, FEDELTÀ ALLA LEZIONE, SEQUENZA LOGICO-TEMPORALE E DIGRESSIONI DEL DOCENTE (TAX-01, D-06):
    - FEDELTÀ ASSOLUTA ALLA NOTA ORIGINALE E ALLA TRASCRIZIONE (FONTI PRIMARIE): La nota originale dell'utente e la trascrizione audio della lezione costituiscono la FONTE PRIMARIA, l'asse portante narrativo e il perimetro concettuale invalicabile. La nota finale NON DEVE MAI discostarsi troppo da quanto effettivamente spiegato, argomentato ed esposto dal docente a lezione o riportato negli appunti originali.
+   - ARCHITETTURA 'SCHELETRO ESECUTIVO + PROGRESSIVE DISCLOSURE' E STILE TELEGRAFICO:
+     * Preserva fedelmente la struttura, la numerazione e l'ordine logico degli appunti grezzi dell'utente (NOTA ORIGINALE).
+     * Sostituisci i muri di prosa accademica prolissa con elenchi puntati o numerati telegrafici, densi e schematici (ispirati al modello stilistico di '99 - Meta/Reference/Gabriele d'Annunzio.md').
+     * Limita la prosa continua a massimo 3-4 righe di introduzione contestuale per sezione; sviluppa poi concetti, proprietà ed esempi tramite elenchi puntati con trattini ('—') o sotto-bullet compatti.
    - RUOLO RIGOROSAMENTE DI SUPPORTO DI DISPENSE, SLIDE E ALTRI APPUNTI (FONTI DI SUPPORTO): Le dispense del corso, le slide PDF e gli eventuali altri appunti hanno uno scopo puramente AUSILIARIO E DI SUPPORTO. Servono per formalizzare le definizioni, recuperare l'esatta notazione matematica LaTeX per formule menzionate o abbozzate a voce, chiarire passaggi algebrici o teoremi, aggiungere richiami precisi alle slide (\\[[[file.pdf#page=N|Slide N]]]) e arricchire con tabelle o figure pertinenti.
    - DIVIETO ASSOLUTO DI DIVAGAZIONI O IPER-ESTENSIONI ENCICLOPEDICHE: Non espandere mai la trattazione a capitoli, lemmi o interi argomenti presenti nelle dispense o nelle slide che NON siano stati affrontati o richiamati a lezione. I materiali di supporto non devono MAI stravolgere la sequenza della lezione né trasformare la nota in un compendio enciclopedico del libro di testo estraneo a quanto svolto dal docente.
    - SEQUENZA LOGICO-TEMPORALE DEL DOCENTE: Ricalca fedelmente la successione logico-temporale della spiegazione senza omettere passaggi concettuali. Nessun template monolitico o sezione generica fissa/vuota: l'articolazione delle sezioni H2 e H3 deve scaturire spontaneamente dall'ordine reale di esposizione dei contenuti.
@@ -942,26 +946,33 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
      > [Trascrizione o sintesi della divagazione]
    - NESSUNA SEZIONE COLLEGAMENTI SEPARATA: Non inserire mai sezioni come '## Collegamenti', '## Note Correlate' o '## Vedi anche'. I collegamenti semantici vengono assorbiti organicamente nel testo.
 
-2. FORMULARIO STEM VINCOLATO E FORMALISMO MATEMATICO (TAX-02, D-04, D-05, D-08, D-09):
-   - Adotta un approccio ibrido per formule e passaggi matematici:
-     a) Formule di passaggio, passaggi algebrici e calcoli intermedi: utilizza blocchi display MathJax standard $$...$$ o inline $...$.
-     b) Teoremi, leggi fisiche, principi e formule cardine della materia: racchiudili in un callout dedicato (> [!example] Teorema / Legge: [Nome] oppure > [!info] Principio / Definizione: [Nome]).
-   - OGNI callout di teorema o formula cardine DEVE obbligatoriamente contenere questi 5 elementi strutturati:
-     1. Espressione display LaTeX $$...$$ centrale
-     2. - **Ipotesi:** (assunzioni necessarie e condizioni a monte)
-     3. - **Condizioni di validità:** (limiti operativi, regimi fisici o vincoli di applicabilità)
-     4. - **Significato dei simboli:** (elenco di ogni parametro con la relativa unità di misura SI, es. $[\\text{{V}}]$, $[\\Omega]$, $[\\text{{A}}]$, $[\\text{{m/s}}^2]$)
-     5. - **Esempio operativo:** (caso applicativo pratico, calcolo d'esempio o note operative)
+2. FORMULARIO STEM VINCOLATO E FORMALISMO MATEMATICO (PATTERN DUAL-LAYER PER TEOREMI E DIMOSTRAZIONI) (TAX-02, D-04, D-05, D-08, D-09):
+   - PATTERN DUAL-LAYER PER TEOREMI E DIMOSTRAZIONI:
+     Per teoremi, proposizioni e lemmi, separa rigorosamente il livello concettuale essenziale dai passaggi algebrici:
+     a) LIVELLO 1 (Visibile nel flusso principale o nel callout del teorema):
+        - Mostra SOLO:
+          1. L'enunciato formale e la formula LaTeX display centrale $$...$$.
+          2. Idea chiave / Strategia della dimostrazione: in massimo 2-3 bullet sintetici che spiegano intuitivamente il *perché* logico funziona (es. *"Si applica il Buon Ordinamento all'insieme dei maggioranti e si sfrutta la discretezza tra $a-1$ e $a$"*).
+     b) LIVELLO 2 (Dimostrazione Formale Passo-Passo - Progressive Disclosure):
+        - Racchiudi TUTTI i passaggi algebrici estesi, le disuguaglianze e i calcoli lunghi della dimostrazione formale dentro un callout collassato di default:
+          > [!abstract]- Dimostrazione Formale Passo-Passo
+          > [Passaggi algebrici dettagliati con formule LaTeX $$...$$]
+        - REGOLA CRITICA INDENTAZIONE: TUTTE le righe interne del callout collassato DEVONO essere prefissate da '> ' affinché Obsidian mantenga il blocco realmente chiuso.
+   - ELIMINAZIONE DEI 5 SOTTO-BULLET FISSI OVUNQUE (STRUTTURA FLESSIBILE E CONDIZIONALE):
+     - Rimuovi l'obbligo rigido dei 5 punti fissi (Ipotesi:, Condizioni di validità:, Significato dei simboli:, Esempio operativo:) per ogni definizione o lemma matematico.
+     - Rendili condizionali: includi 'Significato dei simboli (con unità SI):' e 'Condizioni di validità:' SOLO per leggi fisiche, ingegneristiche o formule multivariate dove i parametri non sono auto-evidenti dal contesto matematico. Per definizioni e proposizioni matematiche pure, privilegia un enunciato chiaro, compatto e formale.
    - DIVIETO DI BACKTICK PER FORMULE: Non racchiudere MAI le formule LaTeX tra blocchi di codice markdown (```latex o ```). Usa solo la sintassi naturale MathJax ($...$ e $$...$$) per consentire il rendering nativo di Obsidian. Non effettuare conversioni premature per Anki (demandate a fasi successive).
 
-3. EVIDENZIAZIONI CROMATICHE E ARRICCHIMENTO VISIVO (TAX-03, D-01, D-02, D-03):
-   - EVIDENZIAZIONI OBBLIGATORIE SU OGNI NOTA:
-     - Giallo (parole chiave assolute, principi primi, concetti cardine):
+3. EVIDENZIAZIONI CROMATICHE E ARRICCHIMENTO VISIVO (BUDGET RIGOROSO) (TAX-03, D-01, D-02, D-03):
+   - BUDGET DI PARSIMONIA ESTREMA PER L'AI (ANTI-CECITA DA EVIDENZIATORE):
+     Per non affaticare la lettura in Live Preview, evitare esplosioni di tag HTML al passaggio del cursore e lasciare spazio all'evidenziazione manuale dello studente in fase di studio:
+     * GIALLO (Concetto cardine): applica AL MASSIMO 1 sola evidenziazione gialla per sotto-sezione (il singolo concetto cardine principale):
        <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>concetto cardine</b></font></mark>
-     - Viola (concetti secondari, nomi propri, definizioni derivate):
+     * VIOLA (Concetti secondari): applica AL MASSIMO 2-3 evidenziazioni viola per sotto-sezione (termini tecnici o concetti derivati):
        <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>
-     - REGOLA CRITICA: Non racchiudere MAI i tag HTML <mark> o <font> tra backtick markdown (`<mark...>` ❌)!
-   - PALETTE VISIVA COMPLETA: Impiega con priorità callout semantici e dinamici (> [!tip], > [!important], > [!warning], > [!note], > [!example], > [!summary]), checkbox avanzate da Style Guide (- [!], - [i], - [*], - [?], - [/], ecc.) e tabelle comparative in Markdown standard (zero tabelle HTML).
+     * ENFASI STANDARD: Per tutte le altre parole chiave, enfasi o elementi importanti usa il normale **grassetto** markdown o *corsivo*, mantenendo il testo pulito, leggibile e leggero.
+     * REGOLA CRITICA: Non racchiudere MAI i tag HTML <mark> o <font> tra backtick markdown (`<mark...>` ❌)!
+   - PALETTE VISIVA E CALLOUT: Impiega con priorità callout semantici (> [!tip], > [!important], > [!warning], > [!note], > [!example], > [!summary], > [!question]), checkbox avanzate da Style Guide (- [!], - [i], - [*], - [?], ecc.) e tabelle comparative in Markdown standard (zero tabelle HTML).
    - DIAGRAMMI MERMAID CONTESTUALI (NON OBBLIGATORI): Non inserire obbligatoriamente diagrammi Mermaid in ogni nota. Usali solo a discrezione in presenza di reali catene causali complesse, derivazioni logiche a stadi o flussi di processi che beneficiano concretamente di visualizzazione grafica. Altrimenti, prediligi callout dinamici, elenchi con checkbox personalizzate o tabelle.
    - REGOLE MERMAID RIGOROSE: Tutte le etichette dei nodi DEVONO essere rigorosamente racchiuse tra doppi apici (es. A["Testo del Nodo (con dettagli)"] --> B["Secondo Nodo"]). Non inserire MAI tag HTML all'interno dei nodi Mermaid.
 
@@ -986,10 +997,15 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
    - RIALLINEAMENTO CODICE E TABELLE: Riorganizza pseudocodice, frammenti di codice e tabelle frammentate in blocchi Markdown sintatticamente evidenziati o tabelle comparative chiare.
    - EMBEDDING FIGURE DISCREZIONALE: Se nel testo o nel contesto sono presenti figure estratte (![[Figura - ...]] o ![[Schema - ...]]), incorporale solo se apportano reale valore concettuale (diagrammi, grafi, schemi a blocchi), posizionandole direttamente a valle del rispettivo concetto cardine. Ometti loghi ateneo o grafiche decorative.
 
-7. DIRETTIVE OPERATIVE UTENTE E META-ISTRUZIONI INLINE (%% AI: ... %%):
-   - Nel testo sorgente possono essere presenti istruzioni dirette dell'utente per te, racchiuse nella sintassi nativa di commento Obsidian '%% AI: <istruzione> %%' (o equivalenti commenti HTML '<!-- AI: <istruzione> -->' o callout '> [!note]- AI: ...').
-   - Esegui queste direttive come COMANDI OPERATIVI PRIORITARI ASSOLUTI (es. richieste di ridimensionamento o posizionamento immagini, focus su argomenti specifici, inserimento di formule, schemi o tabelle mirate).
-   - REGOLA TASSATIVA DI PULIZIA: Rimuovi ed elimina completamente qualsiasi commento o marcatore di direttiva ('%% AI: ... %%', '<!-- AI: ... -->', callout di istruzione) dal corpo finale della nota permanente. La nota finale deve contenere unicamente il testo rielaborato pulito, senza alcuna traccia dei comandi ricevuti.
+7. DIRETTIVE OPERATIVE UTENTE, META-ISTRUZIONI E RISOLUZIONE DUBBI (%% AI: ... %%):
+   - Nel testo sorgente possono essere presenti istruzioni dirette o dubbi dell'utente racchiusi nella sintassi nativa di commento Obsidian '%% AI: <istruzione> %%' (o equivalenti commenti HTML '<!-- AI: <istruzione> -->' o callout '> [!note]- AI: ...').
+   - GESTIONE DUBBI UTENTE: Se l'utente include dubbi, domande o perplessità (es. '%% AI: non ho capito il passaggio... %%' o '%% AI: dubbio... %%'):
+     Risolvi e chiarisci puntualmente il dubbio all'interno di un callout dedicato:
+     > [!question] Chiarimento sul tuo dubbio
+     > [Spiegazione chiara, rigorosa e accessibile del dubbio o del passaggio logico/terminologico]
+     collocato direttamente nel punto esatto del testo in cui il dubbio è stato sollevato.
+   - DIRETTIVE OPERATIVE: Se l'utente fornisce direttive operative (es. richieste di ridimensionamento o posizionamento immagini, focus su argomenti specifici, inserimento di formule, schemi o tabelle mirate), eseguile come comandi prioritari assoluti.
+   - REGOLA TASSATIVA DI PULIZIA: Rimuovi ed elimina completamente qualsiasi commento o marcatore di direttiva ('%% AI: ... %%', '<!-- AI: ... -->', callout originari di istruzione) dal corpo finale della nota permanente, lasciando al loro posto solo la trattazione pulita e gli eventuali callout '> [!question] Chiarimento sul tuo dubbio'.
 {anki_rules}"""
 
     home_bin = str(Path.home() / ".local" / "bin" / "agy")

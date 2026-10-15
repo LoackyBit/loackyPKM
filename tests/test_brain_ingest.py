@@ -2866,6 +2866,48 @@ area: meta
             self.assertIn("RUOLO RIGOROSAMENTE DI SUPPORTO DI DISPENSE, SLIDE E ALTRI APPUNTI", prompt_arg)
             self.assertIn("DIVIETO ASSOLUTO DI DIVAGAZIONI O IPER-ESTENSIONI ENCICLOPEDICHE", prompt_arg)
 
+    def test_enrich_draft_with_ai_cognitive_skeleton_and_ergonomics(self):
+        """Asserts prompt enforces executive skeleton, dual-layer demonstrations, mark budget, and question callouts."""
+        from unittest.mock import patch, MagicMock
+
+        os.environ.pop("BRAIN_INGEST_NO_AI", None)
+        mock_proc = MagicMock()
+        mock_proc.returncode = 0
+        mock_proc.stdout = "# Titolo\nTesto permanente.\n---SUMMARY---\nSintesi esecutiva densa."
+
+        with patch("brain_ingest.subprocess.run", return_value=mock_proc) as mock_run:
+            brain_ingest.enrich_draft_with_ai(
+                vault_root=self.test_dir,
+                title="Topologia e Densità",
+                source_content="Contenuto topologia e densità.",
+                depth="approfondimento"
+            )
+            self.assertTrue(mock_run.called)
+            cmd_args = mock_run.call_args[0][0]
+            prompt_arg = [arg for arg in cmd_args if arg.startswith("--print=")][0]
+
+            # 1. Executive Skeleton and Telegraphic style
+            self.assertIn("ARCHITETTURA 'SCHELETRO ESECUTIVO + PROGRESSIVE DISCLOSURE'", prompt_arg)
+            self.assertIn("Sostituisci i muri di prosa accademica prolissa con elenchi puntati o numerati telegrafici", prompt_arg)
+            self.assertIn("Gabriele d'Annunzio.md", prompt_arg)
+
+            # 2. Dual-Layer Theorems and Collapsible Demonstrations
+            self.assertIn("PATTERN DUAL-LAYER PER TEOREMI E DIMOSTRAZIONI", prompt_arg)
+            self.assertIn("> [!abstract]- Dimostrazione Formale Passo-Passo", prompt_arg)
+            self.assertIn("Idea chiave / Strategia della dimostrazione:", prompt_arg)
+
+            # 3. Elimination of rigid 5 mandatory sub-bullets
+            self.assertIn("ELIMINAZIONE DEI 5 SOTTO-BULLET FISSI OVUNQUE", prompt_arg)
+            self.assertIn("Rimuovi l'obbligo rigido dei 5 punti fissi", prompt_arg)
+
+            # 4. Highlighter budget
+            self.assertIn("BUDGET DI PARSIMONIA ESTREMA PER L'AI", prompt_arg)
+            self.assertIn("MASSIMO 1 sola evidenziazione gialla per sotto-sezione", prompt_arg)
+            self.assertIn("MASSIMO 2-3 evidenziazioni viola per sotto-sezione", prompt_arg)
+
+            # 5. Question callout for inline doubts
+            self.assertIn("> [!question] Chiarimento sul tuo dubbio", prompt_arg)
+
 
 if __name__ == "__main__":
     unittest.main()

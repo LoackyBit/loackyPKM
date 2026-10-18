@@ -126,6 +126,7 @@ None.
 | 261001-r0v | Riorganizzazione Strutturale e Bonifica di 99 - Meta | 2026-10-01 | 54ac866 | [261001-r0v-riordina-99-meta](./quick/261001-r0v-riordina-99-meta/) |
 | 261006-vir | Fix University Course Path Resolution and Extra Folder Creation | 2026-10-06 | 31d4820 | [261006-vir-fix-university-course-path-bug-in-brain-](./quick/261006-vir-fix-university-course-path-bug-in-brain-/) |
 | 261015-hen | Refactoring Cognitivo e UI/UX di brain-ingest (Scheletro Visivo & Co-Pilota Attivo) | 2026-10-15 | 4042a0e | [261015-hen-refactoring-cognitivo-e-ui-ux-di-brain-i](./quick/261015-hen-refactoring-cognitivo-e-ui-ux-di-brain-i/) |
+| 261018-f15 | Uniformare la Tassonomia Callout nelle Note di Ingegneria Informatica 2026-27 | 2026-10-18 | 9656334 | [261018-f15-uniformare-i-callout-in-ingegneria-infor](./quick/261018-f15-uniformare-i-callout-in-ingegneria-infor/) |
 
 ## Deferred Items
 
@@ -137,9 +138,9 @@ None.
 
 **Resume file:** .planning/phases/17-generazione-flashcard-anki-contestuali-preservazione-id/17-CONTEXT.md
 
-Last activity: 2026-10-15 - Completed quick task 261015-hen: Refactoring Cognitivo e UI/UX di brain-ingest (Scheletro Visivo & Co-Pilota Attivo)
-Last session: 2026-10-15T12:50:00+02:00
-Stopped at: Quick task 261015-hen complete, ready for next task
+Last activity: 2026-10-18 - Completed quick task 261018-f15: Uniformare la Tassonomia Callout nelle Note di Ingegneria Informatica 2026-27
+Last session: 2026-10-18T11:00:00+02:00
+Stopped at: Quick task 261018-f15 complete, ready for next task
 
 ## Operator Next Steps
 

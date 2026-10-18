@@ -141,9 +141,16 @@ Ogni nota prodotta deve rispettare rigorosamente `99 - Meta/Style Guide.md`:
      (con tutte le righe interne prefissate da `> ` affinché rimanga realmente chiuso in Obsidian).
    - **Eliminazione dei 5 Sotto-Bullet Fissi:** non imporre la griglia rigida dei 5 punti (Ipotesi, Condizioni, Simboli con SI, Esempio) a ogni proposizione matematica elementare. Includere `Significato dei simboli (con unità SI)` e `Condizioni di validità` **solo** per formule fisiche, ingegneristiche o multivariate non auto-evidenti.
 5. **Diagrammi Mermaid & Callouts Dinamici:**
-   - Diagrammi Mermaid discrezionali (nessun obbligo sistematico per nota): da usare solo per reali flussi o dipendenze complesse.
-   - Privilegiare callouts semantici e dinamici (`> [!summary]`, `> [!tip]-`, `> [!example]`, `> [!info]`, `> [!question]`) e checkbox personalizzate da Style Guide (`- [!]`, `- [i]`, `- [*]`, `- [?]`, ecc.).
-   - Se si usa Mermaid: includere sempre apici per i nodi con spazi o parentesi (`id["Etichetta"]`) e nessun tag HTML all'interno dei nodi.
+   - **Tassonomia Rigorosa Callout Accademici/Scientifici:**
+     * `> [!danger] Titolo` : Assiomi, Teoremi, Definizioni e Corollari formali.
+     * `> [!summary] Titolo` : Proposizioni, Proprietà e Criteri formali.
+     * `> [!example] Titolo` : Esempi pratici, Casi di studio e Controesempi.
+     * `> [!info] Titolo` : Osservazioni, Note a margine, Intuizioni geometriche/analitiche.
+     * `> [!tip]- Flashcard: [Concetto]` : Flashcard Anki inline e contestuali.
+     * `> [!abstract]- Dimostrazione Formale Passo-Passo` : Dimostrazioni estese (Pattern Dual-Layer).
+     * `> [!question] Chiarimento sul tuo dubbio` : Risoluzione dubbi e chiarimenti perplessità inline utente (`%% AI: ... %%`).
+     * `> [!warning]` : Avvertenze critiche e regole di distinzione; `> [!quote]-` per divagazioni didattiche del docente.
+     * Checkbox personalizzate da Style Guide (`- [!]`, `- [i]`, `- [*]`, `- [?]`, ecc.).
 6. **Formule Matematiche (LaTeX):**
    - Usare `$formula$` per formule inline o `$$formula$$` per blocchi matematici.
 7. **Assorbimento Organico dei Collegamenti:**

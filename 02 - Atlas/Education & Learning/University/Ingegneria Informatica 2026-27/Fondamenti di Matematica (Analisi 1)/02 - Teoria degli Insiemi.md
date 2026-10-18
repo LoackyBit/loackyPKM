@@ -11,43 +11,43 @@ updated: 2026-09-27T18:00
 tags: [education/university, education/math, tech/logic]
 summary: "Teoria assiomatica degli insiemi ZF: estensionalità, vuoto, inclusione, coppia, specificazione, unione, intersezione di famiglie, potenza, fondazione, Von Neumann, infinito e scelta."
 course: "Fondamenti di Matematica Analisi 1"
-sources: ["[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf]]"]
+sources: ["[[Lezione 2 FdM.pdf]]"]
 ---
-[[Home MOC|Home]] / [[University|University MOC]] / [[Fondamenti di Matematica Analisi 1 MOC]] / [[02 - Teoria degli Insiemi]]
+[[Home MOC|Home]] / [[University|University MOC]] / [[Fondamenti di Matematica (Analisi 1) MOC]] / [[02 - Teoria degli Insiemi]]
 
 # 02 - Teoria degli Insiemi
 
-- **Docente:** Prof. [[Saverio Salzo]] / Canale A-L
+- **Docente:** Prof. Saverio Salzo / Canale A-L
 - **Data Lezione:** 2026-09-24
-- **Materiali Didattici Ufficiali:** \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=1|Dispensa Lezione 02 — Teoria degli Insiemi (Prof. Salzo)]]]
+- **Materiali Didattici Ufficiali:** \[[[Lezione 2 FdM.pdf#page=1|Dispensa Lezione 02 — Teoria degli Insiemi (Prof. Salzo)]]]
 - **Riferimento MOC:** [[Fondamenti di Matematica (Analisi 1) MOC]], [[Ingegneria Informatica 2026 - 27 MOC]]
 - **Lezione Precedente:** [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione]]
 - **Collegamento Interdisciplinare:** [[01 - Teoria degli Insiemi, Spazio Campionario e Prime Nozioni di Probabilità]] (dove la teoria degli insiemi fornisce la struttura algebrica per lo spazio campionario $\Omega$ e gli eventi aleatori)
 
 La seconda lezione di Fondamenti di Matematica avvia la costruzione formale della <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>teoria assiomatica degli insiemi</b></font></mark>. L'obiettivo è definire gli enti e i procedimenti matematici partendo da nozioni primitive e postulati espliciti, eliminando ogni forma di ambiguità intuitiva e prevenendo le antinomie logiche scoperte all'inizio del Novecento.
 
-La trattazione segue la formulazione della teoria assiomatica **ZF (Zermelo-Fraenkel)** in una versione accessibile e trasparente, nello spirito dell'opera di Paul Halmos, introducendo gli assiomi costruttivi dell'algebra insiemistica e completando il quadro con i complementi sulla fondazione, la costruzione dei numeri naturali di John von Neumann, l'assioma dell'infinito e l'assioma della scelta \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=1|Dispensa p. 1]]].
+La trattazione segue la formulazione della teoria assiomatica **ZF (Zermelo-Fraenkel)** in una versione accessibile e trasparente, nello spirito dell'opera di Paul Halmos, introducendo gli assiomi costruttivi dell'algebra insiemistica e completando il quadro con i complementi sulla fondazione, la costruzione dei numeri naturali di John von Neumann, l'assioma dell'infinito e l'assioma della scelta \[[[Lezione 2 FdM.pdf#page=1|Dispensa p. 1]]].
 
 ---
 
 ## Cenni Storici ed Epistemologici
 
-La teoria degli insiemi fu concepita e sviluppata originariamente da Georg Cantor e Richard Dedekind intorno al 1870, per poi essere formalizzata nel linguaggio della logica da Gottlob Frege nei primi anni del Novecento. In seguito alla scoperta di celebri paradossi — primo fra tutti il **Paradosso di Russell** (1901) e l'antinomia di Burali-Forti — la teoria ingenua degli insiemi (*naive set theory*) dovette essere profondamente rifondata.
+La teoria degli insiemi fu concepita e sviluppata originariamente da <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>Georg Cantor</b></font></mark> e <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>Richard Dedekind</b></font></mark> intorno al 1870, per poi essere formalizzata nel linguaggio della logica da <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>Gottlob Frege</b></font></mark> nei primi anni del Novecento. In seguito alla scoperta di celebri paradossi — primo fra tutti il <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>Paradosso di Russell</b></font></mark> (1901) e l'antinomia di Burali-Forti — la <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>teoria ingenua degli insiemi</b></font></mark> (*naive set theory*) dovette essere profondamente rifondata.
 
-Il processo di assiomatizzazione rigorosa fu avviato da Ernst Zermelo nel 1908 e successivamente perfezionato da Abraham Fraenkel e Thoralf Skolem nel 1922. Il sistema risultante, noto come **teoria di Zermelo-Fraenkel (ZF)**, o **ZFC** con l'inclusione dell'Assioma della Scelta (*Choice*), costituisce il fondamento standard su cui poggia l'intera matematica contemporanea e l'analisi infinitesimale.
+Il processo di assiomatizzazione rigorosa fu avviato da <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>Ernst Zermelo</b></font></mark> nel 1908 e successivamente perfezionato da <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>Abraham Fraenkel</b></font></mark> e Thoralf Skolem nel 1922. Il sistema risultante, noto come <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>teoria di Zermelo-Fraenkel (ZF)</b></font></mark>, o **ZFC** con l'inclusione dell'Assioma della Scelta (*Choice*), costituisce il fondamento standard su cui poggia l'intera matematica contemporanea e l'analisi infinitesimale.
 
 ---
 
 ## Concetti Primitivi e Linguaggio dei Predicati
 
-La teoria degli insiemi si occupa di oggetti formali denominati <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>insiemi</b></font></mark>. Il concetto di insieme è assunto come **primitivo**: non è riconducibile a definizioni più elementari, ma viene qualificato e governato esclusivamente dagli assiomi della teoria (in piena analogia con i concetti di punto, retta e piano nella geometria euclidea) \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=1|Dispensa p. 1]]].
+La teoria degli insiemi si occupa di oggetti formali denominati <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>insiemi</b></font></mark>. Il concetto di insieme è assunto come **primitivo**: non è riconducibile a definizioni più elementari, ma viene qualificato e governato esclusivamente dagli assiomi della teoria (in piena analogia con i concetti di punto, retta e piano nella geometria euclidea) \[[[Lezione 2 FdM.pdf#page=1|Dispensa p. 1]]].
 
 Intuitivamente, gli insiemi rappresentano collezioni di oggetti. Nella teoria pura non vi sono enti non-insiemistici: **tutti gli oggetti del discorso matematico sono insiemi**. Quando si scrive $x \in A$, anche l'elemento $x$ è a sua volta un insieme.
 
-Per articolare la teoria si adotta la [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione#Logica dei Predicati|logica dei predicati]]. Le lettere minuscole e maiuscole ($a, b, x, y, A, B, X, Y, \mathcal{F}, \mathcal{G}$) rappresentano variabili del linguaggio che denotano insiemi.
+Per articolare la teoria si adotta la [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione#Logica dei Predicati e Quantificatori|logica dei predicati]]. Le lettere minuscole e maiuscole ($a, b, x, y, A, B, X, Y, \mathcal{F}, \mathcal{G}$) rappresentano variabili del linguaggio che denotano insiemi.
 
 Tra gli insiemi sono stabilite due <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>relazioni primitive</b></font></mark>:
-1. **Relazione di appartenenza ($\in$):** $x \in A$ asserisce che $x$ è un elemento di $A$ (o che $x$ appartiene ad $A$). È considerata un predicato atomico.
+1. **Relazione di appartenenza ($\in$):** $x \in A$ asserisce che $x$ è un elemento di $A$ (o che $x$ appartiene ad $A$). È considerata un <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>predicato atomico</b></font></mark>.
 2. **Relazione di uguaglianza ($=$):** $x = y$ asserisce che due simboli identificano il medesimo oggetto matematico. È anch'essa assunta come predicato atomico.
 
 A partire dai predicati atomici si costruiscono tutti i predicati complessi mediante i connettivi logici e i quantificatori:
@@ -55,7 +55,7 @@ $$\land, \quad \lor, \quad \neg, \quad \implies, \quad \impliedby, \quad \iff, \
 
 ### Proprietà Fondamentali dell'Uguaglianza
 
-La relazione primitiva di uguaglianza gode delle tre proprietà caratteristiche di una relazione di equivalenza:
+La relazione primitiva di uguaglianza gode delle tre proprietà caratteristiche di una <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>relazione di equivalenza</b></font></mark>:
 - **Riflessività:** $(\forall x) \, (x = x)$
 - **Simmetria:** $(\forall x, y) \, (x = y \implies y = x)$
 - **Transitività:** $(\forall x, y, z) \, (x = y \land y = z \implies x = z)$
@@ -83,7 +83,7 @@ Per snellire la scrittura formale si adottano le consuete abbreviazioni matemati
 
 ## 1. Assioma di Estensionalità
 
-L'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma di estensionalità</b></font></mark> stabilisce il criterio d'identità tra insiemi, legando la relazione di uguaglianza alla relazione di appartenenza \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=2|Dispensa p. 2]]].
+L'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma di estensionalità</b></font></mark> stabilisce il criterio d'identità tra insiemi, legando la relazione di uguaglianza alla relazione di appartenenza \[[[Lezione 2 FdM.pdf#page=2|Dispensa p. 2]]].
 
 > [!danger] Assioma 1: Assioma di Estensionalità
 > Siano $A$ e $B$ due insiemi. Allora:
@@ -106,10 +106,10 @@ Questo assioma prescrive che due insiemi sono uguali se e solo se hanno gli stes
 
 ## 2. Assioma dell'Insieme Vuoto
 
-Mentre l'assioma di estensionalità descrive la relazione tra insiemi, non garantisce l'esistenza di alcun oggetto nel discorso. L'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma dell'insieme vuoto</b></font></mark> assicura l'esistenza del primo ente matematico concreto \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=2|Dispensa p. 2]]].
+Mentre l'assioma di estensionalità descrive la relazione tra insiemi, non garantisce l'esistenza di alcun oggetto nel discorso. L'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma dell'insieme vuoto</b></font></mark> assicura l'esistenza del primo ente matematico concreto \[[[Lezione 2 FdM.pdf#page=2|Dispensa p. 2]]].
 
 > [!danger] Assioma 2: Assioma dell'Insieme Vuoto
-> Esiste (ed è unico) l'insieme che non possiede elementi. Tale insieme si chiama **insieme vuoto** e si denota con $\emptyset$:
+> Esiste (ed è unico) l'insieme che non possiede elementi. Tale insieme si chiama <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>insieme vuoto</b></font></mark> e si denota con $\emptyset$:
 > $$(\forall x) \, (x \notin \emptyset)$$
 
 > [!info] Osservazione: Derivabilità dell'Insieme Vuoto
@@ -130,20 +130,20 @@ Mentre l'assioma di estensionalità descrive la relazione tra insiemi, non garan
 
 ## 3. Relazione di Inclusione e Sottoinsiemi
 
-Accanto alle nozioni primitive, introduciamo per definizione la relazione di <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>inclusione insiemistica</b></font></mark> \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=2|Dispensa p. 2]]].
+Accanto alle nozioni primitive, introduciamo per definizione la relazione di <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>inclusione insiemistica</b></font></mark> \[[[Lezione 2 FdM.pdf#page=2|Dispensa p. 2]]].
 
 > [!danger] Definizione 1.1: Sottoinsieme (Inclusione Insiemistica)
 > Siano $A$ e $B$ due insiemi. Si scrive $B \subset A$ (oppure $B \subseteq A$) per denotare che:
 > $$(\forall x) \, (x \in B \implies x \in A)$$
-> e si dice che $B$ è un **sottoinsieme** di $A$ (o che $B$ è contenuto in $A$, o che $B$ è una parte di $A$).
-> Se $B \subset A$ e $B \ne A$, allora $B$ si dice **sottoinsieme proprio** di $A$.
+> e si dice che $B$ è un <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>sottoinsieme</b></font></mark> di $A$ (o che $B$ è contenuto in $A$, o che $B$ è una parte di $A$).
+> Se $B \subset A$ e $B \ne A$, allora $B$ si dice <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>sottoinsieme proprio</b></font></mark> di $A$.
 
 > [!example] Esempio 1.2: Inclusione dell'Insieme Vuoto e Riflessività
 > Sia $A$ un insieme generico. Valgono sempre le inclusioni:
 > $$\emptyset \subset A \quad \text{e} \quad A \subset A$$
 > 
 > **Dimostrazione Formale:**
-> 1. Per verificare che $\emptyset \subset A$, applichiamo la Definizione 1.1: dobbiamo provare che $(\forall x) \, (x \in \emptyset \implies x \in A)$. Per l'Assioma 2, la premessa $x \in \emptyset$ è falsa per ogni elemento $x$. Per la semantica dell'implicazione materiale nella logica proposizionale, una proposizione condizionale con premessa falsa è identicamente vera (*ex falso quodlibet*). Ne consegue che l'implicazione è vera per qualunque $x$, dimostrando che $\emptyset \subset A$.
+> 1. Per verificare che $\emptyset \subset A$, applichiamo la Definizione 1.1: dobbiamo provare che $(\forall x) \, (x \in \emptyset \implies x \in A)$. Per l'Assioma 2, la premessa $x \in \emptyset$ è falsa per ogni elemento $x$. Per la semantica dell'implicazione materiale nella logica proposizionale, una proposizione condizionale con premessa falsa è identicamente vera (<mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>ex falso quodlibet</b></font></mark>). Ne consegue che l'implicazione è vera per qualunque $x$, dimostrando che $\emptyset \subset A$.
 > 2. Per verificare che $A \subset A$, dobbiamo provare che $(\forall x) \, (x \in A \implies x \in A)$. Assegnando al predicato $x \in A$ il valore proposizionale $P$, l'espressione assume la forma $P \implies P$, che è una tautologia sempre vera per ogni $x$. Dunque ogni insieme è sottoinsieme di se stesso (proprietà riflessiva dell'inclusione).
 
 > [!tip]- Flashcard: Inclusione Universale dell'Insieme Vuoto
@@ -154,10 +154,11 @@ Basic
 Front: Come si dimostra formalmente che per ogni insieme $A$ vale $\emptyset \subset A$?
 Back: Applicando la definizione di inclusione, dobbiamo verificare che $(\forall x) \, (x \in \emptyset \implies x \in A)$. Poiché per l'assioma dell'insieme vuoto la premessa $x \in \emptyset$ è sempre falsa per qualsiasi $x$, l'implicazione logica risulta identicamente vera per il principio di *ex falso quodlibet*. Dunque $\emptyset \subset A$ vale universalmente.
 Tags: education/university education/math tech/logic
+<!--ID: 1790541691244-->
 END
 %%
 
-> [!danger] Teorema: Principio della Doppia Inclusione
+> [!danger] Teorema: <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>Principio della Doppia Inclusione</b></font></mark>
 > Dati due insiemi $A$ e $B$:
 > $$A = B \iff (A \subset B \land B \subset A)$$
 > 
@@ -175,6 +176,7 @@ Back: Dati due insiemi $A$ e $B$:
 $$A = B \iff (A \subset B \land B \subset A)$$
 Dimostrazione: per l'assioma di estensionalità $A = B \iff (\forall x)(x \in A \iff x \in B)$. Scomponendo il bicondizionale nella congiunzione di due implicazioni reciproche, si ottiene $(\forall x)(x \in A \implies x \in B)$ ($A \subset B$) e $(\forall x)(x \in B \implies x \in A)$ ($B \subset A$).
 Tags: education/university education/math tech/logic
+<!--ID: 1790541691245-->
 END
 %%
 
@@ -182,14 +184,14 @@ END
 
 ## 4. Assioma della Coppia Non Ordinata e Genesi degli Insiemi
 
-Per costruire nuovi insiemi a partire da enti già noti, si postula l'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma della coppia non ordinata</b></font></mark> \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=3|Dispensa p. 3]]].
+Per costruire nuovi insiemi a partire da enti già noti, si postula l'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma della coppia non ordinata</b></font></mark> \[[[Lezione 2 FdM.pdf#page=3|Dispensa p. 3]]].
 
 > [!danger] Assioma 3: Assioma della Coppia Non Ordinata
-> Siano $x$ e $y$ insiemi. Esiste un (unico) insieme, indicato con $\{x, y\}$ e chiamato **coppia non ordinata** formata da $x$ e $y$, che possiede $x$ e $y$ come suoi unici elementi:
+> Siano $x$ e $y$ insiemi. Esiste un (unico) insieme, indicato con $\{x, y\}$ e chiamato <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>coppia non ordinata</b></font></mark> formata da $x$ e $y$, che possiede $x$ e $y$ come suoi unici elementi:
 > $$(\forall z) \, (z \in \{x, y\} \iff z = x \lor z = y)$$
 > Si pone inoltre:
 > $$\{x\} := \{x, x\}$$
-> detto **singoletto** (o insieme ridotto ad un solo elemento). Evidentemente vale:
+> detto <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>singoletto</b></font></mark> (o insieme ridotto ad un solo elemento). Evidentemente vale:
 > $$(\forall z) \, (z \in \{x\} \iff z = x)$$
 
 > [!tip]- Flashcard: Assioma della Coppia Non Ordinata e Singoletto
@@ -200,6 +202,7 @@ Cloze
 Text: Dati due insiemi $x$ e $y$, l'assioma della coppia non ordinata assicura l'esistenza dell'insieme {{c1::$\{x, y\}$}} tale che {{c2::$z \in \{x, y\} \iff z = x \lor z = y$}}. Il singoletto è definito ponendo {{c3::$\{x\} := \{x, x\}$}}, per cui $z \in \{x\} \iff z = x$.
 Extra: L'assioma della coppia permette la genesi di insiemi con elementi distinti a partire dal solo insieme vuoto.
 Tags: education/university education/math tech/logic
+<!--ID: 1790541691246-->
 END
 %%
 
@@ -217,7 +220,7 @@ END
 > 2. **Metafora delle Scatole (o dei Sacchi):** gli insiemi sono assimilabili a scatole che contengono altre scatole. In tale rappresentazione l'insieme vuoto $\emptyset$ è la scatola vuota, $\{\emptyset\}$ è una scatola che racchiude al suo interno la scatola vuota, e $\{\emptyset, \{\emptyset\}\}$ è una scatola contenente due scatole distinte.
 
 ![[Schema - Teoria degli Insiemi - Metafora delle Scatole.png]]
-*(Rappresentazione secondo la metafora delle scatole: a sinistra l'insieme vuoto $\emptyset$, al centro il singoletto $\{\emptyset\}$, a destra l'insieme a due elementi $\{\emptyset, \{\emptyset\}\}$ — rif. \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=3|Dispensa p. 3]]])*
+*(Rappresentazione secondo la metafora delle scatole: a sinistra l'insieme vuoto $\emptyset$, al centro il singoletto $\{\emptyset\}$, a destra l'insieme a due elementi $\{\emptyset, \{\emptyset\}\}$ — rif. \[[[Lezione 2 FdM.pdf#page=3|Dispensa p. 3]]])*
 
 > [!tip]- Flashcard: Insieme Vuoto vs Singoletto del Vuoto
 > %%
@@ -234,7 +237,7 @@ END
 
 ## 5. Assioma di Specificazione
 
-L'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma di specificazione</b></font></mark> (o di separazione) stabilisce che qualsiasi proprietà logica ben formulata ritaglia un sottoinsieme all'interno di un insieme universo preesistente \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=3|Dispensa p. 3]]].
+L'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma di specificazione</b></font></mark> (o di separazione) stabilisce che qualsiasi proprietà logica ben formulata ritaglia un sottoinsieme all'interno di un insieme universo preesistente \[[[Lezione 2 FdM.pdf#page=3|Dispensa p. 3]]].
 
 > [!danger] Assioma 4: Assioma di Specificazione (o di Separazione)
 > Sia $A$ un insieme e sia $P(x)$ un predicato in cui compare libera la variabile $x$ (ossia $x$ non è vincolata a monte da un quantificatore $(\forall x)$). Allora esiste un (unico) insieme, denotato con $\{x \in A \mid P(x)\}$, tale che:
@@ -245,11 +248,11 @@ Questo assioma permette di definire sottoinsiemi specificando una proprietà car
 ### Prevenzione del Paradosso di Russell
 
 Il vincolo dell'Assioma 4 di specificare la proprietà su un **insieme $A$ già dato** è il meccanismo che preserva la teoria dalle contraddizioni:
-- Se si ammettesse l'assioma di comprensione ingenua (poter formare l'insieme di tutti gli $x$ che soddisfano $P(x)$ senza vincolo a un universo $A$, ossia $\{x \mid P(x)\}$), ponendo $P(x) \equiv x \notin x$ si potrebbe formare l'insieme di Russell:
+- Se si ammettesse l'assioma di comprensione ingenua (poter formare l'insieme di tutti gli $x$ che soddisfano $P(x)$ senza vincolo a un universo $A$, ossia $\{x \mid P(x)\}$), ponendo $P(x) \equiv x \notin x$ si potrebbe formare l'insieme che genera il <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>Paradosso di Russell</b></font></mark>:
   $$R := \{x \mid x \notin x\}$$
 - Valutando l'appartenenza di $R$ a se stesso, si otterrebbe l'antinomia insolubile:
   $$R \in R \iff R \notin R$$
-- Con l'Assioma 4, invece, è possibile definire soltanto $R_A := \{x \in A \mid x \notin x\}$. Valutando $R_A$, si conclude semplicemente che $R_A \notin A$, dimostrando che **non può esistere l'insieme universale di tutti gli insiemi**.
+- Con l'Assioma 4, invece, è possibile definire soltanto $R_A := \{x \in A \mid x \notin x\}$. Valutando $R_A$, si conclude semplicemente che $R_A \notin A$, dimostrando che non può esistere l'<mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>insieme universale</b></font></mark> di tutti gli insiemi.
 
 > [!tip]- Flashcard: Assioma di Specificazione e Paradosso di Russell
 > %%
@@ -266,23 +269,23 @@ Il vincolo dell'Assioma 4 di specificare la proprietà su un **insieme $A$ già 
 
 ## 6. Operazioni Insiemistiche: Intersezione, Differenza e Complementare
 
-Appoggiandoci all'Assioma 4 di specificazione possiamo definire rigorosamente le prime fondamentali operazioni tra insiemi \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=4|Dispensa p. 4]]].
+Appoggiandoci all'Assioma 4 di specificazione possiamo definire rigorosamente le prime fondamentali operazioni tra insiemi \[[[Lezione 2 FdM.pdf#page=4|Dispensa p. 4]]].
 
 > [!danger] Definizione 1.5: Intersezione, Differenza e Complementare
 > Siano $A$ e $B$ due insiemi.
 > 1. Si pone:
 >    $$A \cap B := \{x \in A \mid x \in B\}$$
->    e si chiama **intersezione di $A$ e $B$**. Evidentemente vale:
+>    e si chiama <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>intersezione di $A$ e $B$</b></font></mark>. Evidentemente vale:
 >    $$(\forall x) \, (x \in A \cap B \iff x \in A \land x \in B)$$
 > 2. Si pone:
 >    $$A \setminus B := \{x \in A \mid x \notin B\}$$
->    e si chiama **differenza tra $A$ e $B$** (o $A - B$). Evidentemente vale:
+>    e si chiama <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>differenza tra $A$ e $B$</b></font></mark> (o $A - B$). Evidentemente vale:
 >    $$(\forall x) \, (x \in A \setminus B \iff x \in A \land x \notin B)$$
-> 3. Se $B \subset A$, l'insieme $A \setminus B$ si denota anche con $\complement_A(B)$ e si chiama **complementare di $B$ rispetto ad $A$**:
+> 3. Se $B \subset A$, l'insieme $A \setminus B$ si denota anche con $\complement_A(B)$ e si chiama <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>complementare di $B$ rispetto ad $A$</b></font></mark>:
 >    $$\complement_A(B) := A \setminus B = \{x \in A \mid x \notin B\} \quad (\text{per } B \subset A)$$
 
 ![[Schema - Teoria degli Insiemi - Operazioni Insiemistiche.png]]
-*(Rappresentazione delle operazioni fondamentali: a sinistra l'intersezione $A \cap B$, al centro la differenza $A \setminus B$, a destra il complementare $\complement_A(B)$ — rif. \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=4|Dispensa p. 4]]])*
+*(Rappresentazione delle operazioni fondamentali: a sinistra l'intersezione $A \cap B$, al centro la differenza $A \setminus B$, a destra il complementare $\complement_A(B)$ — rif. \[[[Lezione 2 FdM.pdf#page=4|Dispensa p. 4]]])*
 
 > [!tip]- Flashcard: Intersezione, Differenza e Complementare
 > %%
@@ -299,14 +302,14 @@ Appoggiandoci all'Assioma 4 di specificazione possiamo definire rigorosamente le
 
 ## 7. Intersezione di una Famiglia di Insiemi
 
-L'intersezione può essere generalizzata non soltanto a due insiemi, ma a una collezione arbitraria (finita o infinita) di insiemi \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=4|Dispensa p. 4]]].
+L'intersezione può essere generalizzata non soltanto a due insiemi, ma a una collezione arbitraria (finita o infinita) di insiemi \[[[Lezione 2 FdM.pdf#page=4|Dispensa p. 4]]].
 
 > [!danger] Definizione 1.6: Intersezione di una Famiglia di Insiemi
 > Sia $\mathcal{F}$ un insieme non vuoto (inteso come una collezione o famiglia di insiemi). Allora esiste almeno un elemento $B \in \mathcal{F}$, e mediante l'Assioma 4 di specificazione possiamo definire l'insieme:
 > $$X := \{x \in B \mid (\forall A \in \mathcal{F}) \, (x \in A)\}$$
 > Evidentemente vale:
 > $$(\forall x) \, (x \in X \iff (\forall A \in \mathcal{F}) \, (x \in A))$$
-> L'insieme $X$ non dipende dalla scelta iniziale dell'insieme $B \in \mathcal{F}$ e si chiama **intersezione degli insiemi di $\mathcal{F}$**, denotato con:
+> L'insieme $X$ non dipende dalla scelta iniziale dell'insieme $B \in \mathcal{F}$ e si chiama <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>intersezione di una famiglia di insiemi</b></font></mark>, denotato con:
 > $$\bigcap \mathcal{F} \quad \text{oppure} \quad \bigcap_{A \in \mathcal{F}} A$$
 
 Intuitivamente, se la famiglia $\mathcal{F}$ contiene gli insiemi $A, B, C, D, \dots$, l'intersezione corrisponde alla parte comune a tutti:
@@ -323,6 +326,7 @@ $$\bigcap \mathcal{F} := \{x \in B \mid (\forall A \in \mathcal{F}) \, (x \in A)
 Tale insieme non dipende dalla scelta iniziale di $B$ e soddisfa:
 $$(\forall x) \, (x \in \bigcap \mathcal{F} \iff (\forall A \in \mathcal{F})(x \in A))$$
 Tags: education/university education/math tech/logic
+<!--ID: 1790541691247-->
 END
 %%
 
@@ -330,7 +334,7 @@ END
 
 ## 8. Assioma dell'Unione e Unione di Insiemi
 
-A differenza dell'intersezione, per unire due o più insiemi generici **non è possibile fare ricorso all'Assioma 4 di specificazione**, poiché non disponiamo a priori di un insieme universo già costituito che contenga entrambi gli insiemi. L'esistenza dell'unione deve essere quindi introdotta tramite un apposito postulato \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=4|Dispensa p. 4]]].
+A differenza dell'intersezione, per unire due o più insiemi generici **non è possibile fare ricorso all'Assioma 4 di specificazione**, poiché non disponiamo a priori di un insieme universo già costituito che contenga entrambi gli insiemi. L'esistenza dell'unione deve essere quindi introdotta tramite l'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma dell'unione</b></font></mark> \[[[Lezione 2 FdM.pdf#page=4|Dispensa p. 4]]].
 
 > [!tip]- Flashcard: Perché l'Unione Richiede un Assioma Autonomo
 %%
@@ -340,26 +344,27 @@ Basic
 Front: Perché per definire l'unione di insiemi non è possibile usare l'Assioma di Specificazione e serve un assioma autonomo?
 Back: L'Assioma di Specificazione consente di ritagliare sottoinsiemi solo a partire da un insieme universo $A$ già esistente nel sistema formale. Per due insiemi generici $A$ e $B$ non si dispone a priori di un insieme più grande che li contenga entrambi; l'esistenza di un insieme contenitore deve essere postulata espressamente tramite l'Assioma dell'Unione.
 Tags: education/university education/math tech/logic
+<!--ID: 1790541691248-->
 END
 %%
 
 > [!danger] Assioma 5: Assioma dell'Unione
-> Sia $\mathcal{F}$ un insieme (pensato come una famiglia di insiemi). Esiste un insieme, che denotiamo con $\bigcup \mathcal{F}$ o con $\bigcup_{A \in \mathcal{F}} A$ e chiamiamo **unione degli insiemi di $\mathcal{F}$**, che ha per elementi tutti e soli gli elementi appartenenti ad almeno un insieme di $\mathcal{F}$:
+> Sia $\mathcal{F}$ un insieme (pensato come una famiglia di insiemi). Esiste un insieme, che denotiamo con $\bigcup \mathcal{F}$ o con $\bigcup_{A \in \mathcal{F}} A$ e chiamiamo <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>unione degli insiemi di $\mathcal{F}$</b></font></mark>, che ha per elementi tutti e soli gli elementi appartenenti ad almeno un insieme di $\mathcal{F}$:
 > $$(\forall x) \, \left(x \in \bigcup \mathcal{F} \iff (\exists A \in \mathcal{F}) \, (x \in A)\right)$$
 
 > [!example] Esempio 1.7: Metafora dei Sacchi di Grano
 > Supponiamo che $\mathcal{F}$ sia un insieme di sacchi di grano. Ciascun sacco contiene chicchi di grano (elementi). Se immaginiamo di svuotare tutti i singoli sacchi in un sacco più grande, otterremo esattamente l'unione $\bigcup \mathcal{F}$.
 
 > [!danger] Definizione 1.8: Unione di Due Insiemi
-> Siano $A$ e $B$ due insiemi. Si definisce l'insieme **unione di $A$ e $B$** come l'unione della famiglia costituita dalla coppia non ordinata $\{A, B\}$ (costruita mediante l'Assioma 3):
+> Siano $A$ e $B$ due insiemi. Si definisce l'insieme <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>unione di due insiemi</b></font></mark> ($A \cup B$) come l'unione della famiglia costituita dalla coppia non ordinata $\{A, B\}$ (costruita mediante l'Assioma 3):
 > $$A \cup B := \bigcup \{A, B\}$$
 > Evidentemente vale la caratterizzazione formale:
 > $$(\forall x) \, (x \in A \cup B \iff (\exists X \in \{A, B\}) \, (x \in X) \iff x \in A \lor x \in B)$$
 
-L'operazione di unione riflette esattamente la **disgiunzione logica inclusiva** ($\lor$).
+L'operazione di unione riflette esattamente la <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>disgiunzione logica inclusiva</b></font></mark> ($\lor$).
 
 ![[Schema - Teoria degli Insiemi - Unione di Insiemi e Famiglie.png]]
-*(Rappresentazione dell'unione: a sinistra l'unione binaria $A \cup B$; a destra l'unione della famiglia $\mathcal{F}$ che raccoglie tutti gli elementi degli insiemi costitutivi — rif. \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=5|Dispensa p. 5]]])*
+*(Rappresentazione dell'unione: a sinistra l'unione binaria $A \cup B$; a destra l'unione della famiglia $\mathcal{F}$ che raccoglie tutti gli elementi degli insiemi costitutivi — rif. \[[[Lezione 2 FdM.pdf#page=5|Dispensa p. 5]]])*
 
 > [!tip]- Flashcard: Assioma dell'Unione e Definizione di $A \cup B$
 > %%
@@ -376,7 +381,7 @@ L'operazione di unione riflette esattamente la **disgiunzione logica inclusiva**
 
 ## 9. Proprietà dell'Algebra Insiemistica e Leggi di De Morgan
 
-L'interazione tra le operazioni di unione, intersezione e differenza genera una struttura algebrica (algebra di Boole degli insiemi) governata dalla seguente proposizione fondamentale \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=5|Dispensa p. 5]]].
+L'interazione tra le operazioni di unione, intersezione e differenza genera una struttura algebrica (algebra di Boole degli insiemi) governata dalla seguente proposizione fondamentale \[[[Lezione 2 FdM.pdf#page=5|Dispensa p. 5]]].
 
 > [!summary] Proposizione 1.9: Proprietà dell'Unione e dell'Intersezione
 > Siano $A, B$ e $C$ insiemi. Valgono le seguenti proprietà:
@@ -409,13 +414,14 @@ Text: L'intersezione e l'unione godono di reciproca distributività:
 2. $A \cup (B \cap C) =$ {{c2::$(A \cup B) \cap (A \cup C)$}}
 Extra: A differenza dell'algebra numerica ordinaria (dove la somma non distribuisce sul prodotto), nell'algebra di Boole degli insiemi entrambe le operazioni distribuiscono l'una rispetto all'altra.
 Tags: education/university education/math tech/logic
+<!--ID: 1790541691249-->
 END
 %%
 
 ### Dimostrazione Formale delle Leggi di De Morgan
 
 Dimostriamo la prima legge per complementari: $\complement_A(B \cup C) = \complement_A(B) \cap \complement_A(C)$.
-Sia $x \in A$ un elemento generico. Sviluppiamo la catena di equivalenze logiche applicando le definizioni e la corrispondente [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione#Leggi di De Morgan|legge di De Morgan proposizionale]]:
+Sia $x \in A$ un elemento generico. Sviluppiamo la catena di equivalenze logiche applicando le definizioni e la corrispondente [[01 - Logica Proposizionale, Predicati e Metodi di Dimostrazione#Leggi del Calcolo Proposizionale e Tautologie|legge di De Morgan proposizionale]]:
 
 $$
 \begin{aligned}
@@ -441,6 +447,7 @@ Text: Siano $B, C \subset A$. Le leggi di De Morgan insiemistiche stabiliscono:
 2. $\complement_A(B \cap C) =$ {{c2::$\complement_A(B) \cup \complement_A(C)$}}
 Extra: Il passaggio al complementare trasforma l'unione in intersezione e l'intersezione in unione, riflettendo esattamente la dualità logica tra congiunzione e disgiunzione.
 Tags: education/university education/math tech/logic
+<!--ID: 1790541691250-->
 END
 %%
 
@@ -456,6 +463,7 @@ Applicando De Morgan proposizionale $\neg(P \lor Q) \equiv \neg P \land \neg Q$:
 $$\iff x \in A \land (x \notin B \land x \notin C) \iff (x \in \complement_A(B)) \land (x \in \complement_A(C)) \iff x \in (\complement_A(B) \cap \complement_A(C))$$
 Per l'assioma di estensionalità, i due insiemi coincidono.
 Tags: education/university education/math tech/logic
+<!--ID: 1790541691251-->
 END
 %%
 
@@ -463,7 +471,7 @@ END
 
 ## 10. Insiemi per Elencazione ed Esempi Applicativi
 
-Grazie alla combinazione dell'Assioma 3 (coppia non ordinata) e dell'Assioma 5 (unione), è possibile giustificare formalmente la notazione degli insiemi definiti per <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>elencazione</b></font></mark> \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=5|Dispensa p. 5]]].
+Grazie alla combinazione dell'Assioma 3 (coppia non ordinata) e dell'Assioma 5 (unione), è possibile giustificare formalmente la notazione degli insiemi definiti per <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>elencazione</b></font></mark> \[[[Lezione 2 FdM.pdf#page=5|Dispensa p. 5]]].
 
 > [!danger] Definizione 1.10: Insiemi per Elencazione
 > Siano $a, b, c, d$ insiemi. Possiamo formare gli insiemi $\{a, b\}$ e $\{c\}$ e definire:
@@ -484,6 +492,7 @@ Back: Si costruiscono prima la coppia $\{a, b\}$ e il singoletto $\{c\}$ (Assiom
 $$\{a, b, c\} := \{a, b\} \cup \{c\}$$
 mediante l'Assioma 5 dell'unione. Iterando il procedimento $(\{a_1, \dots, a_n\} \cup \{a_{n+1}\})$ si fonda rigorosamente qualsiasi insieme finito per elencazione.
 Tags: education/university education/math tech/logic
+<!--ID: 1790541691252-->
 END
 %%
 
@@ -504,10 +513,10 @@ END
 
 ## 11. Assioma dell'Insieme Potenza (Insieme delle Parti)
 
-L'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma dell'insieme potenza</b></font></mark> permette di collezionare la totalità dei possibili sottoinsiemi di un insieme dato in un nuovo ente matematico \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=6|Dispensa p. 6]]].
+L'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma dell'insieme potenza</b></font></mark> permette di collezionare la totalità dei possibili sottoinsiemi di un insieme dato in un nuovo ente matematico \[[[Lezione 2 FdM.pdf#page=6|Dispensa p. 6]]].
 
 > [!danger] Assioma 6: Assioma dell'Insieme Potenza
-> Sia $A$ un insieme. Esiste un insieme che ha per elementi tutti e soli i sottoinsiemi di $A$. Questo insieme si denota con $\mathcal{P}(A)$ (oppure con $2^A$) e si chiama **insieme potenza** di $A$ (o **insieme delle parti** di $A$):
+> Sia $A$ un insieme. Esiste un insieme che ha per elementi tutti e soli i sottoinsiemi di $A$. Questo insieme si denota con $\mathcal{P}(A)$ (oppure con $2^A$) e si chiama **insieme potenza** di $A$ (o <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>insieme delle parti</b></font></mark> di $A$):
 > $$(\forall B) \, (B \in \mathcal{P}(A) \iff B \subset A)$$
 
 > [!example] Esempio 1.12: Proprietà ed Esempi dell'Insieme Potenza
@@ -528,7 +537,7 @@ L'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>ass
 >      (possiede $4$ elementi: cardinalità $2^2 = 4$).
 
 ![[Schema - Teoria degli Insiemi - Insieme Potenza e Scatole Annidate.png]]
-*(L'insieme $\mathcal{P}(\mathcal{P}(\mathcal{P}(\emptyset)))$ illustrato secondo la metafora delle scatole: contiene quattro elementi distinti, ciascuno dei quali è a sua volta una scatola contenente ulteriori scatole al suo interno — rif. \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=6|Dispensa p. 6]]])*
+*(L'insieme $\mathcal{P}(\mathcal{P}(\mathcal{P}(\emptyset)))$ illustrato secondo la metafora delle scatole: contiene quattro elementi distinti, ciascuno dei quali è a sua volta una scatola contenente ulteriori scatole al suo interno — rif. \[[[Lezione 2 FdM.pdf#page=6|Dispensa p. 6]]])*
 
 > [!tip]- Flashcard: Assioma dell'Insieme Potenza e Cardinalità
 > %%
@@ -545,7 +554,7 @@ L'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>ass
 
 ## 12. Complementi: Costruzione dei Numeri Naturali di Von Neumann
 
-La costruzione assiomatica consente di edificare l'intero edificio dei numeri a partire dal puro insieme vuoto, secondo il procedimento formulato da John von Neumann \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=6|Dispensa p. 6]]]. A tale scopo è necessario escludere insiemi patologici che appartengono a se stessi mediante l'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma di fondazione</b></font></mark>.
+La costruzione assiomatica consente di edificare l'intero edificio dei numeri a partire dal puro insieme vuoto, secondo il procedimento formulato da <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>John von Neumann</b></font></mark> \[[[Lezione 2 FdM.pdf#page=6|Dispensa p. 6]]]. A tale scopo è necessario escludere insiemi patologici che appartengono a se stessi mediante l'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma di fondazione</b></font></mark>.
 
 > [!danger] Assioma 7: Assioma di Fondazione (o di Regolarità)
 > Per ogni insieme non vuoto $A$, esiste un suo elemento $x \in A$ tale che $x$ e $A$ sono disgiunti:
@@ -570,18 +579,19 @@ Front: Come si formula l'assioma di fondazione (o regolarità) e come dimostra c
 Back: Enunciato: ogni insieme non vuoto $A$ possiede un elemento disgiunto da $A$: $(\forall A \ne \emptyset)(\exists x \in A)(x \cap A = \emptyset)$.
 Dimostrazione $x \notin x$: se per assurdo $x \in x$, nel singoletto $A = \{x\}$ l'unico elemento $x$ soddisfa $x \in (x \cap A)$, dunque $x \cap A \ne \emptyset$, contraddicendo l'assioma. Ne segue che $(\forall x)(x \notin x)$.
 Tags: education/university education/math tech/logic
+<!--ID: 1790541691253-->
 END
 %%
 
 > [!danger] Definizione 2.1: Successivo di un Insieme
-> Sia $x$ un insieme. Si chiama **successivo di $x$** l'insieme:
+> Sia $x$ un insieme. Si chiama <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>successivo di un insieme</b></font></mark> ($x^+$) l'insieme:
 > $$x^+ := x \cup \{x\}$$
 > Il successivo di $x$ contiene dunque tutti gli elementi di $x$ più l'insieme $x$ stesso.
 > In virtù dell'Assioma 7, vale $x \subset x^+$ e $x \ne x^+$, cosicché $x$ è un sottoinsieme proprio di $x^+$ ed ha esattamente un elemento in più di $x$ (l'elemento $x$ stesso).
 
 ### La Costruzione dei Numeri Naturali di Von Neumann
 
-Definendo lo zero come l'insieme vuoto e applicando iterativamente l'operatore di successivo, si generano tutti i numeri naturali:
+Nella celebre <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>costruzione dei numeri naturali</b></font></mark>, definendo lo zero come l'insieme vuoto e applicando iterativamente l'operatore di successivo, si generano tutti i numeri naturali:
 
 $$
 \begin{aligned}
@@ -613,16 +623,16 @@ $$0 \in 1 \in 2 \in 3 \in 4 \in \dots$$
 
 ## 13. Assioma dell'Infinito e Teorema dell'Esistenza di $\mathbb{N}$
 
-L'operazione di successivo permette di generare potenzialmente ciascun numero naturale, ma non garantisce che esista un insieme in grado di contenerli tutti contemporaneamente. Per sancire l'esistenza di un insieme infinito si introduce l'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma dell'infinito</b></font></mark> \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=7|Dispensa p. 7]]].
+L'operazione di successivo permette di generare potenzialmente ciascun numero naturale, ma non garantisce che esista un insieme in grado di contenerli tutti contemporaneamente. Per sancire l'esistenza di un insieme infinito si introduce l'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma dell'infinito</b></font></mark> \[[[Lezione 2 FdM.pdf#page=7|Dispensa p. 7]]].
 
 > [!danger] Assioma 8: Assioma dell'Infinito
 > Esiste un insieme che contiene l'insieme vuoto $\emptyset$ e il successivo di ogni suo elemento. In formule, esiste un insieme $W$ tale che:
 > $$\emptyset \in W \quad \land \quad (\forall x) \, (x \in W \implies x^+ \in W)$$
-> Un insieme che soddisfa tale proprietà prende il nome di **insieme induttivo**.
+> Un insieme che soddisfa tale proprietà prende il nome di <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>insieme induttivo</b></font></mark>.
 
 Se $\mathcal{F}$ è una famiglia non vuota di insiemi induttivi, la loro intersezione $\bigcap_{A \in \mathcal{F}} A$ è ancora un insieme induttivo. Da questo principio discende il teorema fondativo dell'esistenza dei numeri naturali:
 
-> [!danger] Teorema 2.2: Esistenza e Caratterizzazione di $\mathbb{N}$
+> [!danger] Teorema 2.2: <mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>Esistenza e Caratterizzazione di $\mathbb{N}$</b></font></mark>
 > Esiste il più piccolo insieme induttivo, e tale insieme si denota con $\mathbb{N}$ (l'insieme dei numeri naturali).
 > 
 > **Dimostrazione Formale:**
@@ -651,7 +661,7 @@ Se $\mathcal{F}$ è una famiglia non vuota di insiemi induttivi, la loro interse
 
 ## 14. Assioma della Scelta (Axiom of Choice)
 
-La costruzione del sistema assiomatico ZFC si conclude con l'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma della scelta</b></font></mark>, che postula la possibilità di operare simultaneamente scelte arbitrarie su una collezione infinita di insiemi \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf#page=8|Dispensa p. 8]]].
+La costruzione del sistema assiomatico ZFC si conclude con l'<mark style="background:rgba(255, 193, 69, 0.32)"><font color="#cc8800"><b>assioma della scelta</b></font></mark>, che postula la possibilità di operare simultaneamente scelte arbitrarie su una collezione infinita di insiemi \[[[Lezione 2 FdM.pdf#page=8|Dispensa p. 8]]].
 
 > [!danger] Assioma 9: Assioma della Scelta (Axiom of Choice)
 > Per ogni famiglia $\mathcal{F}$ di insiemi non vuoti e a due a due disgiunti, cioè tale che:
@@ -659,7 +669,7 @@ La costruzione del sistema assiomatico ZFC si conclude con l'<mark style="backgr
 > esiste un insieme $X \subset \bigcup_{A \in \mathcal{F}} A$ tale che, per ogni insieme $A \in \mathcal{F}$, l'intersezione $A \cap X$ è ridotta ad un solo elemento:
 > $$(\forall A \in \mathcal{F}) \, (\exists! x) \, (x \in A \cap X)$$
 
-Mediante l'insieme $X$, la teoria assicura la possibilità di "scegliere" esattamente un rappresentante per ciascun insieme della famiglia, anche qualora la famiglia sia infinita e non esista una formula esplicita o un algoritmo computazionale per operare tale selezione. L'assioma della scelta è invocato costantemente nei teoremi cardine dell'Analisi Matematica (come il Teorema di Hahn-Banach, l'esistenza di basi per spazi vettoriali a dimensione infinita e il Teorema di Tychonoff).
+Mediante l'insieme $X$, la teoria assicura la possibilità di "scegliere" esattamente un rappresentante per ciascun insieme della famiglia, anche qualora la famiglia sia infinita e non esista una formula esplicita o un algoritmo computazionale per operare tale selezione mediante una <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>funzione di scelta</b></font></mark>. L'assioma della scelta è invocato costantemente nei teoremi cardine dell'Analisi Matematica (come il Teorema di Hahn-Banach, l'esistenza di basi per spazi vettoriali a dimensione infinita e il Teorema di Tychonoff).
 
 > [!tip]- Flashcard: Assioma della Scelta
 > %%
@@ -696,4 +706,4 @@ A conclusione del percorso, riassumiamo la gerarchia canonica dei 9 assiomi esam
 
 - **[1]** J.W.R. Dedekind, *Scritti sui fondamenti della matematica*, Bibliopolis, Napoli, 1982.
 - **[2]** P. R. Halmos, *Teoria elementare degli insiemi*, Feltrinelli, Milano, 1970.
-- **[3]** Prof. Saverio Salzo, *Lezione 2: Teoria degli Insiemi* (Dispense ufficiali d'insegnamento), DIAG, Sapienza Università di Roma, 2025/2026 \[[[Fondamenti di Matematica - Lezione 02 - Teoria degli Insiemi.pdf|Dispensa PDF]]].
+- **[3]** Prof. Saverio Salzo, *Lezione 2: Teoria degli Insiemi* (Dispense ufficiali d'insegnamento), DIAG, Sapienza Università di Roma, 2025/2026 \[[[Lezione 2 FdM.pdf|Dispensa PDF]]].

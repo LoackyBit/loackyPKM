@@ -34,25 +34,23 @@
 
 - Corsivo (_titolo_) per titoli di opere
 
-- Callouts:
-	- es:
+- Callouts Generali e Tassonomia Scientifica/Universitaria:
+	- Sintassi base:
+	  ```markdown
+	  > [!danger] Definizione / Teorema / Assioma: Titolo
+	  > Corpo del callout con enunciato formale.
 	  ```
-	  >[!quote] Autore
-	  >citazione
-	  ```
-	- note  
-	- abstract, summary, tldr  
-	- info  
-	- todo  
-	- tip, hint, important  
-	- success, check, done  
-	- question, help, faq  
-	- warning, caution, attention  
-	- failure, fail, missing  
-	- danger, error  
-	- bug  
-	- example  
-	- quote, cite
+	- **Tassonomia Rigorosa Note Scientifiche e Accademiche:**
+	  - `> [!danger]` : **Assiomi, Teoremi, Definizioni e Corollari** formali.
+	  - `> [!summary]` : **Proposizioni, Proprietà e Criteri** matematici.
+	  - `> [!example]` : **Esempi, Casi di Studio e Controesempi**.
+	  - `> [!info]` : **Osservazioni, Note a margine, Intuizioni geometriche/analitiche**.
+	  - `> [!tip]- Flashcard: [Concetto]` : **Flashcard Anki** inline e contestuali (collassate di default).
+	  - `> [!abstract]- Dimostrazione Formale Passo-Passo` : **Dimostrazioni estese** (Pattern Dual-Layer).
+	  - `> [!question] Chiarimento sul tuo dubbio` : **Risoluzione dubbi utente** sollevati inline (`%% AI: ... %%`).
+	  - `> [!warning]` : **Avvertenze critiche, errori concettuali frequenti e regole di distinzione**.
+	  - `> [!quote]-` : **Citazioni d'autore e divagazioni didattiche del docente**.
+	- Altri tipi Obsidian supportati: `note`, `todo`, `success`, `failure`, `bug`.
 
 - Checkbox (Tri-State Review & Tasking):
 	- | Syntax  | Description |

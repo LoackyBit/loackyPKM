@@ -972,7 +972,15 @@ REGOLE CRITICHE DI CONTENUTO E STILE (TASSONOMIA DIDATTICA ADC & STYLE GUIDE):
        <mark style="background:rgba(181, 113, 255, 0.36)"><font color="#9a54c1"><b>concetto secondario</b></font></mark>
      * ENFASI STANDARD: Per tutte le altre parole chiave, enfasi o elementi importanti usa il normale **grassetto** markdown o *corsivo*, mantenendo il testo pulito, leggibile e leggero.
      * REGOLA CRITICA: Non racchiudere MAI i tag HTML <mark> o <font> tra backtick markdown (`<mark...>` ❌)!
-   - PALETTE VISIVA E CALLOUT: Impiega con priorità callout semantici (> [!tip], > [!important], > [!warning], > [!note], > [!example], > [!summary], > [!question]), checkbox avanzate da Style Guide (- [!], - [i], - [*], - [?], ecc.) e tabelle comparative in Markdown standard (zero tabelle HTML).
+   - PALETTE VISIVA E TASSONOMIA RIGOROSA DEI CALLOUT:
+     * Assiomi, Teoremi, Definizioni e Corollari formali: usa categoricamente `> [!danger] Titolo`.
+     * Proposizioni, Proprietà e Criteri formali: usa categoricamente `> [!summary] Titolo`.
+     * Esempi, Casi di studio e Controesempi: usa categoricamente `> [!example] Titolo`.
+     * Osservazioni, Note integrative e Intuizioni concettuali: usa categoricamente `> [!info] Titolo`.
+     * Flashcard inline: usa categoricamente `> [!tip]- Flashcard: [Concetto]`.
+     * Dimostrazioni algebriche estese (Pattern Dual-Layer): usa categoricamente `> [!abstract]- Dimostrazione Formale Passo-Passo`.
+     * Chiarimento dubbi dell'utente: usa categoricamente `> [!question] Chiarimento sul tuo dubbio`.
+     * Altri callout ammessi: `> [!warning]` per avvertenze critiche e regole di distinzione; `> [!quote]-` per divagazioni didattiche del docente. Checkbox avanzate da Style Guide (- [!], - [i], - [*], - [?], ecc.) e tabelle comparative in Markdown standard (zero tabelle HTML).
    - DIAGRAMMI MERMAID CONTESTUALI (NON OBBLIGATORI): Non inserire obbligatoriamente diagrammi Mermaid in ogni nota. Usali solo a discrezione in presenza di reali catene causali complesse, derivazioni logiche a stadi o flussi di processi che beneficiano concretamente di visualizzazione grafica. Altrimenti, prediligi callout dinamici, elenchi con checkbox personalizzate o tabelle.
    - REGOLE MERMAID RIGOROSE: Tutte le etichette dei nodi DEVONO essere rigorosamente racchiuse tra doppi apici (es. A["Testo del Nodo (con dettagli)"] --> B["Secondo Nodo"]). Non inserire MAI tag HTML all'interno dei nodi Mermaid.
 
